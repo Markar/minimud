@@ -1,0 +1,21 @@
+[project]
+name = "evennia-minimud"
+version = "1.1.1"
+requires-python = ">=3.10"
+authors = [
+    {name = "InspectorCaracal"}
+]
+dependencies = [
+    # General
+    "evennia >= 4.0, <5.0",
+    'pywin32; sys_platform=="win32"',
+
+    # contrib requirements
+    "scipy == 1.9.3"
+]
+
+[tool.setuptools]
+py-modules = []
+
+[project.urls]
+repository = "https://github.com/InspectorCaracal/evennia-minimud"
