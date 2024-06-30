@@ -15,7 +15,6 @@ from random import randint
 from evennia.prototypes import spawner, prototypes
 from evennia.objects.objects import DefaultObject
 from evennia.contrib.game_systems.clothing import ContribClothing
-
 from commands.interact import GatherCmdSet
 
 
@@ -181,6 +180,7 @@ class Object(ObjectParent, DefaultObject):
         """
         Make sure that wielded weapons are unwielded.
         """
+
         if self in dropper.wielding:
             dropper.at_unwield(self)
         super().at_drop(dropper, **kwargs)

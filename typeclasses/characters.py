@@ -1,4 +1,5 @@
 from random import randint, choice
+from evennia.prototypes import spawner, prototypes
 from string import punctuation
 from evennia import AttributeProperty
 from evennia.utils import lazy_property, iter_to_str, delay, logger
@@ -274,20 +275,55 @@ class Character(ObjectParent, ClothedCharacter):
         # finally, return the skill plus stat
         return skill_trait.value + stat_bonus
 
+    def at_attack(self, wielder, target, **kwargs):
+        """
+        attack with your natural weapon
+        """
+        weapon = self.db.natural_weapon
+        damage = weapon.get("damage", 0)
+        speed = weapon.get("speed", 10)
+        # attack with your natural attack skill - whatever that is
+        result = self.use_skill(weapon.get("skill"), speed=speed)
+        # apply the weapon damage as a modifier to skill
+        damage = damage * result
+        # subtract the energy required to use this
+        self.traits.ep.current -= weapon.get("energy_cost", 5)
+        if not damage:
+            # the attack failed
+            self.at_emote(
+                f"$conj(swings) $pron(your) {weapon.get('name')} at $you(target), but $conj(misses).",
+                mapping={"target": target},
+            )
+        else:
+            verb = weapon.get("damage_type", "hits")
+            wielder.at_emote(
+                f"$conj({verb}) $you(target) with $pron(your) {weapon.get('name')}.",
+                mapping={"target": target},
+            )
+            # the attack succeeded! apply the damage
+            target.at_damage(wielder, damage, weapon.get("damage_type"))
+        wielder.msg(f"[ Cooldown: {speed} seconds ]")
+        wielder.cooldowns.add("attack", speed)
+
     def get_display_status(self, looker, **kwargs):
         """
         Returns a quick view of the current status of this character
         """
 
+        # print(f"get_display_status: {self}, {self.args}")
         chunks = []
         # prefix the status string with the character's name, if it's someone else checking
-        if looker != self:
-            chunks.append(self.get_display_name(looker, **kwargs))
+        # if looker != self:
+        #     chunks.append(self.get_display_name(looker, **kwargs))
 
         # add resource levels
         chunks.append(
             f"|gHealth: |G{self.traits.hp.current}|g  Energy: |G{self.traits.ep.current}|g  Focus: |G{self.traits.fp.current}"
         )
+        if looker != self:
+            chunks.append(
+                f"|gE: |G{looker.get_display_name(self, **kwargs)} ({looker.traits.hp.current})"
+            )
 
         # get all the current status flags for this character
         if status_tags := self.tags.get(category="status", return_list=True):
@@ -410,7 +446,7 @@ class PlayerCharacter(Character):
         # attack with the weapon
         weapon.at_attack(self, target)
 
-        status = self.get_display_status(self)
+        status = self.get_display_status(target)
         self.msg(prompt=status)
 
         # check if we have auto-attack in settings
@@ -418,6 +454,40 @@ class PlayerCharacter(Character):
             if settings.get("auto attack") and (speed := weapon.speed):
                 # queue up next attack; use None for target to reference stored target on execution
                 delay(speed + 1, self.attack, None, weapon, persistent=True)
+
+    def use_heal(self):
+        """
+        Restores health
+        """
+
+        damage = 50
+        self.msg(f"|cYou cast heal!")
+        self.traits.hp.current += max(damage, 0)
+        self.traits.ep.current += max(damage, 0)
+        self.msg(f"You restore {damage} health and energy!")
+
+    def use_fireball(self, target, **kwargs):
+        """
+        Attempt to cast fireball
+        """
+        if not target:
+            self.msg(f"|GTarget whom?")
+            return
+
+        if not self.db.combat_target:
+            self.enter_combat(target)
+        else:
+            self.db.combat_target = target
+        target.enter_combat(self)
+        # if not self.cooldowns.ready("fireball"):
+        #     self.msg(f"|BNot so fast!")
+        #     return False
+
+        damage = 80
+        self.msg(f"|RYou cast fireball!")
+
+        target.at_damage(self, damage, "fire")
+        # self.cooldowns.add("fireball", 3)
 
     def respawn(self):
         """
@@ -490,7 +560,7 @@ class NPC(Character):
                     # something went wrong...
                     return
                 # create loot drops
-                objs = spawn(*list(self.db.drops))
+                objs = spawner.spawn(*list(self.db.drops))
                 for obj in objs:
                     obj.location = self.location
                 # delete ourself

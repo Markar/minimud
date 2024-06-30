@@ -43,6 +43,13 @@ class CombatScript(Script):
         """
         Returns a list of all active combatants, regardless of alliance.
         """
+        for obj in self.fighters:
+            print(f"in active")
+            if not any(obj.tags.has(["unconscious", "dead", "defeated"])):
+                print(f"active obj: {obj}")
+                print(f"self.fighters: {self.fighters}")
+                return True
+
         return [
             obj
             for obj in self.fighters
@@ -128,9 +135,9 @@ class CombatScript(Script):
         # grant exp to the other team, if relevant
         if exp := combatant.db.exp_reward:
             for obj in self.db.teams[team - 1]:
-                if obj.db.exp:
-                    obj.msg(f"You gain {exp} experience.")
-                    obj.db.exp += exp
+                obj.msg(f"You gain {exp} experience.")
+                obj.db.exp = (obj.db.exp or 0) + exp
+
         self.check_victory()
         # remove their combat target if they have one
         del combatant.db.combat_target

@@ -111,6 +111,7 @@ class CmdAttack(Command):
         """
         optional post-command auto prompt
         """
+
         # check if we have auto-prompt in settings
         if self.account and (settings := self.account.db.settings):
             if settings.get("auto prompt"):
@@ -152,7 +153,6 @@ class CmdWield(Command):
         caller = self.caller
 
         print(f"free hands {caller.free_hands}")
-        # print(f"free hands 2{hands}")
         # check if we have free hands
         if not (hands := caller.free_hands):
             self.msg(
@@ -266,6 +266,51 @@ class CmdFlee(Command):
                 self.msg(prompt=status)
 
 
+class CmdHeal(Command):
+    """
+    Restores health
+
+    Usage:
+        heal
+    """
+
+    key = "heal"
+    help_category = "combat"
+
+    def func(self):
+        print(self.caller)
+        caller = self.caller
+        caller.use_heal()
+
+
+class CmdFireball(Command):
+    """
+    Casts a fireball
+
+    Usage:
+        fireball
+    """
+
+    key = "fireball"
+    help_category = "combat"
+
+    def func(self):
+        print(f"self.caller: {self.caller}")
+        print(f"self.args: {self.args}")
+        caller = self.caller
+        target = self.args
+        location = self.caller.location
+        cscript = location.scripts.get("combat")[0]
+        cscript.add_combatant(self, enemy=target)
+        print(f"location: {cscript}")
+
+        target = caller.search(target)
+        print(f"target: {target}")
+        caller.db.combat_target = target
+        # if caller.in_combat:
+        caller.use_fireball(target)
+
+
 class CmdRespawn(Command):
     """
     Return to the center of town when defeated, with full health.
@@ -318,13 +363,18 @@ class CmdRevive(Command):
 class CmdStatus(Command):
     key = "status"
     aliases = ("hp", "stat")
+    # target is the target of the status command
 
     def func(self):
+        # self.enemy = self.args
+        # enemy = self.caller.search(self.target)
+
         if not self.args:
             target = self.caller
             status = target.get_display_status(self.caller)
             self.msg(prompt=status)
         else:
+            print(f"status args: {self.caller.search(self.args.strip())}")
             target = self.caller.search(self.args.strip())
             if not target:
                 # no valid object found
@@ -346,3 +396,5 @@ class CombatCmdSet(CmdSet):
         self.add(CmdRevive)
         self.add(CmdRespawn)
         self.add(CmdStatus)
+        self.add(CmdFireball)
+        self.add(CmdHeal)
