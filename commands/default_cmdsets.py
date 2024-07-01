@@ -21,7 +21,7 @@ from evennia.contrib.game_systems.containers.containers import ContainerCmdSet
 from evennia.contrib.grid.xyzgrid.commands import XYZGridCmdSet
 from evennia.contrib.rpg.character_creator.character_creator import ContribCmdCharCreate
 from evennia.contrib.game_systems.crafting.crafting import CmdCraft
-
+from evennia.contrib.grid.ingame_map_display import MapDisplayCmdSet
 
 from commands.combat import CombatCmdSet
 from commands.skills import SkillCmdSet
@@ -55,6 +55,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CombatCmdSet)
         self.add(SkillCmdSet)
         self.add(InteractCmdSet)
+        self.add(MapDisplayCmdSet)
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
