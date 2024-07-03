@@ -4,7 +4,6 @@ Prototypes
 from random import randint, choice
 
 ### Crafted prototypes which might be useful to access in other places, such as shops
-
 IRON_DAGGER = {
     "typeclass": "typeclasses.gear.MeleeWeapon",
     "key": "iron dagger",
@@ -17,7 +16,7 @@ IRON_DAGGER = {
     "value": 20,
     "energy_cost": 3,
     "speed": 3,
-    "dmg": 20,
+    "dmg": 50,
 }
 
 IRON_SWORD = {
@@ -397,6 +396,30 @@ STAG_DEER = {
     "can_attack": True,
 }
 
+SCRAWNY_GNOLL = {
+    "typeclass": "typeclasses.characters.NPC",
+    "key": "a scrawny gnoll",
+    "desc": "The gnoll stands about five feet tall, and is wearing a torn blue shirt with greenish yellow pants.",
+    "gender": "neutral",
+    "react_as": "aggressive",
+    "armor": 20,
+    "name_color": "r",
+    "hp": 200,
+    "hpmax": 200,
+    "str": 15,
+    "natural_weapon": {
+        "name": "claws",
+        "damage_type": "slash",
+        "damage": 10,
+        "speed": 4,
+        "energy_cost": 10,
+    },
+    "exp_reward": 10,
+    # randomly generate a list of drop prototype keys when the mob is spawned
+    "drops": lambda: ["IRON_DAGGER"] * randint(3, 5) + ["WOOL_TUNIC"] * randint(0, 5),
+    "can_attack": True,
+}
+
 ### Mob drops
 
 RAW_MEAT = {
@@ -421,3 +444,4 @@ DEER_ANTLER = {
         ("bone", "crafting_material"),
     ],
 }
+

@@ -90,16 +90,20 @@ class Character(ObjectParent, ClothedCharacter):
         self.db.str = 5
         self.db.agi = 5
         self.db.will = 5
+        self.db.hp = 100
+        self.db.hpmax = 100
+        print(f"hp", {self.db.hp})
+        print(f"db {self.db}")
         # resource stats
-        self.traits.add(
-            "hp", "Health", trait_type="gauge", min=0, max=100, base=100, rate=0.1
-        )
-        self.traits.add(
-            "fp", "Focus", trait_type="gauge", min=0, max=100, base=100, rate=0.1
-        )
-        self.traits.add(
-            "ep", "Energy", trait_type="gauge", min=0, max=100, base=100, rate=0.1
-        )
+        # self.traits.add(
+        #     "hp", "Health", trait_type="gauge", min=0, max=100, base=100, rate=0.1
+        # )
+        # self.traits.add(
+        #     "fp", "Focus", trait_type="gauge", min=0, max=100, base=100, rate=0.1
+        # )
+        # self.traits.add(
+        #     "ep", "Energy", trait_type="gauge", min=0, max=100, base=100, rate=0.1
+        # )
         self.traits.add(
             "evasion", trait_type="counter", min=0, max=100, base=0, stat="agi"
         )
@@ -140,16 +144,18 @@ class Character(ObjectParent, ClothedCharacter):
         """
         # apply armor damage reduction
         damage -= self.defense(damage_type)
-        self.traits.hp.current -= max(damage, 0)
+        print(f"self {self} and attacker {attacker}")
+        print(f"at_damage in character: {self.db.hp} {max(damage,0)} and dmg {damage}")
+        self.db.hp -= max(damage, 0)
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
-        if self.traits.hp.value <= 0:
-            self.tags.add("unconscious", category="status")
-            self.tags.add("lying down", category="status")
-            self.msg(
-                "You fall unconscious. You can |wrespawn|n or wait to be |wrevive|nd."
-            )
-            self.traits.hp.rate = 0
+        if self.db.hp <= 0:
+        #     self.tags.add("unconscious", category="status")
+        #     self.tags.add("lying down", category="status")
+        #     self.msg(
+        #         "You fall unconscious. You can |wrespawn|n or wait to be |wrevive|nd."
+        #     )
+        #     self.traits.hp.rate = 0
             if self.in_combat:
                 combat = self.location.scripts.get("combat")[0]
                 combat.remove_combatant(self)
@@ -318,11 +324,11 @@ class Character(ObjectParent, ClothedCharacter):
 
         # add resource levels
         chunks.append(
-            f"|gHealth: |G{self.traits.hp.current}|g  Energy: |G{self.traits.ep.current}|g  Focus: |G{self.traits.fp.current}"
+            f"|gHealth: |G{self.db.hp}|g  Energy: |G{self.db.ep}|g  Focus: |G{self.db.fp}"
         )
         if looker != self:
             chunks.append(
-                f"|gE: |G{looker.get_display_name(self, **kwargs)} ({looker.traits.hp.current})"
+                f"|gE: |G{looker.get_display_name(self, **kwargs)} ({looker.db.hp})"
             )
 
         # get all the current status flags for this character
@@ -365,9 +371,8 @@ class Character(ObjectParent, ClothedCharacter):
             self.tags.remove("unconscious")
             self.tags.remove("lying down")
             # this sets the current HP to 20% of the max, a.k.a. one fifth
-            self.traits.hp.current = self.traits.hp.current.max // 5
+            self.db.hp = self.db.hpmax // 5
             self.msg(prompt=self.get_display_status(self))
-            self.traits.hp.rate = 0.1
 
 
 class PlayerCharacter(Character):
@@ -406,7 +411,7 @@ class PlayerCharacter(Character):
 
     def at_damage(self, attacker, damage, damage_type=None):
         super().at_damage(attacker, damage, damage_type=damage_type)
-        if self.traits.hp.value < 50:
+        if self.db.hp < 50:
             status = self.get_display_status(self)
             self.msg(prompt=status)
 
@@ -462,8 +467,8 @@ class PlayerCharacter(Character):
 
         damage = 50
         self.msg(f"|cYou cast heal!")
-        self.traits.hp.current += max(damage, 0)
-        self.traits.ep.current += max(damage, 0)
+        self.db.hp += max(damage, 0)
+        self.db.ep += max(damage, 0)
         self.msg(f"You restore {damage} health and energy!")
 
     def use_fireball(self, target, **kwargs):
@@ -495,8 +500,7 @@ class PlayerCharacter(Character):
         """
         self.tags.remove("unconscious", category="status")
         self.tags.remove("lying down", category="status")
-        self.traits.hp.reset()
-        self.traits.hp.rate = 0.1
+        self.db.hp = self.db.hpmax
         self.move_to(self.home)
         self.msg(prompt=self.get_display_status(self))
 
@@ -517,6 +521,34 @@ class NPC(Character):
             return 10
         return weapon.get("speed", 10)
 
+    def at_object_creation(self):
+        # basic stats
+        # i could - and wanted to - use the traits handler for these, but then i couldn't set them in NPC prototypes
+        self.db.str = 5
+        self.db.agi = 5
+        self.db.will = 5
+        print(f"npc creation")
+        # resource stats
+        self.db.hp = 100
+        self.db.hpmax = 100
+        self.db.fp = 100
+        self.db.fpmax = 100
+        self.db.ep = 100
+        self.db.epmax = 100
+        
+        # self.traits.add(
+        #     "hp", "Health", trait_type="gauge", min=0, max=200, base=100, rate=0.1
+        # )
+        # self.traits.add(
+        #     "fp", "Focus", trait_type="gauge", min=0, max=10000, base=100, rate=0.1
+        # )
+        # self.traits.add(
+        #     "ep", "Energy", trait_type="gauge", min=0, max=10000, base=100, rate=0.1
+        # )
+        self.traits.add(
+            "evasion", trait_type="counter", min=0, max=100, base=0, stat="agi"
+        )
+        
     def get_display_name(self, looker, **kwargs):
         """
         Adds color to the display name.
@@ -551,9 +583,11 @@ class NPC(Character):
         Apply damage, after taking into account damage resistances.
         """
         super().at_damage(attacker, damage, damage_type=damage_type)
-
-        if self.traits.hp.value <= 0:
+        print(f"at_damage in npc: {self} and {attacker}")
+        delay(1, print(f"delay 1"), None)
+        if self.db.hp <= 0:
             # we've been defeated!
+            print(f"hp below 1")
             if combat_script := self.location.scripts.get("combat"):
                 combat_script = combat_script[0]
                 if not combat_script.remove_combatant(self):
@@ -561,10 +595,15 @@ class NPC(Character):
                     return
                 # create loot drops
                 objs = spawner.spawn(*list(self.db.drops))
+                print(f"spawn loot: {objs}")
                 for obj in objs:
                     obj.location = self.location
                 # delete ourself
-                self.delete()
+                print(f"delete, respawn: {self} and {self.key}")
+                # delay(5, spawner.spawn(self), None, persistent=True)
+                delay(1, self.use_heal(), self)
+                
+                # self.delete()
                 return
 
         if "timid" in self.attributes.get("react_as", ""):
@@ -575,19 +614,18 @@ class NPC(Character):
                 if not combat_script.remove_combatant(self):
                     return
             # there's a 50/50 chance the object will escape forever
-            if randint(0, 1):
-                self.move_to(None)
-                self.delete()
-            else:
-                print(f"in randint else")
-                contents = self.contents_get(content_type="character")
-                print(f"wielded before drop {contents}")
-                flee_dir = choice(self.location.contents_get(content_type="exit"))
-                flee_dir.at_traverse(self, flee_dir.destination)
+            # if randint(0, 1):
+            #     self.move_to(None)
+            #     self.delete()
+            # else:
+            contents = self.contents_get(content_type="character")
+            print(f"wielded before drop {contents}")
+            flee_dir = choice(self.location.contents_get(content_type="exit"))
+            flee_dir.at_traverse(self, flee_dir.destination)
             return
 
         threshold = self.attributes.get("flee_at", 25)
-        if self.traits.hp.value <= 25:
+        if self.db.hp <= 25:
             self.execute_cmd("flee")
 
         # change target to the attacker
@@ -657,7 +695,7 @@ class NPC(Character):
         if not (weapon := self.db.natural_weapon):
             return
         # make sure wielder has enough strength left
-        if self.traits.ep.value < weapon.get("energy_cost", 5):
+        if self.db.ep < weapon.get("energy_cost", 5):
             return False
         # can't attack if on cooldown
         if not wielder.cooldowns.ready("attack"):
@@ -677,7 +715,7 @@ class NPC(Character):
         # apply the weapon damage as a modifier to skill
         damage = damage * result
         # subtract the energy required to use this
-        self.traits.ep.current -= weapon.get("energy_cost", 5)
+        self.db.ep -= weapon.get("energy_cost", 5)
         if not damage:
             # the attack failed
             self.at_emote(
@@ -694,3 +732,50 @@ class NPC(Character):
             target.at_damage(wielder, damage, weapon.get("damage_type"))
         wielder.msg(f"[ Cooldown: {speed} seconds ]")
         wielder.cooldowns.add("attack", speed)
+        
+        def get_display_status(self, looker, **kwargs):
+            """
+            Returns a quick view of the current status of this character
+            """
+
+            # print(f"get_display_status: {self}, {self.args}")
+            chunks = []
+            # prefix the status string with the character's name, if it's someone else checking
+            # if looker != self:
+            #     chunks.append(self.get_display_name(looker, **kwargs))
+
+            # add resource levels
+            chunks.append(
+                f"|gHealth: |G{self.db.hp}|g  Energy: |G{self.db.ep}|g  Focus: |G{self.db.fp}"
+            )
+            if looker != self:
+                chunks.append(
+                    f"|gE: |G{looker.get_display_name(self, **kwargs)} ({looker.db.hp})"
+                )
+
+            # get all the current status flags for this character
+            if status_tags := self.tags.get(category="status", return_list=True):
+                # add these statuses to the string, if there are any
+                chunks.append(iter_to_str(status_tags))
+
+            if looker == self:
+                # if we're checking our own status, include cooldowns
+                all_cooldowns = [
+                    (key, self.cooldowns.time_left(key, use_int=True))
+                    for key in self.cooldowns.all
+                ]
+                all_cooldowns = [f"{c[0]} ({c[1]}s)" for c in all_cooldowns if c[1]]
+                if all_cooldowns:
+                    chunks.append(f"Cooldowns: {iter_to_str(all_cooldowns, endsep=',')}")
+
+            # glue together the chunks and return
+            return " - ".join(chunks)
+
+    def use_heal(self):
+        """
+        Restores health
+        """
+
+        print(f"NPC heals itself {self}")
+        self.db.hp = self.db.hpmax
+        self.db.ep = self.db.epmax

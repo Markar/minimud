@@ -121,23 +121,28 @@ class CombatScript(Script):
         Returns:
             True if combatant is successfully out of combat, False if not
         """
+        print(f"remove combatant")
         # get the combatant's team
         team = self.get_team(combatant)
         if team is None:
+            print(f"team is none")
             # they're already not in combat
             return True
 
+        print(f"remove combatant 2")
         # remove combatant from their team
         self.db.teams[team].remove(combatant)
         # reset the cache
         del self.ndb.teams
 
+        print(f"remove combatant 3")
         # grant exp to the other team, if relevant
         if exp := combatant.db.exp_reward:
             for obj in self.db.teams[team - 1]:
+                print(f"in remove_combatant: {obj} and {obj.db.exp}")
                 obj.msg(f"You gain {exp} experience.")
                 obj.db.exp = (obj.db.exp or 0) + exp
-
+        print(f"Log: Killed {combatant}")
         self.check_victory()
         # remove their combat target if they have one
         del combatant.db.combat_target
@@ -186,6 +191,50 @@ class RestockScript(Script):
 
     def at_script_creation(self):
         self.interval = 3600
+
+    def at_repeat(self):
+        """
+        The primary hook for timed scripts
+        """
+        if not (storage := self.obj.db.storage):
+            # the object we're attached to has no storage location, so it can't hold stock
+            return
+        if not (inventory := self.obj.db.inventory):
+            # we don't have an inventory list attribute set up
+            return
+
+        # go through the inventory listing and possibly restock a few of everything
+        for prototype, max_count in inventory:
+            # current stock of this type
+            in_stock = [
+                obj
+                for obj in storage.contents
+                if obj.tags.has(prototype, category=PROTOTYPE_TAG_CATEGORY)
+            ]
+            if len(in_stock) >= max_count:
+                # already enough of these
+                continue
+            # get a random number of new stock, only process if >0
+            if new_stock := randint(0, 3):
+                # cap it so we don't exceed max
+                new_stock = min(new_stock, max_count - len(in_stock))
+                # make some new stuff!
+                objs = spawn(*[prototype] * new_stock)
+                # customize with the material options
+                for obj in objs:
+                    # make sure it has an initial value
+                    obj.db.value = obj.db.value or 1
+                    # add to the shop stock
+                    self.obj.add_stock(obj)
+
+class RespawnScript(Script):
+    """
+    A script for a shop room that periodically restocks its inventory.
+    """
+
+    def at_script_creation(self):
+        # self.interval = 3600
+        self.interval = 600
 
     def at_repeat(self):
         """

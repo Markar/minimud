@@ -27,7 +27,8 @@ from evennia.settings_default import *
 ######################################################################
 
 # This is the name of your game. Make it catchy!
-SERVERNAME = "MiniMUD the RPG"
+# SERVERNAME = "MiniMUD the RPG"
+SERVERNAME = "Millennium"
 
 # Defines the base character type as PlayerCharacter instead of Character
 BASE_CHARACTER_TYPECLASS = "typeclasses.characters.PlayerCharacter"
@@ -98,7 +99,7 @@ CMDSET_UNLOGGEDIN = "evennia.contrib.base_systems.menu_login.UnloggedinCmdSet"
 CONNECTION_SCREEN_MODULE = "evennia.contrib.base_systems.menu_login.connection_screens"
 
 # Map Settings
-BASIC_MAP_SIZE = 10  # This changes the default map width/height.
+BASIC_MAP_SIZE = 25  # This changes the default map width/height.
 
 ######################################################################
 # Settings given in secret_settings.py override those in this file.
