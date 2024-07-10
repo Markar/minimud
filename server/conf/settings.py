@@ -99,7 +99,7 @@ CMDSET_UNLOGGEDIN = "evennia.contrib.base_systems.menu_login.UnloggedinCmdSet"
 CONNECTION_SCREEN_MODULE = "evennia.contrib.base_systems.menu_login.connection_screens"
 
 # Map Settings
-BASIC_MAP_SIZE = 25  # This changes the default map width/height.
+BASIC_MAP_SIZE = 15  # This changes the default map width/height.
 
 ######################################################################
 # Settings given in secret_settings.py override those in this file.

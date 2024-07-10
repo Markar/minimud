@@ -398,11 +398,13 @@ STAG_DEER = {
 
 SCRAWNY_GNOLL = {
     "typeclass": "typeclasses.characters.NPC",
+    "prototype_key": "scrawny_gnoll",
+    "aliases": ["gnoll"],
     "key": "a scrawny gnoll",
     "desc": "The gnoll stands about five feet tall, and is wearing a torn blue shirt with greenish yellow pants.",
     "gender": "neutral",
     "react_as": "aggressive",
-    "armor": 20,
+    "armor": 0,
     "name_color": "r",
     "hp": 200,
     "hpmax": 200,
@@ -410,13 +412,39 @@ SCRAWNY_GNOLL = {
     "natural_weapon": {
         "name": "claws",
         "damage_type": "slash",
-        "damage": 10,
-        "speed": 4,
+        "damage": 1,
+        "speed": 3,
         "energy_cost": 10,
+    },
+    "exp_reward": 50,
+    # randomly generate a list of drop prototype keys when the mob is spawned
+    "drops": ["IRON_DAGGER"],
+    # "drops": lambda: ["IRON_DAGGER"] randint(0,99) > 20) + ["WOOL_TUNIC"] * randint(0, 5),
+    "can_attack": True,
+}
+
+DEACYING_SKELETON = {
+    "typeclass": "typeclasses.characters.NPC",
+    "key": "a decaying skeleton",
+    "desc": "The decaying skeleton cackles as soon as it sees you.",
+    "gender": "neutral",
+    "react_as": "aggressive",
+    "armor": 10,
+    "name_color": "r",
+    "hp": 100,
+    "hpmax": 100,
+    "str": 15,
+    "natural_weapon": {
+        "name": "dagger",
+        "damage_type": "piercing",
+        "damage": 5,
+        "speed": 2,
+        "energy_cost": 5,
     },
     "exp_reward": 10,
     # randomly generate a list of drop prototype keys when the mob is spawned
-    "drops": lambda: ["IRON_DAGGER"] * randint(3, 5) + ["WOOL_TUNIC"] * randint(0, 5),
+    "drops": ["IRON_DAGGER"],
+    # "drops": lambda: ["IRON_DAGGER"] randint(0,99) > 20) + ["WOOL_TUNIC"] * randint(0, 5),
     "can_attack": True,
 }
 

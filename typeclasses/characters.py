@@ -44,11 +44,11 @@ class Character(ObjectParent, ClothedCharacter):
         Returns:
             True if you can flee, otherwise False
         """
-        # use agility as a fallback for unskilled
+        # use dex as a fallback for unskilled
         if not (evade := self.use_skill("evasion")):
-            evade = self.db.agi
+            evade = self.db.dexterity
         # if you have more focus, you can escape more easily
-        if (randint(0, 99) - self.traits.fp.value) < evade:
+        if (randint(0, 99) - self.db.fp) < evade:
             return True
         else:
             self.msg("You can't find an opportunity to escape.")
@@ -85,25 +85,21 @@ class Character(ObjectParent, ClothedCharacter):
         )
 
     def at_object_creation(self):
-        # basic stats
-        # i could - and wanted to - use the traits handler for these, but then i couldn't set them in NPC prototypes
-        self.db.str = 5
-        self.db.agi = 5
-        self.db.will = 5
-        self.db.hp = 100
-        self.db.hpmax = 100
-        print(f"hp", {self.db.hp})
-        print(f"db {self.db}")
+        self.db.level = 1
+        self.db.strength = 1
+        self.db.dexterity = 1
+        self.db.intelligence = 1
+        self.db.wisdom = 1
+        self.db.constitution = 1
+        self.db.charisma = 1
         # resource stats
-        # self.traits.add(
-        #     "hp", "Health", trait_type="gauge", min=0, max=100, base=100, rate=0.1
-        # )
-        # self.traits.add(
-        #     "fp", "Focus", trait_type="gauge", min=0, max=100, base=100, rate=0.1
-        # )
-        # self.traits.add(
-        #     "ep", "Energy", trait_type="gauge", min=0, max=100, base=100, rate=0.1
-        # )
+        self.db.hp = 50
+        self.db.hpmax = 50
+        self.db.fp = 50
+        self.db.fpmax = 50
+        self.db.ep = 50
+        self.db.epmax = 50
+        
         self.traits.add(
             "evasion", trait_type="counter", min=0, max=100, base=0, stat="agi"
         )
@@ -121,9 +117,9 @@ class Character(ObjectParent, ClothedCharacter):
             return False
 
         # check if we're in combat
-        if self.in_combat:
-            self.msg("You can't leave while in combat.")
-            return False
+        # if self.in_combat:
+        #     self.msg("You can't leave while in combat.")
+        #     return False
 
         return super().at_pre_move(destination, **kwargs)
 
@@ -132,6 +128,9 @@ class Character(ObjectParent, ClothedCharacter):
         optional post-move auto prompt
         """
         super().at_post_move(source_location, **kwargs)
+        if self.in_combat:
+            combat = self.location.scripts.get("combat")[0]
+            combat.remove_combatant(self)
         # check if we have auto-prompt in settings
         if self.account and (settings := self.account.db.settings):
             if settings.get("auto prompt"):
@@ -144,21 +143,14 @@ class Character(ObjectParent, ClothedCharacter):
         """
         # apply armor damage reduction
         damage -= self.defense(damage_type)
-        print(f"self {self} and attacker {attacker}")
-        print(f"at_damage in character: {self.db.hp} {max(damage,0)} and dmg {damage}")
+        print(f"at_damage in character: self:{self} attacker:{attacker} hp:{self.db.hp} max(damage):{max(damage,0)} dmg: {damage}")
         self.db.hp -= max(damage, 0)
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
         if self.db.hp <= 0:
-        #     self.tags.add("unconscious", category="status")
-        #     self.tags.add("lying down", category="status")
-        #     self.msg(
-        #         "You fall unconscious. You can |wrespawn|n or wait to be |wrevive|nd."
-        #     )
-        #     self.traits.hp.rate = 0
-            if self.in_combat:
-                combat = self.location.scripts.get("combat")[0]
-                combat.remove_combatant(self)
+            # if self.in_combat:
+            combat = self.location.scripts.get("combat")[0]
+            combat.remove_combatant(self)
 
     def at_emote(self, message, **kwargs):
         """
@@ -288,12 +280,15 @@ class Character(ObjectParent, ClothedCharacter):
         weapon = self.db.natural_weapon
         damage = weapon.get("damage", 0)
         speed = weapon.get("speed", 10)
+        skill = weapon.get("skill")
         # attack with your natural attack skill - whatever that is
+        self.msg(f"attack with natural attack: {skill and speed: {speed}}")
         result = self.use_skill(weapon.get("skill"), speed=speed)
         # apply the weapon damage as a modifier to skill
+        self.msg(f"damage = damage * result: {damage}")
         damage = damage * result
         # subtract the energy required to use this
-        self.traits.ep.current -= weapon.get("energy_cost", 5)
+        self.db.ep -= weapon.get("energy_cost", 5)
         if not damage:
             # the attack failed
             self.at_emote(
@@ -326,6 +321,7 @@ class Character(ObjectParent, ClothedCharacter):
         chunks.append(
             f"|gHealth: |G{self.db.hp}|g  Energy: |G{self.db.ep}|g  Focus: |G{self.db.fp}"
         )
+        print(f"looker != self {looker} and self {self}")
         if looker != self:
             chunks.append(
                 f"|gE: |G{looker.get_display_name(self, **kwargs)} ({looker.db.hp})"
@@ -382,6 +378,12 @@ class PlayerCharacter(Character):
 
     def at_object_creation(self):
         super().at_object_creation()
+        self.db.title = "the title less"
+        self.db.alignment = "neutral"
+        self.db.stat_points = 5
+        self.db.con_increase_amount = 9
+        self.db.int_increase_amount = 8
+      
         # initialize hands
         self.db._wielded = {"left": None, "right": None}
 
@@ -465,11 +467,30 @@ class PlayerCharacter(Character):
         Restores health
         """
 
+        # FIND OUT WHY I HAVE TO ATTACK THE MOB A SECOND TIME TO KILL IT 
+        hp = self.db.hp
+        hpmax = self.db.hpmax
+        ep = self.db.ep
+        epmax = self.db.epmax
+        hp_amount = 0
+        ep_amount = 0
+        
         damage = 50
-        self.msg(f"|cYou cast heal!")
-        self.db.hp += max(damage, 0)
-        self.db.ep += max(damage, 0)
-        self.msg(f"You restore {damage} health and energy!")
+        if hp + damage > hpmax:            
+            hp_amount = hpmax-hp
+            self.db.hp = hpmax
+        else: 
+            hp_amount = hpmax-hp
+            self.db.hp += max(damage, 0)
+            
+        if ep + damage > epmax:
+            ep_amount = epmax-ep
+            self.db.ep = epmax
+        else: 
+            ep_amount = epmax-ep
+            self.db.ep += max(damage, 0)
+            
+        self.msg(f"You restore {hp_amount or 0} health and {ep_amount or 0} energy!")
 
     def use_fireball(self, target, **kwargs):
         """
@@ -484,15 +505,15 @@ class PlayerCharacter(Character):
         else:
             self.db.combat_target = target
         target.enter_combat(self)
-        # if not self.cooldowns.ready("fireball"):
-        #     self.msg(f"|BNot so fast!")
-        #     return False
+        if not self.cooldowns.ready("fireball"):
+            self.msg(f"|BNot so fast!")
+            return False
 
         damage = 80
         self.msg(f"|RYou cast fireball!")
 
         target.at_damage(self, damage, "fire")
-        # self.cooldowns.add("fireball", 3)
+        self.cooldowns.add("fireball", 1)
 
     def respawn(self):
         """
@@ -522,31 +543,9 @@ class NPC(Character):
         return weapon.get("speed", 10)
 
     def at_object_creation(self):
-        # basic stats
-        # i could - and wanted to - use the traits handler for these, but then i couldn't set them in NPC prototypes
-        self.db.str = 5
-        self.db.agi = 5
-        self.db.will = 5
-        print(f"npc creation")
-        # resource stats
-        self.db.hp = 100
-        self.db.hpmax = 100
-        self.db.fp = 100
-        self.db.fpmax = 100
-        self.db.ep = 100
-        self.db.epmax = 100
-        
-        # self.traits.add(
-        #     "hp", "Health", trait_type="gauge", min=0, max=200, base=100, rate=0.1
-        # )
-        # self.traits.add(
-        #     "fp", "Focus", trait_type="gauge", min=0, max=10000, base=100, rate=0.1
-        # )
-        # self.traits.add(
-        #     "ep", "Energy", trait_type="gauge", min=0, max=10000, base=100, rate=0.1
-        # )
+        super().at_object_creation()
         self.traits.add(
-            "evasion", trait_type="counter", min=0, max=100, base=0, stat="agi"
+            "evasion", trait_type="counter", min=0, max=100, base=0, stat="dexterity"
         )
         
     def get_display_name(self, looker, **kwargs):
@@ -578,61 +577,51 @@ class NPC(Character):
                 # use the exit
                 self.execute_cmd(exits[0].name)
 
+    def at_respawn(self):
+        print(f"at_respawn in npc: {self} and home {self.home}")
+        self.use_heal()
+        # self.move_to(self.home)
+        self.move_to(self.home, False, None, True, True, True, "teleport")
+                  
     def at_damage(self, attacker, damage, damage_type=None):
         """
         Apply damage, after taking into account damage resistances.
         """
-        super().at_damage(attacker, damage, damage_type=damage_type)
-        print(f"at_damage in npc: {self} and {attacker}")
-        delay(1, print(f"delay 1"), None)
+        # apply armor damage reduction
+        damage -= self.defense(damage_type)
+        print(f"at_damage in character: self:{self} attacker:{attacker} hp:{self.db.hp} max(damage):{max(damage,0)} dmg: {damage}")
+        self.db.hp -= max(damage, 0)
+        self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
+        attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
+        print(f"at_damage in npc: {self} and {attacker} and npc hp: {self.db.hp}")
         if self.db.hp <= 0:
-            # we've been defeated!
             print(f"hp below 1")
-            if combat_script := self.location.scripts.get("combat"):
-                combat_script = combat_script[0]
-                if not combat_script.remove_combatant(self):
-                    # something went wrong...
-                    return
+            if self.in_combat:
+                print(f"hp below 1 self.in_combat")
+                if combat_script := self.location.scripts.get("combat"):
+                    combat_script = combat_script[0]
+                    print("1")
+                    combat_script.remove_combatant(self)
+                    print("2")
+                    self.location.msg_contents("A scrawny gnoll dies.")
+                    print("3")
+                    delay(1, self.move_to(None, False, None, True, True, True, "teleport"))
+                    delay(10, self.at_respawn)
+            
+
+                # we've been defeated!
+            
                 # create loot drops
-                objs = spawner.spawn(*list(self.db.drops))
-                print(f"spawn loot: {objs}")
-                for obj in objs:
-                    obj.location = self.location
-                # delete ourself
-                print(f"delete, respawn: {self} and {self.key}")
-                # delay(5, spawner.spawn(self), None, persistent=True)
-                delay(1, self.use_heal(), self)
+                # objs = spawner.spawn(*list(self.db.drops))
+                # print(f"spawn loot: {objs}")
+                # for obj in objs:
+                #     obj.location = self.location
                 
-                # self.delete()
-                return
-
-        if "timid" in self.attributes.get("react_as", ""):
-            self.at_emote("flees!")
-            self.db.fleeing = True
-            if combat_script := self.location.scripts.get("combat"):
-                combat_script = combat_script[0]
-                if not combat_script.remove_combatant(self):
-                    return
-            # there's a 50/50 chance the object will escape forever
-            # if randint(0, 1):
-            #     self.move_to(None)
-            #     self.delete()
-            # else:
-            contents = self.contents_get(content_type="character")
-            print(f"wielded before drop {contents}")
-            flee_dir = choice(self.location.contents_get(content_type="exit"))
-            flee_dir.at_traverse(self, flee_dir.destination)
-            return
-
-        threshold = self.attributes.get("flee_at", 25)
-        if self.db.hp <= 25:
-            self.execute_cmd("flee")
-
-        # change target to the attacker
         if not self.db.combat_target:
             self.enter_combat(attacker)
         else:
             self.db.combat_target = attacker
+
 
     def enter_combat(self, target, **kwargs):
         """
@@ -642,45 +631,53 @@ class NPC(Character):
             weapon = weapons[0]
         else:
             weapon = self
-
+        print(f"npc enter_combat")
         self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
         location = self.location
 
-        if not (combat_script := location.scripts.get("combat")):
+        print(f"npc location: {self.location} and {location}")
+        if location and not (combat_script := location.scripts.get("combat")):
             # there's no combat instance; start one
             from typeclasses.scripts import CombatScript
+            print(f"npc enter_combat if not")
 
             location.scripts.add(CombatScript, key="combat")
             combat_script = location.scripts.get("combat")
-        combat_script = combat_script[0]
-
-        self.db.combat_target = target
+            combat_script = combat_script[0]
+            print(f"npc enter_combat 3 {combat_script}")
+            self.db.combat_target = target
+            print(f"npc enter_combat 5")
+            self.attack(target, weapon)
         # adding a combatant to combat just returns True if they're already there, so this is safe
-        if not combat_script.add_combatant(self, enemy=target):
-            return
+        # if not combat_script.add_combatant(self, enemy=target):
+        #     print(f"npc enter_combat 4 {self} and target {target}")
+        #     return
 
-        self.attack(target, weapon)
+        
 
     def attack(self, target, weapon, **kwargs):
+        print(f"npc attack {self.in_combat}")
         # can't attack if we're not in combat, or if we're fleeing
         if not self.in_combat or self.db.fleeing:
             return
-
+        print(f"npc attack 2")
         # if target is not set, use stored target
         if not target:
             # make sure there's a stored target
             if not (target := self.db.combat_target):
                 return
+        print(f"npc attack 3")
         # verify that target is still here
         if self.location != target.location:
             return
-
+        print(f"npc attack 4")
         # make sure that we can use our chosen weapon
         if not (hasattr(weapon, "at_pre_attack") and hasattr(weapon, "at_attack")):
             return
         if not weapon.at_pre_attack(self):
             return
 
+        print(f"npc attack5")
         # attack with the weapon
         weapon.at_attack(self, target)
         # queue up next attack; use None for target to reference stored target on execution
@@ -695,6 +692,7 @@ class NPC(Character):
         if not (weapon := self.db.natural_weapon):
             return
         # make sure wielder has enough strength left
+        self.msg(f"ep pre-attack: {self.db.ep}")
         if self.db.ep < weapon.get("energy_cost", 5):
             return False
         # can't attack if on cooldown
@@ -733,43 +731,6 @@ class NPC(Character):
         wielder.msg(f"[ Cooldown: {speed} seconds ]")
         wielder.cooldowns.add("attack", speed)
         
-        def get_display_status(self, looker, **kwargs):
-            """
-            Returns a quick view of the current status of this character
-            """
-
-            # print(f"get_display_status: {self}, {self.args}")
-            chunks = []
-            # prefix the status string with the character's name, if it's someone else checking
-            # if looker != self:
-            #     chunks.append(self.get_display_name(looker, **kwargs))
-
-            # add resource levels
-            chunks.append(
-                f"|gHealth: |G{self.db.hp}|g  Energy: |G{self.db.ep}|g  Focus: |G{self.db.fp}"
-            )
-            if looker != self:
-                chunks.append(
-                    f"|gE: |G{looker.get_display_name(self, **kwargs)} ({looker.db.hp})"
-                )
-
-            # get all the current status flags for this character
-            if status_tags := self.tags.get(category="status", return_list=True):
-                # add these statuses to the string, if there are any
-                chunks.append(iter_to_str(status_tags))
-
-            if looker == self:
-                # if we're checking our own status, include cooldowns
-                all_cooldowns = [
-                    (key, self.cooldowns.time_left(key, use_int=True))
-                    for key in self.cooldowns.all
-                ]
-                all_cooldowns = [f"{c[0]} ({c[1]}s)" for c in all_cooldowns if c[1]]
-                if all_cooldowns:
-                    chunks.append(f"Cooldowns: {iter_to_str(all_cooldowns, endsep=',')}")
-
-            # glue together the chunks and return
-            return " - ".join(chunks)
 
     def use_heal(self):
         """
@@ -779,3 +740,6 @@ class NPC(Character):
         print(f"NPC heals itself {self}")
         self.db.hp = self.db.hpmax
         self.db.ep = self.db.epmax
+        
+        
+        

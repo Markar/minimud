@@ -1,0 +1,4 @@
+#
+@spawn scrawny_gnoll
+#
+@sethome gnoll-2 = newbie#01

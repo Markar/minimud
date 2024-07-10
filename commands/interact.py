@@ -57,7 +57,7 @@ class CmdEat(Command):
             return
 
         energy = obj.attributes.get("energy", 0)
-        self.caller.traits.ep.current += energy
+        self.caller.db.ep += energy
         self.caller.at_emote(
             f"$conj({self.cmdstring}) the {{target}}.", mapping={"target": obj}
         )

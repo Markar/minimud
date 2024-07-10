@@ -5,6 +5,7 @@ from evennia.utils.evtable import EvTable
 
 from .command import Command
 from typeclasses.gear import BareHand
+from typeclasses.elementals import EarthAttack
 
 
 class CmdAttack(Command):
@@ -54,6 +55,7 @@ class CmdAttack(Command):
             return
 
         # if we specified a weapon, find it first
+        print(f"self.weapon {self} and weapon: {self.weapon}")
         if self.weapon:
             weapon = self.caller.search(self.weapon)
             if not weapon:
@@ -61,11 +63,13 @@ class CmdAttack(Command):
                 return
         else:
             # grab whatever we're wielding
+            print(f" IN HERE: {self.caller.wielding}")
             if wielded := self.caller.wielding:
                 weapon = wielded[0]
             else:
                 # use our bare hands if we aren't wielding anything
-                weapon = BareHand()
+                # weapon = BareHand()
+                weapon = EarthAttack()
 
         # find our enemy!
         target = self.caller.search(self.target)
@@ -112,6 +116,7 @@ class CmdAttack(Command):
         optional post-command auto prompt
         """
 
+        print(f"at_post_cmd {self} and {self.account.db.settings}")
         # check if we have auto-prompt in settings
         if self.account and (settings := self.account.db.settings):
             if settings.get("auto prompt"):

@@ -25,6 +25,8 @@ from evennia.contrib.grid.ingame_map_display import MapDisplayCmdSet
 
 from commands.combat import CombatCmdSet
 from commands.skills import SkillCmdSet
+from commands.skills import AdvanceCmdSet
+from commands.elementals import ElementalCmdSet
 from commands.interact import InteractCmdSet
 from commands.account import AccountOptsCmdSet
 from commands.shops import CmdMoney
@@ -54,6 +56,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdCraft)
         self.add(CombatCmdSet)
         self.add(SkillCmdSet)
+        self.add(AdvanceCmdSet)
         self.add(InteractCmdSet)
         self.add(MapDisplayCmdSet)
 

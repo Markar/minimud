@@ -22,7 +22,8 @@ class BareHand:
         Validate that this is usable - has ammo, etc.
         """
         # make sure wielder has enough strength left
-        if wielder.traits.ep.value < self.energy_cost:
+        print(f"at_pre_attack on weapon: {wielder} and {wielder.db.ep} and self {self}")
+        if wielder.db.ep < self.energy_cost:
             wielder.msg("You are too tired to hit anything.")
             return False
         # can't attack if on cooldown
@@ -38,7 +39,7 @@ class BareHand:
         """
         damage = self.damage
         # subtract the energy required to use this
-        wielder.traits.ep.current -= self.energy_cost
+        wielder.db.ep -= self.energy_cost
         if not damage:
             # the attack failed
             wielder.at_emote(
@@ -68,7 +69,7 @@ class MeleeWeapon(Object):
         Validate that this is usable - has ammo, etc.
         """
         # make sure wielder has enough strength left
-        if wielder.traits.ep.value < self.attributes.get("energy_cost", 0):
+        if wielder.db.ep < self.attributes.get("energy_cost", 0):
             wielder.msg("You are too tired to use this.")
             return False
         # can't attack if on cooldown
@@ -93,6 +94,7 @@ class MeleeWeapon(Object):
         # pick a random option from our possible damage types
         damage_type = None
         if damage_types := self.tags.get(category="damage_type", return_list=True):
+            print(f"melee at_attack: {choice(damage_types)}")
             damage_type = choice(damage_types)
 
         # does this require skill to use?
@@ -104,7 +106,7 @@ class MeleeWeapon(Object):
         # if no skill required, we are just using our unmodified damage value
 
         # subtract the energy required to use this
-        wielder.traits.ep.current -= self.attributes.get("energy_cost", 0)
+        wielder.db.ep -= self.attributes.get("energy_cost", 0)
         if not damage:
             # the attack failed
             wielder.at_emote(
@@ -116,6 +118,7 @@ class MeleeWeapon(Object):
                 f"$conj({damage_type or 'swings'}) $you(target) with $pron(their) {{weapon}}.",
                 mapping={"target": target, "weapon": self},
             )
+            print(f"attack succeded: {wielder} {damage} {damage_type}")
             # the attack succeeded! apply the damage
             target.at_damage(wielder, damage, damage_type)
         wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
