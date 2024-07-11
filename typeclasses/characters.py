@@ -14,7 +14,7 @@ from .objects import ObjectParent
 
 _IMMOBILE = ("sitting", "lying down", "unconscious")
 _MAX_CAPACITY = 10
-
+# LOOK INTO RESTORING THESE STATUSES
 
 class Character(ObjectParent, ClothedCharacter):
     """
@@ -319,7 +319,7 @@ class Character(ObjectParent, ClothedCharacter):
 
         # add resource levels
         chunks.append(
-            f"|gHealth: |G{self.db.hp}|g  Energy: |G{self.db.ep}|g  Focus: |G{self.db.fp}"
+            f"|gHealth: |G{self.db.hp}|g  Focus: |G{self.db.fp} Energy: |G{self.db.ep}|g"
         )
         print(f"looker != self {looker} and self {self}")
         if looker != self:
@@ -383,6 +383,7 @@ class PlayerCharacter(Character):
         self.db.stat_points = 5
         self.db.con_increase_amount = 9
         self.db.int_increase_amount = 8
+        self.db.guild = "adventurer"
       
         # initialize hands
         self.db._wielded = {"left": None, "right": None}
@@ -412,10 +413,28 @@ class PlayerCharacter(Character):
         return super().at_pre_object_receive(object, source_location, **kwargs)
 
     def at_damage(self, attacker, damage, damage_type=None):
-        super().at_damage(attacker, damage, damage_type=damage_type)
-        if self.db.hp < 50:
-            status = self.get_display_status(self)
-            self.msg(prompt=status)
+        """
+        Apply damage, after taking into account damage resistances.
+        """
+        # apply armor damage reduction
+        damage -= self.defense(damage_type)
+        self.db.hp -= max(damage, 0)
+        self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
+        attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
+        
+        status = self.get_display_status(self)
+        self.msg(prompt=status)
+            
+        if self.db.hp <= 0:
+            self.tags.add("unconscious", category="status")
+            self.tags.add("lying down", category="status")
+            self.msg(
+                "You fall unconscious. You can |wrespawn|n or wait to be |wrevive|nd."
+            )
+            if self.in_combat:
+                combat = self.location.scripts.get("combat")[0]
+                combat.remove_combatant(self)
+            
 
     def attack(self, target, weapon, **kwargs):
         """
@@ -594,29 +613,23 @@ class NPC(Character):
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
         print(f"at_damage in npc: {self} and {attacker} and npc hp: {self.db.hp}")
+        
         if self.db.hp <= 0:
-            print(f"hp below 1")
-            if self.in_combat:
-                print(f"hp below 1 self.in_combat")
-                if combat_script := self.location.scripts.get("combat"):
-                    combat_script = combat_script[0]
-                    print("1")
-                    combat_script.remove_combatant(self)
-                    print("2")
-                    self.location.msg_contents("A scrawny gnoll dies.")
-                    print("3")
-                    delay(1, self.move_to(None, False, None, True, True, True, "teleport"))
-                    delay(10, self.at_respawn)
-            
-
-                # we've been defeated!
-            
+            self.tags.add("defeated", category="status")
+            # we've been defeated!
+            if combat_script := self.location.scripts.get("combat"):
+                combat_script = combat_script[0]
+                if not combat_script.remove_combatant(self):
+                    # something went wrong...
+                    return
                 # create loot drops
-                # objs = spawner.spawn(*list(self.db.drops))
-                # print(f"spawn loot: {objs}")
+                # objs = spawn(*list(self.db.drops))
                 # for obj in objs:
                 #     obj.location = self.location
-                
+                self.move_to(None, False, None, True, True, True, "teleport")
+                delay(10, self.at_respawn)
+                return
+            
         if not self.db.combat_target:
             self.enter_combat(attacker)
         else:
@@ -631,29 +644,24 @@ class NPC(Character):
             weapon = weapons[0]
         else:
             weapon = self
-        print(f"npc enter_combat")
+
         self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
         location = self.location
 
-        print(f"npc location: {self.location} and {location}")
-        if location and not (combat_script := location.scripts.get("combat")):
+        if not (combat_script := location.scripts.get("combat")):
             # there's no combat instance; start one
             from typeclasses.scripts import CombatScript
-            print(f"npc enter_combat if not")
-
             location.scripts.add(CombatScript, key="combat")
             combat_script = location.scripts.get("combat")
-            combat_script = combat_script[0]
-            print(f"npc enter_combat 3 {combat_script}")
-            self.db.combat_target = target
-            print(f"npc enter_combat 5")
-            self.attack(target, weapon)
+        combat_script = combat_script[0]
+        print(f"set combat_target")
+        self.db.combat_target = target
         # adding a combatant to combat just returns True if they're already there, so this is safe
-        # if not combat_script.add_combatant(self, enemy=target):
-        #     print(f"npc enter_combat 4 {self} and target {target}")
-        #     return
-
-        
+        if not combat_script.add_combatant(self, enemy=target):
+            return
+        print(f"before npc attack")
+        self.attack(target, weapon)
+          
 
     def attack(self, target, weapon, **kwargs):
         print(f"npc attack {self.in_combat}")
@@ -730,8 +738,8 @@ class NPC(Character):
             target.at_damage(wielder, damage, weapon.get("damage_type"))
         wielder.msg(f"[ Cooldown: {speed} seconds ]")
         wielder.cooldowns.add("attack", speed)
+    
         
-
     def use_heal(self):
         """
         Restores health

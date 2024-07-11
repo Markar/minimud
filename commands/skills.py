@@ -28,8 +28,32 @@ STAT_COST_DICT = {
     3: 42,
     4: 57,
     5: 78,
-    6: 107,
-    7: 146
+    6: 106,
+    7: 145,
+    8: 195,
+    9: 271,
+    10: 371,
+    11: 508,
+    12: 695,
+    13: 952,
+    14: 1304,
+    15: 1760,
+    16: 2376,
+    17: 3208,
+    18: 4331,
+    19: 5847,
+    20: 7893,
+    21: 10656,
+    22: 14386,
+    23: 19421,
+    24: 26218,
+    25: 35395,
+    26: 47784,
+    27: 64508,
+    28: 87086,
+    29: 117566,
+    30: 158714,
+    31: 214265
 }
 
 LEVEL_COST_DICT = {
@@ -74,18 +98,27 @@ class CmdStatSheet(Command):
 
     def func(self):
         caller = self.caller
+        levelcost = int(LEVEL_COST_DICT[caller.db.level + 1])
         self.msg(f"|g{caller} {caller.db.title} ({caller.db.alignment})")
-        self.msg(f"|GLevel: {caller.db.level or 0}")
-        self.msg(f"|GEXP: {caller.db.exp or 0} ({caller.db.stat_points} stats available)\n")
+        self.msg(f"|GLevel: {caller.db.level or 0} | {levelcost} xp to next level")
+        self.msg(f"|GEXP: {caller.db.exp or 0}")
+        self.msg(f"|GStats: ({caller.db.stat_points} stats available)\n")
 
         # display the primary stats
+        strcost = int(STAT_COST_DICT[caller.db.strength + 1])
+        dexcost = int(STAT_COST_DICT[caller.db.dexterity + 1])
+        wiscost = int(STAT_COST_DICT[caller.db.wisdom + 1])
+        concost = int(STAT_COST_DICT[caller.db.constitution + 1])
+        intcost = int(STAT_COST_DICT[caller.db.intelligence + 1])
+        chacost = int(STAT_COST_DICT[caller.db.charisma + 1])
+        
         stats = [
-            [f"|GStr: |C{caller.db.strength or 0}"],
-            [f"|GDex: |C {caller.db.dexterity or 0}"],
-            [f"|GWis: |C {caller.db.wisdom or 0}"],
-            [f"|GCon: |C {caller.db.constitution or 0}"],
-            [f"|GInt: |C {caller.db.intelligence or 0}"],
-            [f"|GCha: |C {caller.db.charisma or 0}\n"],
+            [f"|GStr: |C{caller.db.strength or 0} | {strcost}xp"],
+            [f"|GDex: |C {caller.db.dexterity or 0} | {dexcost}xp"],
+            [f"|GWis: |C {caller.db.wisdom or 0} | {wiscost}xp"],
+            [f"|GCon: |C {caller.db.constitution or 0} | {concost}xp"],
+            [f"|GInt: |C {caller.db.intelligence or 0} | {intcost}xp"],
+            [f"|GCha: |C {caller.db.charisma or 0} | {chacost}xp\n"],
             [f"|GHp: |C {caller.db.hp or 0} / {caller.db.hpmax}"],
             [f"|GEp: |C {caller.db.ep or 0} / {caller.db.epmax}"],
             [f"|GFp: |C {caller.db.fp or 0} / {caller.db.fpmax}"],
@@ -125,68 +158,25 @@ class CmdAdvance(Command):
     key = "advance"
     aliases = ("adv")
 
-    def _calc_stat_exp(self, stat):
+    def _calc_stat_exp(self, stat, stat_level):
         """
         Calculates the experience cost for increasing your skill from the start level.
         """
         if not stat == "level":
-            return int(STAT_COST_DICT[stat])
-        return int(LEVEL_COST_DICT[stat])
+            print(f"stat cost dict: {STAT_COST_DICT}")
+            return int(STAT_COST_DICT[stat_level])
+        return int(LEVEL_COST_DICT[stat_level])
         
-    def _adv_level(self):
+    def _adv_player_level(self):
         print(f"adv level {self} and caller: {self.caller}")
         caller = self.caller
         cost = LEVEL_COST_DICT[caller.db.level+1]
         if caller.db.exp < cost:
             self.msg(f"|wYou need {cost-caller.db.exp} more experience to advance your level.")
             return
-        caller.db.exp -= cost
-        caller.db.level += 1
-        caller.db.stat_points += 5
         
-        
-    def func(self):
-        caller = self.caller
-        self.msg(f"|G{caller}")
-        print(f"in advance function")
-        try:
-            print(f"args: {self.args.strip()}")
-            if self.args.strip():
-                stat = STAT_DICT.get(self.args.strip())
-            else:
-                stat = "level"
-            
-            self.msg(f"stat {stat}")
-            print(f"advance stat: {stat}")
-            print(f"db stat: {caller.attributes.get(stat)}")
-        except ValueError:
-            self.msg("Usage: Advance, adv <stat or level>")
-            return
-
-        if stat == "level":
-            self._adv_level()
-            return
-            
-        if not (caller.db.stat_points > 0 ):
-            print(f"caller stat points: {caller.db.stat_points}")
-            self.msg("You do not have any stat points available.")
-            return
-            
-        print(f"caller_xp")
-        if not (caller_xp := caller.db.exp):
-            print(f"caller_xp: {caller_xp}")
-            self.msg("You do not have any experience.")
-            return
-        
-        exp_cost = self._calc_stat_exp(stat)
-        if caller_xp < exp_cost:
-            self.msg(
-                f"You do not have enough experience - you need {exp_cost} to advance {stat}."
-            )
-            return
-
         confirm = yield (
-            f"It will cost you {exp_cost} experience to advance your {stat}. Confirm? Yes/No"
+            f"It will cost you {cost} experience to advance your level. Confirm? Yes/No"
         )
         if confirm.lower() not in (
             "yes",
@@ -194,10 +184,26 @@ class CmdAdvance(Command):
         ):
             self.msg("Cancelled.")
             return
+        caller.db.exp -= cost
+        caller.db.level += 1
+        caller.db.stat_points += 5
         
-        caller.db.exp -= exp_cost
-        caller.db.stat_points -= 1
+    def _adv_stat_level(self, stat):
+        print(f"adv level {self} and caller: {self.caller}")
+        caller = self.caller
+        if not (caller.db.stat_points > 0 ):
+            print(f"caller stat points: {caller.db.stat_points}")
+            self.msg("You do not have any stat points available.")
+            return
+        
         current_stat = caller.attributes.get(stat, 0)
+        
+        cost = STAT_COST_DICT[current_stat + 1]
+        if caller.db.exp < cost:
+            self.msg(f"|wYou need {cost-caller.db.exp} more experience to advance your {stat}.")
+            return
+        caller.db.exp -= cost
+        caller.db.stat_points -= 1
         caller.attributes.add(stat, current_stat+1)
         if stat == "con": 
             print(f"adv con: {caller} {caller.db.hp} / {caller.db.hpmax} and {caller.db.con_increase_amount}")
@@ -206,13 +212,28 @@ class CmdAdvance(Command):
         if stat == "int": 
             caller.db.ep += caller.db.int_increase_amount or 0
             caller.db.epmax += caller.db.int_increase_amount or 0
-        self.msg(f"You advance your {stat}.")
-            
-        print(f"caller.attributes.get(stat): {caller.attributes.get(stat)}")
-
+        self.msg(f"|rYou advance your {stat}.")
         
+        
+    def func(self):
+        caller = self.caller
+        self.msg(f"|G{caller}")
+        try:
+            if self.args.strip():
+                stat = STAT_DICT.get(self.args.strip())
+            else:
+                stat = "level"
+            
+        except ValueError:
+            self.msg("Usage: Advance, adv <stat or level>")
+            return
 
-  
+        if stat == "level":
+            self._adv_player_level()
+            return
+        else: 
+            self._adv_stat_level(stat)
+             
         
 class CmdTrainSkill(Command):
     """

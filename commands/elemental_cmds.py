@@ -6,16 +6,16 @@ from evennia.utils.evtable import EvTable
 from .command import Command
 
 GUILD_LEVEL_COST_DICT = {
-    2: 10,
-    3: 20,
-    4: 30,
-    5: 40,
-    6: 50,
-    7: 60,
-    8: 70,
-    9: 80,
-    10: 90,
-    11: 100,
+    2: 300,
+    3: 400,
+    4: 648,
+    5: 951,
+    6: 1529,
+    7: 2409,
+    8: 3330,
+    9: 4645,
+    10: 6000,
+    11: 7500,
     12: 10000,
     13: 12900,
     14: 16000,
@@ -56,7 +56,10 @@ class CmdRebuild(Command):
 
 class CmdEmit(Command):
     """
-    Changes your emit level
+    Changes the power of your attack, costing more energy
+    and dealing more damage with higher ranks. New ranks
+    unlock every 5 guild levels.
+    
 
     Usage:
         emit 1
@@ -76,26 +79,50 @@ class CmdEmit(Command):
             if power == 1 and caller.db.guild_level > 0:
                 print(f"power = 1, caller.db.guild_level {power} and {caller.db.guild_level}")
                 caller.db.emit = 1
-                self.msg(f"|rYou set your emit to power level {power}")
-            if power == 2 and caller.db.guild_level > 1:
+            if power == 2 and caller.db.guild_level >= 5:
                 print(f"power = 2, caller.db.guild_level {power} and {caller.db.guild_level}")
                 caller.db.emit = 2
+            if power == 3 and caller.db.guild_level >= 10:
+                print(f"power = 2, caller.db.guild_level {power} and {caller.db.guild_level}")
+                caller.db.emit = 3
+            if power == 4 and caller.db.guild_level >= 15:
+                print(f"power = 2, caller.db.guild_level {power} and {caller.db.guild_level}")
+                caller.db.emit = 4
+            if power == 5 and caller.db.guild_level >= 20:
+                print(f"power = 2, caller.db.guild_level {power} and {caller.db.guild_level}")
+                caller.db.emit = 5
+            if power == 6 and caller.db.guild_level >= 25:
+                print(f"power = 2, caller.db.guild_level {power} and {caller.db.guild_level}")
+                caller.db.emit = 6
+            if power == 7 and caller.db.guild_level >= 30:
+                print(f"power = 2, caller.db.guild_level {power} and {caller.db.guild_level}")
+                caller.db.emit = 7
             self.msg(f"|rYou set your emit to power level {caller.db.emit}")
         except ValueError:
             print(f"Not an integer for use_emit")
         
         
         
-    def use_emit(self):
-        print(f"args: {self.args.strip()}")
-        try:
-            power = int(self.args.strip())
-            if power == 1 and self.db.guild_level > 0:
-                self.db.emit = 1
-            if power == 2 and self.db.guild_level > 1:
-                self.db.emit = 2
-        except ValueError:
-            print(f"Not an integer for use_emit")
+    # def use_emit(self):
+    #     print(f"args: {self.args.strip()}")
+    #     try:
+    #         power = int(self.args.strip())
+    #         if power == 1 and self.db.guild_level > 0:
+    #             self.db.emit = 1
+    #         if power == 2 and self.db.guild_level >= 5:
+    #             self.db.emit = 2
+    #         if power == 3 and self.db.guild_level >= 10:
+    #             self.db.emit = 3
+    #         if power == 4 and self.db.guild_level >= 15:
+    #             self.db.emit = 4
+    #         if power == 5 and self.db.guild_level >= 20:
+    #             self.db.emit = 5
+    #         if power == 6 and self.db.guild_level >= 25:
+    #             self.db.emit = 6
+    #         if power == 7 and self.db.guild_level >= 30:
+    #             self.db.emit = 7
+    #     except ValueError:
+    #         print(f"Not an integer for use_emit")
 
 class CmdGAdvance(Command):
     """
@@ -123,11 +150,9 @@ class CmdGAdvance(Command):
         else:
             caller.db.gxp -= cost
             caller.db.guild_level += 1
+            caller.db.fpmax += 10
             self.msg(f"|rYou grow more powerful.")
-            
-            
-        
-        
+              
     def func(self):
         caller = self.caller
         caller.msg(f"|G{caller}")
@@ -150,7 +175,58 @@ class CmdGuildStatSheet(Command):
         self.msg(f"|GGuild Level: {caller.db.guild_level or 0}")
         self.msg(f"|GGXP: {caller.db.gxp or 0}\n")
         self.msg(f"|GEmit: {caller.db.emit or 0}\n")
-        
+    
+class CmdJoinElementals(Command):
+    """
+    Join the Elementals guild
+    """
+    
+    key = "join"
+    
+    def func(self):
+        caller = self.caller
+        if caller.db.guild == "adventurer":
+            caller.msg(f"|rYou join the Elementals guild")
+            caller.swap_typeclass("typeclasses.elementals.Elemental")
+        else:
+            caller.msg(f"|rYou are already in a guild")
+            
+class CmdLeaveElementals(Command):
+    """
+    Leave the Elementals guild
+    """
+    
+    key = "leave"
+    
+    def func(self):
+        caller = self.caller
+        if caller.db.guild == "elemental":
+            caller.swap_typeclass("typeclasses.characters.PlayerCharacter")
+            caller.cmdset.delete(ElementalCmdSet)
+            caller.msg(f"|rYou leave the Elementals guild")
+        else:
+            caller.msg(f"|rYou are already an adventurer")
+            
+            
+class CmdDrain(Command):
+    """
+    Drain the corpse of an enemy to restore energy
+    """
+    
+    key = "drain" 
+    
+    def func(self):
+        if not self.args:
+            target = self.caller
+            self.msg(f"corpse, no args provided")
+        else:
+            print(f"status args: {self.caller.search(self.args.strip())}")
+            target = self.caller.search(self.args.strip())
+            if not target:
+                # no valid object found
+                return
+            self.msg(f"corpse with args {self.args}")
+            
 class ElementalCmdSet(CmdSet):
     key = "Elemental CmdSet"
 
@@ -158,10 +234,13 @@ class ElementalCmdSet(CmdSet):
         super().at_cmdset_creation()
 
         # self.add(CmdFireball)
+        self.add(CmdDrain)
         self.add(CmdRebuild)
         self.add(CmdGAdvance)
         self.add(CmdEmit)
         self.add(CmdGuildStatSheet)
+        self.add(CmdJoinElementals)
+        self.add(CmdLeaveElementals)
 
 
 

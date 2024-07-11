@@ -26,10 +26,10 @@ from evennia.contrib.grid.ingame_map_display import MapDisplayCmdSet
 from commands.combat import CombatCmdSet
 from commands.skills import SkillCmdSet
 from commands.skills import AdvanceCmdSet
-from commands.elementals import ElementalCmdSet
 from commands.interact import InteractCmdSet
 from commands.account import AccountOptsCmdSet
 from commands.shops import CmdMoney
+from commands.elemental_cmds import CmdJoinElementals
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -49,6 +49,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
+        self.add(CmdJoinElementals)
         self.add(ClothedCharacterCmdSet)
         self.add(CmdMoney)
         self.add(ContainerCmdSet)

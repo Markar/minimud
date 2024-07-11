@@ -1,6 +1,7 @@
 steps to run
 python -m venv .venv
-source .venv/bin/activate
+Mac: source .venv/bin/activate 
+Win: cd .venv/Scripts, ./Activate
 
 superuser for minimud
 markar

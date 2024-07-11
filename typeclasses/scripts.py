@@ -37,19 +37,13 @@ class CombatScript(Script):
         """
         a, b = self.teams
         return a + b
-
+        
     @property
     def active(self):
         """
         Returns a list of all active combatants, regardless of alliance.
         """
-        for obj in self.fighters:
-            print(f"in active")
-            if not any(obj.tags.has(["unconscious", "dead", "defeated"])):
-                print(f"active obj: {obj}")
-                print(f"self.fighters: {self.fighters}")
-                return True
-
+        
         return [
             obj
             for obj in self.fighters
@@ -153,49 +147,34 @@ class CombatScript(Script):
 
         If one side is victorious, message the remaining members and delete ourself.
         """
+        print(f"check victory")
         if not (active_fighters := self.active):
             # everyone lost or is gone
-            print(f"check_victory, if not active_fighters := self.active")
             self.delete()
             return
-
-        # create a filtered list of only active fighters for each team
-        print(f"before team_a, team_b")
-        print(f" team: {self.db.teams} and figs {active_fighters} ")
-        team_a = self.db.teams[0]
-        team_b = self.db.teams[1]
-        # team_a, team_b = [
-        #     [obj for obj in team if obj in active_fighters] for team in self.db.teams
-        # ]
-        print(f"teams: {team_a} and {team_b}")
+        
+        team_a, team_b = [
+            [obj for obj in team if obj in active_fighters] for team in self.db.teams
+        ]
 
         if team_a and team_b:
-            print(f"team a and b are alive")
             # both teams are still active
             return
 
-        # this case shouldn't arise, but as a redundacancy, checks if both teams are inactive
+        # this case shouldn't arise, but as a redundancy, checks if both teams are inactive
         if not team_a and not team_b:
-            print(f"not team_a and not team_b")
             # everyone lost or is gone
             self.delete()
             return
 
-        print(f"before active_fighters: {active_fighters}")
         # only one team is active at this point; message the winners
-        if team_a:
-            for obj in team_a:
-                del obj.db.combat_target
-                obj.msg("The fight is over.")
-        if team_b:
-            for obj in team_b:
-                del obj.db.combat_target
-                obj.msg("The fight is over.")
+        for obj in active_fighters:
+            # remove their combat target if they have one
+            del obj.db.combat_target
+            obj.msg("The fight is over.")
 
-        print(f"in check_victory: self.delete")
         # say farewell to the combat script!
         self.delete()
-
 
 class RestockScript(Script):
     """
