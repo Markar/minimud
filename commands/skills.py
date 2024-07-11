@@ -167,8 +167,7 @@ class CmdAdvance(Command):
             return int(STAT_COST_DICT[stat_level])
         return int(LEVEL_COST_DICT[stat_level])
         
-    def _adv_player_level(self):
-        print(f"adv level {self} and caller: {self.caller}")
+    def adv_player_level(self):
         caller = self.caller
         cost = LEVEL_COST_DICT[caller.db.level+1]
         if caller.db.exp < cost:
@@ -191,7 +190,7 @@ class CmdAdvance(Command):
     def _adv_stat_level(self, stat):
         print(f"adv level {self} and caller: {self.caller}")
         caller = self.caller
-        if not (caller.db.stat_points > 0 ):
+        if not (caller.db.stat_points > 0):
             print(f"caller stat points: {caller.db.stat_points}")
             self.msg("You do not have any stat points available.")
             return
@@ -206,12 +205,12 @@ class CmdAdvance(Command):
         caller.db.stat_points -= 1
         caller.attributes.add(stat, current_stat+1)
         if stat == "con": 
-            print(f"adv con: {caller} {caller.db.hp} / {caller.db.hpmax} and {caller.db.con_increase_amount}")
-            caller.db.hp += caller.db.con_increase_amount or 0
-            caller.db.hpmax += caller.db.con_increase_amount or 0
+            caller.db.hp = 50 + caller.db.con_increase_amount * caller.db.constitution
+            caller.db.hpmax = 50 + caller.db.con_increase_amount * caller.db.constitution
         if stat == "int": 
-            caller.db.ep += caller.db.int_increase_amount or 0
-            caller.db.epmax += caller.db.int_increase_amount or 0
+            caller.db.fp = 50 + caller.db.int_increase_amount * caller.db.intelligence
+            caller.db.fpmax = 50 + caller.db.int_increase_amount * caller.db.intelligence
+        
         self.msg(f"|rYou advance your {stat}.")
         
         
@@ -219,21 +218,60 @@ class CmdAdvance(Command):
         caller = self.caller
         self.msg(f"|G{caller}")
         try:
-            if self.args.strip():
+            stat = self.args.strip()
+            self.msg(f"args: {stat}")
+            if stat == "level":
+                caller = self.caller
+                cost = LEVEL_COST_DICT[caller.db.level+1]
+                if caller.db.exp < cost:
+                    self.msg(f"|wYou need {cost-caller.db.exp} more experience to advance your level.")
+                    return
+                
+                confirm = yield (
+                    f"It will cost you {cost} experience to advance your level. Confirm? Yes/No"
+                )
+                if confirm.lower() not in (
+                    "yes",
+                    "y",
+                ):
+                    self.msg("Cancelled.")
+                    return
+                caller.db.exp -= cost
+                caller.db.level += 1
+                caller.db.stat_points += 5
+            else: 
+                self.msg(f"stat == {stat}")
                 stat = STAT_DICT.get(self.args.strip())
-            else:
-                stat = "level"
+                caller = self.caller
+                if not (caller.db.stat_points > 0):
+                    print(f"caller stat points: {caller.db.stat_points}")
+                    self.msg("You do not have any stat points available.")
+                    return
+                
+                current_stat = caller.attributes.get(stat, 0)
+                
+                cost = STAT_COST_DICT[current_stat + 1]
+                if caller.db.exp < cost:
+                    self.msg(f"|wYou need {cost-caller.db.exp} more experience to advance your {stat}.")
+                    return
+                caller.db.exp -= cost
+                caller.db.stat_points -= 1
+                caller.attributes.add(stat, current_stat+1)
+                self.msg(f"stat {stat}")
+                if stat == "constitution": 
+                    self.msg("stat == con")
+                    self.msg(f"adv con: {caller} {caller.db.hp}")
+                    # self.msg(f"/ {caller.db.hpmax} and {caller.db.con_increase_amount}")
+                    caller.db.hp += caller.db.con_increase_amount or 0
+                    caller.db.hpmax += caller.db.con_increase_amount or 0
+                if stat == "intelligence": 
+                    caller.db.fp += caller.db.int_increase_amount or 0
+                    caller.db.fpmax += caller.db.int_increase_amount or 0
+                self.msg(f"|rYou advance your {stat}.")
             
         except ValueError:
             self.msg("Usage: Advance, adv <stat or level>")
-            return
-
-        if stat == "level":
-            self._adv_player_level()
-            return
-        else: 
-            self._adv_stat_level(stat)
-             
+            return      
         
 class CmdTrainSkill(Command):
     """

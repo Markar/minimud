@@ -9,6 +9,7 @@ from evennia.contrib.game_systems.clothing.clothing import (
     get_worn_clothes,
 )
 from evennia.contrib.game_systems.cooldowns import CooldownHandler
+from world.prototypes import SMALL_CORPSE, IRON_DAGGER
 
 from .objects import ObjectParent
 
@@ -485,8 +486,6 @@ class PlayerCharacter(Character):
         """
         Restores health
         """
-
-        # FIND OUT WHY I HAVE TO ATTACK THE MOB A SECOND TIME TO KILL IT 
         hp = self.db.hp
         hpmax = self.db.hpmax
         ep = self.db.ep
@@ -623,6 +622,10 @@ class NPC(Character):
                     # something went wrong...
                     return
                 # create loot drops
+                print(f"before corpse")
+                # corpse = spawner.spawn([IRON_DAGGER])
+                # corpse.location = self.location
+                print(f"after corpse: {corpse}")
                 # objs = spawn(*list(self.db.drops))
                 # for obj in objs:
                 #     obj.location = self.location
