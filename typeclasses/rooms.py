@@ -4,17 +4,19 @@ Room
 Rooms are simple containers that has no location of their own.
 
 """
-from evennia.utils import create, iter_to_str, logger
+from evennia import search_object
+from evennia.utils import create, iter_to_str, logger, delay
 from evennia.objects.objects import DefaultRoom
 from evennia.contrib.grid.xyzgrid.xyzroom import XYZRoom
 from evennia.contrib.grid.wilderness.wilderness import WildernessRoom
-
+from evennia.prototypes import spawner
+from random import randint
+import math
 from .objects import ObjectParent
 from .scripts import RestockScript
 
 from commands.shops import ShopCmdSet
 from commands.skills import TrainCmdSet
-
 
 class RoomParent(ObjectParent):
     """
@@ -107,8 +109,7 @@ class XYGridRoom(RoomParent, XYZRoom):
     A subclass of the XYZGrid contrib's room, applying the local RoomParent mixin
     """
 
-    pass
-
+    pass        
 
 class XYGridShop(XYGridRoom):
     """
@@ -166,3 +167,114 @@ class XYZShopNTrain(XYGridTrain, XYGridShop):
     """
 
     pass
+
+
+class ChessboardGnoll(XYGridRoom):
+    def at_object_creation(self):
+        super().at_object_creation()
+        gnolls = spawner.spawn("SCRAWNY_GNOLL")
+        con = 18
+        level = randint(3, 5)
+        xp = level * 15
+        hp = level * con
+
+        for gnoll in gnolls:
+            gnoll.location = self
+            gnoll.home = self
+            gnoll.db.hp = hp
+            gnoll.db.hpmax = hp
+            gnoll.db.exp_reward = xp
+            gnoll.db.con = con
+            gnoll.db.natural_weapon['damage'] = math.ceil(randint(1, 12) * level / 3)
+            
+            
+class ChessboardGnollPup(XYGridRoom):
+    def at_object_creation(self):
+        super().at_object_creation()
+        gnolls = spawner.spawn("GNOLL_PUP")
+        con = 20
+        level = 1
+        xp = level * con
+        hp = level * con
+
+        for gnoll in gnolls:
+            gnoll.location = self
+            gnoll.home = self
+            gnoll.db.hp = hp
+            gnoll.db.hpmax = hp
+            gnoll.db.exp_reward = xp
+            gnoll.db.con = con
+            gnoll.db.natural_weapon['damage'] = math.ceil(randint(1, 12) * level / 3)
+            
+class ChessboardDecayingSkeleton(XYGridRoom):
+    def at_object_creation(self):
+        super().at_object_creation()
+        skeletons = spawner.spawn("DECAYING_SKELETON")
+        con = 18
+        level = 2
+        xp = level * con
+        hp = level * con
+
+        for skeleton in skeletons:
+            skeleton.location = self
+            skeleton.home = self
+            skeleton.db.hp = hp
+            skeleton.db.hpmax = hp
+            skeleton.db.exp_reward = xp
+            skeleton.db.con = con
+            skeleton.db.natural_weapon['damage'] = math.ceil(randint(1, 18) * level / 3)
+            
+class NewbieLargeRat(XYGridRoom):
+    def at_object_creation(self):
+        super().at_object_creation()
+        rats = spawner.spawn("LARGE_RAT")
+        con = 18
+        level = 1
+        xp = level * 15
+        hp = level * con
+
+        for rat in rats:
+            rat.location = self
+            rat.home = self
+            rat.db.hp = hp
+            rat.db.hpmax = hp
+            rat.db.exp_reward = xp
+            rat.db.con = con
+            rat.db.natural_weapon['damage'] = math.ceil(randint(1, 4))
+            
+            
+class NewbieFirebeetle(XYGridRoom):
+    def at_object_creation(self):
+        super().at_object_creation()
+        beetles = spawner.spawn("FIRE_BEETLE")
+        con = 16
+        level = 2
+        xp = level * con
+        hp = level * con
+
+        for beetle in beetles:
+            beetle.location = self
+            beetle.home = self
+            beetle.db.hp = hp
+            beetle.db.hpmax = hp
+            beetle.db.exp_reward = xp
+            beetle.db.con = con
+            beetle.db.natural_weapon['damage'] = math.ceil(randint(1, 6))
+            
+class NewbieSnake(XYGridRoom):
+    def at_object_creation(self):
+        super().at_object_creation()
+        snakes = spawner.spawn("SNAKE")
+        con = 16
+        level = 1
+        xp = level * con
+        hp = level * con
+
+        for snake in snakes:
+            snake.location = self
+            snake.home = self
+            snake.db.hp = hp
+            snake.db.hpmax = hp
+            snake.db.exp_reward = xp
+            snake.db.con = con
+            snake.db.natural_weapon['damage'] = math.ceil(randint(1, 4))

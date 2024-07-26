@@ -1,7 +1,9 @@
 from random import choice
-from evennia import CmdSet
+from evennia import CmdSet, search_tag
 from evennia.utils import iter_to_str
 from evennia.utils.evtable import EvTable
+from evennia import TICKER_HANDLER as tickerhandler
+from evennia import logger
 
 from .command import Command
 
@@ -37,6 +39,43 @@ GUILD_LEVEL_COST_DICT = {
     30: 4200000 
 }
 
+class CmdEnableReactiveArmor(Command):
+    """
+    Reactive armor enhances your physical resists while lowering others
+
+    Usage:
+        enable reactive armor
+        disable reactive armor
+    """
+
+    key = "enable reactive armor"
+    help_category = "reactive armor"
+
+    def func(self):
+        print(self.caller)
+        caller = self.caller
+        caller.use_reactive_armor()
+
+class CmdDisableReactiveArmor(Command):
+    """
+    Reactive armor enhances your physical resists while lowering others
+
+    Usage:
+        enable reactive armor
+        disable reactive armor
+    """
+
+    key = "disable reactive armor"
+    help_category = "reactive armor"
+
+    def func(self):
+        print(self.caller)
+        caller = self.caller
+        caller.db.reactive_armor = False
+        caller.db.edgedac -= caller.db.guild_level
+        caller.db.bluntac -= caller.db.guild_level
+        caller.msg(f"|CYou reactive armor dissolves.")
+        
 class CmdRebuild(Command):
     """
     Restores health
@@ -75,6 +114,7 @@ class CmdEmit(Command):
         try:
             print(f"emit: args {self.args}")
             print(f"emit: {self.caller}")
+            logger.log_info("test logger")
             power = int(self.args.strip())
             if power == 1 and caller.db.guild_level > 0:
                 print(f"power = 1, caller.db.guild_level {power} and {caller.db.guild_level}")
@@ -101,28 +141,6 @@ class CmdEmit(Command):
         except ValueError:
             print(f"Not an integer for use_emit")
         
-        
-        
-    # def use_emit(self):
-    #     print(f"args: {self.args.strip()}")
-    #     try:
-    #         power = int(self.args.strip())
-    #         if power == 1 and self.db.guild_level > 0:
-    #             self.db.emit = 1
-    #         if power == 2 and self.db.guild_level >= 5:
-    #             self.db.emit = 2
-    #         if power == 3 and self.db.guild_level >= 10:
-    #             self.db.emit = 3
-    #         if power == 4 and self.db.guild_level >= 15:
-    #             self.db.emit = 4
-    #         if power == 5 and self.db.guild_level >= 20:
-    #             self.db.emit = 5
-    #         if power == 6 and self.db.guild_level >= 25:
-    #             self.db.emit = 6
-    #         if power == 7 and self.db.guild_level >= 30:
-    #             self.db.emit = 7
-    #     except ValueError:
-    #         print(f"Not an integer for use_emit")
 
 class CmdGAdvance(Command):
     """
@@ -141,16 +159,17 @@ class CmdGAdvance(Command):
     aliases = ("gadv")
 
     def _adv_level(self):
-        print(f"adv level {self} and caller: {self.caller}")
+        print(f"adv level {self} and caller: {self.caller}")        
         caller = self.caller
         cost = GUILD_LEVEL_COST_DICT[caller.db.guild_level+1]
+        print(f"cost{cost} and gxp: {caller.db.gxp}")
         if caller.db.gxp < cost:
             self.msg(f"|wYou need {cost - caller.db.gxp} more experience to advance.")
             return
         else:
             caller.db.gxp -= cost
             caller.db.guild_level += 1
-            caller.db.fpmax += 10
+            caller.db.epmax += 10
             self.msg(f"|rYou grow more powerful.")
               
     def func(self):
@@ -171,17 +190,18 @@ class CmdGuildStatSheet(Command):
 
     def func(self):
         caller = self.caller
-        self.msg(f"|g{caller} {caller.db.title} ({caller.db.alignment})")
+        self.msg(f"|c{caller} {caller.db.title} ({caller.db.alignment})")
         self.msg(f"|GGuild Level: {caller.db.guild_level or 0}")
-        self.msg(f"|GGXP: {caller.db.gxp or 0}\n")
-        self.msg(f"|GEmit: {caller.db.emit or 0}\n")
+        self.msg(f"|GGXP: {caller.db.gxp or 0}")
+        self.msg(f"|GEmit: {caller.db.emit or 0}")
+        self.msg(f"|GForm: {caller.db.subguild}")
     
 class CmdJoinElementals(Command):
     """
     Join the Elementals guild
     """
     
-    key = "join"
+    key = "join elementals"
     
     def func(self):
         caller = self.caller
@@ -196,7 +216,7 @@ class CmdLeaveElementals(Command):
     Leave the Elementals guild
     """
     
-    key = "leave"
+    key = "leave elementals"
     
     def func(self):
         caller = self.caller
@@ -218,7 +238,17 @@ class CmdDrain(Command):
     def func(self):
         if not self.args:
             target = self.caller
-            self.msg(f"corpse, no args provided")
+            corpse = target.location.search("corpse")
+            ep = target.db.ep
+            epmax = target.db.epmax
+            power = corpse.db.power
+            
+            if ep + power > epmax:
+                target.db.ep = epmax
+            else:
+                target.db.ep += max(power, 0)
+            corpse.delete()
+            self.msg(f"|rYou drain the energy from the corpse and it turns into dust.")
         else:
             print(f"status args: {self.caller.search(self.args.strip())}")
             target = self.caller.search(self.args.strip())
@@ -227,13 +257,44 @@ class CmdDrain(Command):
                 return
             self.msg(f"corpse with args {self.args}")
             
+class CmdChooseForm(Command):
+    """
+    Choose your permanent form
+    """
+    
+    key = "chooseform" 
+    
+    def func(self):
+        target = self.args.strip()
+        caller = self.caller
+        if caller.db.guild_level > 5:
+            caller.msg(f"|rYou have already chosen {caller.db.subguild} as your permanent form.")
+            return
+        if not target:
+            self.msg(f"|rYou can choose earth, fire, water, or air.")
+            return
+        
+        if target == "earth":
+            caller.db.subguild = "earth"
+            caller.msg(f"|yYou choose {caller.db.subguild} as your permanent form.")
+        if target == "fire":
+            caller.db.subguild = "fire"
+            caller.msg(f"|rYou choose {caller.db.subguild} as your permanent form.")
+        if target == "water":
+            caller.db.subguild = "water"
+            caller.msg(f"|bYou choose {caller.db.subguild} as your permanent form.")
+        if target == "air":
+            caller.db.subguild = "air"
+            caller.msg(f"|wYou choose {caller.db.subguild} as your permanent form.")
+
+
+        
 class ElementalCmdSet(CmdSet):
     key = "Elemental CmdSet"
 
     def at_cmdset_creation(self):
         super().at_cmdset_creation()
 
-        # self.add(CmdFireball)
         self.add(CmdDrain)
         self.add(CmdRebuild)
         self.add(CmdGAdvance)
@@ -241,146 +302,6 @@ class ElementalCmdSet(CmdSet):
         self.add(CmdGuildStatSheet)
         self.add(CmdJoinElementals)
         self.add(CmdLeaveElementals)
-
-
-
-
-
-
-
-
-
-
-            
-
-        
-
-  
-        
-class CmdTrainSkill(Command):
-    """
-    Improve a skill, based on how much experience you have.
-
-    Enter just "train" by itself to see what you can learn here.
-
-    Usage:
-        train <levels>
-
-    Example:
-        train 5
-    """
-
-    key = "train"
-
-    def _calc_exp(self, start, increase):
-        """
-        Calculates the experience cost for increasing your skill from the start level.
-        """
-        return int((start + (start + increase)) * (increase + 1) / 2.0)
-
-    def func(self):
-        if not self.obj:
-            self.msg("You cannot train skills here.")
-            return
-        if not (to_train := self.obj.db.skill_training):
-            self.msg("You cannot train any skills here.")
-            return
-
-        # make sure this is actually a valid skill
-        if to_train not in SKILL_DICT:
-            self.msg("You cannot train any skills here.")
-            return
-
-        if not self.args:
-            self.msg(f"You can improve your |w{to_train}|n here.")
-            return
-
-        caller = self.caller
-
-        try:
-            levels = int(self.args.strip())
-        except ValueError:
-            self.msg("Usage: train <levels>")
-            return
-
-        if not (caller_xp := caller.db.exp):
-            self.msg("You do not have any experience.")
-            return
-
-        if not (skill := caller.traits.get(to_train)):
-            exp_cost = self._calc_exp(0, levels)
-            if caller_xp < exp_cost:
-                self.msg(
-                    f"You do not have enough experience - you need {exp_cost} to learn {levels} levels of {to_train}."
-                )
-                return
-
-            confirm = yield (
-                f"It will cost you {exp_cost} experience to learn {to_train} up to level {levels}. Confirm? Yes/No"
-            )
-            if confirm.lower() not in (
-                "yes",
-                "y",
-            ):
-                self.msg("Cancelled.")
-                return
-            caller.traits.add(
-                to_train,
-                trait_type="counter",
-                min=0,
-                max=100,
-                base=0,
-                stat=SKILL_DICT.get(to_train),
-            )
-            skill = caller.traits.get(to_train)
-        else:
-            exp_cost = self._calc_exp(skill.base, levels)
-            if caller_xp < exp_cost:
-                self.msg(
-                    f"You do not have enough experience - you need {exp_cost} experience to increase your {to_train} by {levels} levels."
-                )
-                return
-            confirm = yield (
-                f"It will cost you {exp_cost} experience to improve your {to_train} by {levels} levels. Confirm? Yes/No"
-            )
-            if confirm.lower() not in (
-                "yes",
-                "y",
-            ):
-                self.msg("Cancelled.")
-                return
-
-        caller.db.exp -= exp_cost
-        skill.base += levels
-        self.msg(f"You practice your {to_train} and improve it to level {skill.base}.")
-
-
-# class TrainCmdSet(CmdSet):
-#     key = "Train CmdSet"
-
-#     def at_cmdset_creation(self):
-#         super().at_cmdset_creation()
-#         self.add(CmdTrainSkill)
-
-
-# class SkillCmdSet(CmdSet):
-#     key = "Skill CmdSet"
-
-#     def at_cmdset_creation(self):
-#         super().at_cmdset_creation()
-#         self.add(CmdStatSheet)
-
-# class AdvanceCmdSet(CmdSet):
-#     key = "Advance CmdSet"
-
-#     def at_cmdset_creation(self):
-#         super().at_cmdset_creation()
-#         self.add(CmdGAdvance)
-
-# class AdvanceCmdSet(CmdSet):
-#     key = "Advance CmdSet"
-
-#     def at_cmdset_creation(self):
-#         super().at_cmdset_creation()
-#         self.add(CmdEmit)
-        
+        self.add(CmdChooseForm)
+        self.add(CmdEnableReactiveArmor)
+        self.add(CmdDisableReactiveArmor)

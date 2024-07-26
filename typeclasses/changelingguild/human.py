@@ -1,0 +1,53 @@
+class Human:
+    """
+    You know what humans are. 
+    """
+
+    damage = 1
+    energy_cost = 3
+    skill = "blunt"
+    name = "punch"
+    speed = 3
+    
+    def at_pre_attack(self, wielder, **kwargs):
+        # make sure we have enough strength left
+        print(f"at_pre_attack on weapon: {wielder} and {wielder.db.ep} and self {self}")
+        if wielder.db.ep < self.energy_cost:
+            wielder.msg("You are too tired to hit anything.")
+            return False
+        # can't attack if on cooldown
+        if not wielder.cooldowns.ready("attack"):
+            wielder.msg("You can't attack again yet.")
+            return False
+
+        return True
+
+    def at_attack(self, wielder, target, **kwargs):
+        """
+        The auto attack for humans.
+        """
+        self.name = "punch"
+        damage = 5
+        self.energy_cost = 1
+        self.speed = 3
+        self.emote = f"You punch viciously at $you(target), but miss entirely."
+        self.emote_hit = f"You punch glancingly into $you(target), and cause some minor scratches"        
+            
+        # subtract the energy required to use this
+        wielder.db.ep -= self.energy_cost
+        if not damage:
+            # the attack failed
+            wielder.at_emote(
+                f"$conj(swings) $pron(your) {self.name} at $you(target), but $conj(misses).",
+                mapping={"target": target},
+            )
+        else:
+            wielder.at_emote(
+                f"$conj(hits) $you(target) with $pron(your) {self.name}.",
+                mapping={"target": target},
+            )
+            # the attack succeeded! apply the damage
+            target.at_damage(wielder, damage, "blunt")
+        wielder.db.gxp += 1
+        wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
+        wielder.cooldowns.add("attack", self.speed)

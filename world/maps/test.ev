@@ -1,4 +1,10 @@
+
+#
+@dig/teleport Newbieland;newbie#01 : typeclasses.rooms.Room = south;s,north;n
+#
+@desc |yOutside of the city
 #
 @spawn scrawny_gnoll
 #
-@sethome gnoll-2 = newbie#01
+@sethome gnoll = newbie#01
+#

@@ -269,3 +269,4 @@ open north;n,south;s = town#08
 #
 @desc |yThe entrance to Newbieland lies to the south. This is where you can find weak monsters to fight.
 #
+

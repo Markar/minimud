@@ -10,45 +10,55 @@ from evennia.contrib.game_systems.clothing.clothing import (
     ClothedCharacter,
     get_worn_clothes,
 )
-from commands.elemental_cmds import ElementalCmdSet
+from commands.changeling_cmds import ChangelingCmdSet
 from typeclasses.characters import PlayerCharacter
-from typeclasses.elementalguild.air_elemental import AirAttack
-from typeclasses.elementalguild.earth_elemental import EarthAttack
-from typeclasses.elementalguild.fire_elemental import FireAttack
-from typeclasses.elementalguild.water_elemental import WaterAttack
 
-class Elemental(PlayerCharacter):
+from typeclasses.changelingguild.human import Human
+from typeclasses.changelingguild.anole import Anole
+from typeclasses.changelingguild.teiid import Teiid
+from typeclasses.changelingguild.gecko import Gecko
+from typeclasses.changelingguild.skink import Skink
+from typeclasses.changelingguild.iguana import Iguana
+
+
+class Changelings(PlayerCharacter):
     """
     The base typeclass for non-player characters, implementing behavioral AI.
     """
 
     def at_object_creation(self):
-        self.cmdset.add(ElementalCmdSet, persistent=True)
+        self.cmdset.add(ChangelingCmdSet, persistent=True)
         super().at_object_creation()
+        con_increase_amount = 10
+        int_increase_amount = 7
+        
         self.db.guild_level = 1
         self.db.gxp = 0
-        self.db.title = "the novice Elemental"
-        self.db.con_increase_amount = 12
-        self.db.hpmax = 50 + (12 * self.db.constitution)
-        self.db.int_increase_amount = 5
-        self.db.fpmax = 50 + (5 * self.db.intelligence)
+        self.db.title = "the novice changeling"
+        self.db.con_increase_amount = con_increase_amount
+        self.db.hpmax = 50 + (con_increase_amount * self.db.constitution)
+        self.db.int_increase_amount = int_increase_amount
+        self.db.fpmax = 50 + (int_increase_amount * self.db.intelligence)
         self.db.natural_weapon = {
-            "name": "earth_attack",
+            "name": "punch",
             "damage_type": "blunt",
-            "damage": 12,
-            "speed": 3,
-            "energy_cost": 10
+            "damage": 3,
+            "speed": 2,
+            "energy_cost": 1
         }
-        self.db.guild = "elemental"
-        self.db.subguild = "earth"
+        self.db.guild = "changeling"
+        self.db.form = "human"
         self.db._wielded = {"left": None, "right": None}
-        self.db.emit = 1
-        self.db.maxEmit = 1
         self.db.hpregen = 1
         self.db.fpregen = 1
         self.db.epregen = 1
-        self.at_wield(EarthAttack)
-        tickerhandler.add(interval=3, callback=self.at_tick, idstring="ticker1", persistent=True)
+        self.db.form = "Human"
+        self.db.subguild = "none"
+        self.db.engulfs = 0
+        self.db.max_engulfs = 0
+        self.at_wield(Human)
+        tickerhandler.add(interval=6, callback=self.at_tick, idstring="ticker1", persistent=True)
+        tickerhandler.add(interval=60*5, callback=self.at_engulf_tick, idstring="markar-engulf", persistent=True)
     
     def addhp(self, amount):
         hp = self.db.hp
@@ -73,7 +83,11 @@ class Elemental(PlayerCharacter):
             return
         if ep < epmax + amount:
             self.db.ep += amount
-        
+    
+    def at_engulf_tick(self):
+        self.msg(f"|gYour body ripples and shakes as energy flows into you")
+        self.db.engulfs = self.db.max_engulfs
+    
     def at_tick(self):
         self.addhp(1)
         self.addfp(1)
@@ -102,15 +116,19 @@ class Elemental(PlayerCharacter):
     
     def attack(self, target, weapon, **kwargs):
         # can't attack if we're not in combat!
-        self.msg(f"|cAttack in elementals {weapon}")
-        if self.db.subguild == "earth":
-            weapon = EarthAttack()
-        if self.db.subguild == "air":
-            weapon = AirAttack()
-        if self.db.subguild == "water":
-            weapon = WaterAttack()
-        if self.db.subguild == "fire":
-            weapon = FireAttack()
+        self.msg(f"|cAttack in changelings {weapon}")
+        if self.db.form == "Human":
+            weapon = Human()
+        if self.db.form == "Anole":
+            weapon = Anole()
+        if self.db.form == "Teiid":
+            weapon = Teiid()
+        if self.db.form == "Gecko":
+            weapon = Gecko()
+        if self.db.form == "Skink":
+            weapon = Skink()
+        if self.db.form == "Iguana":
+            weapon = Iguana()
             
         if not self.in_combat:
             return
@@ -136,7 +154,7 @@ class Elemental(PlayerCharacter):
             self.msg("You don't see your target.")
             return
 
-        self.msg(f"|cbefore at_attack in elementals {weapon}")
+        self.msg(f"|cbefore at_attack in changelings {weapon}")
         weapon.at_attack(self, target)
 
         status = self.get_display_status(target)
@@ -155,8 +173,8 @@ class Elemental(PlayerCharacter):
         # apply armor damage reduction
         damage -= self.defense(damage_type)
         self.db.hp -= max(damage, 0)
-        if self.db.reactive_armor:
-            self.msg(f"|cYour reactive armor blocks some damage!")
+        if self.db.energy_control:
+            self.msg(f"|cYou block some damage!")
             self.db.ep -= 1
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
@@ -201,7 +219,7 @@ class Elemental(PlayerCharacter):
             
         self.msg(f"You restore {hp_amount or 0} health for {cost or 0} focus!")
         
-    def use_reactive_armor(self):
+    def use_energy_control(self):
         """
         Improve your physical resistance
         """
@@ -209,13 +227,33 @@ class Elemental(PlayerCharacter):
         
         power = self.db.guild_level
         
-        if self.db.reactive_armor:
-            self.msg(f"|rYou already have reactive armor enabled.")
+        if self.db.energy_control:
+            self.msg(f"|rYou already have energy control enabled.")
             return
         
-        self.db.reactivearmor = True
+        self.db.energy_control = True
         self.db.edgedac += power
         self.db.bluntac += power
-        self.msg(f"|rYou activate your reactive armor.")
+        self.msg(f"|rYou activate your energy control.")
         
+    def use_engulf(self):
+        """
+        Engulf your target
+        """
+        hp = self.db.hp
+        hpmax = self.db.hpmax
+        fp = self.db.fp
+        fpmax = self.db.fpmax
+        
+        if self.db.engulfs < 1:
+            self.msg(f"|rYou do not have the strength to engulf at this time.\n")
+            return
+        if  hp > hpmax or fp > fpmax:
+            self.msg(f"|rYou may not engulf a creature at this time.\n")
+            
+        power = self.db.hpmax * (9 + self.db.guild_level/7) / 100
+        self.db.hp += power
+        self.db.fp += power
+        
+        self.msg(f"|rYou flow around ${target} completely enclosing them in plasma!")
         

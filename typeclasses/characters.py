@@ -1,5 +1,6 @@
 from random import randint, choice
 from evennia.prototypes import spawner, prototypes
+from evennia.prototypes.spawner import spawn
 from string import punctuation
 from evennia import AttributeProperty
 from evennia.utils import lazy_property, iter_to_str, delay, logger
@@ -77,13 +78,26 @@ class Character(ObjectParent, ClothedCharacter):
 
     def defense(self, damage_type=None):
         """
-        Get the total armor defense from equipped items and natural defenses
-
-        The damage_type keyword is unused by default.
+        Get the total armor defence from equipped items and natural defenses
         """
-        return sum(
-            [obj.attributes.get("armor", 0) for obj in get_worn_clothes(self) + [self]]
+        print(f"in defense {self} {damage_type}")
+        defense_objs = get_worn_clothes(self) + [self]
+        armor = sum(
+            [obj.attributes.get("armor", 0) for obj in defense_objs]
         )
+        print(f"armor {armor}")
+        print(f"defense_objs self {[self]}")
+        print(f"defense_objs {defense_objs}")
+        if damage_type:
+            print(f"defense {damage_type}")
+            armor += sum(
+                [obj.attributes.get(f"{damage_type}ac", 0) for obj in defense_objs]
+            )
+            typeac = self.attributes.get(f"{damage_type}ac", 0)
+            print(f"typeac {typeac}")
+            armor += self.attributes.get(f"{damage_type}ac", 0)
+
+        return armor
 
     def at_object_creation(self):
         self.db.level = 1
@@ -96,10 +110,22 @@ class Character(ObjectParent, ClothedCharacter):
         # resource stats
         self.db.hp = 50
         self.db.hpmax = 50
+        self.db.hpregen = 1
         self.db.fp = 50
         self.db.fpmax = 50
+        self.db.fpregen = 1
         self.db.ep = 50
         self.db.epmax = 50
+        
+        self.db.edgedac = 0
+        self.db.bluntac = 0
+        self.db.coldac = 0
+        self.db.fireac = 0
+        self.db.acidac = 0
+        self.db.poisonac = 0
+        self.db.mindac = 0
+        self.db.lightningac = 0
+        self.db.energyac = 0
         
         self.traits.add(
             "evasion", trait_type="counter", min=0, max=100, base=0, stat="agi"
@@ -320,7 +346,7 @@ class Character(ObjectParent, ClothedCharacter):
 
         # add resource levels
         chunks.append(
-            f"|gHealth: |G{self.db.hp}|g  Focus: |G{self.db.fp} Energy: |G{self.db.ep}|g"
+            f"|gHealth: |G{self.db.hp}/{self.db.hpmax}|g Focus: |G{self.db.fp}/{self.db.fpmax} Energy: |G{self.db.ep}/{self.db.epmax}|g"
         )
         print(f"looker != self {looker} and self {self}")
         if looker != self:
@@ -417,6 +443,7 @@ class PlayerCharacter(Character):
         """
         Apply damage, after taking into account damage resistances.
         """
+        self.msg(f"|cAttack in PC")
         # apply armor damage reduction
         damage -= self.defense(damage_type)
         self.db.hp -= max(damage, 0)
@@ -445,6 +472,7 @@ class PlayerCharacter(Character):
             target (Object or None): the entity being attacked. if None, attempts to use the combat_target db attribute
             weapon (Object): the object dealing damage
         """
+        self.msg(f"PC atack: {self} and {target} and {weapon}")
         # can't attack if we're not in combat!
         if not self.in_combat:
             return
@@ -470,6 +498,7 @@ class PlayerCharacter(Character):
             self.msg("You don't see your target.")
             return
 
+        print(f"weapon {weapon}")
         # attack with the weapon
         weapon.at_attack(self, target)
 
@@ -625,10 +654,10 @@ class NPC(Character):
                 print(f"before corpse")
                 # corpse = spawner.spawn([IRON_DAGGER])
                 # corpse.location = self.location
-                print(f"after corpse: {corpse}")
-                # objs = spawn(*list(self.db.drops))
-                # for obj in objs:
-                #     obj.location = self.location
+                # print(f"after corpse: {corpse}")
+                objs = spawn(*list(self.db.drops))
+                for obj in objs:
+                    obj.location = self.location
                 self.move_to(None, False, None, True, True, True, "teleport")
                 delay(10, self.at_respawn)
                 return

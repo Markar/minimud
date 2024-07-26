@@ -4,10 +4,11 @@
 #
 @desc |yOutside of the city
 #
-@create/drop scrawny gnoll;gnoll
+@spawn scrawny_gnoll
 #
-@sethome gnoll = newbie#04
+@sethome gnoll = newbie#01
 #
+
 
 @dig/teleport Newbieland;newbie#02 : typeclasses.rooms.Room = south;s,north;n
 #

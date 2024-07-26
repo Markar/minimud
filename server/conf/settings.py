@@ -41,6 +41,9 @@ BASE_CHARACTER_TYPECLASS = "typeclasses.characters.PlayerCharacter"
 EXTRA_LAUNCHER_COMMANDS["xyzgrid"] = "evennia.contrib.grid.xyzgrid.launchcmd.xyzcommand"
 PROTOTYPE_MODULES += ["evennia.contrib.grid.xyzgrid.prototypes"]
 PROTOTYPE_MODULES += ["world.newbie_mobs"]
+PROTOTYPE_MODULES += ["typeclasses.chessboardmobs"]
+PROTOTYPE_MODULES += ["typeclasses.newbieland_mobs"]
+PROTOTYPE_MODULES += ["typeclasses.rooms"]
 XYZROOM_PROTOTYPE_OVERRIDE = {"typeclass": "typeclasses.rooms.XYGridRoom"}
 XYZEXIT_PROTOTYPE_OVERRIDE = {"typeclass": "typeclasses.exits.XYGridExit"}
 
