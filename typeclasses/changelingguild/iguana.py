@@ -40,19 +40,19 @@ class Iguana:
             
         # subtract the energy required to use this
         wielder.db.ep -= self.energy_cost
-        if not damage:
-            # the attack failed
-            wielder.at_emote(
-            f"$conj(swings) $pron(your) tail at $you(target), but $conj(misses).",
-            mapping={"target": target},
-        )
-        else:
-            wielder.at_emote(
-                f"{wielder}'s tail $conj(nicks) $you(target).",
-                mapping={"target": target},
-            )
+        # if not damage:
+        #     # the attack failed
+        #     wielder.at_emote(
+        #     f"$conj(swings) $pron(your) tail at $you(target), but $conj(misses).",
+        #     mapping={"target": target},
+        # )
+        # else:
+        #     wielder.at_emote(
+        #         f"{wielder}'s tail $conj(nicks) $you(target).",
+        #         mapping={"target": target},
+        #     )
             # the attack succeeded! apply the damage
-            target.at_damage(wielder, damage, "blunt")
+        target.at_damage(wielder, damage, "blunt")
         wielder.db.gxp += 1
         wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
         wielder.cooldowns.add("attack", self.speed)

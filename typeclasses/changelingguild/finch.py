@@ -1,21 +1,23 @@
 import math
 
-class Hummingbird:
+class Finch:
     """
-    The bee hummingbird weighs 2 grams and is 5.5 centimeters,
-    or 2 1/8 inches long, making it the world's smallest bird,
-    and ranking it with the smallest of mammals.  Hummingbirds
-    can fly in all directions, including backward, and may hover
-    in place.
+    The finch is a small bird, typically weighing around 20 grams and measuring
+    about 12 centimeters in length. Finches are known for their vibrant colors
+    and melodious songs. They are agile fliers and can navigate through dense
+    foliage with ease.
     """
 
-    damage = 1
-    energy_cost = 3
+    damage = 2
+    energy_cost = 2
     skill = "edged"
-    name = "bite"
-    speed = 3
+    name = "peck"
+    speed = 2
     
     def at_pre_attack(self, wielder, **kwargs):
+        wielder.msg("|cat_pre_attack in finch")
+        # make sure we have enough strength left
+        print(f"at_pre_attack on weapon: {wielder} and {wielder.db.ep} and self {self}")
         if wielder.db.ep < self.energy_cost:
             wielder.msg("You are too tired to hit anything.")
             return False
@@ -27,15 +29,16 @@ class Hummingbird:
         return True
 
     def at_attack(self, wielder, target, **kwargs):
+        wielder.msg("|cat_attack in finch")
         """
-        The auto attack Hummingbird
+        The auto attack Finch
         """
-        self.name = "bite"
-        damage = 5 + math.ceil(wielder.db.dexterity / 3)
-        self.energy_cost = 1
-        self.speed = 3
-        self.emote = f"You bite viciously at $you(target), but miss entirely."
-        self.emote_hit = f"You bite glancingly into $you(target), and cause some minor scratches"        
+        self.name = "peck"
+        damage = 3 + math.ceil(wielder.db.dexterity / 2)
+        self.energy_cost = 2
+        self.speed = 2
+        self.emote = f"You peck viciously at $you(target), but miss entirely."
+        self.emote_hit = f"You peck glancingly into $you(target), and cause some minor scratches"        
             
         # subtract the energy required to use this
         wielder.db.ep -= self.energy_cost
@@ -51,6 +54,7 @@ class Hummingbird:
                 mapping={"target": target},
             )
             # the attack succeeded! apply the damage
-            target.at_damage(wielder, damage, "edged")
+            target.at_damage(wielder, damage, "peck")
         wielder.db.gxp += 1
+        wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
         wielder.cooldowns.add("attack", self.speed)

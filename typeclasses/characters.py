@@ -11,7 +11,7 @@ from evennia.contrib.game_systems.clothing.clothing import (
 )
 from evennia.contrib.game_systems.cooldowns import CooldownHandler
 from world.prototypes import SMALL_CORPSE, IRON_DAGGER
-
+import math
 from .objects import ObjectParent
 
 _IMMOBILE = ("sitting", "lying down", "unconscious")
@@ -86,8 +86,6 @@ class Character(ObjectParent, ClothedCharacter):
             [obj.attributes.get("armor", 0) for obj in defense_objs]
         )
         print(f"armor {armor}")
-        print(f"defense_objs self {[self]}")
-        print(f"defense_objs {defense_objs}")
         if damage_type:
             print(f"defense {damage_type}")
             armor += sum(
@@ -168,6 +166,12 @@ class Character(ObjectParent, ClothedCharacter):
         """
         Apply damage, after taking into account damage resistances.
         """
+        print("at_damage in character")
+        # hit_msg = attacker.get_hit_message(damage, self.get_display_name(attacker))
+        # self.location.msg_contents(f"{hit_msg}", from_obj=self.caller)
+        
+        # py self.location.msg_contents(f"|r$You() $conj(pick) up the gun, whistling to $pron(himself).", from_obj=self)
+
         # apply armor damage reduction
         damage -= self.defense(damage_type)
         print(f"at_damage in character: self:{self} attacker:{attacker} hp:{self.db.hp} max(damage):{max(damage,0)} dmg: {damage}")
@@ -345,8 +349,14 @@ class Character(ObjectParent, ClothedCharacter):
         #     chunks.append(self.get_display_name(looker, **kwargs))
 
         # add resource levels
+        hp = math.floor(self.db.hp)
+        hpmax = self.db.hpmax
+        fp = math.floor(self.db.hp)
+        fpmax = self.db.fpmax
+        ep = math.floor(self.db.ep)
+        epmax = self.db.epmax
         chunks.append(
-            f"|gHealth: |G{self.db.hp}/{self.db.hpmax}|g Focus: |G{self.db.fp}/{self.db.fpmax} Energy: |G{self.db.ep}/{self.db.epmax}|g"
+            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax} Energy: |G{ep}/{epmax}|g"
         )
         print(f"looker != self {looker} and self {self}")
         if looker != self:
@@ -636,11 +646,14 @@ class NPC(Character):
         """
         # apply armor damage reduction
         damage -= self.defense(damage_type)
-        print(f"at_damage in character: self:{self} attacker:{attacker} hp:{self.db.hp} max(damage):{max(damage,0)} dmg: {damage}")
         self.db.hp -= max(damage, 0)
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
-        attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
-        print(f"at_damage in npc: {self} and {attacker} and npc hp: {self.db.hp}")
+        attacker.get_hit_message(damage, self.get_display_name(attacker))
+        # this sends the hit_msg FROM the player TO the room with the damage AFTER reduction by npc
+        # if hit_msg := attacker.get_hit_message(damage, self.get_display_name(attacker)):
+        #     print(f"hit msg: {hit_msg}")
+        #     self.location.msg_contents(hit_msg, from_obj=self.get_display_name(attacker))
+            # attacker.msg(f"{hit_msg}")
         
         if self.db.hp <= 0:
             self.tags.add("defeated", category="status")
@@ -696,28 +709,23 @@ class NPC(Character):
           
 
     def attack(self, target, weapon, **kwargs):
-        print(f"npc attack {self.in_combat}")
         # can't attack if we're not in combat, or if we're fleeing
         if not self.in_combat or self.db.fleeing:
             return
-        print(f"npc attack 2")
         # if target is not set, use stored target
         if not target:
             # make sure there's a stored target
             if not (target := self.db.combat_target):
                 return
-        print(f"npc attack 3")
         # verify that target is still here
         if self.location != target.location:
             return
-        print(f"npc attack 4")
         # make sure that we can use our chosen weapon
         if not (hasattr(weapon, "at_pre_attack") and hasattr(weapon, "at_attack")):
             return
         if not weapon.at_pre_attack(self):
             return
 
-        print(f"npc attack5")
         # attack with the weapon
         weapon.at_attack(self, target)
         # queue up next attack; use None for target to reference stored target on execution

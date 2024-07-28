@@ -110,6 +110,7 @@ class CmdMorph(Command):
 
     def func(self):
         caller = self.caller
+        caller.msg(f"caller: {caller.db.ep}")
         try:
             form = self.args.strip()
 
@@ -124,6 +125,10 @@ class CmdMorph(Command):
                 self.msg(f"|rYou morph back into your human form!")
                 caller.db.form = "Human"
                 return
+            if form == "slime":
+                self.msg(f"|rYou morph back into your slime form!")
+                caller.db.form = "Slime"
+                return
             
             reptile = next((key for key, value in REPTILE_FORMS.items() if value == form), -1)
             if not reptile == -1 and my_glvl >= reptile:
@@ -137,7 +142,7 @@ class CmdMorph(Command):
                 caller.db.form = form_title
                 return
                 
-            avian = next((key for key, value in MAMMAL_FORMS.items() if value == form), -1)
+            avian = next((key for key, value in AVIAN_FORMS.items() if value == form), -1)
             if not avian == -1 and my_glvl >= avian:
                 self.msg(f"|rYou morph into {get_article(form)} {form_title}!")
                 caller.db.form = form_title
@@ -147,16 +152,15 @@ class CmdMorph(Command):
         except ValueError:
             print(f"You don't know how to use that form.")
 
-class CmdEnableEnergyControl(Command):
+class CmdEnergyControl(Command):
     """
     Energy Control enhances your physical resists while lowering others
 
     Usage:
-        enable energy control
-        disable energy control
+        energy control
     """
 
-    key = "enable energy control"
+    key = "energy control"
     help_category = "Changeling"
 
     def func(self):
@@ -212,16 +216,29 @@ class CmdEngulf(Command):
     up to 5 rounds, so be careful.
 
     Usage:
-        rebuild
+        engulf
     """
-
-    key = "rebuild"
-    help_category = "combat"
+    key = "engulf"
+    help_category = "changeling"
 
     def func(self):
         print(self.caller)
         caller = self.caller
-        caller.use_rebuild()
+        target = self.args
+        location = caller.location
+        
+        if combat_script := location.scripts.get("combat"):
+            combat_script = combat_script[0]
+            combat_script.add_combatant(self, enemy=target)
+        else:
+            self.msg(f"|YYou are not in combat.")
+            return
+        target = caller.search(target)
+        # if not target:
+        #     target = caller.search(target)
+        print(f"target: {target}")
+        caller.db.combat_target = target
+        caller.use_engulf(target)
         
 class CmdForms(Command):
     """
@@ -238,12 +255,13 @@ class CmdForms(Command):
         caller = self.caller
         my_glvl = caller.db.guild_level
                     
-        table = EvTable(f"|cAvian", f"|cMammal", f"|cReptile", f"|cGlvl", border="rows")
+        table = EvTable(f"|cAvian", f"|cMammal", f"|cReptile", f"|cGlvl", border="table")
         for glvl in REPTILE_FORMS:
             if my_glvl >= glvl:
                 table.add_row(f"|Y{AVIAN_FORMS[glvl]}", f"|Y{MAMMAL_FORMS[glvl]}", f"|Y{REPTILE_FORMS[glvl]}", glvl)
             else:
                 table.add_row(f"|G{AVIAN_FORMS[glvl]}", f"|G{MAMMAL_FORMS[glvl]}", f"|G{REPTILE_FORMS[glvl]}", glvl)
+        table.add_row(f"|Yslime", f"|Yhuman", "", 1)
         
         caller.msg(str(table))
              
@@ -334,25 +352,33 @@ class CmdLeaveChangelings(Command):
     def func(self):
         caller = self.caller
         if caller.db.guild == "changeling":
-            caller.swap_typeclass("typeclasses.characters.PlayerCharacter")
             caller.db.subguild = "none"
             caller.db.form = "none"
             caller.db.energy_control = "none"
-            tickerhandler.remove(interval=6, callback=caller.at_tick, idstring="ticker1", persistent=True)
-            tickerhandler.remove(interval=6, callback=caller.at_tick, idstring="ticker1", persistent=True)
-            tickerhandler.add(interval=60*5, callback=caller.at_engulf_tick, idstring="markar-engulf", persistent=True)
+            # clear powers if they're enabled so we don't end up with negative stats
+            if caller.db.energy_control:
+                caller.use_energy_control()
+            tickerhandler.remove(interval=6, callback=caller.at_tick, idstring=f"{caller}-regen", persistent=True)
+            tickerhandler.remove(interval=60*5, callback=caller.at_engulf_tick, idstring=f"{caller}-superpower", persistent=True)
+            
             caller.cmdset.delete(ChangelingCmdSet)
+            caller.swap_typeclass("typeclasses.characters.PlayerCharacter")
             caller.msg(f"|rYou leave the Changeling guild")
         else:
             caller.msg(f"|rYou are already an adventurer")
             
             
-class CmdDrain(Command):
+class CmdAbsorb(Command):
     """
-    Drain the corpse of an enemy to restore energy
+    The corpse of a freshly slain enemy is a rich source of cellular
+    material, which can easily be absorbed and converted into protoplasm
+    and stamina, serving to replenish some, or all that you may have lost.
+
+    If you so choose, you may also 'fully' absorb the corpse, leaving
+    nothing left to decay.
     """
     
-    key = "drain" 
+    key = "absorb" 
     
     def func(self):
         if not self.args:
@@ -368,7 +394,7 @@ class CmdDrain(Command):
             else:
                 target.db.ep += max(power, 0)
             corpse.delete()
-            self.msg(f"|rYou drain the energy from the corpse and it turns into dust.")
+            self.msg(f"|You devour the corpse and feel its inner power flow through you.")
         else:
             print(f"status args: {self.caller.search(self.args.strip())}")
             target = self.caller.search(self.args.strip())
@@ -377,6 +403,13 @@ class CmdDrain(Command):
                 return
             self.msg(f"corpse with args {self.args}")
             
+   
+class CmdTest(Command):
+    key = "test"
+    
+    def func(self):
+        msg = self.caller.get_hit_message(50, "fart")
+        print(f"in test: {msg}")
         
 class ChangelingCmdSet(CmdSet):
     key = "Changeling CmdSet"
@@ -384,15 +417,13 @@ class ChangelingCmdSet(CmdSet):
     def at_cmdset_creation(self):
         super().at_cmdset_creation()
 
-        self.add(CmdDrain)
+        self.add(CmdAbsorb)
         self.add(CmdGAdvance)
         self.add(CmdGuildStatSheet)
-        self.add(CmdJoinChangelings)
-        self.add(CmdLeaveChangelings)
         self.add(CmdMorph)
-        self.add(CmdLeaveChangelings)
-        self.add(CmdEnableEnergyControl)
-        self.add(CmdDisableEnergyControl)
+        self.add(CmdEnergyControl)
+        # self.add(CmdDisableEnergyControl)
         self.add(CmdEngulf)
         self.add(CmdForms)
+        self.add(CmdTest)
 

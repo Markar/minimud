@@ -300,8 +300,6 @@ class ElementalCmdSet(CmdSet):
         self.add(CmdGAdvance)
         self.add(CmdEmit)
         self.add(CmdGuildStatSheet)
-        self.add(CmdJoinElementals)
-        self.add(CmdLeaveElementals)
         self.add(CmdChooseForm)
         self.add(CmdEnableReactiveArmor)
         self.add(CmdDisableReactiveArmor)

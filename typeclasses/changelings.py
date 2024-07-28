@@ -10,15 +10,110 @@ from evennia.contrib.game_systems.clothing.clothing import (
     ClothedCharacter,
     get_worn_clothes,
 )
+import math
 from commands.changeling_cmds import ChangelingCmdSet
 from typeclasses.characters import PlayerCharacter
 
+from typeclasses.changelingguild.attack_emotes import AttackEmotes
+
+from typeclasses.changelingguild.slime import Slime
 from typeclasses.changelingguild.human import Human
 from typeclasses.changelingguild.anole import Anole
 from typeclasses.changelingguild.teiid import Teiid
 from typeclasses.changelingguild.gecko import Gecko
 from typeclasses.changelingguild.skink import Skink
 from typeclasses.changelingguild.iguana import Iguana
+# from typeclasses.changelingguild.boa import Boa
+# from typeclasses.changelingguild.viper import Viper
+# from typeclasses.changelingguild.caiman import Caiman
+# from typeclasses.changelingguild.cobra import Cobra
+# from typeclasses.changelingguild.gilamonster import GilaMonster
+# from typeclasses.changelingguild.python import Python
+# from typeclasses.changelingguild.crocodile import Crocodile
+# from typeclasses.changelingguild.alligator import Alligator
+# from typeclasses.changelingguild.anaconda import Anaconda
+# from typeclasses.changelingguild.komododragon import KomodoDragon
+# from typeclasses.changelingguild.rat import Rat
+# from typeclasses.changelingguild.cat import Cat
+# from typeclasses.changelingguild.lynx import Lynx
+# from typeclasses.changelingguild.fox import Fox
+# from typeclasses.changelingguild.badger import Badger
+# from typeclasses.changelingguild.wolverine import Wolverine
+# from typeclasses.changelingguild.wolf import Wolf
+# from typeclasses.changelingguild.blackbear import BlackBear
+# from typeclasses.changelingguild.grizzlybear import GrizzlyBear
+# from typeclasses.changelingguild.elephant import Elephant
+# from typeclasses.changelingguild.cheetah import Cheetah
+# from typeclasses.changelingguild.leopard import Leopard
+# from typeclasses.changelingguild.jaguar import Jaguar
+# from typeclasses.changelingguild.tiger import Tiger
+# from typeclasses.changelingguild.lion import Lion
+from typeclasses.changelingguild.hummingbird import Hummingbird
+# from typeclasses.changelingguild.finch import Finch
+# from typeclasses.changelingguild.sparrow import Sparrow
+# from typeclasses.changelingguild.swallow import Swallow
+# from typeclasses.changelingguild.crow import Crow
+# from typeclasses.changelingguild.raven import Raven
+# from typeclasses.changelingguild.crane import Crane
+# from typeclasses.changelingguild.kestrel import Kestrel
+# from typeclasses.changelingguild.owl import Owl
+# from typeclasses.changelingguild.osprey import Osprey
+# from typeclasses.changelingguild.falcon import Falcon
+# from typeclasses.changelingguild.hawk import Hawk
+# from typeclasses.changelingguild.condor import Condor
+# from typeclasses.changelingguild.ostrich import Ostrich
+# from typeclasses.changelingguild.eagle import Eagle
+
+FORM_CLASSES = {
+    "Slime": Slime,
+    "Human": Human,
+    "Anole": Anole,
+    "Teiid": Teiid,
+    "Gecko": Gecko,
+    "Skink": Skink,
+    "Iguana": Iguana,
+    # "Boa": Boa,
+    # "Viper": Viper,
+    # "Caiman": Caiman,
+    # "Cobra": Cobra,
+    # "Gila Monster": GilaMonster,
+    # "Python": Python,
+    # "Crocodile": Crocodile,
+    # "Alligator": Alligator,
+    # "Anaconda": Anaconda,
+    # "Komodo Dragon": KomodoDragon,
+    # "Rat": Rat,
+    # "Cat": Cat,
+    # "Lynx": Lynx,
+    # "Fox": Fox,
+    # "Badger": Badger,
+    # "Wolverine": Wolverine,
+    # "Wolf": Wolf,
+    # "Black Bear": BlackBear,
+    # "Grizzly Bear": GrizzlyBear,
+    # "Elephant": Elephant,
+    # "Cheetah": Cheetah,
+    # "Leopard": Leopard,
+    # "Jaguar": Jaguar,
+    # "Tiger": Tiger,
+    # "Lion": Lion,
+    "Hummingbird": Hummingbird,
+    # "Finch": Finch,
+    # "Sparrow": Sparrow,
+    # "Swallow": Swallow,
+    # "Crow": Crow,
+    # "Raven": Raven,
+    # "Crane": Crane,
+    # "Kestrel": Kestrel,
+    # "Owl": Owl,
+    # "Osprey": Osprey,
+    # "Falcon": Falcon,
+    # "Hawk": Hawk,
+    # "Condor": Condor,
+    # "Ostrich": Ostrich,
+    # "Eagle": Eagle
+}
+
 
 
 class Changelings(PlayerCharacter):
@@ -57,8 +152,8 @@ class Changelings(PlayerCharacter):
         self.db.engulfs = 0
         self.db.max_engulfs = 0
         self.at_wield(Human)
-        tickerhandler.add(interval=6, callback=self.at_tick, idstring="ticker1", persistent=True)
-        tickerhandler.add(interval=60*5, callback=self.at_engulf_tick, idstring="markar-engulf", persistent=True)
+        tickerhandler.add(interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True)
+        tickerhandler.add(interval=60*5, callback=self.at_engulf_tick, idstring=f"{self}-superpower", persistent=True)
     
     def addhp(self, amount):
         hp = self.db.hp
@@ -116,19 +211,21 @@ class Changelings(PlayerCharacter):
     
     def attack(self, target, weapon, **kwargs):
         # can't attack if we're not in combat!
-        self.msg(f"|cAttack in changelings {weapon}")
-        if self.db.form == "Human":
-            weapon = Human()
-        if self.db.form == "Anole":
-            weapon = Anole()
-        if self.db.form == "Teiid":
-            weapon = Teiid()
-        if self.db.form == "Gecko":
-            weapon = Gecko()
-        if self.db.form == "Skink":
-            weapon = Skink()
-        if self.db.form == "Iguana":
-            weapon = Iguana()
+        # Loop through the form classes and assign the appropriate weapon
+        if self.db.form in FORM_CLASSES:
+            weapon = FORM_CLASSES[self.db.form]()
+        # if self.db.form == "Human":
+        #     weapon = Human()
+        # if self.db.form == "Anole":
+        #     weapon = Anole()
+        # if self.db.form == "Teiid":
+        #     weapon = Teiid()
+        # if self.db.form == "Gecko":
+        #     weapon = Gecko()
+        # if self.db.form == "Skink":
+        #     weapon = Skink()
+        # if self.db.form == "Iguana":
+        #     weapon = Iguana()
             
         if not self.in_combat:
             return
@@ -154,7 +251,6 @@ class Changelings(PlayerCharacter):
             self.msg("You don't see your target.")
             return
 
-        self.msg(f"|cbefore at_attack in changelings {weapon}")
         weapon.at_attack(self, target)
 
         status = self.get_display_status(target)
@@ -166,10 +262,47 @@ class Changelings(PlayerCharacter):
                 # queue up next attack; use None for target to reference stored target on execution
                 delay(speed + 1, self.attack, None, weapon, persistent=True)
     
+    def get_hit_message(self, dam, tn):
+        attack = FORM_CLASSES[self.db.form].name
+
+        msgs = AttackEmotes.get_emote(attack, tn, which="left")
+        if dam == 0:
+            to_me = msgs[0]
+        elif 1 <= dam <= 5:
+            to_me = msgs[1]
+        elif 6 <= dam <= 12:
+            to_me = msgs[2]
+        elif 13 <= dam <= 20:
+            to_me = msgs[3]
+        elif 21 <= dam <= 30:
+            to_me = msgs[4]
+        elif 31 <= dam <= 40:
+            to_me = msgs[5]
+        elif 41 <= dam <= 50:
+            to_me = msgs[6]
+        elif 51 <= dam <= 60:
+            to_me = msgs[7]
+        elif 61 <= dam <= 75:
+            to_me = msgs[8]
+        elif 76 <= dam <= 90:
+            to_me = msgs[9]
+        else:
+            to_me = msgs[10]
+            
+        self.location.msg_contents(to_me, from_obj=self)
+                    
+        return to_me
+
+        
+    
     def at_damage(self, attacker, damage, damage_type=None):
         """
         Apply damage, after taking into account damage resistances.
         """
+        # THIS AREA NEEDS GENERIC MUD HITS GOING *TO* THE PLAYER
+        
+        # room.msg_contents(text, from_obj=caller, mapping={"gun": gun_object})
+        
         # apply armor damage reduction
         damage -= self.defense(damage_type)
         self.db.hp -= max(damage, 0)
@@ -223,12 +356,14 @@ class Changelings(PlayerCharacter):
         """
         Improve your physical resistance
         """
-        ep = self.db.ep
-        
+        ep = self.db.ep        
         power = self.db.guild_level
         
         if self.db.energy_control:
-            self.msg(f"|rYou already have energy control enabled.")
+            self.msg(f"|rYou disable energy control.")
+            self.db.energy_control = False
+            self.db.edgedac -= power
+            self.db.bluntac -= power
             return
         
         self.db.energy_control = True
@@ -236,10 +371,27 @@ class Changelings(PlayerCharacter):
         self.db.bluntac += power
         self.msg(f"|rYou activate your energy control.")
         
-    def use_engulf(self):
+    def use_engulf(self, target,  **kwargs):
         """
         Engulf your target
         """
+        self.msg(f"self engulf {self}")
+        if not target:
+            self.msg(f"|GTarget whom?")
+            return
+
+        if not self.db.combat_target:
+            self.enter_combat(target)
+        else:
+            self.db.combat_target = target
+        target.enter_combat(self)
+        if not self.cooldowns.ready("engulf"):
+            self.msg(f"|BNot so fast!")
+            return False
+        
+        self.db.combat_target = target
+        # execute the actual attack
+        
         hp = self.db.hp
         hpmax = self.db.hpmax
         fp = self.db.fp
@@ -250,10 +402,13 @@ class Changelings(PlayerCharacter):
             return
         if  hp > hpmax or fp > fpmax:
             self.msg(f"|rYou may not engulf a creature at this time.\n")
+            return
             
-        power = self.db.hpmax * (9 + self.db.guild_level/7) / 100
+        power = math.ceil(self.db.hpmax * (9 + self.db.guild_level/7) / 10)
+        self.msg(f"engulf power: {power}")
         self.db.hp += power
         self.db.fp += power
-        
-        self.msg(f"|rYou flow around ${target} completely enclosing them in plasma!")
+        self.db.combat_target.at_damage(self, power)
+        self.cooldowns.add("engulf", 5)
+        self.msg(f"|rYou flow around {target} completely enclosing them in plasma!")
         

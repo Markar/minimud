@@ -34,24 +34,24 @@ class Teiid:
         damage = 10 + math.ceil(wielder.db.strength)
         self.energy_cost = 1
         self.speed = 3
-        self.emote = f"You bite viciously at $you(target), but miss entirely."
-        self.emote_hit = f"You bite glancingly into $you(target), and cause some minor scratches"        
+        # self.emote = f"You bite viciously at $you(target), but miss entirely."
+        # self.emote_hit = f"You bite glancingly into $you(target), and cause some minor scratches"        
             
         # subtract the energy required to use this
         wielder.db.ep -= self.energy_cost
-        if not damage:
-            # the attack failed
-            wielder.at_emote(
-                f"$conj(swings) $pron(your) {self.name} at $you(target), but $conj(misses).",
-                mapping={"target": target},
-            )
-        else:
-            wielder.at_emote(
-                f"$conj(hits) $you(target) with $pron(your) {self.name}.",
-                mapping={"target": target},
-            )
+        # if not damage:
+        #     # the attack failed
+        #     wielder.at_emote(
+        #         f"$conj(swings) $pron(your) {self.name} at $you(target), but $conj(misses).",
+        #         mapping={"target": target},
+        #     )
+        # else:
+        #     wielder.at_emote(
+        #         f"$conj(hits) $you(target) with $pron(your) {self.name}.",
+        #         mapping={"target": target},
+        #     )
             # the attack succeeded! apply the damage
-            target.at_damage(wielder, damage, "blunt")
+        target.at_damage(wielder, damage, "blunt")
         wielder.db.gxp += 1
         wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
         wielder.cooldowns.add("attack", self.speed)
