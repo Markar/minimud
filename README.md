@@ -18,6 +18,9 @@ py here.scripts.get('combat').delete()
 evennia xyzgrid add world.maps.newbie_land
 evennia xyzgrid 
 
+Set an attribute on a room in game
+py setattr(here, "key", "Training Grounds")
+
 @tel town#15
 #
 @dig/teleport A vortex of swirling Chaos;chaos#1 : typeclasses.rooms.Room = enter,vortex

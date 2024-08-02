@@ -16,6 +16,7 @@ from .objects import ObjectParent
 
 _IMMOBILE = ("sitting", "lying down", "unconscious")
 _MAX_CAPACITY = 10
+            
 # LOOK INTO RESTORING THESE STATUSES
 
 class Character(ObjectParent, ClothedCharacter):
@@ -125,9 +126,9 @@ class Character(ObjectParent, ClothedCharacter):
         self.db.lightningac = 0
         self.db.energyac = 0
         
-        self.traits.add(
-            "evasion", trait_type="counter", min=0, max=100, base=0, stat="agi"
-        )
+        # self.traits.add(
+        #     "evasion", trait_type="counter", min=0, max=100, base=0, stat="agi"
+        # )
 
     def at_pre_move(self, destination, **kwargs):
         """
@@ -170,10 +171,10 @@ class Character(ObjectParent, ClothedCharacter):
         # hit_msg = attacker.get_hit_message(damage, self.get_display_name(attacker))
         # self.location.msg_contents(f"{hit_msg}", from_obj=self.caller)
         
-        # py self.location.msg_contents(f"|r$You() $conj(pick) up the gun, whistling to $pron(himself).", from_obj=self)
-
         # apply armor damage reduction
         damage -= self.defense(damage_type)
+        if damage < 0:
+            damage = 0
         print(f"at_damage in character: self:{self} attacker:{attacker} hp:{self.db.hp} max(damage):{max(damage,0)} dmg: {damage}")
         self.db.hp -= max(damage, 0)
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
@@ -318,6 +319,7 @@ class Character(ObjectParent, ClothedCharacter):
         # apply the weapon damage as a modifier to skill
         self.msg(f"damage = damage * result: {damage}")
         damage = damage * result
+        damage = randint(damage/2, damage)
         # subtract the energy required to use this
         self.db.ep -= weapon.get("energy_cost", 5)
         if not damage:
@@ -351,7 +353,7 @@ class Character(ObjectParent, ClothedCharacter):
         # add resource levels
         hp = math.floor(self.db.hp)
         hpmax = self.db.hpmax
-        fp = math.floor(self.db.hp)
+        fp = math.floor(self.db.fp)
         fpmax = self.db.fpmax
         ep = math.floor(self.db.ep)
         epmax = self.db.epmax
@@ -406,6 +408,53 @@ class Character(ObjectParent, ClothedCharacter):
             # this sets the current HP to 20% of the max, a.k.a. one fifth
             self.db.hp = self.db.hpmax // 5
             self.msg(prompt=self.get_display_status(self))
+    
+    def get_emote(self, target, dam):
+        color = "|r"
+        tn = target
+
+        return [
+            f"{color}$You() swing and miss, hitting nothing but air. {dam}",
+            f"{color}$pron(Your) hit causes minor bruises on {tn}{color} {dam}.",
+            f"{color}$pron(Your) hit causes {tn}{color} to bleed slightly. {dam}",
+            f"{color}$You() $conj(strike) {tn}{color} with a powerful blow! {dam}",
+            f"{color}$pron(Your) hit causes {tn}{color} to bleed profusely. {dam}",
+            f"{color}$pron(Your) hit cracks {tn}{color}'s bones! {dam}",
+            f"{color}$You() $conj(pummel) {tn}{color} with relentless force! {dam}",
+            f"{color}$You() $conj(smash) {tn}{color}'s limbs! {dam}",
+            f"{color}$You() $conj(crush) {tn}{color} like a bug! {dam}",
+            f"{color}$You() $conj(hit) {tn}{color} so hard that blood spatters around the room! {dam}",
+            f"{color}$You() $conj(tear) into {tn}{color} with brutal force! {dam}",
+        ]
+    def get_hit_message(self, attacker, dam, tn):
+
+        msgs = self.get_emote(tn, dam)
+        if dam == 0:
+            to_me = msgs[0]
+        elif 1 <= dam <= 5:
+            to_me = msgs[1]
+        elif 6 <= dam <= 12:
+            to_me = msgs[2]
+        elif 13 <= dam <= 20:
+            to_me = msgs[3]
+        elif 21 <= dam <= 30:
+            to_me = msgs[4]
+        elif 31 <= dam <= 40:
+            to_me = msgs[5]
+        elif 41 <= dam <= 50:
+            to_me = msgs[6]
+        elif 51 <= dam <= 60:
+            to_me = msgs[7]
+        elif 61 <= dam <= 75:
+            to_me = msgs[8]
+        elif 76 <= dam <= 90:
+            to_me = msgs[9]
+        else:
+            to_me = msgs[10]
+            
+        self.location.msg_contents(to_me, from_obj=self)
+                    
+        return to_me
 
 
 class PlayerCharacter(Character):
@@ -421,6 +470,13 @@ class PlayerCharacter(Character):
         self.db.con_increase_amount = 9
         self.db.int_increase_amount = 8
         self.db.guild = "adventurer"
+        self.db.natural_weapon = {
+            "name": "fist",
+            "damage_type": "blunt",
+            "damage": 5,
+            "speed": 3,
+            "energy_cost": 1
+        }
       
         # initialize hands
         self.db._wielded = {"left": None, "right": None}
@@ -456,6 +512,8 @@ class PlayerCharacter(Character):
         self.msg(f"|cAttack in PC")
         # apply armor damage reduction
         damage -= self.defense(damage_type)
+        if damage < 0:
+            damage = 0
         self.db.hp -= max(damage, 0)
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
@@ -646,9 +704,12 @@ class NPC(Character):
         """
         # apply armor damage reduction
         damage -= self.defense(damage_type)
+        if damage < 0:
+            damage = 0
         self.db.hp -= max(damage, 0)
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
-        attacker.get_hit_message(damage, self.get_display_name(attacker))
+        
+        attacker.get_hit_message(attacker, damage, self.get_display_name(attacker))
         # this sends the hit_msg FROM the player TO the room with the damage AFTER reduction by npc
         # if hit_msg := attacker.get_hit_message(damage, self.get_display_name(attacker)):
         #     print(f"hit msg: {hit_msg}")

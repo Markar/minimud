@@ -227,7 +227,7 @@ def _check_charname(caller, raw_string, **kwargs):
         )
     else:
         # it's free! set the character's key to the name to reserve it
-        caller.new_char.key = charname
+        caller.new_char.key = charname.capitalize()
         # continue on to the confirmation node
         return "menunode_confirm_name"
 
@@ -257,16 +257,17 @@ def menunode_end(caller, raw_string):
     """End-of-chargen cleanup."""
     char = caller.new_char
     # since everything is finished and confirmed, we actually create the starting objects now
-    protos = ["wool_leggings", "wool_tunic", "leather_boots"]
+    protos = ["tarnished_sword", "wool_leggings", "wool_tunic", "leather_boots"]
     objs = spawn(*protos)
     for obj in objs:
         obj.location = char
-        obj.wear(char, True, quiet=True)
+        # obj.wear(char, True, quiet=True)
     # get start location
-    if cot := char.search("Center of Town", global_search=True, quiet=True):
-        char.home = cot[0]
+    if newbie := char.search("millennium square", global_search=True, quiet=True):
+        char.home = newbie[0]
     # start_location = ObjectDB.objects.get_id(settings.START_LOCATION)
-    char.location = ObjectDB.objects.get_id(596)
+    #596 = cot, #717 = newbie
+    char.location = ObjectDB.objects.get_id(717)
 
     # clear in-progress status
     caller.new_char.attributes.remove("chargen_step")

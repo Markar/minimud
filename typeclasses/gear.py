@@ -11,11 +11,11 @@ class BareHand:
     A dummy "object" class that provides basic combat functionality for unarmed combat
     """
 
-    damage = 1
+    damage = 5
     energy_cost = 3
     skill = "unarmed"
     name = "fist"
-    speed = 5
+    speed = 3
 
     def at_pre_attack(self, wielder, **kwargs):
         """

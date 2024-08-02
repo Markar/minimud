@@ -28,6 +28,17 @@ IRON_DAGGER = {
     "dmg": 50,
 }
 
+TARNISHED_SWORD = {
+    "typeclass": "typeclasses.gear.MeleeWeapon",
+    "key": "tarnished sword",
+    "desc": "The sword is a simple, unadorned weapon, clearly showing signs of age and wear. Its once-shiny blade is now dull and tarnished, with small nicks and scratches marring its surface. The hilt is wrapped in worn leather, providing a somewhat comfortable grip despite its rough appearance. Though it lacks the gleam and sharpness of a more formidable weapon, this sword still holds a certain charm, a testament to its history and the battles it has seen. For a new adventurer, it serves as a reliable, if humble, companion on the journey ahead.",
+    "tags": [("edged", "damage_type"), ("edged", "damage_type")],
+    "value": 30,
+    "energy_cost": 5,
+    "speed": 3,
+    "dmg": 20,
+}
+
 IRON_SWORD = {
     "typeclass": "typeclasses.gear.MeleeWeapon",
     "key": "iron sword",

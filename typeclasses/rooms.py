@@ -73,7 +73,10 @@ class RoomParent(ObjectParent):
             return f"Special commands here: {', '.join(cmd_keys)}"
         else:
             return ""
-
+        
+    def format_appearance(self, appearance, looker, **kwargs):
+        """Don't left-strip the appearance string"""
+        return appearance.rstrip()
 
 class Room(RoomParent, DefaultRoom):
     """

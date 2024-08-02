@@ -14,7 +14,13 @@ class Anole:
     skill = "edged"
     name = "bite"
     speed = 3
-    emit = 1
+    desc = """
+    The green anole is often mistaken, and erroneously called,
+    the chameleon--although it changes color from green to
+    brown, its ability is poor compared to the true chameleon.
+    This 'false chameleon' is often sold as the true thing in
+    pet shops.
+    """
     
     def at_pre_attack(self, wielder, **kwargs):
         wielder.msg("|cat_pre_attack in anole")
@@ -36,7 +42,7 @@ class Anole:
         The auto attack Anole
         """
         self.name = "bite"
-        damage = 5 + math.ceil(wielder.db.dexterity / 3)
+        damage = 1 + wielder.db.guild_level + math.ceil(wielder.db.dexterity / 3)
         self.energy_cost = 1
         self.speed = 3
         self.emote = f"You bite viciously at $you(target), but miss entirely."
@@ -44,24 +50,7 @@ class Anole:
             
         # subtract the energy required to use this
         wielder.db.ep -= self.energy_cost
-        if not damage:
-            # the attack failed
-            wielder.at_emote(
-                f"$conj(swings) $pron(your) {self.name} at $you(target), but $conj(misses).",
-                mapping={"target": target},
-            )
-        else:
-            wielder.at_emote(
-                f"$conj(hits) $you(target) with $pron(your) {self.name}.",
-                mapping={"target": target},
-            )
-            # the attack succeeded! apply the damage
-            target.at_damage(wielder, damage, "edged")
-        wielder.db.gxp += 1
+        target.at_damage(wielder, damage, "edged")
+        super().at_attack(wielder, target, **kwargs)
         wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
         wielder.cooldowns.add("attack", self.speed)
-        
-        # "You dash out of the way of the attack!",
-        #  "You barely avoid the attack!",
-        #  "The anole dashes out of the way of the attack!\n",
-        #  "The anole barely manages to dash out of the way of the attack!\n"

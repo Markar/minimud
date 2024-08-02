@@ -64,6 +64,42 @@ GNOLL_PUP = {
     "can_attack": True,
 }
 
+GNOLL_WARLORD = {
+    "typeclass": "typeclasses.characters.NPC",
+    "key": "a gnoll warlord",
+    "aliases": ["gnoll", "warlord"],
+    "desc": "The gnoll warlord stands over six feet tall, clad in spiked armor and wielding a massive battle axe.",
+    "gender": "male",
+    "react_as": "aggressive",
+    "armor": 10,
+    "name_color": "r",
+    "hp": 300,
+    "hpmax": 300,
+    "str": 20,
+    "natural_weapon": {
+        "name": "battle axe",
+        "damage_type": "edged",
+        "damage": 20,
+        "speed": 2,
+        "energy_cost": 15,
+    },
+    "exp_reward": 50,
+    "drops": [{
+        "key": "decaying corpse of a gnoll warlord.",
+        "aliases": ["corpse"],
+        "desc": "corpse of a gnoll warlord",
+        "name_color": "r",
+        "power": 20
+    }, {
+        "key": "gnoll warlord's battle axe",
+        "aliases": ["axe"],
+        "desc": "A massive battle axe once wielded by a gnoll warlord.",
+        "name_color": "r",
+        "power": 30
+    }],
+    "can_attack": True,
+}
+
 DECAYING_SKELETON = {
     "typeclass": "typeclasses.characters.NPC",
     "key": "a decaying skeleton",

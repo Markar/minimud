@@ -16,6 +16,7 @@ from typeclasses.characters import PlayerCharacter
 
 from typeclasses.changelingguild.attack_emotes import AttackEmotes
 
+from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 from typeclasses.changelingguild.slime import Slime
 from typeclasses.changelingguild.human import Human
 from typeclasses.changelingguild.anole import Anole
@@ -23,8 +24,8 @@ from typeclasses.changelingguild.teiid import Teiid
 from typeclasses.changelingguild.gecko import Gecko
 from typeclasses.changelingguild.skink import Skink
 from typeclasses.changelingguild.iguana import Iguana
-# from typeclasses.changelingguild.boa import Boa
-# from typeclasses.changelingguild.viper import Viper
+from typeclasses.changelingguild.boa import Boa
+from typeclasses.changelingguild.viper import Viper
 # from typeclasses.changelingguild.caiman import Caiman
 # from typeclasses.changelingguild.cobra import Cobra
 # from typeclasses.changelingguild.gilamonster import GilaMonster
@@ -33,15 +34,15 @@ from typeclasses.changelingguild.iguana import Iguana
 # from typeclasses.changelingguild.alligator import Alligator
 # from typeclasses.changelingguild.anaconda import Anaconda
 # from typeclasses.changelingguild.komododragon import KomodoDragon
-# from typeclasses.changelingguild.rat import Rat
-# from typeclasses.changelingguild.cat import Cat
-# from typeclasses.changelingguild.lynx import Lynx
-# from typeclasses.changelingguild.fox import Fox
-# from typeclasses.changelingguild.badger import Badger
-# from typeclasses.changelingguild.wolverine import Wolverine
-# from typeclasses.changelingguild.wolf import Wolf
+from typeclasses.changelingguild.rat import Rat
+from typeclasses.changelingguild.cat import Cat
+from typeclasses.changelingguild.lynx import Lynx
+from typeclasses.changelingguild.fox import Fox
+from typeclasses.changelingguild.badger import Badger
+from typeclasses.changelingguild.wolverine import Wolverine
+from typeclasses.changelingguild.wolf import Wolf
 # from typeclasses.changelingguild.blackbear import BlackBear
-# from typeclasses.changelingguild.grizzlybear import GrizzlyBear
+# from typeclasses.changelingguild.changeling_attack.grizzlybear import GrizzlyBear
 # from typeclasses.changelingguild.elephant import Elephant
 # from typeclasses.changelingguild.cheetah import Cheetah
 # from typeclasses.changelingguild.leopard import Leopard
@@ -49,12 +50,12 @@ from typeclasses.changelingguild.iguana import Iguana
 # from typeclasses.changelingguild.tiger import Tiger
 # from typeclasses.changelingguild.lion import Lion
 from typeclasses.changelingguild.hummingbird import Hummingbird
-# from typeclasses.changelingguild.finch import Finch
-# from typeclasses.changelingguild.sparrow import Sparrow
-# from typeclasses.changelingguild.swallow import Swallow
-# from typeclasses.changelingguild.crow import Crow
-# from typeclasses.changelingguild.raven import Raven
-# from typeclasses.changelingguild.crane import Crane
+from typeclasses.changelingguild.finch import Finch
+from typeclasses.changelingguild.sparrow import Sparrow
+from typeclasses.changelingguild.swallow import Swallow
+from typeclasses.changelingguild.crow import Crow
+from typeclasses.changelingguild.raven import Raven
+from typeclasses.changelingguild.crane import Crane
 # from typeclasses.changelingguild.kestrel import Kestrel
 # from typeclasses.changelingguild.owl import Owl
 # from typeclasses.changelingguild.osprey import Osprey
@@ -65,6 +66,7 @@ from typeclasses.changelingguild.hummingbird import Hummingbird
 # from typeclasses.changelingguild.eagle import Eagle
 
 FORM_CLASSES = {
+    "ChangelingAttack": ChangelingAttack,
     "Slime": Slime,
     "Human": Human,
     "Anole": Anole,
@@ -72,8 +74,8 @@ FORM_CLASSES = {
     "Gecko": Gecko,
     "Skink": Skink,
     "Iguana": Iguana,
-    # "Boa": Boa,
-    # "Viper": Viper,
+    "Boa": Boa,
+    "Viper": Viper,
     # "Caiman": Caiman,
     # "Cobra": Cobra,
     # "Gila Monster": GilaMonster,
@@ -82,13 +84,13 @@ FORM_CLASSES = {
     # "Alligator": Alligator,
     # "Anaconda": Anaconda,
     # "Komodo Dragon": KomodoDragon,
-    # "Rat": Rat,
-    # "Cat": Cat,
-    # "Lynx": Lynx,
-    # "Fox": Fox,
-    # "Badger": Badger,
-    # "Wolverine": Wolverine,
-    # "Wolf": Wolf,
+    "Rat": Rat,
+    "Cat": Cat,
+    "Lynx": Lynx,
+    "Fox": Fox,
+    "Badger": Badger,
+    "Wolverine": Wolverine,
+    "Wolf": Wolf,
     # "Black Bear": BlackBear,
     # "Grizzly Bear": GrizzlyBear,
     # "Elephant": Elephant,
@@ -98,12 +100,12 @@ FORM_CLASSES = {
     # "Tiger": Tiger,
     # "Lion": Lion,
     "Hummingbird": Hummingbird,
-    # "Finch": Finch,
-    # "Sparrow": Sparrow,
-    # "Swallow": Swallow,
-    # "Crow": Crow,
-    # "Raven": Raven,
-    # "Crane": Crane,
+    "Finch": Finch,
+    "Sparrow": Sparrow,
+    "Swallow": Swallow,
+    "Crow": Crow,
+    "Raven": Raven,
+    "Crane": Crane,
     # "Kestrel": Kestrel,
     # "Owl": Owl,
     # "Osprey": Osprey,
@@ -129,6 +131,7 @@ class Changelings(PlayerCharacter):
         
         self.db.guild_level = 1
         self.db.gxp = 0
+        self.db.skillxp = 0
         self.db.title = "the novice changeling"
         self.db.con_increase_amount = con_increase_amount
         self.db.hpmax = 50 + (con_increase_amount * self.db.constitution)
@@ -147,46 +150,83 @@ class Changelings(PlayerCharacter):
         self.db.hpregen = 1
         self.db.fpregen = 1
         self.db.epregen = 1
+        self.db.regrowth_rate = 0
+        self.db.regrowth_cost = 0
         self.db.form = "Human"
         self.db.subguild = "none"
         self.db.engulfs = 0
         self.db.max_engulfs = 0
-        self.at_wield(Human)
+        self.db.skills = {
+            "body_control": 0,
+            "drain": 0,
+            "energy_control": 0,
+            "familiar": 0,
+            "regeneration": 0,
+            "vibrate": 0
+        }
+        self.at_wield(ChangelingAttack)
         tickerhandler.add(interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True)
         tickerhandler.add(interval=60*5, callback=self.at_engulf_tick, idstring=f"{self}-superpower", persistent=True)
     
+    def kickstart(self):
+        self.msg("Kickstarting heartbeat")
+        tickerhandler.add(interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True)
+        tickerhandler.add(interval=60*5, callback=self.at_engulf_tick, idstring=f"{self}-superpower", persistent=True)
+        
     def addhp(self, amount):
         hp = self.db.hp
         hpmax = self.db.hpmax
-        if hp >= hpmax:
-            return
-        if hp < hpmax + amount:
-            self.db.hp += amount
+        
+        if hp + amount > hpmax:
+            self.db.hp = hpmax
+        else: 
+            self.db.hp += max(amount, 0)
     
     def addfp(self, amount):
         fp = self.db.fp
         fpmax = self.db.fpmax
-        if fp >= fpmax:
+        
+        if fp + amount > fpmax:
+            self.db.fp = fpmax
             return
-        if fp < fpmax + amount:
-            self.db.fp += amount
+        else:
+            self.db.fp += max(amount, 0)
     
     def addep(self, amount):
         ep = self.db.ep
         epmax = self.db.epmax
-        if ep >= epmax:
+        
+        if ep + amount > epmax:
+            self.db.ep = epmax
             return
         if ep < epmax + amount:
-            self.db.ep += amount
+            self.db.ep += max(amount, 0)
     
     def at_engulf_tick(self):
         self.msg(f"|gYour body ripples and shakes as energy flows into you")
         self.db.engulfs = self.db.max_engulfs
     
     def at_tick(self):
-        self.addhp(1)
-        self.addfp(1)
-        self.addep(1)
+        regrowth_rate = self.db.regrowth_rate
+        regrowth_cost = self.db.regrowth_cost
+        ep = self.db.ep
+        
+        if not ep > regrowth_cost: 
+            self.msg(f"|rYou do not have enough energy to regrow.")
+            self.db.regrowth_rate = 0
+            self.db.regrowth_cost = 0
+            return
+        
+        if regrowth_cost:
+            self.addep(-self.db.regrowth_cost)
+            
+        if regrowth_rate:
+            self.addhp(self.db.regrowth_rate)
+                    
+        # self.msg(f"|R{self.db.hpregen} {self.db.fpregen} {self.db.epregen}")
+        self.addhp(self.db.hpregen)
+        self.addfp(self.db.fpregen)
+        self.addep(self.db.epregen)
             
         
     def get_display_name(self, looker, **kwargs):
@@ -214,19 +254,7 @@ class Changelings(PlayerCharacter):
         # Loop through the form classes and assign the appropriate weapon
         if self.db.form in FORM_CLASSES:
             weapon = FORM_CLASSES[self.db.form]()
-        # if self.db.form == "Human":
-        #     weapon = Human()
-        # if self.db.form == "Anole":
-        #     weapon = Anole()
-        # if self.db.form == "Teiid":
-        #     weapon = Teiid()
-        # if self.db.form == "Gecko":
-        #     weapon = Gecko()
-        # if self.db.form == "Skink":
-        #     weapon = Skink()
-        # if self.db.form == "Iguana":
-        #     weapon = Iguana()
-            
+        
         if not self.in_combat:
             return
         # can't attack if we're fleeing!
@@ -262,10 +290,10 @@ class Changelings(PlayerCharacter):
                 # queue up next attack; use None for target to reference stored target on execution
                 delay(speed + 1, self.attack, None, weapon, persistent=True)
     
-    def get_hit_message(self, dam, tn):
+    def get_hit_message(self, attacker, dam, tn):
         attack = FORM_CLASSES[self.db.form].name
 
-        msgs = AttackEmotes.get_emote(attack, tn, which="left")
+        msgs = AttackEmotes.get_emote(attacker, attack, tn, which="left")
         if dam == 0:
             to_me = msgs[0]
         elif 1 <= dam <= 5:
@@ -289,26 +317,28 @@ class Changelings(PlayerCharacter):
         else:
             to_me = msgs[10]
             
+        to_me = f"{to_me} ({dam})"
         self.location.msg_contents(to_me, from_obj=self)
                     
         return to_me
 
-        
+    def get_form_help(self, form):
+        form_class = FORM_CLASSES[form.title()]
+        return form_class.__doc__
     
     def at_damage(self, attacker, damage, damage_type=None):
         """
         Apply damage, after taking into account damage resistances.
         """
-        # THIS AREA NEEDS GENERIC MUD HITS GOING *TO* THE PLAYER
-        
-        # room.msg_contents(text, from_obj=caller, mapping={"gun": gun_object})
-        
         # apply armor damage reduction
         damage -= self.defense(damage_type)
-        self.db.hp -= max(damage, 0)
         if self.db.energy_control:
             self.msg(f"|cYou block some damage!")
+            if damage_type in ["edged", "blunt"]:
+                damage -= self.db.guild_level
             self.db.ep -= 1
+            
+        self.db.hp -= max(damage, 0)
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
         
@@ -325,51 +355,21 @@ class Changelings(PlayerCharacter):
                 combat = self.location.scripts.get("combat")[0]
                 combat.remove_combatant(self)
                             
-    def use_rebuild(self):
-        """
-        Restores health
-        """
 
-        hp = self.db.hp
-        hpmax = self.db.hpmax
-        fp = self.db.fp
-        hp_amount = 0
-        
-        damage = 10 + self.db.guild_level + self.db.wisdom
-        cost = damage / 2
-        
-        if cost > fp:
-            return
-        
-        if hp + damage > hpmax:            
-            hp_amount = hpmax-hp
-            self.db.hp = hpmax
-            self.db.fp -= cost
-        else: 
-            hp_amount = hpmax-hp
-            self.db.hp += max(damage, 0)
-            self.db.fp -= cost
-            
-        self.msg(f"You restore {hp_amount or 0} health for {cost or 0} focus!")
         
     def use_energy_control(self):
         """
         Improve your physical resistance
         """
-        ep = self.db.ep        
-        power = self.db.guild_level
         
         if self.db.energy_control:
-            self.msg(f"|rYou disable energy control.")
+            self.msg(f"|MYou feel the energy receding, flowing back into your core. The crackling sounds of the barrier fade away, and the protective shield dissolves into the air.")
             self.db.energy_control = False
-            self.db.edgedac -= power
-            self.db.bluntac -= power
             return
         
         self.db.energy_control = True
-        self.db.edgedac += power
-        self.db.bluntac += power
-        self.msg(f"|rYou activate your energy control.")
+        self.db.ep -= 25
+        self.msg(f"|MAs you focus your mind, a surge of energy begins to flow through your body. You raise your hands, and a shimmering barrier of pure energy forms around you, crackling with power.")
         
     def use_engulf(self, target,  **kwargs):
         """

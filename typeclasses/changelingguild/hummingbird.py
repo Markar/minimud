@@ -1,6 +1,6 @@
 import math
-
-class Hummingbird:
+from typeclasses.changelingguild.changeling_attack import ChangelingAttack
+class Hummingbird(ChangelingAttack):
     """
     The bee hummingbird weighs 2 grams and is 5.5 centimeters,
     or 2 1/8 inches long, making it the world's smallest bird,
@@ -14,24 +14,13 @@ class Hummingbird:
     skill = "edged"
     name = "bite"
     speed = 3
-    
-    def at_pre_attack(self, wielder, **kwargs):
-        if wielder.db.ep < self.energy_cost:
-            wielder.msg("You are too tired to hit anything.")
-            return False
-        # can't attack if on cooldown
-        if not wielder.cooldowns.ready("attack"):
-            wielder.msg("You can't attack again yet.")
-            return False
-
-        return True
 
     def at_attack(self, wielder, target, **kwargs):
         """
         The auto attack Hummingbird
         """
         self.name = "bite"
-        damage = 5 + math.ceil(wielder.db.dexterity / 3)
+        damage = self.db.guild_level + math.ceil(wielder.db.dexterity / 3)
         self.energy_cost = 1
         self.speed = 3
         self.emote = f"You bite viciously at $you(target), but miss entirely."
@@ -52,5 +41,5 @@ class Hummingbird:
             )
             # the attack succeeded! apply the damage
             target.at_damage(wielder, damage, "edged")
-        wielder.db.gxp += 1
+        super().at_attack(wielder, target, **kwargs)
         wielder.cooldowns.add("attack", self.speed)

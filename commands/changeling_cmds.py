@@ -1,15 +1,45 @@
-from random import choice
+from random import choice, randint
 from evennia import CmdSet, search_tag
 from evennia.utils import iter_to_str
 from evennia.utils.evtable import EvTable
 from evennia import TICKER_HANDLER as tickerhandler
 from evennia import logger
 
+
+import math 
 from .command import Command
 
 def get_article(word):
     vowels = "aeiou"
     return "an" if word[0].lower() in vowels else "a"
+
+SKILLS_COST = {
+    1800,
+    9016,
+    25297,
+    54353,
+    99978,
+    166074,
+    256675,
+    375971,
+    528332,
+    718332,
+    950773,
+    1230709,
+    1563470,
+    1954686,
+    2410311,
+    2936647,
+    3540368,
+    4228544,
+    5008665,
+    5888665,
+    6876946,
+    7982402,
+    9214443,
+    10583019,
+    12098644
+}
 
 GUILD_LEVEL_COST_DICT = {
     2: 300,
@@ -40,7 +70,25 @@ GUILD_LEVEL_COST_DICT = {
     27: 1300000,
     28: 1900000,
     29: 2900000,
-    30: 4200000 
+    30: 4200000, 
+    31: 4200000000000,
+}
+SKILL_RANKS = {
+    0: "Very poor",
+    1: "Poor",
+    2: "Below average",
+    3: "Average",
+    4: "Above average",
+    5: "Moderate",
+    6: "Good",
+    7: "Very good",
+    8: "High",
+    9: "Very high",
+    10: "Excellent",
+    12: "Exceptional",
+    14: "Masterful",
+    16: "Supreme",
+    17: "God-like"
 }
 
 AVIAN_FORMS = {
@@ -111,15 +159,13 @@ class CmdMorph(Command):
     def func(self):
         caller = self.caller
         caller.msg(f"caller: {caller.db.ep}")
+        form = self.args.strip().lower()
         try:
-            form = self.args.strip()
-
             my_glvl = caller.db.guild_level
             caller.db.ep -= my_glvl
             caller.addhp(my_glvl)
             
             form_title = form.title()
-            
             if form == "human":
                 print(f"form = human and {caller.db.guild_level}")
                 self.msg(f"|rYou morph back into your human form!")
@@ -161,6 +207,7 @@ class CmdEnergyControl(Command):
     """
 
     key = "energy control"
+    aliases = ("ec")
     help_category = "Changeling"
 
     def func(self):
@@ -168,42 +215,26 @@ class CmdEnergyControl(Command):
         caller = self.caller
         caller.use_energy_control()
 
-class CmdDisableEnergyControl(Command):
-    """
-    Reactive armor enhances your physical resists while lowering others
+# class CmdDisableEnergyControl(Command):
+#     """
+#     Reactive armor enhances your physical resists while lowering others
 
-    Usage:
-        enable energy control
-        disable energy control
-    """
+#     Usage:
+#         enable energy control
+#         disable energy control
+#     """
 
-    key = "disable energy control"
-    help_category = "Changeling"
+#     key = "disable energy control"
+#     help_category = "Changeling"
 
-    def func(self):
-        print(self.caller)
-        caller = self.caller
-        caller.db.energy_control = False
-        caller.db.edgedac -= caller.db.guild_level
-        caller.db.bluntac -= caller.db.guild_level
-        caller.msg(f"|CYou release your control over energy.")
+#     def func(self):
+#         print(self.caller)
+#         caller = self.caller
+#         caller.db.energy_control = False
+#         caller.db.edgedac -= caller.db.guild_level
+#         caller.db.bluntac -= caller.db.guild_level
+#         caller.msg(f"|CYou release your control over energy.")
         
-class CmdRebuild(Command):
-    """
-    Restores health
-
-    Usage:
-        rebuild
-    """
-
-    key = "rebuild"
-    help_category = "combat"
-
-    def func(self):
-        print(self.caller)
-        caller = self.caller
-        caller.use_rebuild()
-
 class CmdEngulf(Command):
     """
     Engulf is the Changeling's Super Power.  You only get a limited
@@ -246,6 +277,7 @@ class CmdForms(Command):
     
     Usage:
     forms
+    forms <form>, - forms hummingbird
     """
     
     key="forms"
@@ -253,6 +285,13 @@ class CmdForms(Command):
         
     def func(self):
         caller = self.caller
+        form = self.args.strip().lower()
+        
+        if form in REPTILE_FORMS.values() or form in MAMMAL_FORMS.values() or form in AVIAN_FORMS.values():
+            form_desc = caller.get_form_help(form)
+            caller.msg(f"|G{form_desc}")
+            return
+        
         my_glvl = caller.db.guild_level
                     
         table = EvTable(f"|cAvian", f"|cMammal", f"|cReptile", f"|cGlvl", border="table")
@@ -261,6 +300,7 @@ class CmdForms(Command):
                 table.add_row(f"|Y{AVIAN_FORMS[glvl]}", f"|Y{MAMMAL_FORMS[glvl]}", f"|Y{REPTILE_FORMS[glvl]}", glvl)
             else:
                 table.add_row(f"|G{AVIAN_FORMS[glvl]}", f"|G{MAMMAL_FORMS[glvl]}", f"|G{REPTILE_FORMS[glvl]}", glvl)
+        table.add_row("", "", "", "")
         table.add_row(f"|Yslime", f"|Yhuman", "", 1)
         
         caller.msg(str(table))
@@ -285,7 +325,7 @@ class CmdGAdvance(Command):
     def _adv_level(self):
         print(f"adv level {self} and caller: {self.caller}")        
         caller = self.caller
-        cost = GUILD_LEVEL_COST_DICT[caller.db.guild_level+1]
+        cost = GUILD_LEVEL_COST_DICT.get(caller.db.guild_level+1, 0)
         print(f"cost{cost} and gxp: {caller.db.gxp}")
         if caller.db.gxp < cost:
             self.msg(f"|wYou need {cost - caller.db.gxp} more experience to advance.")
@@ -315,17 +355,49 @@ class CmdGuildStatSheet(Command):
     """
     View your character's current stats.
     """
-
     key = "gscore"
     aliases = ("gs")
 
     def func(self):
         caller = self.caller
-        self.msg(f"|c{caller} {caller.db.title} ({caller.db.alignment})")
-        self.msg(f"|GGuild Level: {caller.db.guild_level or 0}")
-        self.msg(f"|GGXP: {caller.db.gxp or 0}")
-        # self.msg(f"|GEmit: {caller.db.emit or 0}")
-        self.msg(f"|GForm: {caller.db.form}")
+        title = caller.db.title
+        alignment = caller.db.alignment
+        my_glvl = caller.db.guild_level or 1
+        gxp = caller.db.gxp or 0
+        form = caller.db.form or "none"                
+        gxp_needed = GUILD_LEVEL_COST_DICT[my_glvl+1]
+        ec = caller.db.energy_control or "none"
+        if ec:
+            ecActive = "Active"
+        else:
+            ecActive = "Inactive"
+        engulfs = caller.db.engulfs or 0
+        engulfMax = caller.db.max_engulfs or 0
+        
+        table = EvTable(f"|c{caller} {title} ({alignment})", border="table")
+        table.add_row(f"|GGuild Level: {my_glvl}")
+        table.add_row(f"|GGXP: {gxp} / {gxp_needed}")
+        table.add_row(f"|GEngulfs: {engulfs} / {engulfMax}")
+        table.add_row(f"|GForm: {form}")
+        table.add_row(f"|GEnergy Control: {ecActive}")
+        
+        skill_table = EvTable(f"|cSkills", border="table")
+        body_control = getattr(caller.db.skills, "body_control", 0)
+        drain = getattr(caller.db.skills, "drain", 0)
+        energy_control = getattr(caller.db.skills, "energy_control", 0)
+        familiar = getattr(caller.db.skills, "familiar", 0)
+        regeneration = getattr(caller.db.skills, "regeneration", 0)
+        vibrate = getattr(caller.db.skills, "vibrate", 0)
+        
+        skill_table.add_row(f"|GBody Control", f"|Y{SKILL_RANKS[body_control]}")
+        skill_table.add_row(f"|GDrain", f"|Y{SKILL_RANKS[drain]}")
+        skill_table.add_row(f"|GEnergy Control", f"|Y{SKILL_RANKS[energy_control]}")
+        skill_table.add_row(f"|GFamiliar", f"|Y{SKILL_RANKS[familiar]}")
+        skill_table.add_row(f"|GRegeneration", f"|Y{SKILL_RANKS[regeneration]}")
+        skill_table.add_row(f"|GVibrate", f"|Y{SKILL_RANKS[vibrate]}")
+        
+        caller.msg(str(table))
+        caller.msg(str(skill_table))
     
 class CmdJoinChangelings(Command):
     """
@@ -352,21 +424,33 @@ class CmdLeaveChangelings(Command):
     def func(self):
         caller = self.caller
         if caller.db.guild == "changeling":
+            caller.db.guild = "adventurer"
+            caller.db.guild_level = 1
+            caller.db.gxp = 0
             caller.db.subguild = "none"
             caller.db.form = "none"
-            caller.db.energy_control = "none"
             # clear powers if they're enabled so we don't end up with negative stats
             if caller.db.energy_control:
                 caller.use_energy_control()
-            tickerhandler.remove(interval=6, callback=caller.at_tick, idstring=f"{caller}-regen", persistent=True)
-            tickerhandler.remove(interval=60*5, callback=caller.at_engulf_tick, idstring=f"{caller}-superpower", persistent=True)
+            
+            try:
+                tickerhandler.remove(interval=6, callback=caller.at_tick, idstring=f"{caller}-regen", persistent=True)
+                tickerhandler.remove(interval=60*5, callback=caller.at_engulf_tick, idstring=f"{caller}-superpower", persistent=True)
+            except ValueError:
+                print(f"tickerhandler.remove failed")
             
             caller.cmdset.delete(ChangelingCmdSet)
             caller.swap_typeclass("typeclasses.characters.PlayerCharacter")
             caller.msg(f"|rYou leave the Changeling guild")
         else:
             caller.msg(f"|rYou are already an adventurer")
-            
+
+class CmdKickstart(Command):
+    key = "kickstart"
+    
+    def func(self):
+        caller = self.caller
+        caller.kickstart()
             
 class CmdAbsorb(Command):
     """
@@ -384,32 +468,151 @@ class CmdAbsorb(Command):
         if not self.args:
             target = self.caller
             self.msg(f"target {target}")
-            corpse = target.location.search("corpse")
-            ep = target.db.ep
-            epmax = target.db.epmax
-            power = corpse.db.power
+            if corpse := target.location.search("corpse-1"):
+                ep = target.db.ep
+                epmax = target.db.epmax
+                power = corpse.db.power
+                
+                if ep + power > epmax:
+                    target.db.ep = epmax
+                else:
+                    target.db.ep += max(power, 0)
+                corpse.delete()
+                self.msg(f"|yYou absorb the corpse and feel its inner power flow through you.")
             
-            if ep + power > epmax:
-                target.db.ep = epmax
-            else:
-                target.db.ep += max(power, 0)
-            corpse.delete()
-            self.msg(f"|You devour the corpse and feel its inner power flow through you.")
-        else:
-            print(f"status args: {self.caller.search(self.args.strip())}")
-            target = self.caller.search(self.args.strip())
-            if not target:
-                # no valid object found
-                return
-            self.msg(f"corpse with args {self.args}")
-            
+class CmdCellularReconstruction(Command):
+    """
+    The Changeling's ability to regenerate is a powerful one, but it
+    is not without its limits.  The Changeling can regenerate lost
+    cells, but it takes time and energy to do so.  The Changeling
+    can regenerate up to 10% of their maximum health every 6 seconds.
+    
+    Usage:
+        cellular reconstruction
+        cr
+        recon
+    """
+    
+    key = "cellular reconstruction"
+    aliases = ("cr", "recon")
+    cost = 25
+    guild_level = 9
+    
+    def func(self):
+        caller = self.caller
+        gl = caller.db.guild_level
+        if gl < self.guild_level:
+            self.msg(f"|rYou must be at least {self.guild_level} to use this power.")
+            return
+        if caller.db.ep < self.cost:
+            self.msg(f"|rYou don't have enough energy to use this power.")
+            return
+        
+        regen = caller.db.skills["regeneration"]
+        to_heal = math.floor(30 + gl/2 + randint(0, caller.db.wisdom) + regen)
+
+        caller.addhp(to_heal)
+        caller.db.ep -= self.cost
+        caller.msg(f"|yYou concentrate on your cells and new ones begin to grow and form.")
    
+class CmdCellularRegrowth(Command):
+    """
+    The Changeling's ability to regenerate is a powerful one, but it
+    is not without its limits.  The Changeling can regenerate lost
+    cells, but it takes time and energy to do so.  The Changeling
+    can regenerate up to 10% of their maximum health every 6 seconds.
+    This power costs 25 energy points to use and then additional energy
+    to sustain the regeneration.
+    
+    Usage:
+        cellular regrowth
+    """
+    
+    key = "cellular regrowth"
+    cost = 25
+    guild_level = 3
+    
+    def func(self):
+        caller = self.caller
+        gl = caller.db.guild_level
+        if gl < self.guild_level:
+            self.msg(f"|rYou must be at least {self.guild_level} to use this power.")
+            return
+        if caller.db.ep < self.cost:
+            self.msg(f"|rYou don't have enough energy to use this power.")
+            return
+        
+        regen = caller.db.skills["regeneration"]
+        to_heal = math.floor(5 + regen/2 + randint(0, regen/2) + gl/8 + randint(0, gl/8))
+        to_drain = math.floor(to_heal/3)
+        
+        # cost to activate
+        caller.db.ep -= self.cost
+        # set up the regen
+        caller.db.regrowth_rate += to_heal
+        caller.db.regrowth_cost -= to_drain
+        
+        caller.msg(f"|yYou begin to reconstruct your lost cells.")
+        
+class CmdExperiment(Command):
+    """
+    Advance a level or attribute by spending experience points.
+
+    Enter "experiment" to see what you can learn.
+
+    Usage:
+        experiment
+
+    Example:
+        experiment body_control
+    """
+
+    key = "experiment"
+     
+    def func(self):
+        caller = self.caller
+        try:
+            skill = self.args.strip().lower()
+            list = ["body_control", "drain", "energy_control", "familiar", "regeneration", "vibrate"]
+            
+            if skill == "":
+                self.msg(f"|gWhat would you like to experiment with?")
+                return
+            
+            if skill not in list:
+                caller.msg(f"|gYou can't study that.")
+                return
+
+            current_skill = getattr(caller.db.skills, skill, 0)
+            cost = SKILLS_COST[current_skill+1]
+            if caller.db.skillxp < cost:
+                self.msg(f"|wYou need {cost-caller.db.skillxp} more experience to advance your level.")
+                return
+            
+            confirm = yield (
+                f"It will cost you {cost} experience to advance your level. Confirm? Yes/No"
+            )
+            if confirm.lower() not in (
+                "yes",
+                "y",
+            ):
+                self.msg("Cancelled.")
+                return
+            caller.db.skillxp -= cost
+            setattr(caller.db.skills, skill, current_skill+1)
+            caller.msg(f"You grow more powerful ({skill} {current_skill+1})")
+            
+        except ValueError:
+            self.msg("Usage: enhance <body_control>")
+            return   
 class CmdTest(Command):
     key = "test"
     
     def func(self):
-        msg = self.caller.get_hit_message(50, "fart")
-        print(f"in test: {msg}")
+        # msg = self.caller.get_hit_message(self.caller, 4, "fart")
+        # print(f"in test: {msg}")
+        # self.caller.location.key = "Millennium Square"
+        self.caller.cmdset.delete(ChangelingCmdSet)
         
 class ChangelingCmdSet(CmdSet):
     key = "Changeling CmdSet"
@@ -422,8 +625,11 @@ class ChangelingCmdSet(CmdSet):
         self.add(CmdGuildStatSheet)
         self.add(CmdMorph)
         self.add(CmdEnergyControl)
-        # self.add(CmdDisableEnergyControl)
         self.add(CmdEngulf)
         self.add(CmdForms)
         self.add(CmdTest)
+        self.add(CmdKickstart)
+        self.add(CmdCellularReconstruction)
+        self.add(CmdCellularRegrowth)
+        self.add(CmdExperiment)
 

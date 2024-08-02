@@ -2,27 +2,23 @@ import math
 
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
-class Finch(ChangelingAttack):
+class Sparrow(ChangelingAttack):
     """
-    The finch is a small bird, typically weighing around 20 grams and measuring
-    about 12 centimeters in length. Finches are known for their vibrant colors
-    and melodious songs. They are agile fliers and can navigate through dense
-    foliage with ease.
+    Sparrows are small, fast birds that are known for their
+    agility and quick reflexes. They are often found in
+    urban environments and are known for their distinctive
+    chirping songs.
     """
 
     damage = 2
     energy_cost = 2
     skill = "edged"
-    name = "peck"
+    name = "bite2"
     speed = 2
-
+    
     def at_attack(self, wielder, target, **kwargs):
-        wielder.msg("|cat_attack in finch")
-        """
-        The auto attack Finch
-        """
-        self.name = "peck"
-        damage = 3 + self.db.guild_level + math.ceil(wielder.db.dexterity / 3)
+        self.name = "bite2"
+        damage = 6 + self.db.guild_level + math.ceil(wielder.db.dexterity / 2)
         self.energy_cost = 2
         self.speed = 2
         self.emote = f"You peck viciously at $you(target), but miss entirely."
@@ -30,7 +26,7 @@ class Finch(ChangelingAttack):
             
         # subtract the energy required to use this
         wielder.db.ep -= self.energy_cost
-        target.at_damage(wielder, damage, "peck")
+        target.at_damage(wielder, damage, "bite2")
         super().at_attack(wielder, target, **kwargs)
         wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
         wielder.cooldowns.add("attack", self.speed)
