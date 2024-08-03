@@ -2,6 +2,7 @@ from random import choice
 from evennia import AttributeProperty
 from evennia.utils import logger
 from evennia.contrib.game_systems.containers import ContribContainer
+from random import randint
 
 from .objects import Object, ClothingObject
 
@@ -103,6 +104,7 @@ class MeleeWeapon(Object):
             result = wielder.use_skill(skill, speed=self.speed)
             # apply the weapon damage as a modifier
             damage = damage * result
+            damage = randint(damage / 2, damage)
         # if no skill required, we are just using our unmodified damage value
 
         # subtract the energy required to use this

@@ -10,7 +10,7 @@ from evennia.contrib.game_systems.clothing.clothing import (
     get_worn_clothes,
 )
 from evennia.contrib.game_systems.cooldowns import CooldownHandler
-from world.prototypes import SMALL_CORPSE, IRON_DAGGER
+from world.prototypes import MOB_CORPSE, IRON_DAGGER
 import math
 from .objects import ObjectParent
 
@@ -167,17 +167,14 @@ class Character(ObjectParent, ClothedCharacter):
         """
         Apply damage, after taking into account damage resistances.
         """
-        print("at_damage in character")
-        # hit_msg = attacker.get_hit_message(damage, self.get_display_name(attacker))
-        # self.location.msg_contents(f"{hit_msg}", from_obj=self.caller)
-        
+        # GENERALL NOT USED - OVERRIDEN BY NPC / PC / GUILD versions
+  
         # apply armor damage reduction
         damage -= self.defense(damage_type)
         if damage < 0:
             damage = 0
-        print(f"at_damage in character: self:{self} attacker:{attacker} hp:{self.db.hp} max(damage):{max(damage,0)} dmg: {damage}")
         self.db.hp -= max(damage, 0)
-        self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
+        self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}. Character")
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
         if self.db.hp <= 0:
             # if self.in_combat:
@@ -409,9 +406,9 @@ class Character(ObjectParent, ClothedCharacter):
             self.db.hp = self.db.hpmax // 5
             self.msg(prompt=self.get_display_status(self))
     
-    def get_emote(self, target, dam):
+    def get_emote(self, target, dam, display_name=None):
         color = "|r"
-        tn = target
+        tn = display_name
 
         return [
             f"{color}$You() swing and miss, hitting nothing but air. {dam}",
@@ -426,9 +423,9 @@ class Character(ObjectParent, ClothedCharacter):
             f"{color}$You() $conj(hit) {tn}{color} so hard that blood spatters around the room! {dam}",
             f"{color}$You() $conj(tear) into {tn}{color} with brutal force! {dam}",
         ]
-    def get_hit_message(self, attacker, dam, tn):
+    def get_hit_message(self, target, dam, display_name ):
 
-        msgs = self.get_emote(tn, dam)
+        msgs = self.get_emote(target, dam, display_name)
         if dam == 0:
             to_me = msgs[0]
         elif 1 <= dam <= 5:
@@ -509,14 +506,17 @@ class PlayerCharacter(Character):
         """
         Apply damage, after taking into account damage resistances.
         """
-        self.msg(f"|cAttack in PC")
+        # GENERALLY NOT CALLED - OVERRIDEN BY GUILD VERSION
+        self.msg(f"at_damage in PC")
         # apply armor damage reduction
         damage -= self.defense(damage_type)
         if damage < 0:
             damage = 0
         self.db.hp -= max(damage, 0)
-        self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
-        attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
+        # self.msg(f"You take {damage} damage from {attacker.get_display_name(self)} PC.")
+        # attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
+        # self.get_hit_message(attacker, damage, f"PC at_damage {self.get_display_name(attacker)}")
+        attacker.get_hit_message(attacker, damage, f"PC at_damage {self.get_display_name(attacker)}")
         
         status = self.get_display_status(self)
         self.msg(prompt=status)
@@ -706,15 +706,11 @@ class NPC(Character):
         damage -= self.defense(damage_type)
         if damage < 0:
             damage = 0
+        self.location.msg_contents(f"at_damage npc msg room {self} - {damage}", from_obj=self)
         self.db.hp -= max(damage, 0)
-        self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
-        
-        attacker.get_hit_message(attacker, damage, self.get_display_name(attacker))
+        self.msg(f"You take {damage} damage from {attacker.get_display_name(self)} NPC.")
         # this sends the hit_msg FROM the player TO the room with the damage AFTER reduction by npc
-        # if hit_msg := attacker.get_hit_message(damage, self.get_display_name(attacker)):
-        #     print(f"hit msg: {hit_msg}")
-        #     self.location.msg_contents(hit_msg, from_obj=self.get_display_name(attacker))
-            # attacker.msg(f"{hit_msg}")
+        attacker.get_hit_message(attacker, damage, f"{self.get_display_name(attacker)}")
         
         if self.db.hp <= 0:
             self.tags.add("defeated", category="status")
@@ -724,14 +720,25 @@ class NPC(Character):
                 if not combat_script.remove_combatant(self):
                     # something went wrong...
                     return
+                
                 # create loot drops
-                print(f"before corpse")
-                # corpse = spawner.spawn([IRON_DAGGER])
-                # corpse.location = self.location
-                # print(f"after corpse: {corpse}")
-                objs = spawn(*list(self.db.drops))
-                for obj in objs:
-                    obj.location = self.location
+                corpse = {
+                    "key": f"|Ya decaying corpse of {self}",
+                    "typeclass": "typeclasses.corpse.Corpse",
+                    "desc": f"|YThe decaying corpse of {self} lies here. It looks heavy, and full of nutrients.|n",
+                    "location": self.location,
+                    "power": self.db.level * 8
+                }
+                
+                corpses = spawner.spawn(corpse)
+                # for corpse in corpses:
+                #     delay(10, corpse.delete)
+                #     self.location.msg_contents(f"A {corpse.key} appears.", from_obj=self)
+                
+                if self.db.drops:
+                    objs = spawn(*list(self.db.drops))
+                    for obj in objs:
+                        obj.location = self.location
                 self.move_to(None, False, None, True, True, True, "teleport")
                 delay(10, self.at_respawn)
                 return
@@ -822,21 +829,21 @@ class NPC(Character):
         # apply the weapon damage as a modifier to skill
         damage = damage * result
         # subtract the energy required to use this
-        self.db.ep -= weapon.get("energy_cost", 5)
-        if not damage:
-            # the attack failed
-            self.at_emote(
-                f"$conj(swings) $pron(your) {weapon.get('name')} at $you(target), but $conj(misses).",
-                mapping={"target": target},
-            )
-        else:
-            verb = weapon.get("damage_type", "hits")
-            wielder.at_emote(
-                f"$conj({verb}) $you(target) with $pron(your) {weapon.get('name')}.",
-                mapping={"target": target},
-            )
+        # self.db.ep -= weapon.get("energy_cost", 5)
+        # if not damage:
+        #     # the attack failed
+        #     self.at_emote(
+        #         f"$conj(swings) $pron(your) {weapon.get('name')} at $you(target), but $conj(misses).",
+        #         mapping={"target": target},
+        #     )
+        # else:
+        #     verb = weapon.get("damage_type", "hits")
+        #     wielder.at_emote(
+        #         f"$conj({verb}) $you(target) with $pron(your) {weapon.get('name')}.",
+        #         mapping={"target": target},
+        #     )
             # the attack succeeded! apply the damage
-            target.at_damage(wielder, damage, weapon.get("damage_type"))
+        target.at_damage(wielder, damage, weapon.get("damage_type"))
         wielder.msg(f"[ Cooldown: {speed} seconds ]")
         wielder.cooldowns.add("attack", speed)
     

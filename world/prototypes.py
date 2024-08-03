@@ -3,11 +3,11 @@ Prototypes
 """
 from random import randint, choice
 
-SMALL_CORPSE = {
+MOB_CORPSE = {
     "typeclass": "typeclasses.corpse.Corpse",
     "key": "A small corpse",
     "tags": [
-        ("pierce", "damage_type"),
+        ("mob_corpse"),
     ],
     "value": 20,
 }

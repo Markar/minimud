@@ -4,6 +4,7 @@ from evennia.utils import iter_to_str
 from evennia.utils.evtable import EvTable
 from evennia import TICKER_HANDLER as tickerhandler
 from evennia import logger
+from evennia.prototypes import spawner, prototypes
 
 
 import math 
@@ -471,7 +472,7 @@ class CmdAbsorb(Command):
             if corpse := target.location.search("corpse-1"):
                 ep = target.db.ep
                 epmax = target.db.epmax
-                power = corpse.db.power
+                power = corpse.db.power or 0
                 
                 if ep + power > epmax:
                     target.db.ep = epmax
@@ -609,10 +610,22 @@ class CmdTest(Command):
     key = "test"
     
     def func(self):
+        
+        corpse = {
+            "key":"a corpse",
+            "typeclass": "typeclasses.corpse.Corpse",
+            "desc": "A small corpse",
+            "location": self.caller.location
+        }
+        spawner.spawn(corpse)
+        # objs = spawner.spawn(*list(search_tag("MOB_CORPSE")))
+        # for obj in objs:
+        #     self.caller.msg(f"obj: {obj}")
+        #     obj.location = self.location
         # msg = self.caller.get_hit_message(self.caller, 4, "fart")
         # print(f"in test: {msg}")
         # self.caller.location.key = "Millennium Square"
-        self.caller.cmdset.delete(ChangelingCmdSet)
+        # self.caller.cmdset.delete(ChangelingCmdSet)
         
 class ChangelingCmdSet(CmdSet):
     key = "Changeling CmdSet"

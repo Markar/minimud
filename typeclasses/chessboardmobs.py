@@ -24,13 +24,6 @@ SCRAWNY_GNOLL = {
         "energy_cost": 1,
     },
     "exp_reward": 100,
-    "drops": [{
-        "key": "decaying corpse of a scrawny gnoll.",
-        "aliases": ["corpse"],
-        "desc": "corpse of a scrawny gnoll",
-        "name_color": "r",
-        "power": 20
-    }],
     "can_attack": True,
 }
 

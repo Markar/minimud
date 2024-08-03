@@ -294,7 +294,7 @@ class Changelings(PlayerCharacter):
         attack = FORM_CLASSES[self.db.form].name
 
         msgs = AttackEmotes.get_emote(attacker, attack, tn, which="left")
-        if dam == 0:
+        if dam <= 0:
             to_me = msgs[0]
         elif 1 <= dam <= 5:
             to_me = msgs[1]
@@ -341,6 +341,9 @@ class Changelings(PlayerCharacter):
         self.db.hp -= max(damage, 0)
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
+        # The NPC's attack, emoting to the room
+        # a scrawny gnoll tears into changeling at_damage Markar with brutal force! -18
+        attacker.get_hit_message(self, damage, self.get_display_name(self))
         
         status = self.get_display_status(self)
         self.msg(prompt=status)

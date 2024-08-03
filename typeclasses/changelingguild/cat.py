@@ -23,7 +23,7 @@ class Cat(ChangelingAttack):
         """
         super().at_attack(wielder, target, **kwargs)
         base_dmg = 5 + wielder.db.guild_level + math.ceil(wielder.db.dexterity / 3)
-        damage = randint(base_dmg/3, base_dmg)
+        damage = randint(math.ceil(base_dmg/2), base_dmg)
         self.energy_cost = 3
         self.speed = 3
         self.emote = "You scratch at " + str(target) + ", but miss entirely."
