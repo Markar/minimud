@@ -1,4 +1,5 @@
 import math
+from random import randint
 
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
@@ -14,24 +15,19 @@ class Fox(ChangelingAttack):
     skill = "edged"
     name = "bite"
     speed = 2
+    power = 12
+    toughness = 9
+    dodge = 17
     
-    def at_pre_attack(self, wielder, **kwargs):
-        # make sure we have enough energy left
-        if wielder.db.ep < self.energy_cost:
-            wielder.msg("You are too tired to attack.")
-            return False
-        # can't attack if on cooldown
-        if not wielder.cooldowns.ready("attack"):
-            wielder.msg("You can't attack again yet.")
-            return False
-
-        return True
-
     def at_attack(self, wielder, target, **kwargs):
         """
         The fox's pounce attack
         """
-        damage = 15 + math.ceil(wielder.db.strength / 3)
+        
+        bonus = math.ceil(10 + wielder.db.strength / 3)
+        base_dmg = bonus + (wielder.db.guild_level * self.power)/2
+        damage = randint(math.ceil(base_dmg/2), base_dmg)
+        
         self.energy_cost = 5
         self.speed = 2
         self.emote = "You pounce at " + str(target) + ", but miss entirely."

@@ -2,24 +2,27 @@ import math
 
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
-class Rat(ChangelingAttack):
+class Iguana(ChangelingAttack):
     """
-    Rats are small, agile creatures known for their ability to
-    scurry through tight spaces and spread disease.
+    Unlike several of the other types of lizard, iguanas and
+    other iguanid lizards display fairly complex courtship and
+    terretorial behavioral rites.
     """
 
     damage = 1
     energy_cost = 3
-    skill = "edged"
-    name = "claw"
+    skill = "blunt"
+    name = "tail"
     speed = 3
-
+    power = 8,
+    toughness = 10,
+    dodge = 9,
+    
     def at_attack(self, wielder, target, **kwargs):
         """
-        The auto attack Rat
+        The auto attack Iguana
         """
-        self.name = "claw"
-        damage = wielder.db.guild_level + math.ceil(wielder.db.strength / 3)
+        damage = 20 + self.db.guild_level + math.ceil(wielder.db.strength / 3)
         self.energy_cost = 3
         self.speed = 3
         self.emote = f"Your tail catches nothing but air."
@@ -29,5 +32,6 @@ class Rat(ChangelingAttack):
         wielder.db.ep -= self.energy_cost
         target.at_damage(wielder, damage, self.skill)
         super().at_attack(wielder, target, **kwargs)
-        wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
+        wielder.msg("[ Cooldown: " + str(self.speed) + " seconds ]")
         wielder.cooldowns.add("attack", self.speed)
+

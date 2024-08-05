@@ -14,6 +14,8 @@ py here.scripts.get('combat').delete()
 >>> here.scripts.get('combat').delete()
 (1, {'scripts.CombatScript': 1})
 
+# Delete all in limbo
+py _ = [obj.delete() for obj in self.search("#2").contents]
 
 evennia xyzgrid add world.maps.newbie_land
 evennia xyzgrid 

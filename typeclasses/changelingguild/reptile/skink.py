@@ -2,7 +2,7 @@ import math
 
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
-class Viper(ChangelingAttack):
+class Skink(ChangelingAttack):
     """
     Most species are secretive ground dwellers or burrowers,
     and may show such adaptations as a clear ("window") scale
@@ -12,24 +12,27 @@ class Viper(ChangelingAttack):
 
     damage = 1
     energy_cost = 3
-    skill = "poison"
+    skill = "blunt"
     name = "bite"
     speed = 3
+    power = 2,
+    toughness = 4,
+    dodge = 5,
     
     def at_attack(self, wielder, target, **kwargs):
         """
-        The auto attack Viper
+        The auto attack Skink
         """
         self.name = "bite"
-        damage = 30 + self.db.guild_level + math.ceil(wielder.db.dexterity / 3)
+        damage = 15 + self.db.guild_level + math.ceil(wielder.db.strength / 3)
         self.energy_cost = 3
         self.speed = 3
-        self.emote = "You bite viciously at " + str(target) + ", but miss entirely."
-        self.emote_hit = "You bite glancingly into " + str(target) + ", and cause some minor scratches"        
+        self.emote = f"You bite viciously at $you(target), but miss entirely."
+        self.emote_hit = f"You bite glancingly into $you(target), and cause some minor scratches"        
             
         # subtract the energy required to use this
         wielder.db.ep -= self.energy_cost
         target.at_damage(wielder, damage, self.db.skill)
         super().at_attack(wielder, target, **kwargs)
-        wielder.msg("[ Cooldown: " + str(self.speed) + " seconds ]")
+        wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
         wielder.cooldowns.add("attack", self.speed)

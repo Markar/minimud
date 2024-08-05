@@ -28,4 +28,5 @@ class ChangelingAttack:
         The auto attack for changelings. Only put things that are shared
         between all forms here.
         """
+        
         wielder.db.gxp += self.gxp_rate

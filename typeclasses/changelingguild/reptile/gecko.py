@@ -15,6 +15,9 @@ class Gecko(ChangelingAttack):
     skill = "blunt"
     name = "bite"
     speed = 3
+    power = 5,
+    toughness = 5,
+    dodge = 5,
 
     def at_attack(self, wielder, target, **kwargs):
         """

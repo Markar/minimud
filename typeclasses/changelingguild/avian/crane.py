@@ -13,6 +13,9 @@ class Crane(ChangelingAttack):
     skill = "blunt"
     name = "bite2"
     speed = 2
+    power = 10
+    toughness = 10
+    dodge = 17
     
     def at_attack(self, wielder, target, **kwargs):
         self.name = "bite2"

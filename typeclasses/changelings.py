@@ -19,51 +19,51 @@ from typeclasses.changelingguild.attack_emotes import AttackEmotes
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 from typeclasses.changelingguild.slime import Slime
 from typeclasses.changelingguild.human import Human
-from typeclasses.changelingguild.anole import Anole
-from typeclasses.changelingguild.teiid import Teiid
-from typeclasses.changelingguild.gecko import Gecko
-from typeclasses.changelingguild.skink import Skink
-from typeclasses.changelingguild.iguana import Iguana
-from typeclasses.changelingguild.boa import Boa
-from typeclasses.changelingguild.viper import Viper
-# from typeclasses.changelingguild.caiman import Caiman
-# from typeclasses.changelingguild.cobra import Cobra
-# from typeclasses.changelingguild.gilamonster import GilaMonster
-# from typeclasses.changelingguild.python import Python
-# from typeclasses.changelingguild.crocodile import Crocodile
-# from typeclasses.changelingguild.alligator import Alligator
-# from typeclasses.changelingguild.anaconda import Anaconda
-# from typeclasses.changelingguild.komododragon import KomodoDragon
-from typeclasses.changelingguild.rat import Rat
-from typeclasses.changelingguild.cat import Cat
-from typeclasses.changelingguild.lynx import Lynx
-from typeclasses.changelingguild.fox import Fox
-from typeclasses.changelingguild.badger import Badger
-from typeclasses.changelingguild.wolverine import Wolverine
-from typeclasses.changelingguild.wolf import Wolf
-# from typeclasses.changelingguild.blackbear import BlackBear
-# from typeclasses.changelingguild.changeling_attack.grizzlybear import GrizzlyBear
-# from typeclasses.changelingguild.elephant import Elephant
-# from typeclasses.changelingguild.cheetah import Cheetah
-# from typeclasses.changelingguild.leopard import Leopard
-# from typeclasses.changelingguild.jaguar import Jaguar
-# from typeclasses.changelingguild.tiger import Tiger
-# from typeclasses.changelingguild.lion import Lion
-from typeclasses.changelingguild.hummingbird import Hummingbird
-from typeclasses.changelingguild.finch import Finch
-from typeclasses.changelingguild.sparrow import Sparrow
-from typeclasses.changelingguild.swallow import Swallow
-from typeclasses.changelingguild.crow import Crow
-from typeclasses.changelingguild.raven import Raven
-from typeclasses.changelingguild.crane import Crane
-# from typeclasses.changelingguild.kestrel import Kestrel
-# from typeclasses.changelingguild.owl import Owl
-# from typeclasses.changelingguild.osprey import Osprey
-# from typeclasses.changelingguild.falcon import Falcon
-# from typeclasses.changelingguild.hawk import Hawk
-# from typeclasses.changelingguild.condor import Condor
-# from typeclasses.changelingguild.ostrich import Ostrich
-# from typeclasses.changelingguild.eagle import Eagle
+from typeclasses.changelingguild.reptile.anole import Anole
+from typeclasses.changelingguild.reptile.teiid import Teiid
+from typeclasses.changelingguild.reptile.gecko import Gecko
+from typeclasses.changelingguild.reptile.skink import Skink
+from typeclasses.changelingguild.reptile.iguana import Iguana
+from typeclasses.changelingguild.reptile.boa import Boa
+from typeclasses.changelingguild.reptile.viper import Viper
+# from typeclasses.changelingguild.reptile.caiman import Caiman
+# from typeclasses.changelingguild.reptile.cobra import Cobra
+# from typeclasses.changelingguild.reptile.gilamonster import GilaMonster
+# from typeclasses.changelingguild.reptile.python import Python
+# from typeclasses.changelingguild.reptile.crocodile import Crocodile
+# from typeclasses.changelingguild.reptile.alligator import Alligator
+# from typeclasses.changelingguild.reptile.anaconda import Anaconda
+# from typeclasses.changelingguild.reptile.komododragon import KomodoDragon
+from typeclasses.changelingguild.mammal.rat import Rat
+from typeclasses.changelingguild.mammal.cat import Cat
+from typeclasses.changelingguild.mammal.lynx import Lynx
+from typeclasses.changelingguild.mammal.fox import Fox
+from typeclasses.changelingguild.mammal.badger import Badger
+from typeclasses.changelingguild.mammal.wolverine import Wolverine
+from typeclasses.changelingguild.mammal.wolf import Wolf
+# from typeclasses.changelingguild.mammal.blackbear import BlackBear
+# from typeclasses.changelingguild.mammal.grizzlybear import GrizzlyBear
+# from typeclasses.changelingguild.mammal.elephant import Elephant
+# from typeclasses.changelingguild.mammal.cheetah import Cheetah
+# from typeclasses.changelingguild.mammal.leopard import Leopard
+# from typeclasses.changelingguild.mammal.jaguar import Jaguar
+# from typeclasses.changelingguild.mammal.tiger import Tiger
+# from typeclasses.changelingguild.mammal.lion import Lion
+from typeclasses.changelingguild.avian.hummingbird import Hummingbird
+from typeclasses.changelingguild.avian.finch import Finch
+from typeclasses.changelingguild.avian.sparrow import Sparrow
+from typeclasses.changelingguild.avian.swallow import Swallow
+from typeclasses.changelingguild.avian.crow import Crow
+from typeclasses.changelingguild.avian.raven import Raven
+from typeclasses.changelingguild.avian.crane import Crane
+# from typeclasses.changelingguild.avian.kestrel import Kestrel
+# from typeclasses.changelingguild.avian.owl import Owl
+# from typeclasses.changelingguild.avian.osprey import Osprey
+# from typeclasses.changelingguild.avian.falcon import Falcon
+# from typeclasses.changelingguild.avian.hawk import Hawk
+# from typeclasses.changelingguild.avian.condor import Condor
+# from typeclasses.changelingguild.avian.ostrich import Ostrich
+# from typeclasses.changelingguild.avian.eagle import Eagle
 
 FORM_CLASSES = {
     "ChangelingAttack": ChangelingAttack,
@@ -330,8 +330,28 @@ class Changelings(PlayerCharacter):
         """
         Apply damage, after taking into account damage resistances.
         """
+        form = FORM_CLASSES[self.db.form]
+        # apply dodge
+        glvl = self.db.guild_level
+        form_dodge = form.dodge
+        dodge = form_dodge + glvl + self.db.dexterity
+        if dodge > 90:
+            dodge = 90
+                    
+        if randint(1, 100) >= dodge:
+            self.msg(f"|cYou dodge the attack!")
+            attacker.msg(f"{self.get_display_name(attacker)} dodges your attack!")
+            return
+        
+        # aply toughness
+        toughness = self.db.toughness + glvl + self.db.constitution
+        tougness_reduction = randint(toughness / 2, toughness)
+        damage -= tougness_reduction
+        
         # apply armor damage reduction
         damage -= self.defense(damage_type)
+        
+        # apply energy control reduction
         if self.db.energy_control:
             self.msg(f"|cYou block some damage!")
             if damage_type in ["edged", "blunt"]:
@@ -415,3 +435,47 @@ class Changelings(PlayerCharacter):
         self.cooldowns.add("engulf", 5)
         self.msg(f"|rYou flow around {target} completely enclosing them in plasma!")
         
+    def get_display_status(self, looker, **kwargs):
+        """
+        Returns a quick view of the current status of this character
+        """
+
+        # print(f"get_display_status: {self}, {self.args}")
+        chunks = []
+        # prefix the status string with the character's name, if it's someone else checking
+        # if looker != self:
+        #     chunks.append(self.get_display_name(looker, **kwargs))
+
+        # add resource levels
+        hp = math.floor(self.db.hp)
+        hpmax = self.db.hpmax
+        fp = math.floor(self.db.fp)
+        fpmax = self.db.fpmax
+        ep = math.floor(self.db.ep)
+        epmax = self.db.epmax
+        chunks.append(
+            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax} Energy: |G{ep}/{epmax}|g Form: |G{self.db.form}"
+        )
+        print(f"looker != self {looker} and self {self}")
+        if looker != self:
+            chunks.append(
+                f"|gE: |G{looker.get_display_name(self, **kwargs)} ({looker.db.hp})"
+            )
+
+        # get all the current status flags for this character
+        if status_tags := self.tags.get(category="status", return_list=True):
+            # add these statuses to the string, if there are any
+            chunks.append(iter_to_str(status_tags))
+
+        if looker == self:
+            # if we're checking our own status, include cooldowns
+            all_cooldowns = [
+                (key, self.cooldowns.time_left(key, use_int=True))
+                for key in self.cooldowns.all
+            ]
+            all_cooldowns = [f"{c[0]} ({c[1]}s)" for c in all_cooldowns if c[1]]
+            if all_cooldowns:
+                chunks.append(f"Cooldowns: {iter_to_str(all_cooldowns, endsep=',')}")
+
+        # glue together the chunks and return
+        return " - ".join(chunks)

@@ -16,6 +16,10 @@ class Sparrow(ChangelingAttack):
     name = "bite2"
     speed = 2
     
+    power = 3
+    toughness = 2
+    dodge = 3
+    
     def at_attack(self, wielder, target, **kwargs):
         self.name = "bite2"
         damage = 6 + self.db.guild_level + math.ceil(wielder.db.dexterity / 2)

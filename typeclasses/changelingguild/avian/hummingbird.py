@@ -14,6 +14,9 @@ class Hummingbird(ChangelingAttack):
     skill = "edged"
     name = "bite"
     speed = 3
+    power = 1
+    toughness = 2
+    dodge = 27
 
     def at_attack(self, wielder, target, **kwargs):
         """

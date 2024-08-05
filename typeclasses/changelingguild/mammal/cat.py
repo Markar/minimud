@@ -13,17 +13,23 @@ class Cat(ChangelingAttack):
 
     damage = 1
     energy_cost = 3
-    skill = "blunt"
+    skill = "edged"
     name = "claw"
     speed = 3
+    power = 5
+    toughness = 20
+    dodge = 15
     
     def at_attack(self, wielder, target, **kwargs):
         """
         The auto attack Cat
         """
         super().at_attack(wielder, target, **kwargs)
-        base_dmg = 5 + wielder.db.guild_level + math.ceil(wielder.db.dexterity / 3)
+        
+        bonus = math.ceil(5 + wielder.db.dexterity / 3)
+        base_dmg = bonus + (wielder.db.guild_level * self.power)/2
         damage = randint(math.ceil(base_dmg/2), base_dmg)
+        
         self.energy_cost = 3
         self.speed = 3
         self.emote = "You scratch at " + str(target) + ", but miss entirely."

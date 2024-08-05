@@ -1,4 +1,5 @@
 import math
+from random import randint
 
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
@@ -17,14 +18,18 @@ class Wolf(ChangelingAttack):
     skill = "edged"
     name = "bite"
     speed = 3
+    power = 17
+    toughness = 14
+    dodge = 14
     
     def at_attack(self, wielder, target, **kwargs):
         """
         The wolf's attack method
         """
-        glvl = wielder.db.glvl
-        strength = wielder.db.strength
-        damage = 40 + glvl + math.ceil(strength / 3)
+        bonus = math.ceil(5 + wielder.db.strength / 3)
+        base_dmg = bonus + (wielder.db.guild_level * self.power)/2
+        damage = randint(math.ceil(base_dmg/2), base_dmg)
+        
         self.energy_cost = 3
         self.speed = 3
         self.emote = "You lunge at " + str(target) + ", but miss entirely."
