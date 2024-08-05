@@ -320,6 +320,7 @@ class CmdGTrain(Command):
     """
     
     key = "gtrain"
+    help_category = "Changeling"
     
     def func(self):
         caller = self.caller
@@ -367,7 +368,7 @@ class CmdGAdvance(Command):
     Example:
         gadvance
     """
-
+    help_category = "Changeling"
     key = "gadvance"
     aliases = ("gadv")
 
@@ -406,6 +407,7 @@ class CmdGuildStatSheet(Command):
     """
     key = "gscore"
     aliases = ("gs")
+    help_category = "Changeling"
 
     def func(self):
         caller = self.caller
@@ -511,7 +513,8 @@ class CmdAbsorb(Command):
     nothing left to decay.
     """
     
-    key = "absorb" 
+    key = "absorb"
+    help_category = "Changeling"
     
     def func(self):
         if not self.args:
@@ -541,7 +544,7 @@ class CmdCellularReconstruction(Command):
         cr
         recon
     """
-    
+    help_category = "Changeling"
     key = "cellular reconstruction"
     aliases = ("cr", "recon")
     cost = 25
@@ -576,7 +579,7 @@ class CmdCellularRegrowth(Command):
     Usage:
         cellular regrowth
     """
-    
+    help_category = "Changeling"
     key = "cellular regrowth"
     aliases = ("regrowth", "cg")
     cost = 25
@@ -616,6 +619,7 @@ class CmdExperiment(Command):
         experiment body_control
     """
 
+    help_category = "Changeling"
     key = "experiment"
      
     def func(self):
