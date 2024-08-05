@@ -128,14 +128,14 @@ class CmdStatSheet(Command):
         self.msg(str(table))
         
         # display known skills
-        self.msg(f"\n|gSKILLS")
-        skills = []
-        for skill_key in sorted(SKILL_DICT.keys()):
-            if skill := caller.traits.get(skill_key):
-                skills.append((skill.name, int(skill.value)))
-        rows = list(zip(*skills))
-        if not rows:
-            self.msg("(None)")
+        # self.msg(f"\n|gSKILLS")
+        # skills = []
+        # for skill_key in sorted(SKILL_DICT.keys()):
+        #     if skill := caller.traits.get(skill_key):
+        #         skills.append((skill.name, int(skill.value)))
+        # rows = list(zip(*skills))
+        # if not rows:
+        #     self.msg("(None)")
         table = EvTable(table=rows, border="none")
         self.msg(f"{str(table)}\n\n")
 

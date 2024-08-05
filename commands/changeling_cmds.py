@@ -14,7 +14,7 @@ def get_article(word):
     vowels = "aeiou"
     return "an" if word[0].lower() in vowels else "a"
 
-SKILLS_COST = {
+SKILLS_COST = [
     0,
     1800,
     9016,
@@ -41,7 +41,7 @@ SKILLS_COST = {
     9214443,
     10583019,
     12098644
-}
+]
 
 GUILD_LEVEL_COST_DICT = {
     2: 300,
@@ -432,20 +432,21 @@ class CmdGuildStatSheet(Command):
         table.add_row(f"|GForm: {form}")
         table.add_row(f"|GEnergy Control: {ecActive}")
         
-        skill_table = EvTable(f"|cSkills", border="table")
+        skill_table = EvTable(f"|cSkills", f"|cCost", f"|cRank", border="table")
         body_control = caller.db.skills["body_control"]
         drain = caller.db.skills["drain"]
         energy_control = caller.db.skills["energy_control"]
-        familiar = caller.db.skills["familiar"]
         regeneration = caller.db.skills["regeneration"]
-        vibrate = caller.db.skills["vibrate"]
         
-        skill_table.add_row(f"|GBody Control", f"|Y{SKILL_RANKS[body_control]}")
-        skill_table.add_row(f"|GDrain", f"|Y{SKILL_RANKS[drain]}")
-        skill_table.add_row(f"|GEnergy Control", f"|Y{SKILL_RANKS[energy_control]}")
-        skill_table.add_row(f"|GFamiliar", f"|Y{SKILL_RANKS[familiar]}")
-        skill_table.add_row(f"|GRegeneration", f"|Y{SKILL_RANKS[regeneration]}")
-        skill_table.add_row(f"|GVibrate", f"|Y{SKILL_RANKS[vibrate]}")
+        body_control_cost = SKILLS_COST[body_control+1]
+        drain_cost = SKILLS_COST[drain+1]
+        energy_control_cost = SKILLS_COST[energy_control+1]
+        regeneration_cost = SKILLS_COST[regeneration+1]
+        
+        skill_table.add_row(f"|GBody Control", f"|M{body_control_cost}", f"|Y{SKILL_RANKS[body_control]}")
+        skill_table.add_row(f"|GDrain", f"|M{drain_cost}", f"|Y{SKILL_RANKS[drain]}")
+        skill_table.add_row(f"|GEnergy Control", f"|M{energy_control_cost}", f"|Y{SKILL_RANKS[energy_control]}")
+        skill_table.add_row(f"|GRegeneration", f"|M{regeneration_cost}", f"|Y{SKILL_RANKS[regeneration]}")
         
         caller.msg(str(table))
         caller.msg(str(skill_table))
@@ -606,58 +607,6 @@ class CmdCellularRegrowth(Command):
         
         caller.msg(f"|yYou begin to reconstruct your lost cells.")
         
-class CmdExperiment(Command):
-    """
-    Advance a level or attribute by spending experience points.
-
-    Enter "experiment" to see what you can learn.
-
-    Usage:
-        experiment
-
-    Example:
-        experiment body_control
-    """
-
-    help_category = "Changeling"
-    key = "experiment"
-     
-    def func(self):
-        caller = self.caller
-        try:
-            skill = self.args.strip().lower()
-            list = ["body_control", "drain", "energy_control", "familiar", "regeneration", "vibrate"]
-            
-            if skill == "":
-                self.msg(f"|gWhat would you like to experiment with?")
-                return
-            
-            if skill not in list:
-                caller.msg(f"|gYou can't study that.")
-                return
-
-            current_skill = caller.db.skills[skill]
-            cost = SKILLS_COST[current_skill+1]
-            if caller.db.skillxp < cost:
-                self.msg(f"|wYou need {cost-caller.db.skillxp} more experience to advance your level.")
-                return
-            
-            confirm = yield (
-                f"It will cost you {cost} experience to advance your level. Confirm? Yes/No"
-            )
-            if confirm.lower() not in (
-                "yes",
-                "y",
-            ):
-                self.msg("Cancelled.")
-                return
-            caller.db.skillxp -= cost
-            caller.db.skills[skill] = current_skill+1
-            caller.msg(f"You grow more powerful ({skill} {current_skill+1})")
-            
-        except ValueError:
-            self.msg("Usage: enhance <body_control>")
-            return   
 class CmdTest(Command):
     key = "test"
     
@@ -702,6 +651,6 @@ class ChangelingCmdSet(CmdSet):
         self.add(CmdKickstart)
         self.add(CmdCellularReconstruction)
         self.add(CmdCellularRegrowth)
-        self.add(CmdExperiment)
+        self.add(CmdGTrain)
         self.add(CmdGTrain)
 

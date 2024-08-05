@@ -174,14 +174,12 @@ class Changelings(PlayerCharacter):
     def addhp(self, amount):
         hp = self.db.hp
         hpmax = self.db.hpmax
-        self.msg(f"|gHP: {hp} HPMax: {hpmax}")
         
         if hp + amount > hpmax:
             amt = hpmax - hp
             self.db.hp += max(amt, 0)
             return
         else: 
-            self.msg(f"|gYou gain {amount} health.")
             self.db.hp += max(amount, 0)
     
     def addfp(self, amount):
@@ -220,17 +218,17 @@ class Changelings(PlayerCharacter):
         base_fp_regen = self.db.fpregen
         hp_regen_amt = base_regen
         
+        if self.db.regrowth:
+            regrowth_rate = int(5 + regen_skill/2 + uniform(0, regen_skill/2) + glvl/8 + uniform(0, glvl/8))
+            regrowth_cost = int(regrowth_rate/3)
         
-        regrowth_rate = int(5 + regen_skill/2 + uniform(0, regen_skill/2) + glvl/8 + uniform(0, glvl/8))
-        regrowth_cost = int(regrowth_rate/3)
-        if self.db.regrowth and ep >= regrowth_cost:
-            hp_regen_amt += regrowth_rate
-            self.addep(-regrowth_cost)
-        else:
-            self.msg(f"|rYou do not have enough energy to regrow.")
-            self.db.regrowth = False
+            if ep >= regrowth_cost:
+                hp_regen_amt += regrowth_rate
+                self.addep(-regrowth_cost)
+            else:
+                self.msg(f"|rYou do not have enough energy to regrow.")
+                self.db.regrowth = False
                     
-        self.msg(f"|R{hp_regen_amt} {self.db.fpregen} {self.db.epregen}")
         self.addhp(hp_regen_amt)
         self.addfp(base_fp_regen)
         self.addep(base_ep_regen)
@@ -342,7 +340,7 @@ class Changelings(PlayerCharacter):
         glvl = self.db.guild_level
         form_dodge = form.dodge
         form_toughness = form.toughness
-        ec = getattr(self, "energy_control", False)
+        ec = self.db.skills["energy_control"]
         self.msg(f"ec: {ec}")
         ec_amt = math.floor(ec * (glvl / 5))
         
@@ -396,9 +394,7 @@ class Changelings(PlayerCharacter):
             if self.in_combat:
                 combat = self.location.scripts.get("combat")[0]
                 combat.remove_combatant(self)
-                            
-
-        
+                               
     def use_energy_control(self):
         """
         Improve your physical resistance
@@ -473,8 +469,14 @@ class Changelings(PlayerCharacter):
         fpmax = self.db.fpmax
         ep = math.floor(self.db.ep)
         epmax = self.db.epmax
+        
+        if self.db.energy_control:
+            ecVis = "EC"
+        if self.db.regrowth:
+            regrowthVis = "CG"
+            
         chunks.append(
-            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax} Energy: |G{ep}/{epmax}|g Form: |G{self.db.form}"
+            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax} Energy: |G{ep}/{epmax}|g Form: |G{self.db.form} |gEngulfs: |G{self.db.engulfs}/{self.db.max_engulfs} |Y{ecVis} |Y{regrowthVis}"
         )
         print(f"looker != self {looker} and self {self}")
         if looker != self:
