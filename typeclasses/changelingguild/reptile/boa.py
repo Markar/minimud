@@ -15,8 +15,8 @@ class Boa(ChangelingAttack):
     skill = "blunt"
     name = "constrict"
     speed = 3
-    power = 16,
-    toughness = 13,
+    power = 16
+    toughness = 13
     dodge = 6,
     
     def at_attack(self, wielder, target, **kwargs):

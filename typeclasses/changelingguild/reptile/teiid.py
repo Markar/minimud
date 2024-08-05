@@ -14,9 +14,9 @@ class Teiid(ChangelingAttack):
     skill = "blunt"
     name = "bite"
     speed = 3
-    power = 10,
-    toughness = 8,
-    dodge = 8,
+    power = 10
+    toughness = 8
+    dodge = 8
     
     def at_attack(self, wielder, target, **kwargs):
         """

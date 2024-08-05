@@ -411,17 +411,17 @@ class Character(ObjectParent, ClothedCharacter):
         tn = display_name
 
         return [
-            f"{color}$You() swing and miss, hitting nothing but air. {dam}",
-            f"{color}$pron(Your) hit causes minor bruises on {tn}{color} {dam}.",
-            f"{color}$pron(Your) hit causes {tn}{color} to bleed slightly. {dam}",
-            f"{color}$You() $conj(strike) {tn}{color} with a powerful blow! {dam}",
-            f"{color}$pron(Your) hit causes {tn}{color} to bleed profusely. {dam}",
-            f"{color}$pron(Your) hit cracks {tn}{color}'s bones! {dam}",
-            f"{color}$You() $conj(pummel) {tn}{color} with relentless force! {dam}",
-            f"{color}$You() $conj(smash) {tn}{color}'s limbs! {dam}",
-            f"{color}$You() $conj(crush) {tn}{color} like a bug! {dam}",
-            f"{color}$You() $conj(hit) {tn}{color} so hard that blood spatters around the room! {dam}",
-            f"{color}$You() $conj(tear) into {tn}{color} with brutal force! {dam}",
+            f"{color}{self}{color} swings and misses, hitting nothing but air. {dam}",
+            f"{color}{self}{color}'s hit causes minor bruises on {tn}{color} {dam}.",
+            f"{color}{self}{color}'s hit causes {tn}{color} to bleed slightly. {dam}",
+            f"{color}{self}{color} $conj(strike) {tn}{color} with a powerful blow! {dam}",
+            f"{color}{self}{color}'s hit causes {tn}{color} to bleed profusely. {dam}",
+            f"{color}{self}{color}'s hit cracks {tn}{color}'s bones! {dam}",
+            f"{color}{self}{color} $conj(pummel) {tn}{color} with relentless force! {dam}",
+            f"{color}{self}{color} $conj(smash) {tn}{color}'s limbs! {dam}",
+            f"{color}{self}{color} $conj(crush) {tn}{color} like a bug! {dam}",
+            f"{color}{self}{color} $conj(hit) {tn}{color} so hard that blood spatters around the room! {dam}",
+            f"{color}{self}{color} $conj(tear) into {tn}{color} with brutal force! {dam}",
         ]
     def get_hit_message(self, target, dam, display_name ):
 

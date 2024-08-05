@@ -192,14 +192,14 @@ class AttackEmotes:
                 f"{color}$You() try to engulf {tn}{color}, but miss entirely.",
                 f"{color}$You() engulf {tn}{color}, causing acidic burns and damage.",
                 f"{color}$You() sting {tn}{color} with your acidic touch.",
-                f"{color}{tn}{color}{color}staggers as you engulf {tn}{color} visciously.",
-                f"{color}{tn}{color}{color}cringes in pain as you engulf {tn}{color}!",
+                f"{color}{tn}{color} staggers as you engulf {tn}{color} visciously.",
+                f"{color}{tn}{color} cringes in pain as you engulf {tn}{color}!",
                 f"{color}$pron(Your) acidic touch causes {tn}{color} to fall back in pain.",
-                f"{color}{tn}{color}{color}'s eyes bug out as you engulf {tn}{color} right where it hurts!",
-                f"{color}{tn}{color}{color}'s body goes limp for a moment as you engulf {tn}{color}!",
-                f"{color}{tn}{color}{color} SPASMS violently as you engulf {tn}{color}!!",
-                f"{color}{tn}{color}{color} SHUDDERS and WRITHES in agony as you engulf {tn}{color} visciously!!!",
-                f"{color}{tn}{color}{color}'s body EXPLODES in a shower of gore as you engulf {tn}{color} visciously!!!"
+                f"{color}{tn}{color}'s eyes bug out as you engulf {tn}{color} right where it hurts!",
+                f"{color}{tn}{color}'s body goes limp for a moment as you engulf {tn}{color}!",
+                f"{color}{tn}{color} SPASMS violently as you engulf {tn}{color}!!",
+                f"{color}{tn}{color} SHUDDERS and WRITHES in agony as you engulf {tn}{color} visciously!!!",
+                f"{color}{tn}{color}'s body EXPLODES in a shower of gore as you engulf {tn}{color} visciously!!!"
             ]
             
         if emote == "stomp":
@@ -208,13 +208,13 @@ class AttackEmotes:
                 f"{color}$You() barely nick {tn}{color} with your {which} foot.",
                 f"{color}$pron(Your) {which} foot glances off {tn}{color}, causing minor abrasions.",
                 f"{color}$pron(Your) {which} foot slams into {tn}{color}, but {tn}{color} manages to get mostly out of the way.",
-                f"{color}{tn}{color}{color} screeches as you land your {which} foot right on top of {tn}{color} head!",
-                f"{color}{tn}{color}{color} stumbles back in agony as you land your {which} foot right on top of {tn}{color}!",
+                f"{color}{tn}{color} screeches as you land your {which} foot right on top of {tn}{color} head!",
+                f"{color}{tn}{color} stumbles back in agony as you land your {which} foot right on top of {tn}{color}!",
                 f"{color}Grey matter oozes from {tn}{color}'s ears as you thrust your {which} foot into {tn}{color} skull.",
-                f"{color}{tn}{color}{color} cracks in half as you flatten {tn}{color} with your {which} foot!",
+                f"{color}{tn}{color} cracks in half as you flatten {tn}{color} with your {which} foot!",
                 f"{color}$You() drive {tn}{color} into the ground like a nail!",
-                f"{color}{tn}{color}{color} crunches grossly under your thunderous {which} foot!!",
-                f"{color}{tn}{color}{color} *EXPLODES* like week-old roadkill as you smash {tn}{color} with your {which} foot!"
+                f"{color}{tn}{color} crunches grossly under your thunderous {which} foot!!",
+                f"{color}{tn}{color} *EXPLODES* like week-old roadkill as you smash {tn}{color} with your {which} foot!"
             ]
         if emote == "tackle":
             return [

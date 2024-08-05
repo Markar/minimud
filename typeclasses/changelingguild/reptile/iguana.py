@@ -15,9 +15,9 @@ class Iguana(ChangelingAttack):
     skill = "blunt"
     name = "tail"
     speed = 3
-    power = 8,
-    toughness = 10,
-    dodge = 9,
+    power = 8
+    toughness = 10
+    dodge = 9
     
     def at_attack(self, wielder, target, **kwargs):
         """

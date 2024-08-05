@@ -9,6 +9,7 @@ class ChangelingAttack:
     name = "bite"
     speed = 3
     gxp_rate = 5
+    skill_gxp_rate = 5
 
     def at_pre_attack(self, wielder, **kwargs):
         # make sure we have enough strength left
@@ -30,3 +31,4 @@ class ChangelingAttack:
         """
         
         wielder.db.gxp += self.gxp_rate
+        wielder.db.skill_gxp += self.skill_gxp_rate

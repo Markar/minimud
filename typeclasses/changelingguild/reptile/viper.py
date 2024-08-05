@@ -15,9 +15,9 @@ class Viper(ChangelingAttack):
     skill = "poison"
     name = "bite"
     speed = 3
-    power = 20,
-    toughness = 17,
-    dodge = 6,
+    power = 20
+    toughness = 17
+    dodge = 6
     
     def at_attack(self, wielder, target, **kwargs):
         """

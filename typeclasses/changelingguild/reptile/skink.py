@@ -16,9 +16,9 @@ class Skink(ChangelingAttack):
     skill = "blunt"
     name = "bite"
     speed = 3
-    power = 2,
-    toughness = 4,
-    dodge = 5,
+    power = 2
+    toughness = 4
+    dodge = 5
     
     def at_attack(self, wielder, target, **kwargs):
         """

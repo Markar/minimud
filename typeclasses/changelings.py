@@ -1,4 +1,4 @@
-from random import randint, choice
+from random import randint, uniform
 from evennia.prototypes import spawner, prototypes
 from string import punctuation
 from evennia import AttributeProperty
@@ -131,7 +131,7 @@ class Changelings(PlayerCharacter):
         
         self.db.guild_level = 1
         self.db.gxp = 0
-        self.db.skillxp = 0
+        self.db.skill_gxp = 0
         self.db.title = "the novice changeling"
         self.db.con_increase_amount = con_increase_amount
         self.db.hpmax = 50 + (con_increase_amount * self.db.constitution)
@@ -157,12 +157,10 @@ class Changelings(PlayerCharacter):
         self.db.engulfs = 0
         self.db.max_engulfs = 0
         self.db.skills = {
-            "body_control": 0,
-            "drain": 0,
-            "energy_control": 0,
-            "familiar": 0,
-            "regeneration": 0,
-            "vibrate": 0
+            "body_control": 1,
+            "drain": 1,
+            "energy_control": 1,
+            "regeneration": 1,
         }
         self.at_wield(ChangelingAttack)
         tickerhandler.add(interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True)
@@ -176,10 +174,14 @@ class Changelings(PlayerCharacter):
     def addhp(self, amount):
         hp = self.db.hp
         hpmax = self.db.hpmax
+        self.msg(f"|gHP: {hp} HPMax: {hpmax}")
         
         if hp + amount > hpmax:
-            self.db.hp = hpmax
+            amt = hpmax - hp
+            self.db.hp += max(amt, 0)
+            return
         else: 
+            self.msg(f"|gYou gain {amount} health.")
             self.db.hp += max(amount, 0)
     
     def addfp(self, amount):
@@ -187,7 +189,8 @@ class Changelings(PlayerCharacter):
         fpmax = self.db.fpmax
         
         if fp + amount > fpmax:
-            self.db.fp = fpmax
+            amt = fpmax - fp
+            self.db.fp += max(amt, 0)
             return
         else:
             self.db.fp += max(amount, 0)
@@ -197,7 +200,8 @@ class Changelings(PlayerCharacter):
         epmax = self.db.epmax
         
         if ep + amount > epmax:
-            self.db.ep = epmax
+            amt = epmax - ep
+            self.db.ep += max(amt, 0)
             return
         if ep < epmax + amount:
             self.db.ep += max(amount, 0)
@@ -207,26 +211,29 @@ class Changelings(PlayerCharacter):
         self.db.engulfs = self.db.max_engulfs
     
     def at_tick(self):
-        regrowth_rate = self.db.regrowth_rate
-        regrowth_cost = self.db.regrowth_cost
+        glvl = self.db.guild_level
         ep = self.db.ep
+        regen_skill = self.db.skills["regeneration"]
         
-        if not ep > regrowth_cost: 
+        base_regen = self.db.hpregen
+        base_ep_regen = self.db.epregen
+        base_fp_regen = self.db.fpregen
+        hp_regen_amt = base_regen
+        
+        
+        regrowth_rate = int(5 + regen_skill/2 + uniform(0, regen_skill/2) + glvl/8 + uniform(0, glvl/8))
+        regrowth_cost = int(regrowth_rate/3)
+        if self.db.regrowth and ep >= regrowth_cost:
+            hp_regen_amt += regrowth_rate
+            self.addep(-regrowth_cost)
+        else:
             self.msg(f"|rYou do not have enough energy to regrow.")
-            self.db.regrowth_rate = 0
-            self.db.regrowth_cost = 0
-            return
-        
-        if regrowth_cost:
-            self.addep(-self.db.regrowth_cost)
-            
-        if regrowth_rate:
-            self.addhp(self.db.regrowth_rate)
+            self.db.regrowth = False
                     
-        # self.msg(f"|R{self.db.hpregen} {self.db.fpregen} {self.db.epregen}")
-        self.addhp(self.db.hpregen)
-        self.addfp(self.db.fpregen)
-        self.addep(self.db.epregen)
+        self.msg(f"|R{hp_regen_amt} {self.db.fpregen} {self.db.epregen}")
+        self.addhp(hp_regen_amt)
+        self.addfp(base_fp_regen)
+        self.addep(base_ep_regen)
             
         
     def get_display_name(self, looker, **kwargs):
@@ -304,15 +311,15 @@ class Changelings(PlayerCharacter):
             to_me = msgs[3]
         elif 21 <= dam <= 30:
             to_me = msgs[4]
-        elif 31 <= dam <= 40:
+        elif 31 <= dam <= 50:
             to_me = msgs[5]
-        elif 41 <= dam <= 50:
+        elif 41 <= dam <= 80:
             to_me = msgs[6]
-        elif 51 <= dam <= 60:
+        elif 51 <= dam <= 140:
             to_me = msgs[7]
-        elif 61 <= dam <= 75:
+        elif 61 <= dam <= 225:
             to_me = msgs[8]
-        elif 76 <= dam <= 90:
+        elif 76 <= dam <= 325:
             to_me = msgs[9]
         else:
             to_me = msgs[10]
@@ -334,30 +341,42 @@ class Changelings(PlayerCharacter):
         # apply dodge
         glvl = self.db.guild_level
         form_dodge = form.dodge
-        dodge = form_dodge + glvl + self.db.dexterity
+        form_toughness = form.toughness
+        ec = getattr(self, "energy_control", False)
+        self.msg(f"ec: {ec}")
+        ec_amt = math.floor(ec * (glvl / 5))
+        
+        dodge = self.db.dexterity / 5 + form_dodge * glvl / 12
+        self.msg(f"dodge: {dodge}")
         if dodge > 90:
             dodge = 90
                     
-        if randint(1, 100) >= dodge:
+        ran = randint(1, 100)
+        if ran <= dodge:
+            self.msg(f"random {ran} >= {dodge}")
             self.msg(f"|cYou dodge the attack!")
             attacker.msg(f"{self.get_display_name(attacker)} dodges your attack!")
             return
-        
+        self.msg(f"{self} takes damage: {damage}")
         # aply toughness
-        toughness = self.db.toughness + glvl + self.db.constitution
-        tougness_reduction = randint(toughness / 2, toughness)
+        toughness = form_toughness + glvl/5 + self.db.constitution/10
+        self.msg(f"|cToughness: {toughness}")
+        tougness_reduction = randint(int(toughness/2), int(toughness))
         damage -= tougness_reduction
+        self.msg(f"|cToughness reduction: {tougness_reduction}")
         
         # apply armor damage reduction
         damage -= self.defense(damage_type)
+        self.msg(f"|cArmor reduction: {self.defense(damage_type)}")
         
         # apply energy control reduction
-        if self.db.energy_control:
+        if ec:
             self.msg(f"|cYou block some damage!")
             if damage_type in ["edged", "blunt"]:
-                damage -= self.db.guild_level
+                damage -= ec_amt
             self.db.ep -= 1
             
+        self.msg(f"|cEnergy control reduction: {ec_amt}")   
         self.db.hp -= max(damage, 0)
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
@@ -432,6 +451,7 @@ class Changelings(PlayerCharacter):
         self.db.hp += power
         self.db.fp += power
         self.db.combat_target.at_damage(self, power)
+        self.db.engulfs -= 1
         self.cooldowns.add("engulf", 5)
         self.msg(f"|rYou flow around {target} completely enclosing them in plasma!")
         

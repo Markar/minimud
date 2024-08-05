@@ -15,9 +15,9 @@ class Slime(ChangelingAttack):
     skill = "acid"
     name = "engulf"
     speed = 2
-    power = 2,
-    toughness = 5,
-    dodge = 5,
+    power = 2
+    toughness = 5
+    dodge = 5
 
     def at_attack(self, wielder, target, **kwargs):
         bonus = math.ceil(5 + wielder.db.strength / 3)

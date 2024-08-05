@@ -15,6 +15,7 @@ def get_article(word):
     return "an" if word[0].lower() in vowels else "a"
 
 SKILLS_COST = {
+    0,
     1800,
     9016,
     25297,
@@ -306,10 +307,57 @@ class CmdForms(Command):
         
         caller.msg(str(table))
              
-
+class CmdGTrain(Command):
+    """
+    Train your guild skills by spending skill experience points. Each rank
+    increases your effectiveness in that skill. 
+    
+    Usage: 
+        gtrain <skill>
+    
+    Example:
+        gtrain body_control
+    """
+    
+    key = "gtrain"
+    
+    def func(self):
+        caller = self.caller
+        skill = self.args.strip().lower()
+        list = ["body_control", "drain", "energy_control", "regeneration"]
+        
+        if skill == "":
+                self.msg(f"|gWhat would you like to raise?")
+                return
+            
+        if skill not in list:
+            caller.msg(f"|gYou can't raise that.")
+            return
+        
+        skill_gxp = getattr(caller.db, "skill_gxp", 0)
+        cost = SKILLS_COST[caller.db.skills[f"{skill}"]+1]
+        
+        if skill_gxp < cost:
+            self.msg(f"|wYou need {cost-skill_gxp} more experience to train {skill}.")
+            return
+        
+        confirm = yield (
+            f"It will cost you {cost} experience to advance {skill}. Confirm? Yes/No"
+        )
+        if confirm.lower() not in (
+            "yes",
+            "y",
+        ):
+            self.msg("Cancelled.")
+            return
+            
+        setattr(caller.db, "skill_gxp", skill_gxp - cost)
+        caller.db.skills[skill] += 1
+        caller.msg(f"|yYou grow more experienced in {skill}")
+        
 class CmdGAdvance(Command):
     """
-    Advance a level or attribute by spending experience points.
+    Advance your guild level by spending gxp.
 
     Enter "advance" to see what you can learn.
 
@@ -338,11 +386,11 @@ class CmdGAdvance(Command):
             self.msg(f"|rYou grow more powerful.")
         
         if caller.db.guild_level >= 7:
-            caller.db.engulf_max = 1
+            caller.db.max_engulfs = 1
         elif caller.db.guild_level >= 14:
-            caller.db.engulf_max = 2
+            caller.db.max_engulfs = 2
         elif caller.db.guild_level >= 30:
-            caller.db.engulf_max = 3
+            caller.db.max_engulfs = 3
               
     def func(self):
         caller = self.caller
@@ -383,12 +431,12 @@ class CmdGuildStatSheet(Command):
         table.add_row(f"|GEnergy Control: {ecActive}")
         
         skill_table = EvTable(f"|cSkills", border="table")
-        body_control = getattr(caller.db.skills, "body_control", 0)
-        drain = getattr(caller.db.skills, "drain", 0)
-        energy_control = getattr(caller.db.skills, "energy_control", 0)
-        familiar = getattr(caller.db.skills, "familiar", 0)
-        regeneration = getattr(caller.db.skills, "regeneration", 0)
-        vibrate = getattr(caller.db.skills, "vibrate", 0)
+        body_control = caller.db.skills["body_control"]
+        drain = caller.db.skills["drain"]
+        energy_control = caller.db.skills["energy_control"]
+        familiar = caller.db.skills["familiar"]
+        regeneration = caller.db.skills["regeneration"]
+        vibrate = caller.db.skills["vibrate"]
         
         skill_table.add_row(f"|GBody Control", f"|Y{SKILL_RANKS[body_control]}")
         skill_table.add_row(f"|GDrain", f"|Y{SKILL_RANKS[drain]}")
@@ -530,12 +578,17 @@ class CmdCellularRegrowth(Command):
     """
     
     key = "cellular regrowth"
+    aliases = ("regrowth", "cg")
     cost = 25
     guild_level = 3
     
     def func(self):
         caller = self.caller
         gl = caller.db.guild_level
+        if getattr(caller.db, "regrowth", True):
+            setattr(caller.db, "regrowth", False)
+            caller.msg(f"|rYou stop regenerating.")
+            return
         if gl < self.guild_level:
             self.msg(f"|rYou must be at least {self.guild_level} to use this power.")
             return
@@ -543,15 +596,10 @@ class CmdCellularRegrowth(Command):
             self.msg(f"|rYou don't have enough energy to use this power.")
             return
         
-        regen = caller.db.skills["regeneration"]
-        to_heal = math.floor(5 + regen/2 + randint(0, regen/2) + gl/8 + randint(0, gl/8))
-        to_drain = math.floor(to_heal/3)
         
         # cost to activate
         caller.db.ep -= self.cost
-        # set up the regen
-        caller.db.regrowth_rate += to_heal
-        caller.db.regrowth_cost -= to_drain
+        caller.db.regrowth = True
         
         caller.msg(f"|yYou begin to reconstruct your lost cells.")
         
@@ -584,7 +632,7 @@ class CmdExperiment(Command):
                 caller.msg(f"|gYou can't study that.")
                 return
 
-            current_skill = getattr(caller.db.skills, skill, 0)
+            current_skill = caller.db.skills[skill]
             cost = SKILLS_COST[current_skill+1]
             if caller.db.skillxp < cost:
                 self.msg(f"|wYou need {cost-caller.db.skillxp} more experience to advance your level.")
@@ -600,7 +648,7 @@ class CmdExperiment(Command):
                 self.msg("Cancelled.")
                 return
             caller.db.skillxp -= cost
-            setattr(caller.db.skills, skill, current_skill+1)
+            caller.db.skills[skill] = current_skill+1
             caller.msg(f"You grow more powerful ({skill} {current_skill+1})")
             
         except ValueError:
@@ -611,13 +659,19 @@ class CmdTest(Command):
     
     def func(self):
         
-        corpse = {
-            "key":"a corpse",
-            "typeclass": "typeclasses.corpse.Corpse",
-            "desc": "A small corpse",
-            "location": self.caller.location
-        }
-        spawner.spawn(corpse)
+        self.msg(f"self.caller: {self.caller}")
+        regen = self.caller.db.skills["regeneration"]
+        self.caller.db.skills["regeneration"] = 3
+        regen = self.caller.db.skills["regeneration"]
+        # self.msg(f"regen: {getattr(self.caller.db.skills, 'regeneration')}")
+        self.msg(f"regen: {regen}")
+        # corpse = {
+        #     "key":"a corpse",
+        #     "typeclass": "typeclasses.corpse.Corpse",
+        #     "desc": "A small corpse",
+        #     "location": self.caller.location
+        # }
+        # spawner.spawn(corpse)
         # objs = spawner.spawn(*list(search_tag("MOB_CORPSE")))
         # for obj in objs:
         #     self.caller.msg(f"obj: {obj}")
@@ -645,4 +699,5 @@ class ChangelingCmdSet(CmdSet):
         self.add(CmdCellularReconstruction)
         self.add(CmdCellularRegrowth)
         self.add(CmdExperiment)
+        self.add(CmdGTrain)
 

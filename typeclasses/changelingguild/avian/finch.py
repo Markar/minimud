@@ -16,8 +16,8 @@ class Finch(ChangelingAttack):
     skill = "edged"
     name = "peck"
     speed = 2
-    power = 4,
-    toughness = 4,
+    power = 4
+    toughness = 4
     dodge = 6
     
     def at_attack(self, wielder, target, **kwargs):
