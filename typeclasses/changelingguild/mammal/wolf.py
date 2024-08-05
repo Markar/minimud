@@ -27,7 +27,7 @@ class Wolf(ChangelingAttack):
         The wolf's attack method
         """
         bonus = math.ceil(5 + wielder.db.strength / 3)
-        base_dmg = bonus + (wielder.db.guild_level * self.power)/2
+        base_dmg = bonus + wielder.db.guild_level * self.power / 2
         damage = randint(math.ceil(base_dmg/2), base_dmg)
         
         self.energy_cost = 3

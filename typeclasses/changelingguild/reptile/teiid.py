@@ -1,4 +1,5 @@
 import math
+from random import randint
 
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
@@ -21,8 +22,10 @@ class Teiid(ChangelingAttack):
         """
         The auto attack Teiid
         """
-        self.name = "bite"
-        damage = 5 + self.db.guild_level + math.ceil(wielder.db.strength)
+        bonus = math.ceil(5 + wielder.db.strength / 3)
+        base_dmg = bonus + wielder.db.guild_level * self.power / 2
+        damage = randint(math.ceil(base_dmg/2), base_dmg)
+        
         self.energy_cost = 1
         self.speed = 3
         self.emote = f"You bite viciously at $you(target), but miss entirely."

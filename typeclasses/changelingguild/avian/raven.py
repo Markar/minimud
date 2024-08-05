@@ -1,4 +1,5 @@
 import math
+from random import randint
 
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
@@ -21,8 +22,10 @@ class Raven(ChangelingAttack):
     dodge = 9
 
     def at_attack(self, wielder, target, **kwargs):
-        self.name = "claw"
-        damage = 11 + self.db.guild_level + math.ceil(wielder.db.dexterity / 2)
+        bonus = math.ceil(5 + wielder.db.dexterity / 3)
+        base_dmg = bonus + wielder.db.guild_level * self.power / 2
+        damage = randint(math.ceil(base_dmg/2), base_dmg)
+        
         self.energy_cost = 2
         self.speed = 2
         self.emote = f"You peck viciously at $you(target), but miss entirely."

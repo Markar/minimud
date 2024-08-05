@@ -1,4 +1,5 @@
 import math
+from random import randint
 
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
@@ -14,15 +15,15 @@ class Slime(ChangelingAttack):
     skill = "acid"
     name = "engulf"
     speed = 2
-
+    power = 2,
+    toughness = 5,
+    dodge = 5,
 
     def at_attack(self, wielder, target, **kwargs):
-        wielder.msg("|cat_attack in slime")
-        """
-        The auto attack Slime
-        """
-        self.name = "engulf"
-        damage = 4 + math.ceil(wielder.db.dexterity / 2)
+        bonus = math.ceil(5 + wielder.db.strength / 3)
+        base_dmg = bonus + wielder.db.guild_level * self.power / 2
+        damage = randint(math.ceil(base_dmg/2), base_dmg)
+        
         self.energy_cost = 2
         self.speed = 2
         self.emote = f"You try to engulf $you(target), but miss entirely."

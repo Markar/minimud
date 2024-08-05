@@ -1,4 +1,6 @@
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
+from random import randint
+import math
 
 class Human(ChangelingAttack):
     """
@@ -10,13 +12,18 @@ class Human(ChangelingAttack):
     skill = "blunt"
     name = "punch"
     speed = 3
+    power = 3,
+    toughness = 3,
+    dodge = 3,
 
     def at_attack(self, wielder, target, **kwargs):
         """
         The auto attack for humans.
         """
-        self.name = "punch"
-        damage = 5
+        bonus = math.ceil(5 + wielder.db.strength / 3)
+        base_dmg = bonus + wielder.db.guild_level * self.power / 2
+        damage = randint(math.ceil(base_dmg/2), base_dmg)
+        
         self.energy_cost = 1
         self.speed = 3
         self.emote = f"You punch viciously at $you(target), but miss entirely."

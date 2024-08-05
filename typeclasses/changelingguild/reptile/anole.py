@@ -40,28 +40,3 @@ class Anole(ChangelingAttack):
         target.at_damage(wielder, damage, self.skill)
         wielder.msg("[ Cooldown: " + str(self.speed) + " seconds ]")
         wielder.cooldowns.add("attack", self.speed)
-
-
-    # def at_attack(self, wielder, target, **kwargs):
-    #     wielder.msg("|cat_attack in anole")
-    #     """
-    #     The auto attack Anole
-    #     """
-    #     super().at_attack(wielder, target, **kwargs)
-        
-    #     bonus = math.ceil(5 + wielder.db.dexterity / 3)
-    #     base_dmg = bonus + (wielder.db.guild_level * self.power)/2
-    #     damage = randint(math.ceil(base_dmg/2), base_dmg)
-        
-    #     self.energy_cost = 1
-    #     self.speed = 3
-    #     self.emote = f"You bite viciously at $you(target), but miss entirely."
-    #     self.emote_hit = f"You bite glancingly into $you(target), and cause some minor scratches"        
-            
-    #     # subtract the energy required to use this
-    #     wielder.db.ep -= self.energy_cost
-    #     target.at_damage(wielder, damage, "edged")
-    #     super().at_attack(wielder, target, **kwargs)
-    #     wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
-    #     wielder.cooldowns.add("attack", self.speed)
-        
