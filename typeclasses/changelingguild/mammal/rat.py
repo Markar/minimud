@@ -15,7 +15,7 @@ class Rat(ChangelingAttack):
     name = "claw"
     speed = 3
     power = 4
-    toughness = 5
+    toughness = 6
     dodge = 17
 
     def at_attack(self, wielder, target, **kwargs):

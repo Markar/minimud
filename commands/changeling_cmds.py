@@ -213,29 +213,13 @@ class CmdEnergyControl(Command):
     help_category = "Changeling"
 
     def func(self):
-        print(self.caller)
         caller = self.caller
-        caller.use_energy_control()
-
-# class CmdDisableEnergyControl(Command):
-#     """
-#     Reactive armor enhances your physical resists while lowering others
-
-#     Usage:
-#         enable energy control
-#         disable energy control
-#     """
-
-#     key = "disable energy control"
-#     help_category = "Changeling"
-
-#     def func(self):
-#         print(self.caller)
-#         caller = self.caller
-#         caller.db.energy_control = False
-#         caller.db.edgedac -= caller.db.guild_level
-#         caller.db.bluntac -= caller.db.guild_level
-#         caller.msg(f"|CYou release your control over energy.")
+        glvl = caller.db.guild_level
+        if glvl >= 8:
+            caller.use_energy_control()
+        else:
+            caller.msg(f"|rYou must be at least guild level 8 to use this power.")
+            return
         
 class CmdEngulf(Command):
     """
@@ -259,6 +243,11 @@ class CmdEngulf(Command):
         caller = self.caller
         target = self.args
         location = caller.location
+        glvl = caller.db.guild_level
+        
+        if glvl < 7:
+            self.msg(f"|rYou must be at least guild level 7 to use this power.")
+            return
         
         if combat_script := location.scripts.get("combat"):
             combat_script = combat_script[0]
@@ -306,6 +295,30 @@ class CmdForms(Command):
         table.add_row(f"|Yslime", f"|Yhuman", "", 1)
         
         caller.msg(str(table))
+    
+class CmdPowers(Command):
+    """
+    List of powers, cost, and required rank to use.
+    
+    Usage:
+        powers
+    
+    """
+    
+    key = "powers"
+    help_category = "Changeling"
+    
+    def func(self):
+        caller = self.caller
+        
+        table = EvTable(f"|cPower", f"|cRank", f"|cCost", border="table")
+        table.add_row(f"|GAbsorb", 1, 0)
+        table.add_row(f"|GCellular Regrowth", 3, 25)
+        table.add_row(f"|GEngulf", 7, 0)
+        table.add_row(f"|GEnergy Control", 8, 25)
+        table.add_row(f"|GCellular Reconstruction", 9, 25)
+        
+        caller.msg(str(table))        
              
 class CmdGTrain(Command):
     """
@@ -418,7 +431,7 @@ class CmdGuildStatSheet(Command):
         form = caller.db.form or "none"                
         gxp_needed = GUILD_LEVEL_COST_DICT[my_glvl+1]
         ec = caller.db.energy_control or "none"
-        if ec:
+        if ec == True:
             ecActive = "Active"
         else:
             ecActive = "Inactive"
@@ -611,13 +624,19 @@ class CmdTest(Command):
     key = "test"
     
     def func(self):
-        
-        self.msg(f"self.caller: {self.caller}")
-        regen = self.caller.db.skills["regeneration"]
-        self.caller.db.skills["regeneration"] = 3
-        regen = self.caller.db.skills["regeneration"]
+        caller = self.caller
+        # self.caller.tags.add("player", category="status")
+        player_tags = search_tag("player")
+        caller.msg(f"player tags: {player_tags[0]}")
+        caller.msg(f"caller: {caller}")
+        hasPlayerTags = caller.tags.has("player", "status")
+        caller.msg(f"has tags: {hasPlayerTags}")
+        if caller.tags.has("player"):
+           caller.msg(f"player")
+        else:
+            self.caller.msg(f"not player")
+            self.caller.msg(f"tags: {self.caller.tags.all()}")
         # self.msg(f"regen: {getattr(self.caller.db.skills, 'regeneration')}")
-        self.msg(f"regen: {regen}")
         # corpse = {
         #     "key":"a corpse",
         #     "typeclass": "typeclasses.corpse.Corpse",
@@ -652,5 +671,5 @@ class ChangelingCmdSet(CmdSet):
         self.add(CmdCellularReconstruction)
         self.add(CmdCellularRegrowth)
         self.add(CmdGTrain)
-        self.add(CmdGTrain)
+        self.add(CmdPowers)
 

@@ -461,6 +461,7 @@ class PlayerCharacter(Character):
 
     def at_object_creation(self):
         super().at_object_creation()
+        self.db.tags.add("player", category="status")
         self.db.title = "the title less"
         self.db.alignment = "neutral"
         self.db.stat_points = 5
@@ -674,7 +675,7 @@ class NPC(Character):
         """
         Respond to the arrival of a character
         """
-        if "aggressive" in self.attributes.get("react_as", ""):
+        if "aggressive" in self.attributes.get("react_as", "") and chara.tags.has("player", "status"):
             delay(1, self.enter_combat, chara)
 
     def at_character_depart(self, chara, destination, **kwargs):
@@ -828,6 +829,7 @@ class NPC(Character):
         result = self.use_skill(weapon.get("skill"), speed=speed)
         # apply the weapon damage as a modifier to skill
         damage = damage * result
+        damage = randint(damage/2, damage)
         # subtract the energy required to use this
         # self.db.ep -= weapon.get("energy_cost", 5)
         # if not damage:

@@ -17,7 +17,7 @@ class Anole(ChangelingAttack):
     name = "bite"
     speed = 3
     power = 5
-    toughness = 5
+    toughness = 8
     dodge = 5
 
     def at_attack(self, wielder, target, **kwargs):

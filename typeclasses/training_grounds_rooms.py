@@ -19,7 +19,6 @@ class NewbieLargeRat(XYGridRoom):
             rat.db.hpmax = hp
             rat.db.exp_reward = xp
             rat.db.con = con
-            rat.db.natural_weapon['damage'] = math.ceil(randint(1, 4))
             
             
 class NewbieFirebeetle(XYGridRoom):
@@ -38,7 +37,6 @@ class NewbieFirebeetle(XYGridRoom):
             beetle.db.hpmax = hp
             beetle.db.exp_reward = xp
             beetle.db.con = con
-            beetle.db.natural_weapon['damage'] = math.ceil(randint(1, 6))
             
 class NewbieSnake(XYGridRoom):
     def at_object_creation(self):
@@ -56,7 +54,6 @@ class NewbieSnake(XYGridRoom):
             snake.db.hpmax = hp
             snake.db.exp_reward = xp
             snake.db.con = con
-            snake.db.natural_weapon['damage'] = math.ceil(randint(1, 4))
             
 class NewbieGoblin(XYGridRoom):
     def at_object_creation(self):

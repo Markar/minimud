@@ -368,7 +368,7 @@ class Changelings(PlayerCharacter):
         self.msg(f"|cArmor reduction: {self.defense(damage_type)}")
         
         # apply energy control reduction
-        if ec:
+        if ec == True:
             self.msg(f"|cYou block some damage!")
             if damage_type in ["edged", "blunt"]:
                 damage -= ec_amt
@@ -470,6 +470,8 @@ class Changelings(PlayerCharacter):
         ep = math.floor(self.db.ep)
         epmax = self.db.epmax
         
+        ecVis = ""
+        regrowthVis = ""
         if self.db.energy_control:
             ecVis = "EC"
         if self.db.regrowth:

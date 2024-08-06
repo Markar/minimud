@@ -125,7 +125,7 @@ class CmdStatSheet(Command):
         ]
         rows = list(zip(*stats))
         table = EvTable(table=rows, border="none")
-        self.msg(str(table))
+        self.msg(f"{str(table)}\n\n")
         
         # display known skills
         # self.msg(f"\n|gSKILLS")
@@ -136,8 +136,8 @@ class CmdStatSheet(Command):
         # rows = list(zip(*skills))
         # if not rows:
         #     self.msg("(None)")
-        table = EvTable(table=rows, border="none")
-        self.msg(f"{str(table)}\n\n")
+        # table = EvTable(table=rows, border="none")
+        # self.msg(f"{str(table)}\n\n")
 
 
 class CmdAdvance(Command):
