@@ -13,7 +13,7 @@ class Rat(ChangelingAttack):
     energy_cost = 3
     speed = 3
     power = 4
-    toughness = 6
+    toughness = 5
     dodge = 17
 
     def _calculate_bite_damage(self, wielder):

@@ -51,7 +51,7 @@ class Eagle(ChangelingAttack):
         self.speed = 3
         
         wielder.db.ep -= self.energy_cost
-        target.at_damage(wielder, self._calculate_bite_damage(wielder), "edged", "bite")
+        target.at_damage(wielder, self._calculate_beak_damage(wielder), "edged", "bite")
         target.at_damage(wielder, self._calculate_claw_damage(wielder), "blunt", "claw")
         target.at_damage(wielder, self._calculate_claw_damage(wielder), "blunt", "claw")
         target.at_damage(wielder, self._calculate_wing_damage(wielder), "blunt", "wing")

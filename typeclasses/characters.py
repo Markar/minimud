@@ -699,7 +699,6 @@ class NPC(Character):
         damage -= self.defense(damage_type)
         if damage < 0:
             damage = 0
-        self.location.msg_contents(f"at_damage npc msg room {self} - {damage}", from_obj=self)
         self.db.hp -= max(damage, 0)
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)} NPC.")
         # this sends the hit_msg FROM the player TO the room with the damage AFTER reduction by npc

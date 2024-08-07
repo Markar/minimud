@@ -25,7 +25,7 @@ class Condor(ChangelingAttack):
         damage = randint(int(dmg/2), int(dmg))
         return damage
      
-    def _calculate_claw_damage(self, wielder):
+    def _calculate_bite_damage(self, wielder):
         dex = wielder.db.dexterity
         str = wielder.db.strength
         stat_bonus = (str+dex)/5

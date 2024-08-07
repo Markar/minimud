@@ -181,7 +181,7 @@ py setattr(here, "key", "Southbound Pathway")
 #
 @dig/teleport Road south of center;town#25 : typeclasses.rooms.Room = east;e,west;w
 #
-@desc |yAlong Peter's lane, southeast of the center of town.
+@desc |YAs you venture south from the western pathway junction, the cobblestone path narrows, flanked by ancient oak trees whose branches form a natural canopy overhead. The air is filled with the scent of blooming wildflowers, and the distant sound of a babbling brook adds a serene ambiance. Sunlight filters through the leaves, casting dappled shadows on the ground, creating a tranquil and inviting atmosphere.
 #
 
 
@@ -195,16 +195,16 @@ open north;n,south;s = town#08
 
 
 #
-@dig/teleport George's road;town#27 : typeclasses.rooms.Room = south;s,north;n
+@dig/teleport Southern Pathway;town#27 : typeclasses.rooms.Room = south;s,north;n
 #
-@desc |yHeading to the south side of town.
+@desc |YAs you venture south from the western pathway junction, the cobblestone path narrows, flanked by ancient oak trees whose branches form a natural canopy overhead. The air is filled with the scent of blooming wildflowers, and the distant sound of a babbling brook adds a serene ambiance. Sunlight filters through the leaves, casting dappled shadows on the ground, creating a tranquil and inviting atmosphere.
 #
 
 
 #
-@dig/teleport George's road;town#28 : typeclasses.rooms.Room = south;s,north;n
+@dig/teleport Southern Trail;town#28 : typeclasses.rooms.Room = south;s,north;n
 #
-@desc |YAlong George's road.
+@desc |YContinuing south, the pathway transitions from cobblestones to a soft dirt trail. Tall grasses sway gently in the breeze, and vibrant butterflies flit from flower to flower. The sound of rustling leaves and chirping birds creates a peaceful melody. Ahead, the trail curves slightly, hinting at new discoveries just around the bend.
 #
 
 

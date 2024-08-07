@@ -346,31 +346,28 @@ class Changelings(PlayerCharacter):
         form_dodge = form.dodge
         form_toughness = form.toughness
         ec = self.db.skills["energy_control"]
-        self.msg(f"ec: {ec}")
         ec_amt = math.floor(ec * (glvl / 5))
         
         dodge = self.db.dexterity / 5 + form_dodge * glvl / 12
-        self.msg(f"dodge: {dodge}")
         if dodge > 90:
             dodge = 90
                     
         ran = randint(1, 100)
         if ran <= dodge:
-            self.msg(f"random {ran} >= {dodge}")
             self.msg(f"|cYou dodge the attack!")
             attacker.msg(f"{self.get_display_name(attacker)} dodges your attack!")
             return
-        self.msg(f"{self} takes damage: {damage}")
+        # self.msg(f"{self} takes damage: {damage}")
         # aply toughness
         toughness = form_toughness + glvl/5 + self.db.constitution/10
-        self.msg(f"|cToughness: {toughness}")
+        # self.msg(f"|cToughness: {toughness}")
         tougness_reduction = randint(int(toughness/2), int(toughness))
         damage -= tougness_reduction
-        self.msg(f"|cToughness reduction: {tougness_reduction}")
+        # self.msg(f"|cToughness reduction: {tougness_reduction}")
         
         # apply armor damage reduction
         damage -= self.defense(damage_type)
-        self.msg(f"|cArmor reduction: {self.defense(damage_type)}")
+        # self.msg(f"|cArmor reduction: {self.defense(damage_type)}")
         
         # apply energy control reduction
         if ec == True and damage_type in ["edged", "blunt"]:
@@ -379,7 +376,7 @@ class Changelings(PlayerCharacter):
             self.msg(f"|cYou block some damage!")
             
             
-        self.msg(f"|cEnergy control reduction: {ec_amt}")   
+        # self.msg(f"|cEnergy control reduction: {ec_amt}")   
         self.db.hp -= max(damage, 0)
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
@@ -483,7 +480,7 @@ class Changelings(PlayerCharacter):
             regrowthVis = "CG"
             
         chunks.append(
-            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax} Energy: |G{ep}/{epmax}|g Form: |G{self.db.form} |gEngulfs: |G{self.db.engulfs}/{self.db.max_engulfs} |Y{ecVis} |Y{regrowthVis}"
+            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g Form: |G{self.db.form} |gEngulfs: |G{self.db.engulfs}/{self.db.max_engulfs} |Y{ecVis} |Y{regrowthVis}"
         )
         print(f"looker != self {looker} and self {self}")
         if looker != self:
