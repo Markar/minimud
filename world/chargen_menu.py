@@ -10,6 +10,7 @@ from typeclasses.characters import Character
 from evennia.prototypes.spawner import spawn
 from evennia.utils import dedent
 from evennia.utils.evtable import EvTable
+from evennia.objects.models import ObjectDB
 
 _INFLECT = inflect.engine()
 
@@ -28,129 +29,17 @@ def menunode_welcome(caller):
 
     text = dedent(
         """\
-        |wWelcome to the game!|n
+        |wWelcome to the Millennium!|n
 
-        During the character creation process, you can go forwards and back between steps,
-        as well as quit and resume later. Feel free to take your time!
+        This mud is a work in progress, please report any bugs or suggestions and enjoy the game!
     """
     )
-    options = {"desc": "Let's begin!", "goto": "menunode_points_base"}
+    options = {"desc": "Let's begin!", "goto": "menunode_choose_gender"}
     return text, options
 
 
 #########################################################
-#                Point Allocation
-#########################################################
-
-
-def menunode_points_base(caller, **kwargs):
-    """Base node for categorized options."""
-    # this is a new decision step, so save your resume point here
-    caller.new_char.db.chargen_step = "menunode_points_base"
-
-    str = caller.new_char.db.str or 0
-    agi = caller.new_char.db.agi or 0
-    wil = caller.new_char.db.will or 0
-    # get the remaining number of points left
-    if not (points_remaining := kwargs.get("points")):
-        points_remaining = 24 - (str + agi + wil)
-
-    text = dedent(
-        f"""\
-        |wStats|n
-
-        You have {points_remaining} points left to allocate.
-        
-        Strength:  {str}
-        Agility:   {agi}
-        Will:      {wil}
-        """
-    )
-
-    help = "Different skills are boosted by different stats. Stats cannot be changed later, but as your skills improve, the associated stat has less impact."
-
-    options = []
-    if points_remaining > 0:
-        # only make the option to increase stats available if there are points remaining
-        options += [
-            {
-                "desc": "|gAdd|n a point to |wStrength|n",
-                "goto": (
-                    _change_stat,
-                    {"stat": "str", "change": 1, "points": points_remaining},
-                ),
-            },
-            {
-                "desc": "|gAdd|n a point to |wAgility|n",
-                "goto": (
-                    _change_stat,
-                    {"stat": "agi", "change": 1, "points": points_remaining},
-                ),
-            },
-            {
-                "desc": "|gAdd|n a point to |wWill|n",
-                "goto": (
-                    _change_stat,
-                    {"stat": "will", "change": 1, "points": points_remaining},
-                ),
-            },
-        ]
-    # ALWAYS make the option to decrease stats available
-    options += [
-        {
-            "desc": "|rRemove|n a point from |wStrength|n",
-            "goto": (
-                _change_stat,
-                {"stat": "str", "change": -1, "points": points_remaining},
-            ),
-        },
-        {
-            "desc": "|rRemove|n a point from |wAgility|n",
-            "goto": (
-                _change_stat,
-                {"stat": "agi", "change": -1, "points": points_remaining},
-            ),
-        },
-        {
-            "desc": "|rRemove|n a point from |wWill|n",
-            "goto": (
-                _change_stat,
-                {"stat": "will", "change": -1, "points": points_remaining},
-            ),
-        },
-    ]
-
-    # only make the option to continue available once you've spent all your points
-    if points_remaining == 0:
-        options.append(
-            {
-                "key": ("(Next)", "next", "n"),
-                "desc": "Continue to the next step.",
-                "goto": "menunode_choose_gender",
-            }
-        )
-    return (text, help), options
-
-
-def _change_stat(caller, raw_string, stat, change, points, **kwargs):
-    """
-    Apply a point change to a stat
-    """
-    # make sure we have this stat, so we can change it
-    stat_value = caller.new_char.attributes.get(stat, 0)
-    # verify we have enough points available
-    if points >= change:
-        # make the change to the trait
-        caller.new_char.attributes.add(stat, stat_value + change)
-        # make the inverse change to the points
-        points -= change
-
-    # all good, return
-    return "menunode_points_base", {"points": points}
-
-
-#########################################################
-#                Gender
+#                Gender/Pronouns
 #########################################################
 
 
@@ -166,14 +55,14 @@ def menunode_choose_gender(caller, **kwargs):
     )
 
     options = [
-        {"desc": f"she/her", "goto": (_set_gender, {"gender": "female"})},
-        {"desc": f"he/him", "goto": (_set_gender, {"gender": "male"})},
+        {"desc": f"male", "goto": (_set_gender, {"gender": "male"})},
+        {"desc": f"female", "goto": (_set_gender, {"gender": "female"})},
         # once past the first decision, it's also a good idea to include a "back to previous step" option
-        {
-            "key": ("(Back)", "back", "b"),
-            "desc": "Go back to stat selection",
-            "goto": "menunode_points_base",
-        },
+        # {
+        #     "key": ("(Back)", "back", "b"),
+        #     "desc": "Go back to stat selection",
+        #     "goto": "menunode_points_base",
+        # },
     ]
 
     return text, options
@@ -186,7 +75,8 @@ def _set_gender(caller, raw_string, gender, **kwargs):
     # verify it's a valid option
     if gender in ("male", "female"):
         caller.new_char.gender = gender
-        return _check_desc(caller, raw_string, **kwargs)
+        # return _check_desc(caller, raw_string, **kwargs)
+        return "menunode_choose_name"
     else:
         # go back to do it again
         return "menunode_choose_gender"
@@ -300,20 +190,19 @@ def menunode_choose_name(caller, raw_string, **kwargs):
     # including the prompt text defined above
     text = dedent(
         f"""\
-        |wChoosing a Name|n
+        |wChoose a Name|n
 
-        Especially for roleplaying-centric games, being able to choose your
-        character's name after deciding everything else, instead of before,
-        is really useful.
+        Please avoid inappropriate names or you will be asked to come up with a new one.
 
         {prompt_text}
         """
     )
 
-    help = "You'll have a chance to change your mind before confirming, even if the name is free."
+    # help = "You'll have a chance to change your mind before confirming, even if the name is free."
     # since this is a free-text field, we just have the one
     options = {"key": "_default", "goto": _check_charname}
-    return (text, help), options
+    # return (text, help), options
+    return text, options
 
 
 def _check_charname(caller, raw_string, **kwargs):
@@ -338,7 +227,7 @@ def _check_charname(caller, raw_string, **kwargs):
         )
     else:
         # it's free! set the character's key to the name to reserve it
-        caller.new_char.key = charname
+        caller.new_char.key = charname.capitalize()
         # continue on to the confirmation node
         return "menunode_confirm_name"
 
@@ -368,14 +257,17 @@ def menunode_end(caller, raw_string):
     """End-of-chargen cleanup."""
     char = caller.new_char
     # since everything is finished and confirmed, we actually create the starting objects now
-    protos = ["wool_leggings", "wool_tunic", "leather_boots"]
+    protos = ["tarnished_sword", "wool_leggings", "wool_tunic", "leather_boots"]
     objs = spawn(*protos)
     for obj in objs:
         obj.location = char
-        obj.wear(char, True, quiet=True)
+        # obj.wear(char, True, quiet=True)
     # get start location
-    if plaza := char.search("East half of a plaza", global_search=True, quiet=True):
-        char.home = plaza[0]
+    if newbie := char.search("millennium square", global_search=True, quiet=True):
+        char.home = newbie[0]
+    # start_location = ObjectDB.objects.get_id(settings.START_LOCATION)
+    #596 = cot, #717 = newbie
+    char.location = ObjectDB.objects.get_id(717)
 
     # clear in-progress status
     caller.new_char.attributes.remove("chargen_step")

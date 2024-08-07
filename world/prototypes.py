@@ -3,8 +3,16 @@ Prototypes
 """
 from random import randint, choice
 
-### Crafted prototypes which might be useful to access in other places, such as shops
+MOB_CORPSE = {
+    "typeclass": "typeclasses.corpse.Corpse",
+    "key": "A small corpse",
+    "tags": [
+        ("mob_corpse"),
+    ],
+    "value": 20,
+}
 
+### Crafted prototypes which might be useful to access in other places, such as shops
 IRON_DAGGER = {
     "typeclass": "typeclasses.gear.MeleeWeapon",
     "key": "iron dagger",
@@ -16,6 +24,17 @@ IRON_DAGGER = {
     ],
     "value": 20,
     "energy_cost": 3,
+    "speed": 3,
+    "dmg": 50,
+}
+
+TARNISHED_SWORD = {
+    "typeclass": "typeclasses.gear.MeleeWeapon",
+    "key": "tarnished sword",
+    "desc": "The sword is a simple, unadorned weapon, clearly showing signs of age and wear. Its once-shiny blade is now dull and tarnished, with small nicks and scratches marring its surface. The hilt is wrapped in worn leather, providing a somewhat comfortable grip despite its rough appearance. Though it lacks the gleam and sharpness of a more formidable weapon, this sword still holds a certain charm, a testament to its history and the battles it has seen. For a new adventurer, it serves as a reliable, if humble, companion on the journey ahead.",
+    "tags": [("edged", "damage_type"), ("edged", "damage_type")],
+    "value": 30,
+    "energy_cost": 5,
     "speed": 3,
     "dmg": 20,
 }
@@ -397,6 +416,35 @@ STAG_DEER = {
     "can_attack": True,
 }
 
+# SCRAWNY_GNOLL = {
+#     "typeclass": "typeclasses.characters.NPC",
+#     "prototype_key": "scrawny_gnoll",
+#     "aliases": ["gnoll"],
+#     "key": "a scrawny gnoll",
+#     "desc": "The gnoll stands about five feet tall, and is wearing a torn blue shirt with greenish yellow pants.",
+#     "gender": "neutral",
+#     "react_as": "aggressive",
+#     "armor": 0,
+#     "name_color": "r",
+#     "hp": 200,
+#     "hpmax": 200,
+#     "str": 15,
+#     "natural_weapon": {
+#         "name": "claws",
+#         "damage_type": "slash",
+#         "damage": 1,
+#         "speed": 3,
+#         "energy_cost": 10,
+#     },
+#     "exp_reward": 50,
+#     # randomly generate a list of drop prototype keys when the mob is spawned
+#     "drops": ["IRON_DAGGER"],
+#     # "drops": lambda: ["IRON_DAGGER"] randint(0,99) > 20) + ["WOOL_TUNIC"] * randint(0, 5),
+#     "can_attack": True,
+# }
+
+
+
 ### Mob drops
 
 RAW_MEAT = {
@@ -421,3 +469,4 @@ DEER_ANTLER = {
         ("bone", "crafting_material"),
     ],
 }
+

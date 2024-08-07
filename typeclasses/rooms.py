@@ -4,17 +4,25 @@ Room
 Rooms are simple containers that has no location of their own.
 
 """
-from evennia.utils import create, iter_to_str, logger
+from evennia import search_object
+from evennia.utils import create, iter_to_str, logger, delay
 from evennia.objects.objects import DefaultRoom
 from evennia.contrib.grid.xyzgrid.xyzroom import XYZRoom
 from evennia.contrib.grid.wilderness.wilderness import WildernessRoom
-
+from evennia.prototypes import spawner
+from evennia import CmdSet
+from random import randint
+import math
 from .objects import ObjectParent
 from .scripts import RestockScript
 
 from commands.shops import ShopCmdSet
 from commands.skills import TrainCmdSet
 
+from commands.elemental_cmds import CmdJoinElementals
+from commands.elemental_cmds import CmdLeaveElementals
+from commands.changeling_cmds import CmdJoinChangelings
+from commands.changeling_cmds import CmdLeaveChangelings
 
 class RoomParent(ObjectParent):
     """
@@ -65,7 +73,10 @@ class RoomParent(ObjectParent):
             return f"Special commands here: {', '.join(cmd_keys)}"
         else:
             return ""
-
+        
+    def format_appearance(self, appearance, looker, **kwargs):
+        """Don't left-strip the appearance string"""
+        return appearance.rstrip()
 
 class Room(RoomParent, DefaultRoom):
     """
@@ -107,8 +118,7 @@ class XYGridRoom(RoomParent, XYZRoom):
     A subclass of the XYZGrid contrib's room, applying the local RoomParent mixin
     """
 
-    pass
-
+    pass        
 
 class XYGridShop(XYGridRoom):
     """
@@ -166,3 +176,106 @@ class XYZShopNTrain(XYGridTrain, XYGridShop):
     """
 
     pass
+
+
+# class ChessboardGnoll(XYGridRoom):
+#     def at_object_creation(self):
+#         super().at_object_creation()
+#         gnolls = spawner.spawn("SCRAWNY_GNOLL")
+#         con = 18
+#         level = randint(3, 5)
+#         xp = level * 15
+#         hp = level * con
+
+#         for gnoll in gnolls:
+#             gnoll.location = self
+#             gnoll.home = self
+#             gnoll.db.hp = hp
+#             gnoll.db.hpmax = hp
+#             gnoll.db.exp_reward = xp
+#             gnoll.db.con = con
+#             gnoll.db.natural_weapon['damage'] = math.ceil(randint(1, 12) * level / 3)
+            
+            
+# class ChessboardGnollPup(XYGridRoom):
+#     def at_object_creation(self):
+#         super().at_object_creation()
+#         gnolls = spawner.spawn("GNOLL_PUP")
+#         con = 20
+#         level = 1
+#         xp = level * con
+#         hp = level * con
+
+#         for gnoll in gnolls:
+#             gnoll.location = self
+#             gnoll.home = self
+#             gnoll.db.hp = hp
+#             gnoll.db.hpmax = hp
+#             gnoll.db.exp_reward = xp
+#             gnoll.db.con = con
+#             gnoll.db.natural_weapon['damage'] = math.ceil(randint(1, 12) * level / 3)
+            
+# class ChessboardDecayingSkeleton(XYGridRoom):
+#     def at_object_creation(self):
+#         super().at_object_creation()
+#         skeletons = spawner.spawn("DECAYING_SKELETON")
+#         con = 18
+#         level = 2
+#         xp = level * con
+#         hp = level * con
+
+#         for skeleton in skeletons:
+#             skeleton.location = self
+#             skeleton.home = self
+#             skeleton.db.hp = hp
+#             skeleton.db.hpmax = hp
+#             skeleton.db.exp_reward = xp
+#             skeleton.db.con = con
+#             skeleton.db.natural_weapon['damage'] = math.ceil(randint(1, 18) * level / 3)
+            
+class ElementalRoomCmdSet(CmdSet):
+    key = "elemental_room"
+    priority = 1
+
+    def at_cmdset_creation(self):
+        self.add(CmdJoinElementals())
+        self.add(CmdLeaveElementals())
+class ElementalGuildJoinRoom(Room):
+    def at_object_creation(self):
+        print(f"at obj creation, self {self}")
+        self.cmdset.add_default(ElementalRoomCmdSet)
+        # self.desc = f"
+        # As you step into the grand hall of the Elementals Guild, you are immediately enveloped by an aura of ancient power and mystique. The room is vast, with high ceilings adorned with intricate carvings depicting the four elements: earth, air, fire, and water. The walls are lined with glowing crystals that pulse with a soft, ethereal light, casting dancing shadows across the room.
+
+        # At the center of the hall stands a large, circular platform made of polished stone. Surrounding the platform are four towering statues, each representing one of the elemental guardians. The statue of the earth guardian is a massive figure carved from solid rock, its eyes glowing with a deep, emerald light. The air guardian is depicted as a graceful, almost ethereal figure, seemingly made of swirling winds. The fire guardian is a fierce, imposing figure, with flames flickering around its form. The water guardian is a serene, flowing figure, with water cascading down its body.
+
+        # The air is filled with the faint hum of elemental energy, and you can feel the power of the elements coursing through the room. As you approach the platform, a sense of anticipation and excitement builds within you. This is the place where you will take your first steps towards mastering the elements and joining the ranks of the Elementals Guild.
+        # "
+                    
+                    
+        
+class ChangelingRoomCmdSet(CmdSet):
+    key = "changeling_room"
+    priority = 1
+
+    def at_cmdset_creation(self):
+        self.add(CmdJoinChangelings())
+        self.add(CmdLeaveChangelings())
+
+class ChangelingGuildJoinRoom(Room):
+    def at_object_creation(self):
+        print(f"at obj creation, self {self}")
+        self.cmdset.add_default(ChangelingRoomCmdSet)
+        # self.desc = f"
+        # As you step into the sleek, metallic chamber of the Changeling Guild, you are immediately struck by the futuristic design and advanced technology that surrounds you. The room is illuminated by a soft, blue glow emanating from the walls, which are embedded with intricate circuitry and holographic displays.
+
+        # In the center of the chamber stands a large, circular console made of a smooth, reflective material. The console is surrounded by a series of floating, transparent screens that display streams of data and complex schematics. The air is filled with a faint hum of machinery and the occasional beep of electronic devices.
+
+        # Around the room, you can see various stations dedicated to different aspects of the changeling’s craft. One station is equipped with advanced genetic modification tools, while another is filled with holographic projectors and disguise equipment. There is even a section dedicated to virtual reality training, where members can practice their shapeshifting abilities in a simulated environment.
+
+        # At the far end of the chamber, a large, imposing figure stands guard. This is the guild’s leader, a master changeling who has perfected the art of transformation. Their form is constantly shifting, flickering between different appearances as they observe you with keen, calculating eyes.
+
+        # As you approach the console, a sense of excitement and anticipation fills you. This is the place where you will learn to harness the power of transformation and join the ranks of the Changeling Guild. The possibilities are endless, and the future is yours to shape.
+        # "
+                    
+          

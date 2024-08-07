@@ -5,6 +5,8 @@ from evennia.utils.evtable import EvTable
 
 from .command import Command
 from typeclasses.gear import BareHand
+from typeclasses.elementals import EarthAttack
+from typeclasses.elementals import AirAttack
 
 
 class CmdAttack(Command):
@@ -54,6 +56,7 @@ class CmdAttack(Command):
             return
 
         # if we specified a weapon, find it first
+        print(f"self.weapon {self} and weapon: {self.weapon}")
         if self.weapon:
             weapon = self.caller.search(self.weapon)
             if not weapon:
@@ -66,6 +69,7 @@ class CmdAttack(Command):
             else:
                 # use our bare hands if we aren't wielding anything
                 weapon = BareHand()
+                # weapon = AirAttack()
 
         # find our enemy!
         target = self.caller.search(self.target)
@@ -82,6 +86,7 @@ class CmdAttack(Command):
 
         # it's all good! let's get started!
         if not (combat_script := location.scripts.get("combat")):
+            self.msg(f"Combat script: {combat_script}")
             # there's no combat instance; start one
             from typeclasses.scripts import CombatScript
 
@@ -112,6 +117,7 @@ class CmdAttack(Command):
         optional post-command auto prompt
         """
 
+        print(f"at_post_cmd {self} and {self.account.db.settings}")
         # check if we have auto-prompt in settings
         if self.account and (settings := self.account.db.settings):
             if settings.get("auto prompt"):
@@ -283,32 +289,32 @@ class CmdHeal(Command):
         caller.use_heal()
 
 
-class CmdFireball(Command):
-    """
-    Casts a fireball
+# class CmdFireball(Command):
+#     """
+#     Casts a fireball
 
-    Usage:
-        fireball
-    """
+#     Usage:
+#         fireball
+#     """
 
-    key = "fireball"
-    help_category = "combat"
+#     key = "fireball"
+#     help_category = "combat"
 
-    def func(self):
-        print(f"self.caller: {self.caller}")
-        print(f"self.args: {self.args}")
-        caller = self.caller
-        target = self.args
-        location = self.caller.location
-        cscript = location.scripts.get("combat")[0]
-        cscript.add_combatant(self, enemy=target)
-        print(f"location: {cscript}")
+#     def func(self):
+#         print(f"self.caller: {self.caller}")
+#         print(f"self.args: {self.args}")
+#         caller = self.caller
+#         target = self.args
+#         location = self.caller.location
+#         cscript = location.scripts.get("combat")[0]
+#         cscript.add_combatant(self, enemy=target)
+#         print(f"location: {cscript}")
 
-        target = caller.search(target)
-        print(f"target: {target}")
-        caller.db.combat_target = target
-        # if caller.in_combat:
-        caller.use_fireball(target)
+#         target = caller.search(target)
+#         print(f"target: {target}")
+#         caller.db.combat_target = target
+#         # if caller.in_combat:
+#         caller.use_fireball(target)
 
 
 class CmdRespawn(Command):
@@ -396,5 +402,5 @@ class CombatCmdSet(CmdSet):
         self.add(CmdRevive)
         self.add(CmdRespawn)
         self.add(CmdStatus)
-        self.add(CmdFireball)
+        # self.add(CmdFireball)
         self.add(CmdHeal)

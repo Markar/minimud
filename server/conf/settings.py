@@ -27,7 +27,8 @@ from evennia.settings_default import *
 ######################################################################
 
 # This is the name of your game. Make it catchy!
-SERVERNAME = "MiniMUD the RPG"
+# SERVERNAME = "MiniMUD the RPG"
+SERVERNAME = "Millennium"
 
 # Defines the base character type as PlayerCharacter instead of Character
 BASE_CHARACTER_TYPECLASS = "typeclasses.characters.PlayerCharacter"
@@ -39,6 +40,14 @@ BASE_CHARACTER_TYPECLASS = "typeclasses.characters.PlayerCharacter"
 # XYZGrid - https://www.evennia.com/docs/latest/Contribs/Contrib-XYZGrid.html
 EXTRA_LAUNCHER_COMMANDS["xyzgrid"] = "evennia.contrib.grid.xyzgrid.launchcmd.xyzcommand"
 PROTOTYPE_MODULES += ["evennia.contrib.grid.xyzgrid.prototypes"]
+PROTOTYPE_MODULES += ["world.newbie_mobs"]
+PROTOTYPE_MODULES += ["typeclasses.chessboardmobs"]
+PROTOTYPE_MODULES += ["typeclasses.chessboardrooms"]
+PROTOTYPE_MODULES += ["typeclasses.training_grounds_mobs"]
+PROTOTYPE_MODULES += ["typeclasses.training_grounds_rooms"]
+PROTOTYPE_MODULES += ["typeclasses.mystical_forest_mobs"]
+PROTOTYPE_MODULES += ["typeclasses.mystical_forest_rooms"]
+PROTOTYPE_MODULES += ["typeclasses.rooms"]
 XYZROOM_PROTOTYPE_OVERRIDE = {"typeclass": "typeclasses.rooms.XYGridRoom"}
 XYZEXIT_PROTOTYPE_OVERRIDE = {"typeclass": "typeclasses.exits.XYGridExit"}
 
@@ -98,7 +107,7 @@ CMDSET_UNLOGGEDIN = "evennia.contrib.base_systems.menu_login.UnloggedinCmdSet"
 CONNECTION_SCREEN_MODULE = "evennia.contrib.base_systems.menu_login.connection_screens"
 
 # Map Settings
-BASIC_MAP_SIZE = 10  # This changes the default map width/height.
+BASIC_MAP_SIZE = 15  # This changes the default map width/height.
 
 ######################################################################
 # Settings given in secret_settings.py override those in this file.
