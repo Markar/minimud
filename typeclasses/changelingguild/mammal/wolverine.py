@@ -36,7 +36,7 @@ class Wolverine(ChangelingAttack):
         dex = wielder.db.dexterity
         str = wielder.db.strength
         stat_bonus = str / 10 + dex / 5
-        dmg = 2 + stat_bonus + wielder.db.guild_level / 6
+        dmg = 2 + stat_bonus + wielder.db.guild_level / 4
         
         damage = randint(int(dmg/2), int(dmg))
         return damage

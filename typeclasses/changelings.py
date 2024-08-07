@@ -56,14 +56,14 @@ from typeclasses.changelingguild.avian.swallow import Swallow
 from typeclasses.changelingguild.avian.crow import Crow
 from typeclasses.changelingguild.avian.raven import Raven
 from typeclasses.changelingguild.avian.crane import Crane
-# from typeclasses.changelingguild.avian.kestrel import Kestrel
-# from typeclasses.changelingguild.avian.owl import Owl
-# from typeclasses.changelingguild.avian.osprey import Osprey
-# from typeclasses.changelingguild.avian.falcon import Falcon
-# from typeclasses.changelingguild.avian.hawk import Hawk
-# from typeclasses.changelingguild.avian.condor import Condor
-# from typeclasses.changelingguild.avian.ostrich import Ostrich
-# from typeclasses.changelingguild.avian.eagle import Eagle
+from typeclasses.changelingguild.avian.kestrel import Kestrel
+from typeclasses.changelingguild.avian.owl import Owl
+from typeclasses.changelingguild.avian.osprey import Osprey
+from typeclasses.changelingguild.avian.falcon import Falcon
+from typeclasses.changelingguild.avian.hawk import Hawk
+from typeclasses.changelingguild.avian.condor import Condor
+from typeclasses.changelingguild.avian.ostrich import Ostrich
+from typeclasses.changelingguild.avian.eagle import Eagle
 
 FORM_CLASSES = {
     "ChangelingAttack": ChangelingAttack,
@@ -106,14 +106,14 @@ FORM_CLASSES = {
     "Crow": Crow,
     "Raven": Raven,
     "Crane": Crane,
-    # "Kestrel": Kestrel,
-    # "Owl": Owl,
-    # "Osprey": Osprey,
-    # "Falcon": Falcon,
-    # "Hawk": Hawk,
-    # "Condor": Condor,
-    # "Ostrich": Ostrich,
-    # "Eagle": Eagle
+    "Kestrel": Kestrel,
+    "Owl": Owl,
+    "Osprey": Osprey,
+    "Falcon": Falcon,
+    "Hawk": Hawk,
+    "Condor": Condor,
+    "Ostrich": Ostrich,
+    "Eagle": Eagle
 }
 
 
