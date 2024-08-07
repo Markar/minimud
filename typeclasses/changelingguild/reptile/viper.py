@@ -12,29 +12,35 @@ class Viper(ChangelingAttack):
 
     damage = 1
     energy_cost = 3
-    skill = "poison"
-    name = "bite"
     speed = 3
     power = 20
     toughness = 17
     dodge = 6
     
+    def _calculate_damage(self, wielder):
+        """
+        Calculate the damage of the attack
+        """
+        dex = wielder.db.dexterity
+        str = wielder.db.strength
+        stat_bonus = (str+dex) / 4
+        base_dmg = 15 + wielder.db.guild_level * 3
+        dmg = base_dmg + stat_bonus
+        
+        damage = randint(int(dmg/2), int(dmg))
+        return damage
+    
     def at_attack(self, wielder, target, **kwargs):
         """
-        The auto attack Viper
+        The auto attack of Teiid
         """
-        bonus = math.ceil(5 + wielder.db.strength / 3)
-        base_dmg = bonus + wielder.db.guild_level * self.power / 2
-        damage = randint(math.ceil(base_dmg/2), base_dmg)
-        
-        self.energy_cost = 3
-        self.speed = 3
-        self.emote = "You bite viciously at " + str(target) + ", but miss entirely."
-        self.emote_hit = "You bite glancingly into " + str(target) + ", and cause some minor scratches"        
-            
-        # subtract the energy required to use this
-        wielder.db.ep -= self.energy_cost
-        target.at_damage(wielder, damage, self.db.skill)
         super().at_attack(wielder, target, **kwargs)
-        wielder.msg("[ Cooldown: " + str(self.speed) + " seconds ]")
+        
+        self.energy_cost = 1
+        self.speed = 3
+        
+        wielder.db.ep -= self.energy_cost
+        target.at_damage(wielder, self._calculate_damage(wielder), "poison", "bite")
+        
+        wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
         wielder.cooldowns.add("attack", self.speed)

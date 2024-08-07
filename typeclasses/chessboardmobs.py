@@ -72,7 +72,7 @@ GNOLL_WARLORD = {
     "natural_weapon": {
         "name": "battle axe",
         "damage_type": "edged",
-        "damage": 20,
+        "damage": 2,
         "speed": 2,
         "energy_cost": 15,
     },

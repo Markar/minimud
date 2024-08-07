@@ -254,6 +254,11 @@ class Changelings(PlayerCharacter):
         self.msg(f"You cannot wield weapons.")
         return False
     
+    """
+    This kicks off the auto attack of the form, which is weapon.at_attack
+    The weapon is the form class, which is a subclass of ChangelingAttack
+    and has the at_attack method. 
+    """
     def attack(self, target, weapon, **kwargs):
         # can't attack if we're not in combat!
         # Loop through the form classes and assign the appropriate weapon
@@ -295,10 +300,10 @@ class Changelings(PlayerCharacter):
                 # queue up next attack; use None for target to reference stored target on execution
                 delay(speed + 1, self.attack, None, weapon, persistent=True)
     
-    def get_hit_message(self, attacker, dam, tn):
-        attack = FORM_CLASSES[self.db.form].name
+    def get_hit_message(self, attacker, dam, tn, emote="bite"):
+        # attack = FORM_CLASSES[self.db.form].name
 
-        msgs = AttackEmotes.get_emote(attacker, attack, tn, which="left")
+        msgs = AttackEmotes.get_emote(attacker, emote, tn, which="left")
         if dam <= 0:
             to_me = msgs[0]
         elif 1 <= dam <= 5:
@@ -333,7 +338,7 @@ class Changelings(PlayerCharacter):
     
     def at_damage(self, attacker, damage, damage_type=None):
         """
-        Apply damage, after taking into account damage resistances.
+        Apply damage to self, after taking into account damage resistances.
         """
         form = FORM_CLASSES[self.db.form]
         # apply dodge
@@ -368,11 +373,11 @@ class Changelings(PlayerCharacter):
         self.msg(f"|cArmor reduction: {self.defense(damage_type)}")
         
         # apply energy control reduction
-        if ec == True:
-            self.msg(f"|cYou block some damage!")
-            if damage_type in ["edged", "blunt"]:
-                damage -= ec_amt
+        if ec == True and damage_type in ["edged", "blunt"]:
+            damage -= ec_amt
             self.db.ep -= 1
+            self.msg(f"|cYou block some damage!")
+            
             
         self.msg(f"|cEnergy control reduction: {ec_amt}")   
         self.db.hp -= max(damage, 0)

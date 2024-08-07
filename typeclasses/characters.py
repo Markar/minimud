@@ -86,14 +86,11 @@ class Character(ObjectParent, ClothedCharacter):
         armor = sum(
             [obj.attributes.get("armor", 0) for obj in defense_objs]
         )
-        print(f"armor {armor}")
         if damage_type:
-            print(f"defense {damage_type}")
             armor += sum(
                 [obj.attributes.get(f"{damage_type}ac", 0) for obj in defense_objs]
             )
             typeac = self.attributes.get(f"{damage_type}ac", 0)
-            print(f"typeac {typeac}")
             armor += self.attributes.get(f"{damage_type}ac", 0)
 
         return armor
@@ -116,19 +113,17 @@ class Character(ObjectParent, ClothedCharacter):
         self.db.ep = 50
         self.db.epmax = 50
         
-        self.db.edgedac = 0
-        self.db.bluntac = 0
-        self.db.coldac = 0
-        self.db.fireac = 0
-        self.db.acidac = 0
-        self.db.poisonac = 0
-        self.db.mindac = 0
-        self.db.lightningac = 0
-        self.db.energyac = 0
-        
-        # self.traits.add(
-        #     "evasion", trait_type="counter", min=0, max=100, base=0, stat="agi"
-        # )
+        self.db.ac_types = {
+            "edged": 0,
+            "blunt": 0,
+            "cold": 0,
+            "fire": 0,
+            "acid": 0,
+            "poison": 0,
+            "mind": 0,
+            "lightning": 0,
+            "energy": 0,  
+        }
 
     def at_pre_move(self, destination, **kwargs):
         """
@@ -426,7 +421,7 @@ class Character(ObjectParent, ClothedCharacter):
     def get_hit_message(self, target, dam, display_name ):
 
         msgs = self.get_emote(target, dam, display_name)
-        if dam == 0:
+        if dam <= 0:
             to_me = msgs[0]
         elif 1 <= dam <= 5:
             to_me = msgs[1]
@@ -461,7 +456,7 @@ class PlayerCharacter(Character):
 
     def at_object_creation(self):
         super().at_object_creation()
-        self.db.tags.add("player", category="status")
+        self.tags.add("player", category="status")
         self.db.title = "the title less"
         self.db.alignment = "neutral"
         self.db.stat_points = 5
@@ -660,9 +655,6 @@ class NPC(Character):
 
     def at_object_creation(self):
         super().at_object_creation()
-        self.traits.add(
-            "evasion", trait_type="counter", min=0, max=100, base=0, stat="dexterity"
-        )
         
     def get_display_name(self, looker, **kwargs):
         """
@@ -699,7 +691,7 @@ class NPC(Character):
         # self.move_to(self.home)
         self.move_to(self.home, False, None, True, True, True, "teleport")
                   
-    def at_damage(self, attacker, damage, damage_type=None):
+    def at_damage(self, attacker, damage, damage_type=None, emote="bite"):
         """
         Apply damage, after taking into account damage resistances.
         """
@@ -711,7 +703,8 @@ class NPC(Character):
         self.db.hp -= max(damage, 0)
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)} NPC.")
         # this sends the hit_msg FROM the player TO the room with the damage AFTER reduction by npc
-        attacker.get_hit_message(attacker, damage, f"{self.get_display_name(attacker)}")
+        # this comes from the changelings class, where the emotes live
+        attacker.get_hit_message(attacker, damage, f"{self.get_display_name(attacker)}", emote)
         
         if self.db.hp <= 0:
             self.tags.add("defeated", category="status")

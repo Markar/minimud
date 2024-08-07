@@ -1,4 +1,3 @@
-import math
 from random import randint
 
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
@@ -10,30 +9,30 @@ class Raven(ChangelingAttack):
     and suburban environments and are known for their loud cawing
     and scavenging behavior.
     """
-
-    damage = 2
-    energy_cost = 2
-    skill = "edged"
-    name = "claw"
-    speed = 2
     
+    speed = 2
     power = 8
     toughess = 9
     dodge = 9
 
+    def _calculate_bite_damage(self, wielder):
+        dex = wielder.db.dexterity
+        str = wielder.db.strength
+        stat_bonus = str+dex/5
+        dmg = 20 + stat_bonus + wielder.db.guild_level
+        
+        damage = randint(int(dmg/2), int(dmg))
+        return damage
+    
     def at_attack(self, wielder, target, **kwargs):
-        bonus = math.ceil(5 + wielder.db.dexterity / 3)
-        base_dmg = bonus + wielder.db.guild_level * self.power / 2
-        damage = randint(math.ceil(base_dmg/2), base_dmg)
-        
-        self.energy_cost = 2
-        self.speed = 2
-        self.emote = f"You peck viciously at $you(target), but miss entirely."
-        self.emote_hit = f"You peck glancingly into $you(target), and cause some minor scratches"        
-        
-        # subtract the energy required to use this
-        wielder.db.ep -= self.energy_cost
-        target.at_damage(wielder, damage, "claw")
         super().at_attack(wielder, target, **kwargs)
+        
+        self.energy_cost = 1
+        self.speed = 3
+        
+        wielder.db.ep -= self.energy_cost
+        target.at_damage(wielder, self._calculate_bite_damage(wielder), "edged", "bite")
+        target.at_damage(wielder, self._calculate_bite_damage(wielder), "edged", "bite")
+
         wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
         wielder.cooldowns.add("attack", self.speed)

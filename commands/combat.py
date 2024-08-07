@@ -64,7 +64,6 @@ class CmdAttack(Command):
                 return
         else:
             # grab whatever we're wielding
-            print(f" IN HERE: {self.caller.wielding}")
             if wielded := self.caller.wielding:
                 weapon = wielded[0]
             else:
@@ -87,6 +86,7 @@ class CmdAttack(Command):
 
         # it's all good! let's get started!
         if not (combat_script := location.scripts.get("combat")):
+            self.msg(f"Combat script: {combat_script}")
             # there's no combat instance; start one
             from typeclasses.scripts import CombatScript
 

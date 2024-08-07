@@ -22,7 +22,7 @@ class Human(ChangelingAttack):
         """
         bonus = math.ceil(5 + wielder.db.strength / 3)
         base_dmg = bonus + wielder.db.guild_level * self.power / 2
-        damage = randint(math.ceil(base_dmg/2), base_dmg)
+        damage = randint(int(base_dmg/2), int(base_dmg))
         
         self.energy_cost = 1
         self.speed = 3

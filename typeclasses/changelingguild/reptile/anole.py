@@ -11,32 +11,37 @@ class Anole(ChangelingAttack):
     pet shops.
     """
 
-    damage = 1
     energy_cost = 3
-    skill = "edged"
-    name = "bite"
     speed = 3
     power = 5
     toughness = 8
     dodge = 5
 
+    def _calculate_damage(self, wielder):
+        """
+        Calculate the damage of the attack
+        """
+        dex = wielder.db.dexterity
+        wis = wielder.db.wisdom
+        stat_bonus = (dex+wis) / 5
+        base_dmg = 10 + wielder.db.guild_level / 2
+        dmg = base_dmg + stat_bonus
+        
+        damage = randint(int(dmg/2), int(dmg))
+        return damage
+    
     def at_attack(self, wielder, target, **kwargs):
         """
-        The auto attack Cat
+        The auto attack of Anole
         """
         super().at_attack(wielder, target, **kwargs)
         
-        bonus = math.ceil(5 + wielder.db.dexterity / 3)
-        base_dmg = bonus + wielder.db.guild_level * self.power / 2
-        damage = randint(math.ceil(base_dmg/2), base_dmg)
-        
         self.energy_cost = 3
         self.speed = 3
-        self.emote = "You scratch at " + str(target) + ", but miss entirely."
-        self.emote_hit = "You scratch into " + str(target) + ", and cause some minor scratches"        
             
-        # subtract the energy required to use this
         wielder.db.ep -= self.energy_cost
-        target.at_damage(wielder, damage, self.skill)
+        target.at_damage(wielder, self._calculate_damage(wielder), "edged", "bite")
+        target.at_damage(wielder, self._calculate_damage(wielder), "edged", "tail")
+        
         wielder.msg("[ Cooldown: " + str(self.speed) + " seconds ]")
         wielder.cooldowns.add("attack", self.speed)

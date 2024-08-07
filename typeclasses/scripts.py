@@ -70,6 +70,7 @@ class CombatScript(Script):
             True if combatant is successfully in the combat instance, False if not
         """
         if combatant in self.fighters:
+            print(f"{combatant} is already in combat.")
             # already in combat here
             return True
 

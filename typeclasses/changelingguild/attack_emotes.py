@@ -286,5 +286,35 @@ class AttackEmotes:
                 f"{color}You() impale {tn}{color} on your fist and shake {tn}{color} like a rag doll!",
                 f"{color}You() tear a <GAPING HOLE> in {tn}{color} with your fist, spilling {tn}{color}'s guts onto the ground!"
             ]
+        if emote == "burn":
+            return [
+                f"{color}$You() emit a burst of heat, but it dissipates harmlessly.",
+                f"{color}$You() singe {tn}{color} slightly with a flicker of flame.",
+                f"{color}$You() scorch {tn}{color}'s skin with a brief flare.",
+                f"{color}$You() sear a painful burn into {tn}{color}'s flesh.",
+                f"{color}$You() engulf {tn}{color} in a wave of intense heat, causing them to stagger.",
+                f"{color}$You() char {tn}{color}'s arm, leaving a deep burn mark.",
+                f"{color}Smoke rises as you roast {tn}{color}, leaving their skin blistered and raw!",
+                f"{color}You() ignite {tn}{color}'s clothing, causing them to frantically pat out the flames!",
+                f"{color}You() unleash a fiery blast that engulfs {tn}{color}, making them scream in agony!",
+                f"{color}You() incinerate {tn}{color} with a powerful burst of flame, leaving them writhing in pain!",
+                f"{color}You() reduce {tn}{color} to a smoldering heap, their body charred and smoking!"
+            ]
+        if emote == "toast_attack":
+            return [
+                f"{color}$You() launch a piece of toast at {tn}{color}, but it harmlessly bounces off.",
+                f"{color}$You() pop up a slice of toast that lightly taps {tn}{color} on the head.",
+                f"{color}$You() fling a piece of toast at {tn}{color}, leaving a small, buttery mark.",
+                f"{color}$You() send a slice of toast flying into {tn}{color}'s face, causing them to flinch.",
+                f"{color}$You() pop up a perfectly toasted slice that smacks {tn}{color} squarely on the nose.",
+                f"{color}$You() launch a piece of toast with such force that it leaves a red mark on {tn}{color}'s cheek.",
+                f"{color}A slice of toast pops up and hits {tn}{color} in the eye, making them blink rapidly!",
+                f"{color}You() send a barrage of toast slices at {tn}{color}, causing them to stumble back!",
+                f"{color}You() pop up a slice of toast that hits {tn}{color} so hard, it leaves a toasty imprint!",
+                f"{color}You() launch a flaming piece of toast at {tn}{color}, singeing their hair!",
+                f"{color}You() pop up a slice of toast with such precision that it knocks {tn}{color} off their feet!"
+            ]
+
+
 
                 

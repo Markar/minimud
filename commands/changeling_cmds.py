@@ -5,6 +5,7 @@ from evennia.utils.evtable import EvTable
 from evennia import TICKER_HANDLER as tickerhandler
 from evennia import logger
 from evennia.prototypes import spawner, prototypes
+from evennia import search_object
 
 
 import math 
@@ -626,16 +627,34 @@ class CmdTest(Command):
     def func(self):
         caller = self.caller
         # self.caller.tags.add("player", category="status")
-        player_tags = search_tag("player")
-        caller.msg(f"player tags: {player_tags[0]}")
-        caller.msg(f"caller: {caller}")
-        hasPlayerTags = caller.tags.has("player", "status")
-        caller.msg(f"has tags: {hasPlayerTags}")
-        if caller.tags.has("player"):
-           caller.msg(f"player")
-        else:
-            self.caller.msg(f"not player")
-            self.caller.msg(f"tags: {self.caller.tags.all()}")
+        bark = search_object("Bark")[0]
+        bark.locks.add("call:false(); control:perm(Developer); delete:id(3) or perm(Admin);drop:holds(); edit:pid(3) or perm(Admin); examine:perm(Builder); get:false(); puppet:id(4270) or pid(3) or perm(Developer) or pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin); tell:perm(Admin); view:all()")
+        
+        # setattr(bark.db, "Locks", locks)
+        
+        
+        # view:perm(Builder);get:perm(Builder);search:perm(Builder)
+        
+        # call:false(); control:perm(Developer); delete:id(3) or perm(Admin);
+        # drop:holds(); edit:pid(3) or perm(Admin); examine:perm(Builder);
+        # get:false(); puppet:id(4270) or pid(3) or perm(Developer) or
+        # pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin);
+        # tell:perm(Admin); view:all()
+  
+  
+        # caller.msg(f"player tags: {player_tags[0].db.dbref}")
+        # caller.msg(f"key: {player_tags[0].key}")
+        
+        # key = getattr(player_tags[0], "location")
+        # caller.msg(f"key: {key}")
+        # caller.msg(f"caller: {caller}")
+        # hasPlayerTags = caller.tags.has("player", "status")
+        # caller.msg(f"has tags: {hasPlayerTags}")
+        # if caller.tags.has("player"):
+        #    caller.msg(f"player")
+        # else:
+        #     self.caller.msg(f"not player")
+        #     self.caller.msg(f"tags: {self.caller.tags.all()}")
         # self.msg(f"regen: {getattr(self.caller.db.skills, 'regeneration')}")
         # corpse = {
         #     "key":"a corpse",
@@ -673,3 +692,27 @@ class ChangelingCmdSet(CmdSet):
         self.add(CmdGTrain)
         self.add(CmdPowers)
 
+
+
+# Name/key: Blah (#4270)
+# Typeclass: PlayerCharacter (typeclasses.characters.PlayerCharacter)
+# Sessions: #11
+# Account: Magius (#3)
+#   Account Typeclass: Account (typeclasses.accounts.Account)
+#   Account Permissions: player
+# Location: Limbo (#2)
+# Home: Millennium Square (#596)
+# Permissions: player
+# Locks:   call:false(); control:perm(Developer); delete:id(3) or perm(Admin);
+#   drop:holds(); edit:pid(3) or perm(Admin); examine:perm(Builder);
+#   get:false(); puppet:id(4270) or pid(3) or perm(Developer) or
+#   pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin);
+#   tell:perm(Admin); view:all()
+  
+  
+# Typeclass: Changelings (typeclasses.changelings.Changelings)
+# Permissions: player
+# Locks:   call:false(); control:perm(Developer); delete:perm(Admin); drop:holds();
+#   edit:perm(Admin); examine:perm(Builder); get:false();
+#   puppet:pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin);
+#   tell:perm(Admin); view:all()
