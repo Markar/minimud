@@ -51,8 +51,6 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
-        # self.add(CmdJoinElementals)
-        # self.add(CmdJoinChangelings)
         self.add(ClothedCharacterCmdSet)
         self.add(CmdMoney)
         self.add(ContainerCmdSet)

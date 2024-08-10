@@ -19,9 +19,6 @@ class Command(BaseCommand):
     here. Without setting one, the parent's docstring will show (like now).
 
     """
-    def at_post_cmd(self, **kwargs):
-        # self.caller.db.last_command = self.cmdstring
-        # setattr(self.caller.db, "last_command", self.cmdstring)
 
     # Each Command class implements the following methods, called in this order
     # (only func() is actually required):
