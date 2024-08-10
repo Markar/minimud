@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, uniform
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
 class Hawk(ChangelingAttack):

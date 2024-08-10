@@ -1,7 +1,7 @@
 """
 Prototypes
 """
-from random import randint, choice
+from random import randint, uniform, choice
 
 MOB_CORPSE = {
     "typeclass": "typeclasses.corpse.Corpse",
@@ -415,35 +415,6 @@ STAG_DEER = {
     "exp_reward": 10,
     "can_attack": True,
 }
-
-# SCRAWNY_GNOLL = {
-#     "typeclass": "typeclasses.characters.NPC",
-#     "prototype_key": "scrawny_gnoll",
-#     "aliases": ["gnoll"],
-#     "key": "a scrawny gnoll",
-#     "desc": "The gnoll stands about five feet tall, and is wearing a torn blue shirt with greenish yellow pants.",
-#     "gender": "neutral",
-#     "react_as": "aggressive",
-#     "armor": 0,
-#     "name_color": "r",
-#     "hp": 200,
-#     "hpmax": 200,
-#     "str": 15,
-#     "natural_weapon": {
-#         "name": "claws",
-#         "damage_type": "slash",
-#         "damage": 1,
-#         "speed": 3,
-#         "energy_cost": 10,
-#     },
-#     "exp_reward": 50,
-#     # randomly generate a list of drop prototype keys when the mob is spawned
-#     "drops": ["IRON_DAGGER"],
-#     # "drops": lambda: ["IRON_DAGGER"] randint(0,99) > 20) + ["WOOL_TUNIC"] * randint(0, 5),
-#     "can_attack": True,
-# }
-
-
 
 ### Mob drops
 

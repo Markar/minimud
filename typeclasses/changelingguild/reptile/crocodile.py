@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, uniform
 
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
@@ -30,7 +30,7 @@ class Crocodile(ChangelingAttack):
         base_dmg = 17 + wielder.db.guild_level/2
         dmg = base_dmg + stat_bonus
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
     
     def _calculate_bite_damage(self, wielder):
@@ -40,7 +40,7 @@ class Crocodile(ChangelingAttack):
         base_dmg = 32 + wielder.db.guild_level
         dmg = base_dmg + stat_bonus
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
     
     def at_attack(self, wielder, target, **kwargs):

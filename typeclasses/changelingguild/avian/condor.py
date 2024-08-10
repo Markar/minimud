@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, uniform
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
 class Condor(ChangelingAttack):
@@ -22,7 +22,7 @@ class Condor(ChangelingAttack):
         stat_bonus = dex/3
         dmg = 38 + stat_bonus + wielder.db.guild_level * 3/2
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
      
     def _calculate_bite_damage(self, wielder):
@@ -31,7 +31,7 @@ class Condor(ChangelingAttack):
         stat_bonus = (str+dex)/5
         dmg = 30 + stat_bonus + wielder.db.guild_level / 2
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
     
     

@@ -11,7 +11,7 @@ inheritance.
 
 """
 
-from random import randint
+from random import randint, uniform
 from evennia.prototypes import spawner, prototypes
 from evennia.objects.objects import DefaultObject
 from evennia.contrib.game_systems.clothing import ContribClothing

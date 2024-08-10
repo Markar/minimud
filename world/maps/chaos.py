@@ -16,3 +16,16 @@
 chessboard
 #
 @open leave = chaos#2
+#
+
+
+#
+@dig/teleport An entrance to training grounds;chaos#3 : typeclasses.rooms.Room = west;w,east;e
+#
+@desc |GThe room is dominated by a life-size chessboard, each square large enough to accommodate a full-grown person. On the black and white tiles, gnolls and skeletons clash in a fierce battle. The gnolls, with their hyena-like features and crude armor, snarl and swing their weapons with savage intensity. Opposing them, skeletal warriors, their bones clattering with each movement, wield rusted swords and shields. The air is thick with the sounds of combat, and the eerie glow of torches casts flickering shadows across the scene, making the battle seem almost otherworldly.
+#
+@open enter = (1,1,training_grounds)
+#
+enter
+#
+@open leave = chaos#3

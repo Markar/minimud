@@ -22,6 +22,7 @@ from evennia.contrib.grid.xyzgrid.commands import XYZGridCmdSet
 from evennia.contrib.rpg.character_creator.character_creator import ContribCmdCharCreate
 from evennia.contrib.game_systems.crafting.crafting import CmdCraft
 from evennia.contrib.grid.ingame_map_display import MapDisplayCmdSet
+from evennia.commands.default.syscommands import CMD_NOINPUT 
 
 from commands.combat import CombatCmdSet
 from commands.skills import SkillCmdSet
@@ -29,10 +30,8 @@ from commands.skills import AdvanceCmdSet
 from commands.interact import InteractCmdSet
 from commands.account import AccountOptsCmdSet
 from commands.shops import CmdMoney
-from commands.elemental_cmds import CmdJoinElementals
-from commands.changeling_cmds import CmdJoinChangelings
 from commands.admin import AdminCmdSet
-
+from .command import Command
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -64,9 +63,19 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(AdvanceCmdSet)
         self.add(InteractCmdSet)
         self.add(MapDisplayCmdSet)
+        # self.add(CmdNoInput)
         # self.add(AdminCmdSet)
 
-
+# class CmdNoInput(Command):
+#     key = CMD_NOINPUT
+    
+#     def func(self):
+#         cmd = getattr(self.caller.db, "last_command")
+#         if cmd:
+#             self.execute_cmd(cmd)
+#         else:
+#             self.caller.msg("You can't repeat that command.")
+    
 class AccountCmdSet(default_cmds.AccountCmdSet):
     """
     This is the cmdset available to the Account at all times. It is

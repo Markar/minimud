@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, uniform
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
 class Python(ChangelingAttack):
@@ -20,7 +20,7 @@ class Python(ChangelingAttack):
         base_dmg = 10 + wielder.db.guild_level / 2
         dmg = base_dmg + stat_bonus
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
     
     def _calculate_constrict_damage(self, wielder):
@@ -30,7 +30,7 @@ class Python(ChangelingAttack):
         base_dmg = 20 + wielder.db.guild_level*2
         dmg = base_dmg + stat_bonus
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
     
     def at_attack(self, wielder, target, **kwargs):

@@ -1,5 +1,5 @@
 import math
-from random import randint
+from random import randint, uniform
 
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
@@ -22,7 +22,7 @@ class Rat(ChangelingAttack):
         stat_bonus = (dex+str) / 10
         dmg = 5 + stat_bonus + wielder.db.guild_level / 2
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
     
     def _calculate_claw_damage(self, wielder):
@@ -31,7 +31,7 @@ class Rat(ChangelingAttack):
         stat_bonus = (dex+str) / 10
         dmg = 10 + stat_bonus + wielder.db.guild_level / 2
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
     
     def at_attack(self, wielder, target, **kwargs):

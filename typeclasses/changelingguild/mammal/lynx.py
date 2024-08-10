@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, uniform
 
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
@@ -22,7 +22,7 @@ class Lynx(ChangelingAttack):
         stat_bonus = str / 8 + dex / 6
         dmg = 14 + stat_bonus + wielder.db.guild_level / 3
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
     
     def _calculate_claw_damage(self, wielder):
@@ -31,7 +31,7 @@ class Lynx(ChangelingAttack):
         stat_bonus = str / 8 + dex / 6
         dmg = 7 + stat_bonus + wielder.db.guild_level / 2
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
     
     def at_attack(self, wielder, target, **kwargs):

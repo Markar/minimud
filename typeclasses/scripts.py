@@ -1,4 +1,4 @@
-from random import randint, choice
+from random import randint, uniform, choice
 from evennia.utils import make_iter, logger
 from evennia.scripts.scripts import DefaultScript
 from evennia.prototypes.prototypes import PROTOTYPE_TAG_CATEGORY
@@ -69,10 +69,10 @@ class CombatScript(Script):
         Returns:
             True if combatant is successfully in the combat instance, False if not
         """
-        if combatant in self.fighters:
-            print(f"{combatant} is already in combat.")
-            # already in combat here
-            return True
+        # if combatant in self.fighters:
+        #     print(f"{combatant} is already in combat.")
+        #     # already in combat here
+        #     return True
 
         # if neither ally nor enemy are given, they're not actually fighting anyone
         if not (ally or enemy):

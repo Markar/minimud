@@ -1,39 +1,25 @@
-class EarthAttack:
+from random import uniform
+from typeclasses.elementalguild.elemental_attack import ElementalAttack
+class EarthAttack(ElementalAttack):
     """
-    A dummy "object" class that provides basic combat functionality for unarmed combat
+    Earth elementals are known for their strength and durability. They are
+    often found in rocky areas such as mountains and caves, where they can
+    blend in with their surroundings. Earth elementals have the ability to
+    control the earth and rocks around them, using them to attack their
+    enemies. They are also known for their ability to create earthquakes
+    and landslides, which can cause massive damage to their foes.
     """
-
-    damage = 1
-    energy_cost = 3
-    skill = "unarmed"
-    name = "landslide"
     speed = 3
     emit = 1
-    
-    def at_pre_attack(self, wielder, **kwargs):
-        # make sure we have enough strength left
-        print(f"at_pre_attack on weapon: {wielder} and {wielder.db.ep} and self {self}")
-        if wielder.db.ep < self.energy_cost:
-            wielder.msg("You are too tired to hit anything.")
-            return False
-        # can't attack if on cooldown
-        if not wielder.cooldowns.ready("attack"):
-            wielder.msg("You can't attack again yet.")
-            return False
-
-        return True
 
     def at_attack(self, wielder, target, **kwargs):
-        """
-        The auto attack for earth elementals
-        """
+        super().at_attack(wielder, target, **kwargs)
+        
         if wielder.db.emit == 1:
             self.name = "pebbles"
             damage = 20 + wielder.db.wisdom
             self.energy_cost = 1
             self.speed = 3
-            self.emote = f"You try to rain {self.name} at $you(target), but $conj(misses)."
-            self.emote_hit = f"$conj(swings) $pron(your) {self.name} at $you(target), but $conj(misses).",
         if wielder.db.emit == 2:
             self.name = "stones"
             damage = 30 + wielder.db.wisdom
@@ -77,21 +63,9 @@ class EarthAttack:
             self.emote = f"Your {self.name} $conj(misses)."
             self.emote_hit = f"You summon {self.name} to destroy $you(target)!",
             
-        # subtract the energy required to use this
+        # Subtract energy and apply damage to target before their defenses
         wielder.db.ep -= self.energy_cost
-        if not damage:
-            # the attack failed
-            wielder.at_emote(
-                f"$conj(swings) $pron(your) {self.name} at $you(target), but $conj(misses).",
-                mapping={"target": target},
-            )
-        else:
-            wielder.at_emote(
-                f"$conj(hits) $you(target) with $pron(your) {self.name}.",
-                mapping={"target": target},
-            )
-            # the attack succeeded! apply the damage
-            target.at_damage(wielder, damage, "blunt")
-        wielder.db.gxp += 1 + wielder.db.emit
+        target.at_damage(wielder, damage, "blunt", "earth_elemental_melee")
+             
         wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
         wielder.cooldowns.add("attack", self.speed)

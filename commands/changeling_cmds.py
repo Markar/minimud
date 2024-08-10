@@ -7,7 +7,6 @@ from evennia import logger
 from evennia.prototypes import spawner, prototypes
 from evennia import search_object
 
-
 import math 
 from .command import Command
 
@@ -76,6 +75,7 @@ GUILD_LEVEL_COST_DICT = {
     30: 4200000, 
     31: 4200000000000,
 }
+
 SKILL_RANKS = {
     0: "Very poor",
     1: "Poor",
@@ -171,11 +171,11 @@ class CmdMorph(Command):
             form_title = form.title()
             if form == "human":
                 print(f"form = human and {caller.db.guild_level}")
-                self.msg(f"|rYou morph back into your human form!")
+                self.msg(f"|rYou morph into your human form!")
                 caller.db.form = "Human"
                 return
             if form == "slime":
-                self.msg(f"|rYou morph back into your slime form!")
+                self.msg(f"|rYou morph into your slime form!")
                 caller.db.form = "Slime"
                 return
             
@@ -203,7 +203,11 @@ class CmdMorph(Command):
 
 class CmdEnergyControl(Command):
     """
-    Energy Control enhances your physical resists while lowering others
+    Energy control is the Changeling's ability to manipulate the energy
+    within their body.  This power allows the Changeling to bolster their
+    defenses against physical attacks. This power costs 25 energy points
+    to use and lasts until it is turned off or the Changeling runs out of
+    energy.
 
     Usage:
         energy control
@@ -265,7 +269,8 @@ class CmdEngulf(Command):
         
 class CmdForms(Command):
     """
-    List of forms
+    List of forms available to the Changeling, their guild level
+    requirement, and their description.
     
     Usage:
     forms
@@ -299,7 +304,7 @@ class CmdForms(Command):
     
 class CmdPowers(Command):
     """
-    List of powers, cost, and required rank to use.
+    List of powers available to the Changeling, their rank, and their cost.
     
     Usage:
         powers
@@ -429,6 +434,7 @@ class CmdGuildStatSheet(Command):
         alignment = caller.db.alignment
         my_glvl = caller.db.guild_level or 1
         gxp = caller.db.gxp or 0
+        skill_gxp = caller.db.skill_gxp or 0
         form = caller.db.form or "none"                
         gxp_needed = GUILD_LEVEL_COST_DICT[my_glvl+1]
         ec = caller.db.energy_control or "none"
@@ -436,15 +442,22 @@ class CmdGuildStatSheet(Command):
             ecActive = "Active"
         else:
             ecActive = "Inactive"
+        cg = caller.db.regrowth or "none"
+        if cg == True:
+            cgActive = "Active"
+        else:
+            cgActive = "Inactive"
         engulfs = caller.db.engulfs or 0
         engulfMax = caller.db.max_engulfs or 0
         
         table = EvTable(f"|c{caller} {title} ({alignment})", border="table")
         table.add_row(f"|GGuild Level: {my_glvl}")
         table.add_row(f"|GGXP: {gxp} / {gxp_needed}")
+        table.add_row(f"|GSkill GXP: {skill_gxp}")
         table.add_row(f"|GEngulfs: {engulfs} / {engulfMax}")
         table.add_row(f"|GForm: {form}")
         table.add_row(f"|GEnergy Control: {ecActive}")
+        table.add_row(f"|GCellular Regrowth: {cgActive}")
         
         skill_table = EvTable(f"|cSkills", f"|cCost", f"|cRank", border="table")
         body_control = caller.db.skills["body_control"]
@@ -526,15 +539,19 @@ class CmdAbsorb(Command):
 
     If you so choose, you may also 'fully' absorb the corpse, leaving
     nothing left to decay.
+    
+    Usage:
+        absorb
+        ab
     """
     
     key = "absorb"
+    aliases = ("ab")
     help_category = "Changeling"
     
     def func(self):
         if not self.args:
             target = self.caller
-            self.msg(f"target {target}")
             if corpse := target.location.search("corpse-1"):
                 ep = target.db.ep
                 epmax = target.db.epmax
@@ -626,51 +643,15 @@ class CmdTest(Command):
     
     def func(self):
         caller = self.caller
-        # self.caller.tags.add("player", category="status")
-        bark = search_object("Bark")[0]
-        bark.locks.add("call:false(); control:perm(Developer); delete:id(3) or perm(Admin);drop:holds(); edit:pid(3) or perm(Admin); examine:perm(Builder); get:false(); puppet:id(4270) or pid(3) or perm(Developer) or pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin); tell:perm(Admin); view:all()")
+        caller.msg("test")
         
-        # setattr(bark.db, "Locks", locks)
+        tagged = search_tag(key="player", category="type")
+        for x in tagged:
+            x.db.best_kill = {"name": "none", "level": 0, "xp": 0}
         
-        
-        # view:perm(Builder);get:perm(Builder);search:perm(Builder)
-        
-        # call:false(); control:perm(Developer); delete:id(3) or perm(Admin);
-        # drop:holds(); edit:pid(3) or perm(Admin); examine:perm(Builder);
-        # get:false(); puppet:id(4270) or pid(3) or perm(Developer) or
-        # pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin);
-        # tell:perm(Admin); view:all()
-  
-  
-        # caller.msg(f"player tags: {player_tags[0].db.dbref}")
-        # caller.msg(f"key: {player_tags[0].key}")
-        
-        # key = getattr(player_tags[0], "location")
-        # caller.msg(f"key: {key}")
-        # caller.msg(f"caller: {caller}")
-        # hasPlayerTags = caller.tags.has("player", "status")
-        # caller.msg(f"has tags: {hasPlayerTags}")
-        # if caller.tags.has("player"):
-        #    caller.msg(f"player")
-        # else:
-        #     self.caller.msg(f"not player")
-        #     self.caller.msg(f"tags: {self.caller.tags.all()}")
-        # self.msg(f"regen: {getattr(self.caller.db.skills, 'regeneration')}")
-        # corpse = {
-        #     "key":"a corpse",
-        #     "typeclass": "typeclasses.corpse.Corpse",
-        #     "desc": "A small corpse",
-        #     "location": self.caller.location
-        # }
-        # spawner.spawn(corpse)
-        # objs = spawner.spawn(*list(search_tag("MOB_CORPSE")))
-        # for obj in objs:
-        #     self.caller.msg(f"obj: {obj}")
-        #     obj.location = self.location
-        # msg = self.caller.get_hit_message(self.caller, 4, "fart")
-        # print(f"in test: {msg}")
-        # self.caller.location.key = "Millennium Square"
-        # self.caller.cmdset.delete(ChangelingCmdSet)
+
+
+        caller.msg("done")
         
 class ChangelingCmdSet(CmdSet):
     key = "Changeling CmdSet"
@@ -691,28 +672,3 @@ class ChangelingCmdSet(CmdSet):
         self.add(CmdCellularRegrowth)
         self.add(CmdGTrain)
         self.add(CmdPowers)
-
-
-
-# Name/key: Blah (#4270)
-# Typeclass: PlayerCharacter (typeclasses.characters.PlayerCharacter)
-# Sessions: #11
-# Account: Magius (#3)
-#   Account Typeclass: Account (typeclasses.accounts.Account)
-#   Account Permissions: player
-# Location: Limbo (#2)
-# Home: Millennium Square (#596)
-# Permissions: player
-# Locks:   call:false(); control:perm(Developer); delete:id(3) or perm(Admin);
-#   drop:holds(); edit:pid(3) or perm(Admin); examine:perm(Builder);
-#   get:false(); puppet:id(4270) or pid(3) or perm(Developer) or
-#   pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin);
-#   tell:perm(Admin); view:all()
-  
-  
-# Typeclass: Changelings (typeclasses.changelings.Changelings)
-# Permissions: player
-# Locks:   call:false(); control:perm(Developer); delete:perm(Admin); drop:holds();
-#   edit:perm(Admin); examine:perm(Builder); get:false();
-#   puppet:pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin);
-#   tell:perm(Admin); view:all()

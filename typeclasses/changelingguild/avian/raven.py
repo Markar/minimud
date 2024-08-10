@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, uniform
 
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
@@ -21,7 +21,7 @@ class Raven(ChangelingAttack):
         stat_bonus = str+dex/5
         dmg = 20 + stat_bonus + wielder.db.guild_level
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
     
     def at_attack(self, wielder, target, **kwargs):

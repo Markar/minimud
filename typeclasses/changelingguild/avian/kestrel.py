@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, uniform
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
 class Kestrel(ChangelingAttack):
@@ -24,7 +24,7 @@ class Kestrel(ChangelingAttack):
         stat_bonus = str/5 + dex/3
         dmg = 8 + stat_bonus + wielder.db.guild_level
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
      
     def _calculate_claw_damage(self, wielder):
@@ -33,7 +33,7 @@ class Kestrel(ChangelingAttack):
         stat_bonus = str/5 + dex/3
         dmg = 5 + stat_bonus + wielder.db.guild_level / 4
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
     
     

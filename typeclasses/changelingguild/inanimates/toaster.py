@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, uniform
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
 class Toaster(ChangelingAttack):
@@ -24,7 +24,7 @@ class Toaster(ChangelingAttack):
         stat_bonus = wis/2
         dmg = 25 + stat_bonus + wielder.db.guild_level / 2
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
     
     def _calculate_popup_damage(self, wielder):
@@ -32,7 +32,7 @@ class Toaster(ChangelingAttack):
         stat_bonus = wis/2
         dmg = stat_bonus + wielder.db.guild_level / 2
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
     
     def at_attack(self, wielder, target, **kwargs):

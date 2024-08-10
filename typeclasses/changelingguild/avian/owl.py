@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, uniform
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
 class Owl(ChangelingAttack):
@@ -22,7 +22,7 @@ class Owl(ChangelingAttack):
         stat_bonus = str/3 + dex/5
         dmg = 14 + stat_bonus + wielder.db.guild_level / 2
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
      
     def _calculate_gaze_damage(self, wielder):
@@ -30,7 +30,7 @@ class Owl(ChangelingAttack):
         stat_bonus = wis / 3
         dmg = 39 + stat_bonus + wielder.db.guild_level
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
     
     

@@ -1,5 +1,5 @@
 import math
-from random import randint
+from random import randint, uniform
 
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
@@ -18,7 +18,7 @@ class Finch(ChangelingAttack):
     speed = 2
     power = 4
     toughness = 4
-    dodge = 6
+    dodge = 22
     
     def _calculate_bite_damage(self, wielder):
         dex = wielder.db.dexterity
@@ -26,16 +26,16 @@ class Finch(ChangelingAttack):
         stat_bonus = str+dex/3
         dmg =  5 + stat_bonus + wielder.db.guild_level / 2
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
     
     def _calculate_claw_damage(self, wielder):
         dex = wielder.db.dexterity
         str = wielder.db.strength
         stat_bonus = str / 5 + dex / 3
-        dmg = stat_bonus + wielder.db.guild_level / 4
+        dmg = 1 + stat_bonus + wielder.db.guild_level / 4
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
     
     def at_attack(self, wielder, target, **kwargs):

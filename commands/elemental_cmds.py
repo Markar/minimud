@@ -36,7 +36,8 @@ GUILD_LEVEL_COST_DICT = {
     27: 1300000,
     28: 1900000,
     29: 2900000,
-    30: 4200000 
+    30: 4200000, 
+    31: 4200000000000,
 }
 
 class CmdEnableReactiveArmor(Command):

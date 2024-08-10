@@ -88,7 +88,7 @@ MAP_KEY = {
     },
 }
 
-from random import randint, choices
+from random import randint, uniform, choices
 from evennia.contrib.grid.wilderness import wilderness
 from evennia.prototypes import spawner
 from evennia.utils.search import search_tag

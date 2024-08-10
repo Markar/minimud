@@ -1,7 +1,7 @@
 """
 Prototypes
 """
-from random import randint, choice
+from random import randint, uniform, choice
 LARGE_RAT = {
     "typeclass": "typeclasses.characters.NPC",
     "key": "a large rat",
@@ -18,10 +18,11 @@ LARGE_RAT = {
     "str": 7,
     "natural_weapon": {
         "name": "bite",
-        "damage_type": "piercing",
+        "damage_type": "edged",
         "damage": 5,
         "speed": 4,
         "energy_cost": 7,
+        "hits": 2
     },
     "exp_reward": 8,
     # "drops": [{
@@ -68,7 +69,7 @@ FIRE_BEETLE = {
 
 GOBLIN_SCOUT = {
     "typeclass": "typeclasses.characters.NPC",
-    "key": "a novice goblin",
+    "key": "a goblin scout",
     "aliases": ["goblin"],
     "tags": ["mystical_forest_mob"],
     "desc": "A small, green-skinned goblin wielding a crude dagger. It looks eager to prove itself in combat.",

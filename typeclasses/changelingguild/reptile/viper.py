@@ -1,5 +1,5 @@
 import math
-from random import randint
+from random import randint, uniform
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
 class Viper(ChangelingAttack):
@@ -27,7 +27,7 @@ class Viper(ChangelingAttack):
         base_dmg = 15 + wielder.db.guild_level * 3
         dmg = base_dmg + stat_bonus
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
     
     def at_attack(self, wielder, target, **kwargs):
