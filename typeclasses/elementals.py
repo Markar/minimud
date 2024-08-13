@@ -12,10 +12,7 @@ from evennia.contrib.game_systems.clothing.clothing import (
 )
 from commands.elemental_cmds import ElementalCmdSet
 from typeclasses.characters import PlayerCharacter
-from typeclasses.elementalguild.air_elemental import AirAttack
-from typeclasses.elementalguild.earth_elemental import EarthAttack
-from typeclasses.elementalguild.fire_elemental import FireAttack
-from typeclasses.elementalguild.water_elemental import WaterAttack
+from typeclasses.elementalguild.earth_elemental_attack import EarthAttack
 from typeclasses.elementalguild.attack_emotes import AttackEmotes
 
 class Elemental(PlayerCharacter):
@@ -28,15 +25,15 @@ class Elemental(PlayerCharacter):
         super().at_object_creation()
         con_increase_amount = 12
         int_increase_amount = 5
-        self.db.con_increase_amount = 12
-        self.db.int_increase_amount = 5
-        self.db.hpmax = 50 + (12 * self.db.constitution)        
-        self.db.fpmax = 50 + (5 * self.db.intelligence)
+        self.db.con_increase_amount = con_increase_amount
+        self.db.int_increase_amount = int_increase_amount
+        self.db.hpmax = 50 + (con_increase_amount * self.db.constitution)        
+        self.db.fpmax = 50 + (int_increase_amount * self.db.intelligence)
         
         self.db.guild_level = 1
         self.db.gxp = 0
         self.db.skill_gxp = 0
-        self.db.title = "the novice Elemental"        
+        self.db.title = "the novice Elemental"
         
         self.db.natural_weapon = {
             "name": "earth_attack",
@@ -53,6 +50,7 @@ class Elemental(PlayerCharacter):
         self.db.hpregen = 1
         self.db.fpregen = 1
         self.db.epregen = 1
+        self.db.strategy = "melee"
         self.at_wield(EarthAttack)
         tickerhandler.add(interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True)
     
@@ -127,12 +125,6 @@ class Elemental(PlayerCharacter):
         # can't attack if we're not in combat!
         if self.db.subguild == "earth":
             weapon = EarthAttack()
-        if self.db.subguild == "air":
-            weapon = AirAttack()
-        if self.db.subguild == "water":
-            weapon = WaterAttack()
-        if self.db.subguild == "fire":
-            weapon = FireAttack()
             
         if not self.in_combat:
             return
@@ -204,7 +196,6 @@ class Elemental(PlayerCharacter):
         else:
             to_me = msgs[10]
             
-        self.msg(f"to_me {to_me}")
         to_me = f"{to_me} ({dam})"
         self.location.msg_contents(to_me, from_obj=self)
                     
@@ -214,19 +205,22 @@ class Elemental(PlayerCharacter):
         """
         Apply damage, after taking into account damage resistances.
         """
-        # apply armor damage reduction
+        glvl = self.db.guild_level
+        status = self.get_display_status(self)
         damage -= self.defense(damage_type)
-        self.db.hp -= max(damage, 0)
-        if self.db.reactive_armor:
+        
+        # apply reactive armor after defense if it's enabled
+        if damage_type in ("blunt", "edged") and self.db.reactive_armor:
+            reactive_armor_absorbed = randint(glvl/3, glvl)
+            damage -= reactive_armor_absorbed
             self.msg(f"|cYour reactive armor blocks some damage!")
-            self.db.ep -= 1
+            
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
         
-        status = self.get_display_status(self)
-        self.msg(prompt=status)
-        
+        self.db.hp -= max(damage, 0)
         attacker.get_npc_attack_emote(self, damage, self.get_display_name(self))
+        self.msg(prompt=status)
             
         if self.db.hp <= 0:
             self.tags.add("unconscious", category="status")
@@ -237,51 +231,7 @@ class Elemental(PlayerCharacter):
             if self.in_combat:
                 combat = self.location.scripts.get("combat")[0]
                 combat.remove_combatant(self)
-                            
-    def use_rebuild(self):
-        """
-        Restores health
-        """
-
-        hp = self.db.hp
-        hpmax = self.db.hpmax
-        fp = self.db.fp
-        hp_amount = 0
-        
-        damage = 10 + self.db.guild_level + self.db.wisdom
-        cost = damage / 2
-        
-        if cost > fp:
-            return
-        
-        if hp + damage > hpmax:            
-            hp_amount = hpmax-hp
-            self.db.hp = hpmax
-            self.db.fp -= cost
-        else: 
-            hp_amount = hpmax-hp
-            self.db.hp += max(damage, 0)
-            self.db.fp -= cost
-            
-        self.msg(f"You restore {hp_amount or 0} health for {cost or 0} focus!")
-        
-    def use_reactive_armor(self):
-        """
-        Improve your physical resistance
-        """
-        ep = self.db.ep
-        
-        power = self.db.guild_level
-        
-        if self.db.reactive_armor:
-            self.msg(f"|rYou already have reactive armor enabled.")
-            return
-        
-        self.db.reactivearmor = True
-        self.db.edgedac += power
-        self.db.bluntac += power
-        self.msg(f"|rYou activate your reactive armor.")
-        
+                              
         
     def enter_combat(self, target, **kwargs):
         """

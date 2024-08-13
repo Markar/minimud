@@ -1,71 +1,267 @@
-from random import uniform
-from typeclasses.elementalguild.elemental_attack import ElementalAttack
-class EarthAttack(ElementalAttack):
-    """
-    Earth elementals are known for their strength and durability. They are
-    often found in rocky areas such as mountains and caves, where they can
-    blend in with their surroundings. Earth elementals have the ability to
-    control the earth and rocks around them, using them to attack their
-    enemies. They are also known for their ability to create earthquakes
-    and landslides, which can cause massive damage to their foes.
-    """
-    speed = 3
-    emit = 1
+from random import randint, uniform, choice
+from evennia.prototypes import spawner, prototypes
+from string import punctuation
+from evennia import AttributeProperty
+from evennia.utils import lazy_property, iter_to_str, delay, logger
+from evennia.contrib.rpg.traits import TraitHandler
+from evennia.contrib.game_systems.cooldowns import CooldownHandler
+from evennia import TICKER_HANDLER as tickerhandler
+from evennia.contrib.game_systems.clothing.clothing import (
+    ClothedCharacter,
+    get_worn_clothes,
+)
+from commands.elemental_cmds import ElementalCmdSet
+from typeclasses.characters import PlayerCharacter
+from typeclasses.elementalguild.earth_elemental_attack import EarthAttack
+from typeclasses.elementalguild.attack_emotes import AttackEmotes
+from typeclasses.elementals import Elemental
+from typeclasses.elementalguild.earth_elemental_commands import CmdTerranRestoration
+import math
 
-    def at_attack(self, wielder, target, **kwargs):
-        super().at_attack(wielder, target, **kwargs)
+class EarthElemental(Elemental):
+    
+    def at_object_creation(self):
+        self.cmdset.add(ElementalCmdSet, persistent=True)
+        super().at_object_creation()
+        con_increase_amount = 12
+        int_increase_amount = 5
+        self.db.con_increase_amount = con_increase_amount
+        self.db.int_increase_amount = int_increase_amount
+        self.db.hpmax = 50 + (con_increase_amount * self.db.constitution)        
+        self.db.fpmax = 50 + (int_increase_amount * self.db.intelligence)
         
-        if wielder.db.emit == 1:
-            self.name = "pebbles"
-            damage = 20 + wielder.db.wisdom
-            self.energy_cost = 1
-            self.speed = 3
-        if wielder.db.emit == 2:
-            self.name = "stones"
-            damage = 30 + wielder.db.wisdom
-            self.energy_cost = 2
-            self.speed = 3
-            self.emote = f"You try to throw {self.name} at $you(target), but $conj(misses)."
-            self.emote_hit = f"$conj(swings) $pron(your) {self.name} at $you(target), but $conj(misses).",
-        if wielder.db.emit == 3:
-            self.name = "rocks"
-            damage = 40 + (wielder.db.wisdom*2)
-            self.energy_cost = 3
-            self.speed = 3
-            self.emote = f"You try to smash {self.name} with $you(target), but $conj(misses)."
-            self.emote_hit = f"$conj(swings) $pron(your) {self.name} at $you(target)!",
-        if wielder.db.emit == 4:
-            self.name = "boulders"
-            damage = 50 + (wielder.db.wisdom*2)
-            self.energy_cost = 4
-            self.speed = 3
-            self.emote = f"You throw {self.name} at $you(target), but $conj(misses)."
-            self.emote_hit = f"$conj(swings) $pron(your) {self.name} at $you(target)!",
-        if wielder.db.emit == 5:
-            self.name = "spikes of earth"
-            damage = 65 + (wielder.db.wisdom*3)
-            self.energy_cost = 5
-            self.speed = 3
-            self.emote = f"You raise {self.name} from the ground $you(target), but $conj(misses)."
-            self.emote_hit = f"You raise {self.name} at $you(target)!",
-        if wielder.db.emit == 6:
-            self.name = "landslide"
-            damage = 70 + (wielder.db.wisdom*4)
-            self.energy_cost = 6
-            self.speed = 3
-            self.emote = f"Your {self.name} $conj(misses) $pron(your) $you(target)."
-            self.emote_hit = f"Your {self.name} flattens $you(target)!",
-        if wielder.db.emit == 7:
-            self.name = "earth elementals"
-            damage = 80 + (wielder.db.wisdom*5)
-            self.energy_cost = 7
-            self.speed = 3
-            self.emote = f"Your {self.name} $conj(misses)."
-            self.emote_hit = f"You summon {self.name} to destroy $you(target)!",
+        self.db.guild_level = 1
+        self.db.gxp = 0
+        self.db.skill_gxp = 0
+        self.db.title = "the novice earth elemental"
+        
+        self.db.natural_weapon = {
+            "name": "earth_attack",
+            "damage_type": "blunt",
+            "damage": 12,
+            "speed": 3,
+            "energy_cost": 10
+        }
+        self.db.guild = "elemental"
+        self.db.subguild = "earth"
+        self.db._wielded = {"left": None, "right": None}
+        self.db.reaction_percentage = 50
+        self.db.hpregen = 1
+        self.db.fpregen = 1
+        self.db.epregen = 1
+        self.db.strategy = "melee"
+        self.at_wield(EarthAttack)
+        tickerhandler.add(interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True)
+    
+    def kickstart(self):
+        self.msg("Kickstarting heartbeat")
+        tickerhandler.add(interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True)
+        
+    def addhp(self, amount):
+        hp = self.db.hp
+        hpmax = self.db.hpmax
+        
+        if hp + amount > hpmax:
+            amt = hpmax - hp
+            self.db.hp += max(amt, 0)
+            return
+        else: 
+            self.db.hp += max(amount, 0)
+    
+    def addfp(self, amount):
+        fp = self.db.fp
+        fpmax = self.db.fpmax
+        
+        if fp + amount > fpmax:
+            amt = fpmax - fp
+            self.db.fp += max(amt, 0)
+            return
+        else:
+            self.db.fp += max(amount, 0)
+    
+    def addep(self, amount):
+        ep = self.db.ep
+        epmax = self.db.epmax
+        
+        if ep + amount > epmax:
+            amt = epmax - ep
+            self.db.ep += max(amt, 0)
+            return
+        if ep < epmax + amount:
+            self.db.ep += max(amount, 0)
+        
+    def at_tick(self):
+        base_regen = self.db.hpregen
+        base_ep_regen = self.db.epregen
+        base_fp_regen = self.db.fpregen
+        
+        self.addhp(base_regen)
+        self.addfp(base_ep_regen)
+        self.addep(base_fp_regen)
             
-        # Subtract energy and apply damage to target before their defenses
-        wielder.db.ep -= self.energy_cost
-        target.at_damage(wielder, damage, "blunt", "earth_elemental_melee")
-             
-        wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
-        wielder.cooldowns.add("attack", self.speed)
+        
+    def get_display_name(self, looker, **kwargs):
+        """
+        Adds color to the display name.
+        """
+        name = super().get_display_name(looker, **kwargs)
+        if looker == self:
+            # special color for our own name
+            return f"|c{name}|n"
+        return f"|g{name}|n"    
+
+    # property to mimic weapons
+    @property
+    def speed(self):
+        weapon = self.db.natural_weapon
+        return weapon.get("speed", 3)
+
+    def at_wield(self, weapon, **kwargs):
+        self.msg(f"You cannot wield weapons.")
+        return False
+    
+    def attack(self, target, weapon, **kwargs):
+        weapon = EarthAttack()
+            
+        if not self.in_combat:
+            return
+        # can't attack if we're fleeing!
+        if self.db.fleeing:
+            return
+        # make sure that we can use our chosen weapon
+        if not (hasattr(weapon, "at_pre_attack") and hasattr(weapon, "at_attack")):
+            self.msg(f"You cannot attack with {weapon.get_numbered_name(1, self)}.")
+            return
+        if not weapon.at_pre_attack(self):
+            # the method handles its own error messaging
+            return
+
+        # if target is not set, use stored target
+        if not target:
+            # make sure there's a stored target
+            if not (target := self.db.combat_target):
+                self.msg("You cannot attack nothing.")
+                return
+
+        if target.location != self.location:
+            self.msg("You don't see your target.")
+            return
+
+        weapon.at_attack(self, target)
+
+        status = self.get_display_status(target)
+        self.msg(prompt=status)
+
+        # check if we have auto-attack in settings
+        if self.account and (settings := self.account.db.settings):
+            if settings.get("auto attack") and (speed := weapon.speed):
+                # queue up next attack; use None for target to reference stored target on execution
+                delay(speed + 1, self.attack, None, weapon, persistent=True)
+    
+    def get_player_attack_hit_message(self, attacker, dam, tn, emote="earth_elemental_melee"):
+        """
+        Get the hit message based on the damage dealt. This is the elemental's
+        version of the method, defaulting to the earth elemental version but 
+        should be overridden by subguilds.
+        
+        ex: 
+            f"{color}$You() hurl a handful of dirt, but it scatters harmlessly.",
+        """
+        
+        msgs = AttackEmotes.get_emote(attacker, emote, tn, which="left")
+        
+        if dam <= 0:
+            to_me = msgs[0]
+        elif 1 <= dam <= 5:
+            to_me = msgs[1]
+        elif 6 <= dam <= 12:
+            to_me = msgs[2]
+        elif 13 <= dam <= 20:
+            to_me = msgs[3]
+        elif 21 <= dam <= 30:
+            to_me = msgs[4]
+        elif 31 <= dam <= 50:
+            to_me = msgs[5]
+        elif 51 <= dam <= 80:
+            to_me = msgs[6]
+        elif 81 <= dam <= 140:
+            to_me = msgs[7]
+        elif 141 <= dam <= 225:
+            to_me = msgs[8]
+        elif 225 <= dam <= 325:
+            to_me = msgs[9]
+        else:
+            to_me = msgs[10]
+            
+        to_me = f"{to_me} ({dam})"
+        self.location.msg_contents(to_me, from_obj=self)
+                    
+        return to_me
+    
+    def at_damage(self, attacker, damage, damage_type=None):
+        """
+        Apply damage, after taking into account damage resistances.
+        """
+        glvl = self.db.guild_level
+        con = self.db.constitution
+        hp = self.db.hp
+        hpmax = self.db.hpmax
+        status = self.get_display_status(self)
+        # reduction = uniform(1 - 0.1 (con / 200 + glvl / 150))
+        # self.msg(f"Reduction: {reduction}")
+        # reduction = 0.9
+        # damage *= math.round(reduction)
+        damage -= self.defense(damage_type)
+        
+        # apply reactive armor after defense if it's enabled
+        if damage_type in ("blunt", "edged") and self.db.reactive_armor:
+            reactive_armor_absorbed = randint(glvl/3, glvl)
+            damage -= reactive_armor_absorbed
+            self.msg(f"|cYour reactive armor blocks some damage!")
+            
+        self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
+        attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
+        
+        self.db.hp -= max(damage, 0)
+        attacker.get_npc_attack_emote(self, damage, self.get_display_name(self))
+        self.msg(prompt=status)
+        
+        hp_percentage = hp / hpmax
+        reaction = int(self.db.reaction_percentage or 1) / 100
+        if hp_percentage < reaction:
+            self.execute_cmd("terran restoration")
+            
+        if hp <= 0:
+            self.tags.add("unconscious", category="status")
+            self.tags.add("lying down", category="status")
+            self.msg(
+                "You fall unconscious. You can |wrespawn|n or wait to be |wrevive|nd."
+            )
+            if self.in_combat:
+                combat = self.location.scripts.get("combat")[0]
+                combat.remove_combatant(self)
+                              
+        
+    def enter_combat(self, target, **kwargs):
+        """
+        initiate combat against another character
+        """
+        if weapons := self.wielding:
+            weapon = weapons[0]
+        else:
+            weapon = self
+
+        self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
+        location = self.location
+
+        if not (combat_script := location.scripts.get("combat")):
+            # there's no combat instance; start one
+            from typeclasses.scripts import CombatScript
+            location.scripts.add(CombatScript, key="combat")
+            combat_script = location.scripts.get("combat")
+        combat_script = combat_script[0]
+        self.db.combat_target = target
+        # adding a combatant to combat just returns True if they're already there, so this is safe
+        # if not combat_script.add_combatant(self, enemy=target):
+        #     return
+        self.attack(target, weapon)

@@ -5,9 +5,6 @@ from evennia.utils.evtable import EvTable
 
 from .command import Command
 from typeclasses.gear import BareHand
-from typeclasses.elementals import EarthAttack
-from typeclasses.elementals import AirAttack
-
 
 class CmdAttack(Command):
     """
@@ -69,7 +66,6 @@ class CmdAttack(Command):
             else:
                 # use our bare hands if we aren't wielding anything
                 weapon = BareHand()
-                # weapon = AirAttack()
 
         # find our enemy!
         target = self.caller.search(self.target)

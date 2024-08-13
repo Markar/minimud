@@ -3,10 +3,8 @@ class ElementalAttack:
     All elemental attacks inherit from this one
     """
 
-    damage = 1
-    energy_cost = 3
     skill = "blunt"
-    name = "bite"
+    name = "earth_elemental_melee"
     speed = 3
     gxp_rate = 5
     skill_gxp_rate = 5
