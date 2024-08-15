@@ -41,3 +41,44 @@ py setattr(here, "key", "Training Grounds")
 chessboard
 #
 @open leave = chaos#2
+
+
+### DELETE ROOMS
+from typeclasses.rooms import NewbieSnake
+all = NewbieGoblin.objects.all()
+
+for x in all:
+    caller.msg(f"x: {x}")
+    x.delete()
+
+### RESET LOCKS
+ self.caller.tags.add("player", category="type")
+ bark = search_object("Bark")[0]
+ bark.locks.add("call:false(); control:perm(Developer); delete:id(3) or perm(Admin);drop:holds(); edit:pid(3) or perm(Admin); examine:perm(Builder); get:false(); puppet:id(4270) or pid(3) or perm(Developer) or pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin); tell:perm(Admin); view:all()")
+
+### SEARCH BY TAG
+  hasPlayerTags = caller.tags.has("player", "status")
+
+### SPAWN OBJECT BY PROTOTYPE IN CODE
+ corpse = {
+     "key":"a corpse",
+     "typeclass": "typeclasses.corpse.Corpse",
+     "desc": "A small corpse",
+     "location": self.caller.location
+ }
+ spawner.spawn(corpse)
+
+### USE SPAWNER IN CODE
+ objs = spawner.spawn(*list(search_tag("MOB_CORPSE")))
+ for obj in objs:
+     self.caller.msg(f"obj: {obj}")
+     obj.location = self.location
+        
+### TEST FUNCTION CALL
+msg = self.caller.get_hit_message(self.caller, 4, "fart")
+
+### SET LOCAL KEY
+ self.caller.location.key = "Millennium Square"
+
+### DELETE CMDSET ON PLAYER
+ self.caller.cmdset.delete(ChangelingCmdSet)

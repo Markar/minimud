@@ -5,9 +5,6 @@ from evennia.utils.evtable import EvTable
 
 from .command import Command
 from typeclasses.gear import BareHand
-from typeclasses.elementals import EarthAttack
-from typeclasses.elementals import AirAttack
-
 
 class CmdAttack(Command):
     """
@@ -69,7 +66,6 @@ class CmdAttack(Command):
             else:
                 # use our bare hands if we aren't wielding anything
                 weapon = BareHand()
-                # weapon = AirAttack()
 
         # find our enemy!
         target = self.caller.search(self.target)
@@ -98,9 +94,9 @@ class CmdAttack(Command):
         current_fighters = combat_script.fighters
 
         # adding a combatant to combat just returns True if they're already there, so this is safe
-        if not combat_script.add_combatant(self.caller, enemy=target):
-            self.msg("You can't fight right now.")
-            return
+        # if not combat_script.add_combatant(self.caller, enemy=target):
+        #     self.msg("You can't fight right now.")
+        #     return
 
         self.caller.db.combat_target = target
         # execute the actual attack

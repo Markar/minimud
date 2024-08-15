@@ -267,7 +267,8 @@ def menunode_end(caller, raw_string):
         char.home = newbie[0]
     # start_location = ObjectDB.objects.get_id(settings.START_LOCATION)
     #596 = cot, #717 = newbie
-    char.location = ObjectDB.objects.get_id(717)
+    # char.location = ObjectDB.objects.get_id(717)
+    char.location = newbie[0]
 
     # clear in-progress status
     caller.new_char.attributes.remove("chargen_step")

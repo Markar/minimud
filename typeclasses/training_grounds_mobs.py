@@ -1,97 +1,76 @@
 """
 Prototypes
 """
-from random import randint, choice
+from random import randint, uniform, choice
 
-LARGE_RAT = {
-    "typeclass": "typeclasses.characters.NPC",
-    "key": "a large rat",
-    "aliases": ["rat"],
-    "tags": ["large_rat"],
-    "desc": "You estimate this rat at about 25 pounds and notice large sharp teeth and claws.",
-    "gender": "neutral",
-    "react_as": "aggressive",
-    "armor": 5,
-    "name_color": "Y",
-    "str": 15,
-    "level": 1,
-    "natural_weapon": {
-        "name": "claws",
-        "damage_type": "edged",
-        "damage": 3,
-        "speed": 4,
-        "energy_cost": 1,
-    },
-    "exp_reward": 45,
-    "drops": [{
-        "key": "decaying corpse of a large rat.",
-        "aliases": ["corpse"],
-        "desc": "corpse of a large corpse",
-        "name_color": "r",
-        "power": 10
-    }],
-    "can_attack": True,
-}
+# LARGE_RAT = {
+#     "typeclass": "typeclasses.characters.NPC",
+#     "key": "a large rat",
+#     "aliases": ["rat"],
+#     "tags": ["large_rat"],
+#     "desc": "You estimate this rat at about 25 pounds and notice large sharp teeth and claws.",
+#     "gender": "neutral",
+#     "react_as": "aggressive",
+#     "armor": 5,
+#     "name_color": "Y",
+#     "str": 15,
+#     "level": 1,
+#     "natural_weapon": {
+#         "name": "claws",
+#         "damage_type": "edged",
+#         "damage": 3,
+#         "speed": 4,
+#         "energy_cost": 1,
+#     },
+#     "exp_reward": 45,
+#     "can_attack": True,
+# }
 
-FIRE_BEETLE = {
-    "typeclass": "typeclasses.characters.NPC",
-    "key": "a fire beetle",
-    "aliases": ["bug", "beetle"],
-    "desc": "The beetle has a thick yellow shell with black spots, red eyes, and a large pincer. It has 6 legs and makes a clicking sound as it moves around.",
-    "gender": "neutral",
-    "react_as": "social",
-    "armor": 4,
-    "name_color": "r",
-    "hp": 32,
-    "hpmax": 32,
-    "str": 10,
-    "natural_weapon": {
-        "name": "pincer",
-        "damage_type": "edged",
-        "damage": 5,
-        "speed": 4,
-        "energy_cost": 1,
-    },
-    "exp_reward": 25,
-    "drops": [{
-        "key": "decaying corpse of a fire beetle.",
-        "aliases": ["corpse"],
-        "desc": "corpse of a fire beetle",
-        "name_color": "r",
-        "power": 10
-    }],
-    "can_attack": True,
-}
+# FIRE_BEETLE = {
+#     "typeclass": "typeclasses.characters.NPC",
+#     "key": "a fire beetle",
+#     "aliases": ["bug", "beetle"],
+#     "desc": "The beetle has a thick yellow shell with black spots, red eyes, and a large pincer. It has 6 legs and makes a clicking sound as it moves around.",
+#     "gender": "neutral",
+#     "react_as": "social",
+#     "armor": 4,
+#     "name_color": "r",
+#     "hp": 32,
+#     "hpmax": 32,
+#     "str": 10,
+#     "natural_weapon": {
+#         "name": "pincer",
+#         "damage_type": "edged",
+#         "damage": 5,
+#         "speed": 4,
+#         "energy_cost": 1,
+#     },
+#     "exp_reward": 25,
+#     "can_attack": True,
+# }
 
-SNAKE = {
-    "typeclass": "typeclasses.characters.NPC",
-    "key": "",
-    "aliases": [""],
-    "desc": "",
-    "gender": "neutral",
-    "react_as": "aggressive",
-    "armor": 2,
-    "name_color": "g",
-    "hp": 16,
-    "hpmax": 16,
-    "str": 5,
-    "natural_weapon": {
-        "name": "bite",
-        "damage_type": "edged",
-        "damage": 2,
-        "speed": 2,
-        "energy_cost": 1,
-    },
-    "exp_reward": 20,
-    "drops": [{
-        "key": "decaying corpse of a .",
-        "aliases": ["corpse"],
-        "desc": "corpse of a ",
-        "name_color": "r",
-        "power": 5
-    }],
-    "can_attack": True,
-}
+# SNAKE = {
+#     "typeclass": "typeclasses.characters.NPC",
+#     "key": "",
+#     "aliases": [""],
+#     "desc": "",
+#     "gender": "neutral",
+#     "react_as": "aggressive",
+#     "armor": 2,
+#     "name_color": "g",
+#     "hp": 16,
+#     "hpmax": 16,
+#     "str": 5,
+#     "natural_weapon": {
+#         "name": "bite",
+#         "damage_type": "edged",
+#         "damage": 2,
+#         "speed": 2,
+#         "energy_cost": 1,
+#     },
+#     "exp_reward": 20,
+#     "can_attack": True,
+# }
 
 NOVICE_GOBLIN = {
     "typeclass": "typeclasses.characters.NPC",
@@ -114,13 +93,13 @@ NOVICE_GOBLIN = {
         "energy_cost": 8,
     },
     "exp_reward": 10,
-    "drops": [{
-        "key": "crude dagger",
-        "aliases": ["dagger"],
-        "desc": "A small, crude dagger used by goblins.",
-        "name_color": "g",
-        "power": 5
-    }],
+    # "drops": [{
+    #     "key": "crude dagger",
+    #     "aliases": ["dagger"],
+    #     "desc": "A small, crude dagger used by goblins.",
+    #     "name_color": "g",
+    #     "power": 5
+    # }],
     "can_attack": True,
 }
 
@@ -145,13 +124,13 @@ ROGUE_APPRENTICE = {
         "energy_cost": 12,
     },
     "exp_reward": 20,
-    "drops": [{
-        "key": "short sword",
-        "aliases": ["sword"],
-        "desc": "A sharp short sword used by rogue apprentices.",
-        "name_color": "b",
-        "power": 10
-    }],
+    # "drops": [{
+    #     "key": "short sword",
+    #     "aliases": ["sword"],
+    #     "desc": "A sharp short sword used by rogue apprentices.",
+    #     "name_color": "b",
+    #     "power": 10
+    # }],
     "can_attack": True,
 }
 
@@ -175,13 +154,13 @@ FIRE_BEETLE = {
         "energy_cost": 15,
     },
     "exp_reward": 25,
-    "drops": [{
-        "key": "fire beetle shell",
-        "aliases": ["shell"],
-        "desc": "The glowing shell of a fire beetle.",
-        "name_color": "r",
-        "power": 15
-    }],
+    # "drops": [{
+    #     "key": "fire beetle shell",
+    #     "aliases": ["shell"],
+    #     "desc": "The glowing shell of a fire beetle.",
+    #     "name_color": "r",
+    #     "power": 15
+    # }],
     "can_attack": True,
 }
 
@@ -206,13 +185,13 @@ SKELETAL_WARRIOR = {
         "energy_cost": 18,
     },
     "exp_reward": 30,
-    "drops": [{
-        "key": "rusted sword",
-        "aliases": ["sword"],
-        "desc": "A rusted sword wielded by a skeletal warrior.",
-        "name_color": "w",
-        "power": 10
-    }],
+    # "drops": [{
+    #     "key": "rusted sword",
+    #     "aliases": ["sword"],
+    #     "desc": "A rusted sword wielded by a skeletal warrior.",
+    #     "name_color": "w",
+    #     "power": 10
+    # }],
     "can_attack": True,
 }
 
@@ -237,13 +216,13 @@ NOVICE_MAGE = {
         "energy_cost": 10,
     },
     "exp_reward": 15,
-    "drops": [{
-        "key": "wooden staff",
-        "aliases": ["staff"],
-        "desc": "A simple wooden staff used by novice mages.",
-        "name_color": "m",
-        "power": 8
-    }],
+    # "drops": [{
+    #     "key": "wooden staff",
+    #     "aliases": ["staff"],
+    #     "desc": "A simple wooden staff used by novice mages.",
+    #     "name_color": "m",
+    #     "power": 8
+    # }],
     "can_attack": True,
 }
 
@@ -299,13 +278,13 @@ NOVICE_ARCHER = {
         "energy_cost": 9,
     },
     "exp_reward": 12,
-    "drops": [{
-        "key": "basic bow",
-        "aliases": ["bow"],
-        "desc": "A basic bow used by novice archers.",
-        "name_color": "y",
-        "power": 7
-    }],
+    # "drops": [{
+    #     "key": "basic bow",
+    #     "aliases": ["bow"],
+    #     "desc": "A basic bow used by novice archers.",
+    #     "name_color": "y",
+    #     "power": 7
+    # }],
     "can_attack": True,
 }
 
@@ -330,13 +309,13 @@ MALFUNCTIONING_ROBOT = {
         "energy_cost": 12,
     },
     "exp_reward": 20,
-    "drops": [{
-        "key": "robotic component",
-        "aliases": ["component"],
-        "desc": "A piece of the malfunctioning robot, still sparking with energy.",
-        "name_color": "s",
-        "power": 10
-    }],
+    # "drops": [{
+    #     "key": "robotic component",
+    #     "aliases": ["component"],
+    #     "desc": "A piece of the malfunctioning robot, still sparking with energy.",
+    #     "name_color": "s",
+    #     "power": 10
+    # }],
     "can_attack": True,
 }
 
@@ -361,13 +340,13 @@ CYBER_SOLDIER = {
         "energy_cost": 18,
     },
     "exp_reward": 35,
-    "drops": [{
-        "key": "plasma rifle",
-        "aliases": ["rifle"],
-        "desc": "An advanced plasma rifle used by cybernetic soldiers.",
-        "name_color": "b",
-        "power": 20
-    }],
+    # "drops": [{
+    #     "key": "plasma rifle",
+    #     "aliases": ["rifle"],
+    #     "desc": "An advanced plasma rifle used by cybernetic soldiers.",
+    #     "name_color": "b",
+    #     "power": 20
+    # }],
     "can_attack": True,
 }
 
@@ -392,13 +371,13 @@ ALIEN_SCOUT = {
         "energy_cost": 16,
     },
     "exp_reward": 30,
-    "drops": [{
-        "key": "alien energy core",
-        "aliases": ["core"],
-        "desc": "A glowing energy core from the alien scout.",
-        "name_color": "g",
-        "power": 15
-    }],
+    # "drops": [{
+    #     "key": "alien energy core",
+    #     "aliases": ["core"],
+    #     "desc": "A glowing energy core from the alien scout.",
+    #     "name_color": "g",
+    #     "power": 15
+    # }],
     "can_attack": True,
 }
 

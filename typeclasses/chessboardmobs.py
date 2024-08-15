@@ -1,7 +1,7 @@
 """
 Prototypes
 """
-from random import randint, choice
+from random import randint, uniform, choice
 
 SCRAWNY_GNOLL = {
     "typeclass": "typeclasses.characters.NPC",
@@ -47,13 +47,6 @@ GNOLL_PUP = {
         "energy_cost": 10,
     },
     "exp_reward": 5,
-    "drops": [{
-        "key": "decaying corpse of a gnoll pup.",
-        "aliases": ["corpse"],
-        "desc": "corpse of a gnoll pup",
-        "name_color": "r",
-        "power": 5
-    }],
     "can_attack": True,
 }
 
@@ -78,12 +71,6 @@ GNOLL_WARLORD = {
     },
     "exp_reward": 50,
     "drops": [{
-        "key": "decaying corpse of a gnoll warlord.",
-        "aliases": ["corpse"],
-        "desc": "corpse of a gnoll warlord",
-        "name_color": "r",
-        "power": 20
-    }, {
         "key": "gnoll warlord's battle axe",
         "aliases": ["axe"],
         "desc": "A massive battle axe once wielded by a gnoll warlord.",
@@ -113,37 +100,5 @@ DECAYING_SKELETON = {
         "energy_cost": 5,
     },
     "exp_reward": 5,
-    "drops": [{
-        "key": "decaying corpse of a decaying skeleton.",
-        "aliases": ["corpse"],
-        "desc": "corpse of a decaying skeleton",
-        "name_color": "r",
-        "power": 5
-    }],
     "can_attack": True,
 }
-
-### Mob drops
-
-# RAW_MEAT = {
-#     "key": "raw meat",
-#     "desc": "A piece of meat from an animal. It hasn't been cooked.",
-#     "tags": [("raw meat", "crafting_material")],
-# }
-# ANIMAL_HIDE = {
-#     "key": "animal hide",
-#     "desc": "A section of hide from an animal, suitable for leather-crafting",
-#     "tags": [("leather", "crafting_material")],
-# }
-# DEER_MEAT = {
-#     "key": "raw deer meat",
-#     "desc": "A piece of meat from a deer. It hasn't been cooked.",
-#     "tags": [("raw meat", "crafting_material"), ("venison", "crafting_material")],
-# }
-# DEER_ANTLER = {
-#     "key": "antler",
-#     "desc": "A forked antler bone from an adult stag.",
-#     "tags": [
-#         ("bone", "crafting_material"),
-#     ],
-# }

@@ -1,4 +1,4 @@
-from random import randint, choice
+from random import randint, uniform, uniform
 from evennia.prototypes import spawner, prototypes
 from evennia.prototypes.spawner import spawn
 from string import punctuation
@@ -311,7 +311,7 @@ class Character(ObjectParent, ClothedCharacter):
         # apply the weapon damage as a modifier to skill
         self.msg(f"damage = damage * result: {damage}")
         damage = damage * result
-        damage = randint(damage/2, damage)
+        damage = math.ceil(uniform(damage/2, damage))
         # subtract the energy required to use this
         self.db.ep -= weapon.get("energy_cost", 5)
         if not damage:
@@ -418,7 +418,11 @@ class Character(ObjectParent, ClothedCharacter):
             f"{color}{self}{color} $conj(hit) {tn}{color} so hard that blood spatters around the room! {dam}",
             f"{color}{self}{color} $conj(tear) into {tn}{color} with brutal force! {dam}",
         ]
-    def get_hit_message(self, target, dam, display_name ):
+    def get_npc_attack_emote(self, target, dam, display_name ):
+        """
+        Get the right attack emote for the NPC based on the damage they deal
+        to the player, after taking into account the player's defense.
+        """
 
         msgs = self.get_emote(target, dam, display_name)
         if dam <= 0:
@@ -456,7 +460,7 @@ class PlayerCharacter(Character):
 
     def at_object_creation(self):
         super().at_object_creation()
-        self.tags.add("player", category="status")
+        self.tags.add("player", category="type")
         self.db.title = "the title less"
         self.db.alignment = "neutral"
         self.db.stat_points = 5
@@ -470,10 +474,25 @@ class PlayerCharacter(Character):
             "speed": 3,
             "energy_cost": 1
         }
+        self.best_kill = {
+            "name": "none",
+            "level": 0,
+            "xp": 0
+        }
       
         # initialize hands
         self.db._wielded = {"left": None, "right": None}
 
+    def add_best_kill(self, target):
+        """
+        Add a target to the best kill list
+        """
+        if self.db.best_kill["xp"] < target.db.exp_reward:
+            self.db.best_kill["name"] = target.get_display_name(self)
+            self.db.best_kill["level"] = target.db.level
+            self.db.best_kill["xp"] = target.db.exp_reward
+        
+        
     def get_display_name(self, looker, **kwargs):
         """
         Adds color to the display name.
@@ -483,6 +502,14 @@ class PlayerCharacter(Character):
             # special color for our own name
             return f"|c{name}|n"
         return f"|g{name}|n"
+
+    def at_character_arrive(self, chara, **kwargs):
+        """
+        Respond to the arrival of an NPC
+        """
+        if "aggressive" in chara.attributes.get("react_as", ""):
+            delay(1, self.enter_combat, chara)
+            delay(1, chara.enter_combat, self)
 
     def at_pre_object_receive(self, object, source_location, **kwargs):
         """
@@ -512,7 +539,7 @@ class PlayerCharacter(Character):
         # self.msg(f"You take {damage} damage from {attacker.get_display_name(self)} PC.")
         # attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
         # self.get_hit_message(attacker, damage, f"PC at_damage {self.get_display_name(attacker)}")
-        attacker.get_hit_message(attacker, damage, f"PC at_damage {self.get_display_name(attacker)}")
+        attacker.get_player_attack_hit_message(attacker, damage, f"PC at_damage {self.get_display_name(attacker)}")
         
         status = self.get_display_status(self)
         self.msg(prompt=status)
@@ -626,6 +653,32 @@ class PlayerCharacter(Character):
         target.at_damage(self, damage, "fire")
         self.cooldowns.add("fireball", 1)
 
+    # def enter_combat(self, target, **kwargs):
+    #     """
+    #     initiate combat against another character
+    #     """
+    #     if weapons := self.wielding:
+    #         weapon = weapons[0]
+    #     else:
+    #         weapon = self
+
+    #     self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
+    #     location = self.location
+
+    #     if not (combat_script := location.scripts.get("combat")):
+    #         # there's no combat instance; start one
+    #         from typeclasses.scripts import CombatScript
+    #         location.scripts.add(CombatScript, key="combat")
+    #         combat_script = location.scripts.get("combat")
+    #     combat_script = combat_script[0]
+    #     print(f"set combat_target")
+    #     self.db.combat_target = target
+    #     # adding a combatant to combat just returns True if they're already there, so this is safe
+    #     if not combat_script.add_combatant(self, enemy=target):
+    #         return
+    #     print(f"before npc attack")
+    #     self.attack(target, weapon)
+        
     def respawn(self):
         """
         Resets the character back to the spawn point with full health.
@@ -667,8 +720,9 @@ class NPC(Character):
         """
         Respond to the arrival of a character
         """
-        if "aggressive" in self.attributes.get("react_as", "") and chara.tags.has("player", "status"):
+        if "aggressive" in self.attributes.get("react_as", "") and chara.tags.has("player", "type"):
             delay(1, self.enter_combat, chara)
+            delay(1, chara.enter_combat, self)
 
     def at_character_depart(self, chara, destination, **kwargs):
         """
@@ -699,15 +753,15 @@ class NPC(Character):
         damage -= self.defense(damage_type)
         if damage < 0:
             damage = 0
-        self.location.msg_contents(f"at_damage npc msg room {self} - {damage}", from_obj=self)
         self.db.hp -= max(damage, 0)
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)} NPC.")
         # this sends the hit_msg FROM the player TO the room with the damage AFTER reduction by npc
         # this comes from the changelings class, where the emotes live
-        attacker.get_hit_message(attacker, damage, f"{self.get_display_name(attacker)}", emote)
+        attacker.get_player_attack_hit_message(attacker, damage, f"{self.get_display_name(attacker)}", emote)
         
         if self.db.hp <= 0:
             self.tags.add("defeated", category="status")
+            attacker.add_best_kill(self)
             # we've been defeated!
             if combat_script := self.location.scripts.get("combat"):
                 combat_script = combat_script[0]
@@ -734,7 +788,7 @@ class NPC(Character):
                     for obj in objs:
                         obj.location = self.location
                 self.move_to(None, False, None, True, True, True, "teleport")
-                delay(10, self.at_respawn)
+                delay(5, self.at_respawn)
                 return
             
         if not self.db.combat_target:
@@ -768,6 +822,8 @@ class NPC(Character):
             return
         print(f"before npc attack")
         self.attack(target, weapon)
+        target.enter_combat(self)
+        # target.attack(self, target.db.weapon)
           
 
     def attack(self, target, weapon, **kwargs):
@@ -818,27 +874,21 @@ class NPC(Character):
         weapon = self.db.natural_weapon
         damage = weapon.get("damage", 0)
         speed = weapon.get("speed", 10)
+        hits = weapon.get("hits", 1)
         # attack with your natural attack skill - whatever that is
         result = self.use_skill(weapon.get("skill"), speed=speed)
         # apply the weapon damage as a modifier to skill
         damage = damage * result
-        damage = randint(damage/2, damage)
-        # subtract the energy required to use this
-        # self.db.ep -= weapon.get("energy_cost", 5)
-        # if not damage:
-        #     # the attack failed
-        #     self.at_emote(
-        #         f"$conj(swings) $pron(your) {weapon.get('name')} at $you(target), but $conj(misses).",
-        #         mapping={"target": target},
-        #     )
-        # else:
-        #     verb = weapon.get("damage_type", "hits")
-        #     wielder.at_emote(
-        #         f"$conj({verb}) $you(target) with $pron(your) {weapon.get('name')}.",
-        #         mapping={"target": target},
-        #     )
-            # the attack succeeded! apply the damage
-        target.at_damage(wielder, damage, weapon.get("damage_type"))
+        
+        for _ in range(hits):
+            # randomize the damage for each attack
+            damage = math.ceil(uniform(damage/2, damage))
+            target.at_damage(wielder, damage, weapon.get("damage_type"))
+           
+        status = target.get_display_status(self)
+        target.msg(prompt=status)
+        
+        target.status = self.get_display_status(self)
         wielder.msg(f"[ Cooldown: {speed} seconds ]")
         wielder.cooldowns.add("attack", speed)
     

@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, uniform
 from evennia.utils import iter_to_str
 from evennia.contrib.game_systems.crafting import CraftingRecipe
 

@@ -6,141 +6,11 @@ from evennia import TICKER_HANDLER as tickerhandler
 from evennia import logger
 
 from .command import Command
-
-GUILD_LEVEL_COST_DICT = {
-    2: 300,
-    3: 400,
-    4: 648,
-    5: 951,
-    6: 1529,
-    7: 2409,
-    8: 3330,
-    9: 4645,
-    10: 6000,
-    11: 7500,
-    12: 10000,
-    13: 12900,
-    14: 16000,
-    15: 22500,
-    16: 32000,
-    17: 47000,
-    18: 67000,
-    19: 90000,
-    20: 120000,
-    21: 160000,
-    22: 220000,
-    23: 295000,
-    24: 445000,
-    25: 675000,
-    26: 950000,
-    27: 1300000,
-    28: 1900000,
-    29: 2900000,
-    30: 4200000 
-}
-
-class CmdEnableReactiveArmor(Command):
-    """
-    Reactive armor enhances your physical resists while lowering others
-
-    Usage:
-        enable reactive armor
-        disable reactive armor
-    """
-
-    key = "enable reactive armor"
-    help_category = "reactive armor"
-
-    def func(self):
-        print(self.caller)
-        caller = self.caller
-        caller.use_reactive_armor()
-
-class CmdDisableReactiveArmor(Command):
-    """
-    Reactive armor enhances your physical resists while lowering others
-
-    Usage:
-        enable reactive armor
-        disable reactive armor
-    """
-
-    key = "disable reactive armor"
-    help_category = "reactive armor"
-
-    def func(self):
-        print(self.caller)
-        caller = self.caller
-        caller.db.reactive_armor = False
-        caller.db.edgedac -= caller.db.guild_level
-        caller.db.bluntac -= caller.db.guild_level
-        caller.msg(f"|CYou reactive armor dissolves.")
-        
-class CmdRebuild(Command):
-    """
-    Restores health
-
-    Usage:
-        rebuild
-    """
-
-    key = "rebuild"
-    help_category = "combat"
-
-    def func(self):
-        print(self.caller)
-        caller = self.caller
-        caller.use_rebuild()
-
-
-class CmdEmit(Command):
-    """
-    Changes the power of your attack, costing more energy
-    and dealing more damage with higher ranks. New ranks
-    unlock every 5 guild levels.
-    
-
-    Usage:
-        emit 1
-        emit 2
-    """
-
-    key = "emit"
-    help_category = "combat"
-
-    def func(self):
-        caller = self.caller
-        
-        try:
-            print(f"emit: args {self.args}")
-            print(f"emit: {self.caller}")
-            logger.log_info("test logger")
-            power = int(self.args.strip())
-            if power == 1 and caller.db.guild_level > 0:
-                print(f"power = 1, caller.db.guild_level {power} and {caller.db.guild_level}")
-                caller.db.emit = 1
-            if power == 2 and caller.db.guild_level >= 5:
-                print(f"power = 2, caller.db.guild_level {power} and {caller.db.guild_level}")
-                caller.db.emit = 2
-            if power == 3 and caller.db.guild_level >= 10:
-                print(f"power = 2, caller.db.guild_level {power} and {caller.db.guild_level}")
-                caller.db.emit = 3
-            if power == 4 and caller.db.guild_level >= 15:
-                print(f"power = 2, caller.db.guild_level {power} and {caller.db.guild_level}")
-                caller.db.emit = 4
-            if power == 5 and caller.db.guild_level >= 20:
-                print(f"power = 2, caller.db.guild_level {power} and {caller.db.guild_level}")
-                caller.db.emit = 5
-            if power == 6 and caller.db.guild_level >= 25:
-                print(f"power = 2, caller.db.guild_level {power} and {caller.db.guild_level}")
-                caller.db.emit = 6
-            if power == 7 and caller.db.guild_level >= 30:
-                print(f"power = 2, caller.db.guild_level {power} and {caller.db.guild_level}")
-                caller.db.emit = 7
-            self.msg(f"|rYou set your emit to power level {caller.db.emit}")
-        except ValueError:
-            print(f"Not an integer for use_emit")
-        
+from typeclasses.elementalguild.earth_elemental_commands import EarthElementalCmdSet
+from typeclasses.elementalguild.air_elemental_commands import AirElementalCmdSet
+from typeclasses.elementalguild.fire_elemental_commands import FireElementalCmdSet
+from typeclasses.elementalguild.water_elemental_commands import WaterElementalCmdSet
+from typeclasses.elementalguild.constants_and_helpers import SKILLS_COST, SKILL_RANKS, GUILD_LEVEL_COST_DICT
 
 class CmdGAdvance(Command):
     """
@@ -157,12 +27,11 @@ class CmdGAdvance(Command):
 
     key = "gadvance"
     aliases = ("gadv")
+    help_category = "elemental"
 
-    def _adv_level(self):
-        print(f"adv level {self} and caller: {self.caller}")        
+    def _adv_level(self):       
         caller = self.caller
         cost = GUILD_LEVEL_COST_DICT[caller.db.guild_level+1]
-        print(f"cost{cost} and gxp: {caller.db.gxp}")
         if caller.db.gxp < cost:
             self.msg(f"|wYou need {cost - caller.db.gxp} more experience to advance.")
             return
@@ -182,19 +51,41 @@ class CmdGAdvance(Command):
 
 class CmdGuildStatSheet(Command):
     """
-    View your character's current stats.
+    Display your guild stats
     """
 
     key = "gscore"
     aliases = ("gs")
+    help_category = "elemental"
 
     def func(self):
         caller = self.caller
-        self.msg(f"|c{caller} {caller.db.title} ({caller.db.alignment})")
-        self.msg(f"|GGuild Level: {caller.db.guild_level or 0}")
-        self.msg(f"|GGXP: {caller.db.gxp or 0}")
-        self.msg(f"|GEmit: {caller.db.emit or 0}")
-        self.msg(f"|GForm: {caller.db.subguild}")
+        title = caller.db.title or "the novice"
+        alignment = caller.db.alignment or "neutral"
+        my_glvl = caller.db.guild_level or 1
+        gxp = caller.db.gxp or 0
+        skill_gxp = caller.db.skill_gxp or 0
+        form = caller.db.subguild or "adventurer"
+        gxp_needed = GUILD_LEVEL_COST_DICT[my_glvl+1]
+        reaction = caller.db.reaction_percentage or 50                
+        
+        table = EvTable(f"|c{caller}", f"|c{title}", border="table")
+        table.add_row(f"|GGuild Level", my_glvl)
+        table.add_row(f"|GGXP", f"{gxp} / {gxp_needed}")
+        table.add_row(f"|GSkill GXP", skill_gxp)
+        table.add_row(f"|GForm", form.title())
+        table.add_row(f"|GReaction", f"{reaction}%")
+        
+        caller.msg(str(table))
+        
+        skill_table = EvTable(f"|cSkills", f"|cCost", f"|cRank", border="table")
+        skills = caller.db.skills.items()  # Get the items (key-value pairs) of the skills dictionary
+
+        # Assuming SKILLS_COST is a dictionary that maps ranks to costs
+        for skill,rank in skills:
+            skill_table.add_row(f"|G{skill.title()}", f"{SKILLS_COST[rank]}", f"{SKILL_RANKS[rank]}")
+
+        caller.msg(str(skill_table))
     
 class CmdJoinElementals(Command):
     """
@@ -207,7 +98,8 @@ class CmdJoinElementals(Command):
         caller = self.caller
         if caller.db.guild == "adventurer":
             caller.msg(f"|rYou join the Elementals guild")
-            caller.swap_typeclass("typeclasses.elementals.Elemental")
+            # caller.swap_typeclass("typeclasses.elementals.Elemental")
+            caller.swap_typeclass("typeclasses.elementalguild.earth_elemental.EarthElemental", clean_attributes=False)
         else:
             caller.msg(f"|rYou are already in a guild")
             
@@ -228,42 +120,35 @@ class CmdLeaveElementals(Command):
             caller.msg(f"|rYou are already an adventurer")
             
             
-class CmdDrain(Command):
-    """
-    Drain the corpse of an enemy to restore energy
-    """
-    
-    key = "drain" 
-    
-    def func(self):
-        if not self.args:
-            target = self.caller
-            corpse = target.location.search("corpse")
-            ep = target.db.ep
-            epmax = target.db.epmax
-            power = corpse.db.power
-            
-            if ep + power > epmax:
-                target.db.ep = epmax
-            else:
-                target.db.ep += max(power, 0)
-            corpse.delete()
-            self.msg(f"|rYou drain the energy from the corpse and it turns into dust.")
-        else:
-            print(f"status args: {self.caller.search(self.args.strip())}")
-            target = self.caller.search(self.args.strip())
-            if not target:
-                # no valid object found
-                return
-            self.msg(f"corpse with args {self.args}")
-            
 class CmdChooseForm(Command):
     """
-    Choose your permanent form
+    You can choose from earth, fire, water, or air. Earth is more defensive,
+    fire is more offensive, water is more balanced, and air is more
+    evasive. Once you choose a form, you cannot change it.
     """
     
     key = "chooseform" 
+    help_category = "elemental"
     
+    def _remove_cmdsets(self):
+        caller = self.caller
+        if caller.db.subguild == "earth":
+            caller.cmdset.delete(FireElementalCmdSet)
+            caller.cmdset.delete(WaterElementalCmdSet)
+            caller.cmdset.delete(AirElementalCmdSet)
+        if caller.db.subguild == "fire":
+            caller.cmdset.delete(EarthElementalCmdSet)
+            caller.cmdset.delete(WaterElementalCmdSet)
+            caller.cmdset.delete(AirElementalCmdSet)
+        if caller.db.subguild == "water":
+            caller.cmdset.delete(EarthElementalCmdSet)
+            caller.cmdset.delete(FireElementalCmdSet)
+            caller.cmdset.delete(AirElementalCmdSet)
+        if caller.db.subguild == "air":
+            caller.cmdset.delete(EarthElementalCmdSet)
+            caller.cmdset.delete(FireElementalCmdSet)
+            caller.cmdset.delete(WaterElementalCmdSet)
+            
     def func(self):
         target = self.args.strip()
         caller = self.caller
@@ -275,18 +160,55 @@ class CmdChooseForm(Command):
             return
         
         if target == "earth":
-            caller.db.subguild = "earth"
+            caller.db.subguild = "earth"            
             caller.msg(f"|yYou choose {caller.db.subguild} as your permanent form.")
+            caller.swap_typeclass("typeclasses.elementalguild.earth_elemental.EarthElemental", clean_attributes=False, clean_cmdsets=True)
+            caller.cmdset.add(EarthElementalCmdSet, persistent=True)
+            self._remove_cmdsets()
         if target == "fire":
             caller.db.subguild = "fire"
             caller.msg(f"|rYou choose {caller.db.subguild} as your permanent form.")
+            caller.swap_typeclass("typeclasses.elementalguild.fire_elemental.FireElemental", clean_attributes=False, clean_cmdsets=True)
+            caller.cmdset.add(FireElementalCmdSet, persistent=True)
+            self._remove_cmdsets()
         if target == "water":
             caller.db.subguild = "water"
             caller.msg(f"|bYou choose {caller.db.subguild} as your permanent form.")
+            caller.swap_typeclass("typeclasses.elementalguild.water_elemental.WaterElemental", clean_attributes=False, clean_cmdsets=True)
+            caller.cmdset.add(WaterElementalCmdSet, persistent=True)
+            self._remove_cmdsets()
         if target == "air":
             caller.db.subguild = "air"
-            caller.msg(f"|wYou choose {caller.db.subguild} as your permanent form.")
+            caller.msg(f"|wYou choose {caller.db.subguild} as your permanent form.")            
+            caller.swap_typeclass("typeclasses.elementalguild.air_elemental.AirElemental", clean_attributes=False, clean_cmdsets=True)
+            caller.cmdset.add(AirElementalCmdSet, persistent=True)
+            self._remove_cmdsets()
+            
+class CmdGHelp(Command):
+    """
+    Search for guild topics to learn more about the elementals.
+    """
+    
+    key = "ghelp" 
+    help_category = "elemental"
+    
+    
 
+
+class CmdTest(Command):
+    key = "test"
+    
+    def func(self):
+        caller = self.caller
+        caller.msg("test")        
+        # caller.cmdset.delete(ElementalCmdSet)
+        # caller.cmdset.delete(ElementalCmdSet)
+        # caller.cmdset.delete(ElementalCmdSet)
+        # caller.cmdset.delete(ElementalCmdSet)
+        # caller.cmdset.delete(ElementalCmdSet)
+        
+        caller.msg("done")
+        
 
         
 class ElementalCmdSet(CmdSet):
@@ -295,11 +217,8 @@ class ElementalCmdSet(CmdSet):
     def at_cmdset_creation(self):
         super().at_cmdset_creation()
 
-        self.add(CmdDrain)
-        self.add(CmdRebuild)
+        # self.add(CmdDrain)
         self.add(CmdGAdvance)
-        self.add(CmdEmit)
         self.add(CmdGuildStatSheet)
         self.add(CmdChooseForm)
-        self.add(CmdEnableReactiveArmor)
-        self.add(CmdDisableReactiveArmor)
+        self.add(CmdTest)

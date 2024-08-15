@@ -275,7 +275,7 @@ class AttackEmotes:
         if emote == "punch":
             return [
                 f"{color}$You() punch air and little else.",
-                f"{color}$You() jump out of the way of your fist and are merely scratched.",
+                f"{color}{tn}{color} jumps out of the way of your fist and is merely scratched.",
                 f"{color}$You() scrape your fist against {tn}{color}.",
                 f"{color}$You() manage to gash a hole in {tn}{color} with your fist.",
                 f"{color}$You() throw your fist into {tn}{color} and knock {tn}{color} down to the ground.",

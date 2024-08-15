@@ -13,23 +13,24 @@
 #
 #
 #
-@dig/teleport General Store;town#03 : typeclasses.rooms.Room = east;e,west;w
+@dig/teleport The Nexus Bazaar;town#03 : typeclasses.rooms.Room = east;e,west;w
 #
-@desc |yThis is the shop.
+@desc |YNestled at the edge of Millennium Square, The Nexus Bazaar is a shop like no other. Its exterior is a blend of sleek, metallic panels and whimsical, fairy-tale architecture, adorned with glowing crystals that pulse in sync with the obelisk's energy. As you step inside, you're greeted by a dazzling array of goods from across time and space.|/|/Shelves made of shimmering, translucent material hold an eclectic mix of items: enchanted artifacts, advanced technological gadgets, and rare, otherworldly curiosities. Holographic displays float above the counters, showcasing the shop's most prized possessions. The air is filled with a faint hum of machinery and the occasional spark of magical energy.|/|/The shopkeeper, a cyborg with a friendly demeanor and a twinkle in their eye, stands behind a counter cluttered with mysterious trinkets and a sleek, digital ledger. They greet each customer with a warm smile and a wealth of knowledge about the shop's diverse inventory.|/|/In one corner, a portal shimmers, offering glimpses of distant realms and promising new adventures to those who dare to step through. The Nexus Bazaar is a place where the past, present, and future converge, and where every visit holds the promise of discovery and wonder.
 #
 @teleport town#01
 #
 #
 #
-@dig/teleport Road;town#04 : typeclasses.rooms.Room = north;n,south;s
+@dig/teleport Southbound Pathway;town#04 : typeclasses.rooms.Room = north;n,south;s
 #
-@desc |yBefore the bank.
+# @desc |YAs you leave the bustling energy of Millennium Square behind, you find yourself on the Southbound Pathway. The road is a seamless blend of cobblestone and sleek, metallic panels, reflecting the town's unique fusion of old and new. Enchanted lanterns line the path, casting a soft, ethereal glow that guides your way.|/|/To your left, lush, enchanted gardens burst with vibrant flora, their colors shifting in harmony with the ever-changing sky. On your right, futuristic buildings with holographic signs advertise exotic goods and services. The air is filled with a mix of floral scents and the faint hum of advanced machinery, creating a sense of both tranquility and anticipation.
+py setattr(here, "key", "Southbound Pathway")
 #
 #
 #
-@dig/teleport Bank;town#05 : typeclasses.rooms.Room = north;n,south;s
+@dig/teleport Western Pathway Junction;town#05 : typeclasses.rooms.Room = north;n,south;s
 #
-@desc |yThe bank.
+@desc |YHeading west from the Southbound Pathway, you find yourself on the Western Pathway Junction. The road here is a harmonious blend of cobblestone and sleek, metallic panels, reflecting the town's unique fusion of old and new. Enchanted lanterns line the path, casting a soft, ethereal glow that guides your way.|/|/To the north, the road leads back towards the vibrant energy of Millennium Square, where the obelisk pulses with otherworldly power.|/|/To the south, a narrow path veers off, leading towards the tranquil Enchanted Grove, where bioluminescent trees and mystical creatures await. The air is filled with a mix of floral scents and the faint hum of advanced machinery, creating a sense of both tranquility and anticipation.|/|/The Western Pathway Junction is a crossroads of adventure, offering a choice between the bustling energy of Millennium Square and the serene escape of the Enchanted Grove.
 #
 @teleport town#04
 #
@@ -164,24 +165,23 @@ open east;e,west;w = town#04
 #
 
 
+@dig/teleport Western Pathway Junction;town#23 : typeclasses.rooms.Room = east;e,west;w
 #
-@dig/teleport Road south of center;town#23 : typeclasses.rooms.Room = east;e,west;w
-#
-@desc |yPeter's lane runs east-west, south of the center of town.
+@desc |YHeading west from the Southbound Pathway, you find yourself on the Western Pathway Junction. The road here is a harmonious blend of cobblestone and sleek, metallic panels, reflecting the town's unique fusion of old and new. Enchanted lanterns line the path, casting a soft, ethereal glow that guides your way.|/|/To the north, the road leads back towards the vibrant energy of Millennium Square, where the obelisk pulses with otherworldly power.|/|/To the south, a narrow path veers off, leading towards the tranquil Enchanted Grove, where bioluminescent trees and mystical creatures await. The air is filled with a mix of floral scents and the faint hum of advanced machinery, creating a sense of both tranquility and anticipation.|/|/The Western Pathway Junction is a crossroads of adventure, offering a choice between the bustling energy of Millennium Square and the serene escape of the Enchanted Grove.
 #
 
 
+@dig/teleport Southbound Pathway;town#24 : typeclasses.rooms.Room = east;e,west;w
 #
-@dig/teleport Road south of center;town#24 : typeclasses.rooms.Room = east;e,west;w
-#
-@desc |yAlong Peter's lane, south of the center of town.
+@desc |YAs you leave the bustling energy of Millennium Square behind, you find yourself on the Southbound Pathway. The road is a seamless blend of cobblestone and sleek, metallic panels, reflecting the town's unique fusion of old and new. Enchanted lanterns line the path, casting a soft, ethereal glow that guides your way.|/|/To your left, lush, enchanted gardens burst with vibrant flora, their colors shifting in harmony with the ever-changing sky. On your right, futuristic buildings with holographic signs advertise exotic goods and services. The air is filled with a mix of floral scents and the faint hum of advanced machinery, creating a sense of both tranquility and anticipation.
+py setattr(here, "key", "Southbound Pathway")
 #
 
 
 #
 @dig/teleport Road south of center;town#25 : typeclasses.rooms.Room = east;e,west;w
 #
-@desc |yAlong Peter's lane, southeast of the center of town.
+@desc |YAs you venture south from the western pathway junction, the cobblestone path narrows, flanked by ancient oak trees whose branches form a natural canopy overhead. The air is filled with the scent of blooming wildflowers, and the distant sound of a babbling brook adds a serene ambiance. Sunlight filters through the leaves, casting dappled shadows on the ground, creating a tranquil and inviting atmosphere.
 #
 
 
@@ -195,16 +195,16 @@ open north;n,south;s = town#08
 
 
 #
-@dig/teleport George's road;town#27 : typeclasses.rooms.Room = south;s,north;n
+@dig/teleport Southern Pathway;town#27 : typeclasses.rooms.Room = south;s,north;n
 #
-@desc |yHeading to the south side of town.
+@desc |YAs you venture south from the western pathway junction, the cobblestone path narrows, flanked by ancient oak trees whose branches form a natural canopy overhead. The air is filled with the scent of blooming wildflowers, and the distant sound of a babbling brook adds a serene ambiance. Sunlight filters through the leaves, casting dappled shadows on the ground, creating a tranquil and inviting atmosphere.
 #
 
 
 #
-@dig/teleport George's road;town#28 : typeclasses.rooms.Room = south;s,north;n
+@dig/teleport Southern Trail;town#28 : typeclasses.rooms.Room = south;s,north;n
 #
-@desc |YAlong George's road.
+@desc |YContinuing south, the pathway transitions from cobblestones to a soft dirt trail. Tall grasses sway gently in the breeze, and vibrant butterflies flit from flower to flower. The sound of rustling leaves and chirping birds creates a peaceful melody. Ahead, the trail curves slightly, hinting at new discoveries just around the bend.
 #
 
 

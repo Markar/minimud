@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, uniform
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
 class Cat(ChangelingAttack):
@@ -12,8 +12,8 @@ class Cat(ChangelingAttack):
 
     energy_cost = 3
     speed = 3
-    power = 5
-    toughness = 20
+    power = 6
+    toughness = 6
     dodge = 15
     
     def _calculate_bite_damage(self, wielder):
@@ -22,7 +22,7 @@ class Cat(ChangelingAttack):
         stat_bonus = (dex+str) / 8
         dmg = 10 + stat_bonus + wielder.db.guild_level / 3
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
     
     def _calculate_claw_damage(self, wielder):
@@ -31,7 +31,7 @@ class Cat(ChangelingAttack):
         stat_bonus = (dex+str) / 10
         dmg = 7 + stat_bonus + wielder.db.guild_level / 3
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
     
     def at_attack(self, wielder, target, **kwargs):

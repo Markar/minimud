@@ -1,4 +1,4 @@
-from random import randint, uniform
+from random import randint, uniform, uniform
 from evennia.prototypes import spawner, prototypes
 from string import punctuation
 from evennia import AttributeProperty
@@ -26,14 +26,14 @@ from typeclasses.changelingguild.reptile.skink import Skink
 from typeclasses.changelingguild.reptile.iguana import Iguana
 from typeclasses.changelingguild.reptile.boa import Boa
 from typeclasses.changelingguild.reptile.viper import Viper
-# from typeclasses.changelingguild.reptile.caiman import Caiman
-# from typeclasses.changelingguild.reptile.cobra import Cobra
-# from typeclasses.changelingguild.reptile.gilamonster import GilaMonster
-# from typeclasses.changelingguild.reptile.python import Python
-# from typeclasses.changelingguild.reptile.crocodile import Crocodile
-# from typeclasses.changelingguild.reptile.alligator import Alligator
-# from typeclasses.changelingguild.reptile.anaconda import Anaconda
-# from typeclasses.changelingguild.reptile.komododragon import KomodoDragon
+from typeclasses.changelingguild.reptile.caiman import Caiman
+from typeclasses.changelingguild.reptile.cobra import Cobra
+from typeclasses.changelingguild.reptile.gilamonster import GilaMonster
+from typeclasses.changelingguild.reptile.python import Python
+from typeclasses.changelingguild.reptile.crocodile import Crocodile
+from typeclasses.changelingguild.reptile.alligator import Alligator
+from typeclasses.changelingguild.reptile.anaconda import Anaconda
+from typeclasses.changelingguild.reptile.komodo_dragon import KomodoDragon
 from typeclasses.changelingguild.mammal.rat import Rat
 from typeclasses.changelingguild.mammal.cat import Cat
 from typeclasses.changelingguild.mammal.lynx import Lynx
@@ -41,14 +41,14 @@ from typeclasses.changelingguild.mammal.fox import Fox
 from typeclasses.changelingguild.mammal.badger import Badger
 from typeclasses.changelingguild.mammal.wolverine import Wolverine
 from typeclasses.changelingguild.mammal.wolf import Wolf
-# from typeclasses.changelingguild.mammal.blackbear import BlackBear
-# from typeclasses.changelingguild.mammal.grizzlybear import GrizzlyBear
-# from typeclasses.changelingguild.mammal.elephant import Elephant
-# from typeclasses.changelingguild.mammal.cheetah import Cheetah
-# from typeclasses.changelingguild.mammal.leopard import Leopard
-# from typeclasses.changelingguild.mammal.jaguar import Jaguar
-# from typeclasses.changelingguild.mammal.tiger import Tiger
-# from typeclasses.changelingguild.mammal.lion import Lion
+from typeclasses.changelingguild.mammal.black_bear import BlackBear
+from typeclasses.changelingguild.mammal.grizzly_bear import GrizzlyBear
+from typeclasses.changelingguild.mammal.elephant import Elephant
+from typeclasses.changelingguild.mammal.cheetah import Cheetah
+from typeclasses.changelingguild.mammal.leopard import Leopard
+from typeclasses.changelingguild.mammal.jaguar import Jaguar
+from typeclasses.changelingguild.mammal.tiger import Tiger
+from typeclasses.changelingguild.mammal.lion import Lion
 from typeclasses.changelingguild.avian.hummingbird import Hummingbird
 from typeclasses.changelingguild.avian.finch import Finch
 from typeclasses.changelingguild.avian.sparrow import Sparrow
@@ -56,14 +56,14 @@ from typeclasses.changelingguild.avian.swallow import Swallow
 from typeclasses.changelingguild.avian.crow import Crow
 from typeclasses.changelingguild.avian.raven import Raven
 from typeclasses.changelingguild.avian.crane import Crane
-# from typeclasses.changelingguild.avian.kestrel import Kestrel
-# from typeclasses.changelingguild.avian.owl import Owl
-# from typeclasses.changelingguild.avian.osprey import Osprey
-# from typeclasses.changelingguild.avian.falcon import Falcon
-# from typeclasses.changelingguild.avian.hawk import Hawk
-# from typeclasses.changelingguild.avian.condor import Condor
-# from typeclasses.changelingguild.avian.ostrich import Ostrich
-# from typeclasses.changelingguild.avian.eagle import Eagle
+from typeclasses.changelingguild.avian.kestrel import Kestrel
+from typeclasses.changelingguild.avian.owl import Owl
+from typeclasses.changelingguild.avian.osprey import Osprey
+from typeclasses.changelingguild.avian.falcon import Falcon
+from typeclasses.changelingguild.avian.hawk import Hawk
+from typeclasses.changelingguild.avian.condor import Condor
+from typeclasses.changelingguild.avian.ostrich import Ostrich
+from typeclasses.changelingguild.avian.eagle import Eagle
 
 FORM_CLASSES = {
     "ChangelingAttack": ChangelingAttack,
@@ -76,14 +76,14 @@ FORM_CLASSES = {
     "Iguana": Iguana,
     "Boa": Boa,
     "Viper": Viper,
-    # "Caiman": Caiman,
-    # "Cobra": Cobra,
-    # "Gila Monster": GilaMonster,
-    # "Python": Python,
-    # "Crocodile": Crocodile,
-    # "Alligator": Alligator,
-    # "Anaconda": Anaconda,
-    # "Komodo Dragon": KomodoDragon,
+    "Caiman": Caiman,
+    "Cobra": Cobra,
+    "Gila Monster": GilaMonster,
+    "Python": Python,
+    "Crocodile": Crocodile,
+    "Alligator": Alligator,
+    "Anaconda": Anaconda,
+    "Komodo Dragon": KomodoDragon,
     "Rat": Rat,
     "Cat": Cat,
     "Lynx": Lynx,
@@ -91,14 +91,14 @@ FORM_CLASSES = {
     "Badger": Badger,
     "Wolverine": Wolverine,
     "Wolf": Wolf,
-    # "Black Bear": BlackBear,
-    # "Grizzly Bear": GrizzlyBear,
-    # "Elephant": Elephant,
-    # "Cheetah": Cheetah,
-    # "Leopard": Leopard,
-    # "Jaguar": Jaguar,
-    # "Tiger": Tiger,
-    # "Lion": Lion,
+    "Black Bear": BlackBear,
+    "Grizzly Bear": GrizzlyBear,
+    "Elephant": Elephant,
+    "Cheetah": Cheetah,
+    "Leopard": Leopard,
+    "Jaguar": Jaguar,
+    "Tiger": Tiger,
+    "Lion": Lion,
     "Hummingbird": Hummingbird,
     "Finch": Finch,
     "Sparrow": Sparrow,
@@ -106,17 +106,15 @@ FORM_CLASSES = {
     "Crow": Crow,
     "Raven": Raven,
     "Crane": Crane,
-    # "Kestrel": Kestrel,
-    # "Owl": Owl,
-    # "Osprey": Osprey,
-    # "Falcon": Falcon,
-    # "Hawk": Hawk,
-    # "Condor": Condor,
-    # "Ostrich": Ostrich,
-    # "Eagle": Eagle
+    "Kestrel": Kestrel,
+    "Owl": Owl,
+    "Osprey": Osprey,
+    "Falcon": Falcon,
+    "Hawk": Hawk,
+    "Condor": Condor,
+    "Ostrich": Ostrich,
+    "Eagle": Eagle
 }
-
-
 
 class Changelings(PlayerCharacter):
     """
@@ -128,15 +126,16 @@ class Changelings(PlayerCharacter):
         super().at_object_creation()
         con_increase_amount = 10
         int_increase_amount = 7
+        self.db.con_increase_amount = con_increase_amount
+        self.db.int_increase_amount = int_increase_amount
+        self.db.hpmax = 50 + (con_increase_amount * self.db.constitution)
+        self.db.fpmax = 50 + (int_increase_amount * self.db.intelligence)
         
         self.db.guild_level = 1
         self.db.gxp = 0
         self.db.skill_gxp = 0
         self.db.title = "the novice changeling"
-        self.db.con_increase_amount = con_increase_amount
-        self.db.hpmax = 50 + (con_increase_amount * self.db.constitution)
-        self.db.int_increase_amount = int_increase_amount
-        self.db.fpmax = 50 + (int_increase_amount * self.db.intelligence)
+                
         self.db.natural_weapon = {
             "name": "punch",
             "damage_type": "blunt",
@@ -145,7 +144,7 @@ class Changelings(PlayerCharacter):
             "energy_cost": 1
         }
         self.db.guild = "changeling"
-        self.db.form = "human"
+        self.db.subguild = "none"
         self.db._wielded = {"left": None, "right": None}
         self.db.hpregen = 1
         self.db.fpregen = 1
@@ -153,7 +152,7 @@ class Changelings(PlayerCharacter):
         self.db.regrowth_rate = 0
         self.db.regrowth_cost = 0
         self.db.form = "Human"
-        self.db.subguild = "none"
+        
         self.db.engulfs = 0
         self.db.max_engulfs = 0
         self.db.skills = {
@@ -213,22 +212,25 @@ class Changelings(PlayerCharacter):
         ep = self.db.ep
         regen_skill = self.db.skills["regeneration"]
         
+        hp = self.db.hp
+        hpmax = self.db.hpmax
         base_regen = self.db.hpregen
         base_ep_regen = self.db.epregen
         base_fp_regen = self.db.fpregen
         hp_regen_amt = base_regen
         
-        if self.db.regrowth:
+        if self.db.regrowth and hp < hpmax:
             regrowth_rate = int(5 + regen_skill/2 + uniform(0, regen_skill/2) + glvl/8 + uniform(0, glvl/8))
             regrowth_cost = int(regrowth_rate/3)
         
-            if ep >= regrowth_cost:
+            if ep >= regrowth_cost and hp < hpmax:
                 hp_regen_amt += regrowth_rate
-                self.addep(-regrowth_cost)
+                self.msg(f"|MYou feel the energy flowing through you, knitting your wounds together.")
+                self.db.ep -= regrowth_cost
             else:
                 self.msg(f"|rYou do not have enough energy to regrow.")
                 self.db.regrowth = False
-                    
+        
         self.addhp(hp_regen_amt)
         self.addfp(base_fp_regen)
         self.addep(base_ep_regen)
@@ -300,8 +302,16 @@ class Changelings(PlayerCharacter):
                 # queue up next attack; use None for target to reference stored target on execution
                 delay(speed + 1, self.attack, None, weapon, persistent=True)
     
-    def get_hit_message(self, attacker, dam, tn, emote="bite"):
+    def get_player_attack_hit_message(self, attacker, dam, tn, emote="bite"):
         # attack = FORM_CLASSES[self.db.form].name
+        """
+        Get the hit message based on the damage dealt. This is the changeling's
+        version of the method, defaulting to bite but should be overridden by 
+        subguilds.        
+        
+        ex: 
+            f"{color}$pron(Your) bite causes {tn}{color} to bleed slightly.",
+        """
 
         msgs = AttackEmotes.get_emote(attacker, emote, tn, which="left")
         if dam <= 0:
@@ -316,13 +326,13 @@ class Changelings(PlayerCharacter):
             to_me = msgs[4]
         elif 31 <= dam <= 50:
             to_me = msgs[5]
-        elif 41 <= dam <= 80:
+        elif 51 <= dam <= 80:
             to_me = msgs[6]
-        elif 51 <= dam <= 140:
+        elif 81 <= dam <= 140:
             to_me = msgs[7]
-        elif 61 <= dam <= 225:
+        elif 141 <= dam <= 225:
             to_me = msgs[8]
-        elif 76 <= dam <= 325:
+        elif 225 <= dam <= 325:
             to_me = msgs[9]
         else:
             to_me = msgs[10]
@@ -331,10 +341,6 @@ class Changelings(PlayerCharacter):
         self.location.msg_contents(to_me, from_obj=self)
                     
         return to_me
-
-    def get_form_help(self, form):
-        form_class = FORM_CLASSES[form.title()]
-        return form_class.__doc__
     
     def at_damage(self, attacker, damage, damage_type=None):
         """
@@ -346,49 +352,51 @@ class Changelings(PlayerCharacter):
         form_dodge = form.dodge
         form_toughness = form.toughness
         ec = self.db.skills["energy_control"]
-        self.msg(f"ec: {ec}")
-        ec_amt = math.floor(ec * (glvl / 5))
+        base_ec_amt = ec * (glvl / 5)
+        ec_amt = math.floor(uniform(base_ec_amt/2, base_ec_amt))
         
         dodge = self.db.dexterity / 5 + form_dodge * glvl / 12
-        self.msg(f"dodge: {dodge}")
         if dodge > 90:
             dodge = 90
                     
         ran = randint(1, 100)
         if ran <= dodge:
-            self.msg(f"random {ran} >= {dodge}")
             self.msg(f"|cYou dodge the attack!")
             attacker.msg(f"{self.get_display_name(attacker)} dodges your attack!")
             return
-        self.msg(f"{self} takes damage: {damage}")
+        # self.msg(f"{self} takes damage: {damage}")
         # aply toughness
         toughness = form_toughness + glvl/5 + self.db.constitution/10
-        self.msg(f"|cToughness: {toughness}")
-        tougness_reduction = randint(int(toughness/2), int(toughness))
-        damage -= tougness_reduction
-        self.msg(f"|cToughness reduction: {tougness_reduction}")
+        # self.msg(f"|cToughness: {toughness}")
+        tougness_reduction = math.ceil(uniform(toughness/2, toughness))
+        if glvl < 5: 
+            tougness_reduction = tougness_reduction / 3
+        if glvl < 10:
+            tougness_reduction = tougness_reduction / 2
+        damage -= math.ceil(tougness_reduction)
+        # self.msg(f"|cToughness reduction: {tougness_reduction}")
         
         # apply armor damage reduction
         damage -= self.defense(damage_type)
-        self.msg(f"|cArmor reduction: {self.defense(damage_type)}")
+        # self.msg(f"|cArmor reduction: {self.defense(damage_type)}")
         
         # apply energy control reduction
-        if ec == True and damage_type in ["edged", "blunt"]:
+        if self.db.energy_control is True and damage_type in ["edged", "blunt"]:
             damage -= ec_amt
             self.db.ep -= 1
             self.msg(f"|cYou block some damage!")
             
             
-        self.msg(f"|cEnergy control reduction: {ec_amt}")   
+        # self.msg(f"|cEnergy control reduction: {ec_amt}")   
         self.db.hp -= max(damage, 0)
-        self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
+        # self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
         # The NPC's attack, emoting to the room
         # a scrawny gnoll tears into changeling at_damage Markar with brutal force! -18
         attacker.get_hit_message(self, damage, self.get_display_name(self))
         
-        status = self.get_display_status(self)
-        self.msg(prompt=status)
+        # status = self.get_display_status(self)
+        # self.msg(prompt=status)
             
         if self.db.hp <= 0:
             self.tags.add("unconscious", category="status")
@@ -414,6 +422,10 @@ class Changelings(PlayerCharacter):
         self.db.ep -= 25
         self.msg(f"|MAs you focus your mind, a surge of energy begins to flow through your body. You raise your hands, and a shimmering barrier of pure energy forms around you, crackling with power.")
         
+    def get_form_help(self, form):
+        form_class = FORM_CLASSES[form.title()]
+        return form_class.__doc__
+    
     def use_engulf(self, target,  **kwargs):
         """
         Engulf your target
@@ -483,7 +495,7 @@ class Changelings(PlayerCharacter):
             regrowthVis = "CG"
             
         chunks.append(
-            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax} Energy: |G{ep}/{epmax}|g Form: |G{self.db.form} |gEngulfs: |G{self.db.engulfs}/{self.db.max_engulfs} |Y{ecVis} |Y{regrowthVis}"
+            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g Form: |G{self.db.form} |gEngulfs: |G{self.db.engulfs}/{self.db.max_engulfs} |Y{ecVis} |Y{regrowthVis}"
         )
         print(f"looker != self {looker} and self {self}")
         if looker != self:
@@ -508,3 +520,27 @@ class Changelings(PlayerCharacter):
 
         # glue together the chunks and return
         return " - ".join(chunks)
+    
+    def enter_combat(self, target, **kwargs):
+        """
+        initiate combat against another character
+        """
+        if weapons := self.wielding:
+            weapon = weapons[0]
+        else:
+            weapon = self
+
+        self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
+        location = self.location
+
+        if not (combat_script := location.scripts.get("combat")):
+            # there's no combat instance; start one
+            from typeclasses.scripts import CombatScript
+            location.scripts.add(CombatScript, key="combat")
+            combat_script = location.scripts.get("combat")
+        combat_script = combat_script[0]
+        self.db.combat_target = target
+        # adding a combatant to combat just returns True if they're already there, so this is safe
+        # if not combat_script.add_combatant(self, enemy=target):
+        #     return
+        self.attack(target, weapon)

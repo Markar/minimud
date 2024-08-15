@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, uniform
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 class Hummingbird(ChangelingAttack):
     """
@@ -21,7 +21,7 @@ class Hummingbird(ChangelingAttack):
         stat_bonus = str+dex/4
         dmg = 1 + stat_bonus + wielder.db.guild_level / 2
         
-        damage = randint(int(dmg/2), int(dmg))
+        damage = int(uniform(dmg/2, dmg))
         return damage
     
     
