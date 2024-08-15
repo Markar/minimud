@@ -1,9 +1,6 @@
-from random import randint, uniform, choice
-from evennia.prototypes import spawner, prototypes
+from random import randint, uniform
 from string import punctuation
-from evennia import AttributeProperty
-from evennia.utils import lazy_property, iter_to_str, delay, logger
-from evennia.contrib.rpg.traits import TraitHandler
+from evennia.utils import delay
 from evennia.contrib.game_systems.cooldowns import CooldownHandler
 from evennia import TICKER_HANDLER as tickerhandler
 from evennia.contrib.game_systems.clothing.clothing import (
@@ -11,9 +8,7 @@ from evennia.contrib.game_systems.clothing.clothing import (
     get_worn_clothes,
 )
 from commands.elemental_cmds import ElementalCmdSet
-from typeclasses.characters import PlayerCharacter
 from typeclasses.elementalguild.earth_elemental_attack import EarthAttack
-from typeclasses.elementalguild.attack_emotes import AttackEmotes
 from typeclasses.elementals import Elemental
 from typeclasses.elementalguild.earth_elemental_commands import CmdTerranRestoration
 import math
@@ -50,6 +45,17 @@ class EarthElemental(Elemental):
         self.db.fpregen = 1
         self.db.epregen = 1
         self.db.strategy = "melee"
+        self.db.skills = {
+            # "stone mastery": 1,
+            # "earth resonance": 1,
+            "mineral fortification": 1,
+            # "geological insight": 1,
+            # "seismic awareness": 1,
+            # "rock solid defense": 1,
+            # "elemental harmony": 1,
+            "earthen regeneration": 1,
+            "assimilation": 1,
+        }
         self.at_wield(EarthAttack)
         tickerhandler.add(interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True)
     
@@ -93,11 +99,24 @@ class EarthElemental(Elemental):
     def at_tick(self):
         base_regen = self.db.hpregen
         base_ep_regen = self.db.epregen
-        base_fp_regen = self.db.fpregen
+        base_fp_regen = self.db.fpregen        
+        regen = self.db.skills["earthen regeneration"]
         
+        if regen < 2: 
+            bonus_fp = 0
+        if regen < 5:
+            bonus_fp = int(uniform(0, regen/2)) #0-2
+        if regen < 10:
+            bonus_fp = int(uniform(1, regen/2)) #1-3
+        if regen < 15:
+            bonus_fp = int(uniform(3, regen/3)) #3-5
+        if regen < 20:
+            bonus_fp = int(uniform(4, regen/3)) #4-6
+        
+        total_fp_regen = base_fp_regen + bonus_fp
         self.addhp(base_regen)
         self.addfp(base_ep_regen)
-        self.addep(base_fp_regen)
+        self.addep(total_fp_regen)
             
         
     def get_display_name(self, looker, **kwargs):
@@ -158,46 +177,6 @@ class EarthElemental(Elemental):
                 # queue up next attack; use None for target to reference stored target on execution
                 delay(speed + 1, self.attack, None, weapon, persistent=True)
     
-    def get_player_attack_hit_message(self, attacker, dam, tn, emote="earth_elemental_melee"):
-        """
-        Get the hit message based on the damage dealt. This is the elemental's
-        version of the method, defaulting to the earth elemental version but 
-        should be overridden by subguilds.
-        
-        ex: 
-            f"{color}$You() hurl a handful of dirt, but it scatters harmlessly.",
-        """
-        
-        msgs = AttackEmotes.get_emote(attacker, emote, tn, which="left")
-        
-        if dam <= 0:
-            to_me = msgs[0]
-        elif 1 <= dam <= 5:
-            to_me = msgs[1]
-        elif 6 <= dam <= 12:
-            to_me = msgs[2]
-        elif 13 <= dam <= 20:
-            to_me = msgs[3]
-        elif 21 <= dam <= 30:
-            to_me = msgs[4]
-        elif 31 <= dam <= 50:
-            to_me = msgs[5]
-        elif 51 <= dam <= 80:
-            to_me = msgs[6]
-        elif 81 <= dam <= 140:
-            to_me = msgs[7]
-        elif 141 <= dam <= 225:
-            to_me = msgs[8]
-        elif 225 <= dam <= 325:
-            to_me = msgs[9]
-        else:
-            to_me = msgs[10]
-            
-        to_me = f"{to_me} ({dam})"
-        self.location.msg_contents(to_me, from_obj=self)
-                    
-        return to_me
-    
     def at_damage(self, attacker, damage, damage_type=None):
         """
         Apply damage, after taking into account damage resistances.
@@ -206,29 +185,56 @@ class EarthElemental(Elemental):
         con = self.db.constitution
         hp = self.db.hp
         hpmax = self.db.hpmax
+        skill_level = self.db.skills.get("mineral fortification", 0)
         status = self.get_display_status(self)
+        hp_percentage = hp / hpmax
+        reaction = int(self.db.reaction_percentage or 1) / 100
+        
         # reduction = uniform(1 - 0.1 (con / 200 + glvl / 150))
         # self.msg(f"Reduction: {reduction}")
         # reduction = 0.9
         # damage *= math.round(reduction)
         damage -= self.defense(damage_type)
         
+        # Flat damage reduction - 50 con = 5 reduction, glvl 30 = 1.5 reduction
+        flat_reduction = con * 0.1 + glvl * 0.05
+        
+        # Percentage damage reduction 2% per skill level
+        percentage_reduction = skill_level * 0.02
+        
+        # Apply flat reduction
+        damage -= flat_reduction
+        
+        # Apply percentage reduction
+        damage *= (1 - percentage_reduction)
+        
+        # Apply defense reduction
+        damage -= self.defense(damage_type)
+        
         # apply reactive armor after defense if it's enabled
         if damage_type in ("blunt", "edged") and self.db.reactive_armor:
-            reactive_armor_absorbed = randint(glvl/3, glvl)
+            reactive_armor_absorbed = uniform(glvl/3, glvl)
             damage -= reactive_armor_absorbed
-            self.msg(f"|cYour reactive armor blocks some damage!")
-            
+            self.msg(f"|cYour reactive armor blocks some damage!")            
+        
+        # Make sure damage is an integer, similar to floor rounding
+        damage = int(damage)
+        
+        # Ensure damage doesn't go below zero
+        damage = max(damage, 0)
+        
+        # Apply the damage to the character
+        self.db.hp -= damage
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
-        
-        self.db.hp -= max(damage, 0)
+    
+        # Get the attack emote
         attacker.get_npc_attack_emote(self, damage, self.get_display_name(self))
         self.msg(prompt=status)
         
-        hp_percentage = hp / hpmax
-        reaction = int(self.db.reaction_percentage or 1) / 100
-        if hp_percentage < reaction:
+        # Check if the character is below the reaction percentage
+        if hp_percentage < reaction and glvl > 3:
+            self.msg(f"|cYou are below {reaction*100}% health!|n")
             self.execute_cmd("terran restoration")
             
         if hp <= 0:
@@ -241,27 +247,3 @@ class EarthElemental(Elemental):
                 combat = self.location.scripts.get("combat")[0]
                 combat.remove_combatant(self)
                               
-        
-    def enter_combat(self, target, **kwargs):
-        """
-        initiate combat against another character
-        """
-        if weapons := self.wielding:
-            weapon = weapons[0]
-        else:
-            weapon = self
-
-        self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
-        location = self.location
-
-        if not (combat_script := location.scripts.get("combat")):
-            # there's no combat instance; start one
-            from typeclasses.scripts import CombatScript
-            location.scripts.add(CombatScript, key="combat")
-            combat_script = location.scripts.get("combat")
-        combat_script = combat_script[0]
-        self.db.combat_target = target
-        # adding a combatant to combat just returns True if they're already there, so this is safe
-        # if not combat_script.add_combatant(self, enemy=target):
-        #     return
-        self.attack(target, weapon)

@@ -11,8 +11,7 @@ class WaterAttack(ElementalAttack):
     massive damage to their foes.
     """
     speed = 3
-    emit = 1
-    energy_cost = 1
+    energy_cost = 3
 
     def _calculate_melee_damage(self, wielder):
         glvl = wielder.db.guild_level

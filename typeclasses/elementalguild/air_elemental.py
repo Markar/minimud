@@ -15,7 +15,7 @@ from typeclasses.characters import PlayerCharacter
 from typeclasses.elementalguild.air_elemental_attack import AirAttack
 from typeclasses.elementalguild.attack_emotes import AttackEmotes
 from typeclasses.elementals import Elemental
-from typeclasses.elementalguild.air_elemental_commands import CmdRestoration
+from typeclasses.elementalguild.air_elemental_commands import CmdAerialRestoration
 
 class AirElemental(Elemental):
 
@@ -49,6 +49,17 @@ class AirElemental(Elemental):
         self.db.fpregen = 1
         self.db.epregen = 1
         self.db.strategy = "melee"
+        self.db.skills = {
+            "wind mastery": 1,
+            "aerial agility": 1,
+            "storm resilience": 1,
+            "gale force": 1,
+            "cyclone armor": 1,
+            "zephyr infusion": 1,
+            "tempest control": 1,
+            "elemental harmony": 1,
+        }
+                
         self.at_wield(AirAttack)
         tickerhandler.add(interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True)
     
@@ -233,9 +244,7 @@ class AirElemental(Elemental):
         
         hp_percentage = hp / hpmax
         reaction = int(self.db.reaction_percentage or 1) / 100
-        self.msg(f"hpp {hp_percentage} reaction: {reaction}")
         if hp_percentage < reaction:
-            self.msg(f"hpp2 {hp_percentage} reaction: {reaction}")
             self.execute_cmd("aerial restoration")
             
         if self.db.hp <= 0:
@@ -248,27 +257,3 @@ class AirElemental(Elemental):
                 combat = self.location.scripts.get("combat")[0]
                 combat.remove_combatant(self)
                               
-        
-    def enter_combat(self, target, **kwargs):
-        """
-        initiate combat against another character
-        """
-        if weapons := self.wielding:
-            weapon = weapons[0]
-        else:
-            weapon = self
-
-        self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
-        location = self.location
-
-        if not (combat_script := location.scripts.get("combat")):
-            # there's no combat instance; start one
-            from typeclasses.scripts import CombatScript
-            location.scripts.add(CombatScript, key="combat")
-            combat_script = location.scripts.get("combat")
-        combat_script = combat_script[0]
-        self.db.combat_target = target
-        # adding a combatant to combat just returns True if they're already there, so this is safe
-        # if not combat_script.add_combatant(self, enemy=target):
-        #     return
-        self.attack(target, weapon)

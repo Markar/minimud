@@ -11,8 +11,7 @@ class EarthAttack(ElementalAttack):
     and landslides, which can cause massive damage to their foes.
     """
     speed = 3
-    emit = 1
-    energy_cost = 1
+    energy_cost = 3
 
     def _calculate_melee_damage(self, wielder):
         glvl = wielder.db.guild_level
@@ -23,15 +22,15 @@ class EarthAttack(ElementalAttack):
         dmg = 5 + stat_bonus + glvl * 3/2
         
         if glvl < 10:
-            dmg += 10
+            dmg += 7
         elif glvl < 20:
-            dmg += 20
+            dmg += 14
         elif glvl < 30:
-            dmg += 40
+            dmg += 28
         elif glvl < 40:
-            dmg += 70
+            dmg += 42
         else: 
-            dmg += 100
+            dmg += 65
         
         
         damage = int(uniform(dmg/2, dmg))
@@ -48,7 +47,6 @@ class EarthAttack(ElementalAttack):
         wielder.db.ep -= self.energy_cost
         dmg = self._calculate_melee_damage(wielder)
         target.at_damage(wielder, dmg, "blunt", "earth_elemental_melee")
-        wielder.msg(f"dmg: {dmg}")
              
         wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
         wielder.cooldowns.add("attack", self.speed)

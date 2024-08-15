@@ -10,40 +10,7 @@ from typeclasses.elementalguild.earth_elemental_commands import EarthElementalCm
 from typeclasses.elementalguild.air_elemental_commands import AirElementalCmdSet
 from typeclasses.elementalguild.fire_elemental_commands import FireElementalCmdSet
 from typeclasses.elementalguild.water_elemental_commands import WaterElementalCmdSet
-
-GUILD_LEVEL_COST_DICT = {
-    2: 300,
-    3: 400,
-    4: 648,
-    5: 951,
-    6: 1529,
-    7: 2409,
-    8: 3330,
-    9: 4645,
-    10: 6000,
-    11: 7500,
-    12: 10000,
-    13: 12900,
-    14: 16000,
-    15: 22500,
-    16: 32000,
-    17: 47000,
-    18: 67000,
-    19: 90000,
-    20: 120000,
-    21: 160000,
-    22: 220000,
-    23: 295000,
-    24: 445000,
-    25: 675000,
-    26: 950000,
-    27: 1300000,
-    28: 1900000,
-    29: 2900000,
-    30: 4200000, 
-    31: 4200000000000,
-}
-        
+from typeclasses.elementalguild.constants_and_helpers import SKILLS_COST, SKILL_RANKS, GUILD_LEVEL_COST_DICT
 
 class CmdGAdvance(Command):
     """
@@ -93,16 +60,32 @@ class CmdGuildStatSheet(Command):
 
     def func(self):
         caller = self.caller
+        title = caller.db.title or "the novice"
+        alignment = caller.db.alignment or "neutral"
         my_glvl = caller.db.guild_level or 1
-        gxp_needed = GUILD_LEVEL_COST_DICT[my_glvl+1]
+        gxp = caller.db.gxp or 0
         skill_gxp = caller.db.skill_gxp or 0
+        form = caller.db.subguild or "adventurer"
+        gxp_needed = GUILD_LEVEL_COST_DICT[my_glvl+1]
+        reaction = caller.db.reaction_percentage or 50                
         
-        self.msg(f"|c{caller} {caller.db.title} ({caller.db.alignment})")
-        self.msg(f"|GGuild Level: {caller.db.guild_level or 0}")
-        self.msg(f"|GGXP: {caller.db.gxp or 0} / {gxp_needed}")
-        # table.add_row(f"|GSkill GXP: {skill_gxp}")
-        self.msg(f"|GEmit: {caller.db.emit or 0}")
-        self.msg(f"|GForm: {caller.db.subguild}")
+        table = EvTable(f"|c{caller}", f"|c{title}", border="table")
+        table.add_row(f"|GGuild Level", my_glvl)
+        table.add_row(f"|GGXP", f"{gxp} / {gxp_needed}")
+        table.add_row(f"|GSkill GXP", skill_gxp)
+        table.add_row(f"|GForm", form.title())
+        table.add_row(f"|GReaction", f"{reaction}%")
+        
+        caller.msg(str(table))
+        
+        skill_table = EvTable(f"|cSkills", f"|cCost", f"|cRank", border="table")
+        skills = caller.db.skills.items()  # Get the items (key-value pairs) of the skills dictionary
+
+        # Assuming SKILLS_COST is a dictionary that maps ranks to costs
+        for skill,rank in skills:
+            skill_table.add_row(f"|G{skill.title()}", f"{SKILLS_COST[rank]}", f"{SKILL_RANKS[rank]}")
+
+        caller.msg(str(skill_table))
     
 class CmdJoinElementals(Command):
     """
@@ -136,37 +119,6 @@ class CmdLeaveElementals(Command):
         else:
             caller.msg(f"|rYou are already an adventurer")
             
-            
-# class CmdDrain(Command):
-#     """
-#     Drain the corpse of an enemy to restore energy
-#     """
-    
-#     key = "drain" 
-#     aliases = ["dc", "dr"]
-#     help_category = "elemental"
-    
-#     def func(self):
-#         if not self.args:
-#             target = self.caller
-#             corpse = target.location.search("corpse")
-#             ep = target.db.ep
-#             epmax = target.db.epmax
-#             power = corpse.db.power
-            
-#             if ep + power > epmax:
-#                 target.db.ep = epmax
-#             else:
-#                 target.db.ep += max(power, 0)
-#             corpse.delete()
-#             self.msg(f"|rYou drain the energy from the corpse and it turns into dust.")
-#         else:
-#             print(f"status args: {self.caller.search(self.args.strip())}")
-#             target = self.caller.search(self.args.strip())
-#             if not target:
-#                 # no valid object found
-#                 return
-#             self.msg(f"corpse with args {self.args}")
             
 class CmdChooseForm(Command):
     """
@@ -231,6 +183,16 @@ class CmdChooseForm(Command):
             caller.swap_typeclass("typeclasses.elementalguild.air_elemental.AirElemental", clean_attributes=False, clean_cmdsets=True)
             caller.cmdset.add(AirElementalCmdSet, persistent=True)
             self._remove_cmdsets()
+            
+class CmdGHelp(Command):
+    """
+    Search for guild topics to learn more about the elementals.
+    """
+    
+    key = "ghelp" 
+    help_category = "elemental"
+    
+    
 
 
 class CmdTest(Command):

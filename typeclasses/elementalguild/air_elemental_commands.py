@@ -7,7 +7,7 @@ from evennia import TICKER_HANDLER as tickerhandler
 from evennia import logger
 from commands.command import Command
         
-class CmdRestoration(Command):
+class CmdAerialRestoration(Command):
     """
     The air elemental can restore their body to restore health, 
     at the cost of focus. The amount of health restored is based on
@@ -143,6 +143,6 @@ class AirElementalCmdSet(CmdSet):
         super().at_cmdset_creation()
 
         self.add(CmdEnvelop)
-        self.add(CmdRestoration)
+        self.add(CmdAerialRestoration)
         self.add(CmdPowers)
         self.add(CmdReaction)

@@ -6,7 +6,7 @@ from evennia.utils.evtable import EvTable
 from evennia import TICKER_HANDLER as tickerhandler
 from evennia import logger
 from commands.command import Command
-
+from typeclasses.elementalguild.constants_and_helpers import SKILLS_COST
 
 class CmdReactiveArmor(Command):
     """
@@ -94,7 +94,6 @@ class CmdTerranRestoration(Command):
         msg = f"|M$pron(Your) rocky exterior begins to shift and mend. Cracks seal themselves as stones and minerals realign, drawn from the surrounding ground."
         caller.location.msg_contents(msg, from_obj=caller)    
         
-
 class CmdAssimilate(Command):
     """
     Assimilate the corpse of an enemy to restore energy
@@ -108,17 +107,16 @@ class CmdAssimilate(Command):
         if not self.args:
             caller = self.caller
             if corpse := caller.location.search("corpse-1"):
-                ep = caller.db.ep
-                epmax = caller.db.epmax
-                power = corpse.db.power
-            
-                if ep + power > epmax:
-                    caller.db.ep = epmax
-                else:
-                    caller.db.ep += max(power, 0)
+                base_power = corpse.db.power
+                skill_rank = caller.db.skills.get("assimilate", 0)
+                
+                # Calculate the power with the skill rank multiplier
+                power = base_power * (1 + (skill_rank * 0.1))
+                
+                caller.addep(power)
                 corpse.delete()
-                drain_msg = f"|M$pron(Your) form glows faintly as it assimilates the energy from the consumed corpse strengthening $pron(your) rocky exterior."
-                caller.location.msg_contents(drain_msg, from_obj=caller)
+                assimilate_msg = f"|M$pron(Your) form glows faintly as it assimilates the energy from the consumed corpse, strengthening $pron(your) rocky exterior."
+                caller.location.msg_contents(assimilate_msg, from_obj=caller)
             else:
                 caller.msg("Assimilate what?")
    
@@ -140,7 +138,7 @@ class CmdPowers(Command):
         table = EvTable(f"|cPower", f"|cRank", f"|cCost", border="table")
         table.add_row(f"|GAssimilate", 1, 0)
         table.add_row(f"|GReaction", 1, 0)
-        table.add_row(f"|GRebuild", 3, 25)
+        table.add_row(f"|GTerran Restoration", 3, "variable")
         table.add_row(f"|GReactive Armor", 7, 0)
         
         caller.msg(str(table))                
@@ -170,14 +168,66 @@ class CmdReaction(Command):
         
         caller.db.reaction_percentage = args
         caller.msg(f"Reaction set to {args}.")
+        
+class CmdGTrain(Command):
+    """
+    Train your guild skills by spending skill experience points. Each rank
+    increases your effectiveness in that skill. 
+    
+    Usage: 
+        gtrain <skill>
+    
+    Example:
+        gtrain mineral fortification
+    """
+    
+    key = "gtrain"
+    help_category = "Earth Elemental"
+    
+    def func(self):
+        caller = self.caller
+        skill = self.args.strip().lower()
+        list = ["mineral fortification", "assimilation", "earthen regeneration"]
+        
+        if skill == "":
+                self.msg(f"|gWhat would you like to raise?")
+                return
+            
+        if skill not in list:
+            caller.msg(f"|gYou can't raise that.")
+            return
+        
+        skill_gxp = getattr(caller.db, "skill_gxp", 0)
+        cost = caller.db.skills[f"{skill}"]+1
+        cost = SKILLS_COST[cost]
+        
+        if skill_gxp < cost:
+            self.msg(f"|wYou need {cost-skill_gxp} more experience to train {skill}.")
+            return
+        
+        confirm = yield (
+            f"It will cost you {cost} experience to advance {skill}. Confirm? Yes/No"
+        )
+        if confirm.lower() not in (
+            "yes",
+            "y",
+        ):
+            self.msg("Cancelled.")
+            return
+            
+        setattr(caller.db, "skill_gxp", skill_gxp - cost)
+        caller.db.skills[skill] += 1
+        caller.msg(f"|yYou grow more experienced in {skill}")
 
 class Test(Command):
     key = "test2"
     
     def func(self):
         self.msg("Test command")
-        if (0.9 < 0.95):
-            self.msg("True")
+        cost = self.caller.db.skills["mineral fortification"]+1
+        self.msg(f"|gCost: {cost}")
+        cost = SKILLS_COST[cost]
+        self.msg(f"|gCost2: {cost}")
                 
 class EarthElementalCmdSet(CmdSet):
     key = "Earth Elemental CmdSet"
@@ -190,4 +240,5 @@ class EarthElementalCmdSet(CmdSet):
         self.add(CmdReactiveArmor)
         self.add(CmdPowers)
         self.add(CmdReaction)
+        self.add(CmdGTrain)
         self.add(Test)

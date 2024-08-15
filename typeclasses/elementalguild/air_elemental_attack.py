@@ -11,8 +11,7 @@ class AirAttack(ElementalAttack):
     can cause massive damage to their foes.
     """
     speed = 2
-    emit = 1
-    energy_cost = 1
+    energy_cost = 3
 
     def _calculate_melee_damage(self, wielder):
         glvl = wielder.db.guild_level

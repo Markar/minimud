@@ -19,6 +19,40 @@ from typeclasses.elementals import Elemental
 from typeclasses.elementalguild.water_elemental_commands import CmdRejuvenate
 
 class WaterElemental(Elemental):
+    skill_info = {
+        "water mastery": {
+            "description": "Increases the elemental's control over water, enhancing the effectiveness of all water-based abilities.",
+            "effect": "Boosts damage and precision of water-related skills.",
+        },
+        "fluid agility": {
+            "description": "Enhances the elemental's speed and flexibility, making it more elusive in combat.",
+            "effect": "Increases movement speed and evasion.",
+        },
+        "aqua resilience": {
+            "description": "Improves the elemental's resistance to water and ice damage, allowing for greater endurance in battle.",
+            "effect": "Increases health and resistance to water and ice damage.",
+        },
+        "tidal force": {
+            "description": "Grants the elemental the ability to channel powerful currents, improving the impact of its attacks.",
+            "effect": "Increases critical hit chance and damage for water-based attacks.",
+        },
+        "hydro armor": {
+            "description": "Surrounds the elemental with a protective layer of water, providing additional defense and offensive capabilities.",
+            "effect": "Increases armor and adds a slowing effect to melee attacks.",
+        },
+        "aqua infusion": {
+            "description": "Infuses the elemental's core with the essence of water, enhancing its regenerative abilities.",
+            "effect": "Increases health regeneration rate and reduces cooldowns for healing abilities.",
+        },
+        "wave control": {
+            "description": "Improves the elemental's ability to manipulate large-scale water movements, increasing the effectiveness of area-of-effect attacks.",
+            "effect": "Boosts the range and damage of area-of-effect water abilities.",
+        },
+        "elemental synergy": {
+            "description": "Enhances the elemental's ability to work in harmony with other elements, boosting the effectiveness of combined elemental attacks.",
+            "effect": "Increases synergy and damage when using multi-elemental abilities.",
+        },
+    }
 
     def at_object_creation(self):
         self.cmdset.add(ElementalCmdSet, persistent=True)
@@ -51,6 +85,17 @@ class WaterElemental(Elemental):
         self.db.fpregen = 1
         self.db.epregen = 1
         self.db.strategy = "melee"
+        self.db.skills = {
+            "water mastery": 1,
+            "fluid agility": 1,
+            "aqua resilience": 1,
+            "tidal force": 1,
+            "hydro armor": 1,
+            "aqua infusion": 1,
+            "wave control": 1,
+            "elemental synergy": 1,
+        }
+                
         self.at_wield(WaterAttack)
         tickerhandler.add(interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True)
     
@@ -231,27 +276,3 @@ class WaterElemental(Elemental):
                 combat = self.location.scripts.get("combat")[0]
                 combat.remove_combatant(self)
                               
-        
-    def enter_combat(self, target, **kwargs):
-        """
-        initiate combat against another character
-        """
-        if weapons := self.wielding:
-            weapon = weapons[0]
-        else:
-            weapon = self
-
-        self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
-        location = self.location
-
-        if not (combat_script := location.scripts.get("combat")):
-            # there's no combat instance; start one
-            from typeclasses.scripts import CombatScript
-            location.scripts.add(CombatScript, key="combat")
-            combat_script = location.scripts.get("combat")
-        combat_script = combat_script[0]
-        self.db.combat_target = target
-        # adding a combatant to combat just returns True if they're already there, so this is safe
-        # if not combat_script.add_combatant(self, enemy=target):
-        #     return
-        self.attack(target, weapon)
