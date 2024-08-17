@@ -113,7 +113,7 @@ class CmdAssimilate(Command):
                 # Calculate the power with the skill rank multiplier
                 power = base_power * (1 + (skill_rank * 0.1))
                 
-                caller.addep(power)
+                caller.adjust_ep(power)
                 corpse.delete()
                 assimilate_msg = f"|M$pron(Your) form glows faintly as it assimilates the energy from the consumed corpse, strengthening $pron(your) rocky exterior."
                 caller.location.msg_contents(assimilate_msg, from_obj=caller)

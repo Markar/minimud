@@ -1,21 +1,12 @@
 from random import randint, uniform, choice
-from evennia.prototypes import spawner, prototypes
-from string import punctuation
-from evennia import AttributeProperty
-from evennia.utils import lazy_property, iter_to_str, delay, logger
-from evennia.contrib.rpg.traits import TraitHandler
-from evennia.contrib.game_systems.cooldowns import CooldownHandler
+from evennia.utils import delay
 from evennia import TICKER_HANDLER as tickerhandler
-from evennia.contrib.game_systems.clothing.clothing import (
-    ClothedCharacter,
-    get_worn_clothes,
-)
 from commands.elemental_cmds import ElementalCmdSet
-from typeclasses.characters import PlayerCharacter
 from typeclasses.elementalguild.air_elemental_attack import AirAttack
 from typeclasses.elementalguild.attack_emotes import AttackEmotes
 from typeclasses.elementals import Elemental
-from typeclasses.elementalguild.air_elemental_commands import CmdAerialRestoration
+from typeclasses.utils import adjust_ep, adjust_fp, adjust_hp
+
 
 class AirElemental(Elemental):
 
@@ -26,20 +17,20 @@ class AirElemental(Elemental):
         int_increase_amount = 5
         self.db.con_increase_amount = con_increase_amount
         self.db.int_increase_amount = int_increase_amount
-        self.db.hpmax = 50 + (con_increase_amount * self.db.constitution)        
+        self.db.hpmax = 50 + (con_increase_amount * self.db.constitution)
         self.db.fpmax = 50 + (int_increase_amount * self.db.intelligence)
-        
+
         self.db.guild_level = 1
         self.db.gxp = 0
         self.db.skill_gxp = 0
         self.db.title = "the novice air elemental"
-        
+
         self.db.natural_weapon = {
             "name": "air_attack",
             "damage_type": "blunt",
             "damage": 12,
             "speed": 3,
-            "energy_cost": 10
+            "energy_cost": 10,
         }
         self.db.guild = "elemental"
         self.db.subguild = "air"
@@ -59,57 +50,27 @@ class AirElemental(Elemental):
             "tempest control": 1,
             "elemental harmony": 1,
         }
-                
+
         self.at_wield(AirAttack)
-        tickerhandler.add(interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True)
-    
+        tickerhandler.add(
+            interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
+        )
+
     def kickstart(self):
         self.msg("Kickstarting heartbeat")
-        tickerhandler.add(interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True)
-        
-    def addhp(self, amount):
-        hp = self.db.hp
-        hpmax = self.db.hpmax
-        
-        if hp + amount > hpmax:
-            amt = hpmax - hp
-            self.db.hp += max(amt, 0)
-            return
-        else: 
-            self.db.hp += max(amount, 0)
-    
-    def addfp(self, amount):
-        fp = self.db.fp
-        fpmax = self.db.fpmax
-        
-        if fp + amount > fpmax:
-            amt = fpmax - fp
-            self.db.fp += max(amt, 0)
-            return
-        else:
-            self.db.fp += max(amount, 0)
-    
-    def addep(self, amount):
-        ep = self.db.ep
-        epmax = self.db.epmax
-        
-        if ep + amount > epmax:
-            amt = epmax - ep
-            self.db.ep += max(amt, 0)
-            return
-        if ep < epmax + amount:
-            self.db.ep += max(amount, 0)
-        
+        tickerhandler.add(
+            interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
+        )
+
     def at_tick(self):
         base_regen = self.db.hpregen
         base_ep_regen = self.db.epregen
         base_fp_regen = self.db.fpregen
-        
-        self.addhp(base_regen)
-        self.addfp(base_ep_regen)
-        self.addep(base_fp_regen)
-            
-        
+
+        adjust_hp(base_regen)
+        adjust_fp(base_ep_regen)
+        adjust_ep(base_fp_regen)
+
     def get_display_name(self, looker, **kwargs):
         """
         Adds color to the display name.
@@ -118,7 +79,7 @@ class AirElemental(Elemental):
         if looker == self:
             # special color for our own name
             return f"|c{name}|n"
-        return f"|g{name}|n"    
+        return f"|g{name}|n"
 
     # property to mimic weapons
     @property
@@ -129,10 +90,10 @@ class AirElemental(Elemental):
     def at_wield(self, weapon, **kwargs):
         self.msg(f"You cannot wield weapons.")
         return False
-    
+
     def attack(self, target, weapon, **kwargs):
         weapon = AirAttack()
-            
+
         if not self.in_combat:
             return
         # can't attack if we're fleeing!
@@ -167,19 +128,21 @@ class AirElemental(Elemental):
             if settings.get("auto attack") and (speed := weapon.speed):
                 # queue up next attack; use None for target to reference stored target on execution
                 delay(speed + 1, self.attack, None, weapon, persistent=True)
-    
-    def get_player_attack_hit_message(self, attacker, dam, tn, emote="air_elemental_melee"):
+
+    def get_player_attack_hit_message(
+        self, attacker, dam, tn, emote="air_elemental_melee"
+    ):
         """
         Get the hit message based on the damage dealt. This is the elemental's
-        version of the method, defaulting to the earth elemental version but 
+        version of the method, defaulting to the earth elemental version but
         should be overridden by subguilds.
-        
-        ex: 
+
+        ex:
             f"{color}$You() hurl a handful of dirt, but it scatters harmlessly.",
         """
-        
+
         msgs = AttackEmotes.get_emote(attacker, emote, tn, which="left")
-        
+
         if dam <= 0:
             to_me = msgs[0]
         elif 1 <= dam <= 5:
@@ -202,12 +165,12 @@ class AirElemental(Elemental):
             to_me = msgs[9]
         else:
             to_me = msgs[10]
-            
+
         to_me = f"{to_me} ({dam})"
         self.location.msg_contents(to_me, from_obj=self)
-                    
+
         return to_me
-    
+
     def at_damage(self, attacker, damage, damage_type=None):
         """
         Apply damage, after taking into account damage resistances.
@@ -217,11 +180,11 @@ class AirElemental(Elemental):
         hpmax = self.db.hpmax
         dex = self.db.dexterity
         form_dodge = 25
-        
-        dodge = form_dodge + glvl + dex/3 
+
+        dodge = form_dodge + glvl + dex / 3
         if dodge > 90:
             dodge = 90
-                    
+
         ran = randint(1, 100)
         if ran <= dodge:
             self.msg(f"|cYou dodge the attack!")
@@ -230,23 +193,23 @@ class AirElemental(Elemental):
         elif ran + ran <= dodge:
             self.msg(f"|cYou parry the attack!")
             attacker.msg(f"{self.get_display_name(attacker)} parries your attack!")
-            damage *= 100 - dodge/200
-            
+            damage *= 100 - dodge / 200
+
         status = self.get_display_status(self)
         damage -= self.defense(damage_type)
-            
+
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
-        
+
         self.db.hp -= max(damage, 0)
         attacker.get_npc_attack_emote(self, damage, self.get_display_name(self))
         self.msg(prompt=status)
-        
+
         hp_percentage = hp / hpmax
         reaction = int(self.db.reaction_percentage or 1) / 100
         if hp_percentage < reaction:
             self.execute_cmd("aerial restoration")
-            
+
         if self.db.hp <= 0:
             self.tags.add("unconscious", category="status")
             self.tags.add("lying down", category="status")
@@ -256,4 +219,3 @@ class AirElemental(Elemental):
             if self.in_combat:
                 combat = self.location.scripts.get("combat")[0]
                 combat.remove_combatant(self)
-                              
