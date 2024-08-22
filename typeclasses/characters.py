@@ -16,8 +16,9 @@ from .objects import ObjectParent
 
 _IMMOBILE = ("sitting", "lying down", "unconscious")
 _MAX_CAPACITY = 10
-            
+
 # LOOK INTO RESTORING THESE STATUSES
+
 
 class Character(ObjectParent, ClothedCharacter):
     """
@@ -83,9 +84,7 @@ class Character(ObjectParent, ClothedCharacter):
         """
         print(f"in defense {self} {damage_type}")
         defense_objs = get_worn_clothes(self) + [self]
-        armor = sum(
-            [obj.attributes.get("armor", 0) for obj in defense_objs]
-        )
+        armor = sum([obj.attributes.get("armor", 0) for obj in defense_objs])
         if damage_type:
             armor += sum(
                 [obj.attributes.get(f"{damage_type}ac", 0) for obj in defense_objs]
@@ -112,7 +111,7 @@ class Character(ObjectParent, ClothedCharacter):
         self.db.fpregen = 1
         self.db.ep = 50
         self.db.epmax = 50
-        
+
         self.db.ac_types = {
             "edged": 0,
             "blunt": 0,
@@ -122,7 +121,7 @@ class Character(ObjectParent, ClothedCharacter):
             "poison": 0,
             "mind": 0,
             "lightning": 0,
-            "energy": 0,  
+            "energy": 0,
         }
 
     def at_pre_move(self, destination, **kwargs):
@@ -163,13 +162,15 @@ class Character(ObjectParent, ClothedCharacter):
         Apply damage, after taking into account damage resistances.
         """
         # GENERALL NOT USED - OVERRIDEN BY NPC / PC / GUILD versions
-  
+
         # apply armor damage reduction
         damage -= self.defense(damage_type)
         if damage < 0:
             damage = 0
         self.db.hp -= max(damage, 0)
-        self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}. Character")
+        self.msg(
+            f"You take {damage} damage from {attacker.get_display_name(self)}. Character"
+        )
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
         if self.db.hp <= 0:
             # if self.in_combat:
@@ -311,7 +312,7 @@ class Character(ObjectParent, ClothedCharacter):
         # apply the weapon damage as a modifier to skill
         self.msg(f"damage = damage * result: {damage}")
         damage = damage * result
-        damage = math.ceil(uniform(damage/2, damage))
+        damage = math.ceil(uniform(damage / 2, damage))
         # subtract the energy required to use this
         self.db.ep -= weapon.get("energy_cost", 5)
         if not damage:
@@ -400,7 +401,7 @@ class Character(ObjectParent, ClothedCharacter):
             # this sets the current HP to 20% of the max, a.k.a. one fifth
             self.db.hp = self.db.hpmax // 5
             self.msg(prompt=self.get_display_status(self))
-    
+
     def get_emote(self, target, dam, display_name=None):
         color = "|r"
         tn = display_name
@@ -418,7 +419,8 @@ class Character(ObjectParent, ClothedCharacter):
             f"{color}{self}{color} $conj(hit) {tn}{color} so hard that blood spatters around the room! {dam}",
             f"{color}{self}{color} $conj(tear) into {tn}{color} with brutal force! {dam}",
         ]
-    def get_npc_attack_emote(self, target, dam, display_name ):
+
+    def get_npc_attack_emote(self, target, dam, display_name):
         """
         Get the right attack emote for the NPC based on the damage they deal
         to the player, after taking into account the player's defense.
@@ -447,9 +449,9 @@ class Character(ObjectParent, ClothedCharacter):
             to_me = msgs[9]
         else:
             to_me = msgs[10]
-            
+
         self.location.msg_contents(to_me, from_obj=self)
-                    
+
         return to_me
 
 
@@ -472,14 +474,10 @@ class PlayerCharacter(Character):
             "damage_type": "blunt",
             "damage": 5,
             "speed": 3,
-            "energy_cost": 1
+            "energy_cost": 1,
         }
-        self.best_kill = {
-            "name": "none",
-            "level": 0,
-            "xp": 0
-        }
-      
+        self.best_kill = {"name": "none", "level": 0, "xp": 0}
+
         # initialize hands
         self.db._wielded = {"left": None, "right": None}
 
@@ -491,8 +489,7 @@ class PlayerCharacter(Character):
             self.db.best_kill["name"] = target.get_display_name(self)
             self.db.best_kill["level"] = target.db.level
             self.db.best_kill["xp"] = target.db.exp_reward
-        
-        
+
     def get_display_name(self, looker, **kwargs):
         """
         Adds color to the display name.
@@ -539,11 +536,13 @@ class PlayerCharacter(Character):
         # self.msg(f"You take {damage} damage from {attacker.get_display_name(self)} PC.")
         # attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
         # self.get_hit_message(attacker, damage, f"PC at_damage {self.get_display_name(attacker)}")
-        attacker.get_player_attack_hit_message(attacker, damage, f"PC at_damage {self.get_display_name(attacker)}")
-        
+        attacker.get_player_attack_hit_message(
+            attacker, damage, f"PC at_damage {self.get_display_name(attacker)}"
+        )
+
         status = self.get_display_status(self)
         self.msg(prompt=status)
-            
+
         if self.db.hp <= 0:
             self.tags.add("unconscious", category="status")
             self.tags.add("lying down", category="status")
@@ -553,7 +552,6 @@ class PlayerCharacter(Character):
             if self.in_combat:
                 combat = self.location.scripts.get("combat")[0]
                 combat.remove_combatant(self)
-            
 
     def attack(self, target, weapon, **kwargs):
         """
@@ -612,22 +610,22 @@ class PlayerCharacter(Character):
         epmax = self.db.epmax
         hp_amount = 0
         ep_amount = 0
-        
+
         damage = 50
-        if hp + damage > hpmax:            
-            hp_amount = hpmax-hp
+        if hp + damage > hpmax:
+            hp_amount = hpmax - hp
             self.db.hp = hpmax
-        else: 
-            hp_amount = hpmax-hp
+        else:
+            hp_amount = hpmax - hp
             self.db.hp += max(damage, 0)
-            
+
         if ep + damage > epmax:
-            ep_amount = epmax-ep
+            ep_amount = epmax - ep
             self.db.ep = epmax
-        else: 
-            ep_amount = epmax-ep
+        else:
+            ep_amount = epmax - ep
             self.db.ep += max(damage, 0)
-            
+
         self.msg(f"You restore {hp_amount or 0} health and {ep_amount or 0} energy!")
 
     def use_fireball(self, target, **kwargs):
@@ -678,7 +676,7 @@ class PlayerCharacter(Character):
     #         return
     #     print(f"before npc attack")
     #     self.attack(target, weapon)
-        
+
     def respawn(self):
         """
         Resets the character back to the spawn point with full health.
@@ -708,7 +706,7 @@ class NPC(Character):
 
     def at_object_creation(self):
         super().at_object_creation()
-        
+
     def get_display_name(self, looker, **kwargs):
         """
         Adds color to the display name.
@@ -720,7 +718,9 @@ class NPC(Character):
         """
         Respond to the arrival of a character
         """
-        if "aggressive" in self.attributes.get("react_as", "") and chara.tags.has("player", "type"):
+        if "aggressive" in self.attributes.get("react_as", "") and chara.tags.has(
+            "player", "type"
+        ):
             delay(1, self.enter_combat, chara)
             delay(1, chara.enter_combat, self)
 
@@ -744,7 +744,7 @@ class NPC(Character):
         self.use_heal()
         # self.move_to(self.home)
         self.move_to(self.home, False, None, True, True, True, "teleport")
-                  
+
     def at_damage(self, attacker, damage, damage_type=None, emote="bite"):
         """
         Apply damage, after taking into account damage resistances.
@@ -754,11 +754,15 @@ class NPC(Character):
         if damage < 0:
             damage = 0
         self.db.hp -= max(damage, 0)
-        self.msg(f"You take {damage} damage from {attacker.get_display_name(self)} NPC.")
+        self.msg(
+            f"You take {damage} damage from {attacker.get_display_name(self)} NPC."
+        )
         # this sends the hit_msg FROM the player TO the room with the damage AFTER reduction by npc
-        # this comes from the changelings class, where the emotes live
-        attacker.get_player_attack_hit_message(attacker, damage, f"{self.get_display_name(attacker)}", emote)
-        
+        # this comes from the guild class, where the emotes live
+        attacker.get_player_attack_hit_message(
+            attacker, damage, f"{self.get_display_name(attacker)}", emote
+        )
+
         if self.db.hp <= 0:
             self.tags.add("defeated", category="status")
             attacker.add_best_kill(self)
@@ -768,21 +772,21 @@ class NPC(Character):
                 if not combat_script.remove_combatant(self):
                     # something went wrong...
                     return
-                
+
                 # create loot drops
                 corpse = {
                     "key": f"|Ya decaying corpse of {self}",
                     "typeclass": "typeclasses.corpse.Corpse",
                     "desc": f"|YThe decaying corpse of {self} lies here. It looks heavy, and full of nutrients.|n",
                     "location": self.location,
-                    "power": self.db.level * 8
+                    "power": self.db.level * 8,
                 }
-                
+
                 corpses = spawner.spawn(corpse)
                 # for corpse in corpses:
                 #     delay(10, corpse.delete)
                 #     self.location.msg_contents(f"A {corpse.key} appears.", from_obj=self)
-                
+
                 if self.db.drops:
                     objs = spawn(*list(self.db.drops))
                     for obj in objs:
@@ -790,12 +794,11 @@ class NPC(Character):
                 self.move_to(None, False, None, True, True, True, "teleport")
                 delay(5, self.at_respawn)
                 return
-            
+
         if not self.db.combat_target:
             self.enter_combat(attacker)
         else:
             self.db.combat_target = attacker
-
 
     def enter_combat(self, target, **kwargs):
         """
@@ -812,6 +815,7 @@ class NPC(Character):
         if not (combat_script := location.scripts.get("combat")):
             # there's no combat instance; start one
             from typeclasses.scripts import CombatScript
+
             location.scripts.add(CombatScript, key="combat")
             combat_script = location.scripts.get("combat")
         combat_script = combat_script[0]
@@ -824,7 +828,6 @@ class NPC(Character):
         self.attack(target, weapon)
         target.enter_combat(self)
         # target.attack(self, target.db.weapon)
-          
 
     def attack(self, target, weapon, **kwargs):
         # can't attack if we're not in combat, or if we're fleeing
@@ -879,20 +882,19 @@ class NPC(Character):
         result = self.use_skill(weapon.get("skill"), speed=speed)
         # apply the weapon damage as a modifier to skill
         damage = damage * result
-        
+
         for _ in range(hits):
             # randomize the damage for each attack
-            damage = math.ceil(uniform(damage/2, damage))
+            damage = math.ceil(uniform(damage / 2, damage))
             target.at_damage(wielder, damage, weapon.get("damage_type"))
-           
+
         status = target.get_display_status(self)
         target.msg(prompt=status)
-        
+
         target.status = self.get_display_status(self)
         wielder.msg(f"[ Cooldown: {speed} seconds ]")
         wielder.cooldowns.add("attack", speed)
-    
-        
+
     def use_heal(self):
         """
         Restores health
@@ -901,6 +903,3 @@ class NPC(Character):
         print(f"NPC heals itself {self}")
         self.db.hp = self.db.hpmax
         self.db.ep = self.db.epmax
-        
-        
-        

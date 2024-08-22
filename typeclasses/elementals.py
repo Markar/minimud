@@ -84,46 +84,6 @@ class Elemental(PlayerCharacter):
         self.msg(f"You cannot wield weapons.")
         return False
 
-    def attack(self, target, weapon, **kwargs):
-        # can't attack if we're not in combat!
-        if self.db.subguild == "earth":
-            weapon = EarthAttack()
-
-        if not self.in_combat:
-            return
-        # can't attack if we're fleeing!
-        if self.db.fleeing:
-            return
-        # make sure that we can use our chosen weapon
-        if not (hasattr(weapon, "at_pre_attack") and hasattr(weapon, "at_attack")):
-            self.msg(f"You cannot attack with {weapon.get_numbered_name(1, self)}.")
-            return
-        if not weapon.at_pre_attack(self):
-            # the method handles its own error messaging
-            return
-
-        # if target is not set, use stored target
-        if not target:
-            # make sure there's a stored target
-            if not (target := self.db.combat_target):
-                self.msg("You cannot attack nothing.")
-                return
-
-        if target.location != self.location:
-            self.msg("You don't see your target.")
-            return
-
-        weapon.at_attack(self, target)
-
-        status = self.get_display_status(target)
-        self.msg(prompt=status)
-
-        # check if we have auto-attack in settings
-        if self.account and (settings := self.account.db.settings):
-            if settings.get("auto attack") and (speed := weapon.speed):
-                # queue up next attack; use None for target to reference stored target on execution
-                delay(speed + 1, self.attack, None, weapon, persistent=True)
-
     def get_player_attack_hit_message(
         self, attacker, dam, tn, emote="earth_elemental_melee"
     ):
@@ -165,37 +125,6 @@ class Elemental(PlayerCharacter):
         self.location.msg_contents(to_me, from_obj=self)
 
         return to_me
-
-    def at_damage(self, attacker, damage, damage_type=None):
-        """
-        Apply damage, after taking into account damage resistances.
-        """
-        glvl = self.db.guild_level
-        status = self.get_display_status(self)
-        damage -= self.defense(damage_type)
-
-        # apply reactive armor after defense if it's enabled
-        if damage_type in ("blunt", "edged") and self.db.reactive_armor:
-            reactive_armor_absorbed = randint(glvl / 3, glvl)
-            damage -= reactive_armor_absorbed
-            self.msg(f"|cYour reactive armor blocks some damage!")
-
-        self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
-        attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
-
-        self.db.hp -= max(damage, 0)
-        attacker.get_npc_attack_emote(self, damage, self.get_display_name(self))
-        self.msg(prompt=status)
-
-        if self.db.hp <= 0:
-            self.tags.add("unconscious", category="status")
-            self.tags.add("lying down", category="status")
-            self.msg(
-                "You fall unconscious. You can |wrespawn|n or wait to be |wrevive|nd."
-            )
-            if self.in_combat:
-                combat = self.location.scripts.get("combat")[0]
-                combat.remove_combatant(self)
 
     def enter_combat(self, target, **kwargs):
         """

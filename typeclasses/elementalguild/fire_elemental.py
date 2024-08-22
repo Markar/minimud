@@ -1,4 +1,4 @@
-from random import randint, uniform, choice
+from random import uniform
 from evennia.utils import delay
 from evennia import TICKER_HANDLER as tickerhandler
 from commands.elemental_cmds import ElementalCmdSet
@@ -27,7 +27,7 @@ class FireElemental(Elemental):
 
         self.db.natural_weapon = {
             "name": "fire_attack",
-            "damage_type": "blunt",
+            "damage_type": "fire",
             "damage": 12,
             "speed": 3,
             "energy_cost": 10,
@@ -66,10 +66,24 @@ class FireElemental(Elemental):
         base_regen = self.db.hpregen
         base_ep_regen = self.db.epregen
         base_fp_regen = self.db.fpregen
+        regen = self.db.skills["ember infusion"]
+
+        if regen < 2:
+            bonus_fp = 0
+        if regen < 5:
+            bonus_fp = int(uniform(0, regen / 2))  # 0-2
+        if regen < 10:
+            bonus_fp = int(uniform(1, regen / 2))  # 1-3
+        if regen < 15:
+            bonus_fp = int(uniform(3, regen / 3))  # 3-5
+        if regen < 20:
+            bonus_fp = int(uniform(4, regen / 3))  # 4-6
+
+        total_fp_regen = base_fp_regen + bonus_fp
 
         adjust_hp(base_regen)
         adjust_fp(base_ep_regen)
-        adjust_ep(base_fp_regen)
+        adjust_ep(total_fp_regen)
 
     def get_display_name(self, looker, **kwargs):
         """

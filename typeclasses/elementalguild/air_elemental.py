@@ -66,10 +66,24 @@ class AirElemental(Elemental):
         base_regen = self.db.hpregen
         base_ep_regen = self.db.epregen
         base_fp_regen = self.db.fpregen
+        regen = self.db.skills["zephyr infusion"]
+
+        if regen < 2:
+            bonus_fp = 0
+        if regen < 5:
+            bonus_fp = int(uniform(0, regen / 2))  # 0-2
+        if regen < 10:
+            bonus_fp = int(uniform(1, regen / 2))  # 1-3
+        if regen < 15:
+            bonus_fp = int(uniform(3, regen / 3))  # 3-5
+        if regen < 20:
+            bonus_fp = int(uniform(4, regen / 3))  # 4-6
+
+        total_fp_regen = base_fp_regen + bonus_fp
 
         adjust_hp(base_regen)
         adjust_fp(base_ep_regen)
-        adjust_ep(base_fp_regen)
+        adjust_ep(total_fp_regen)
 
     def get_display_name(self, looker, **kwargs):
         """
@@ -128,48 +142,6 @@ class AirElemental(Elemental):
             if settings.get("auto attack") and (speed := weapon.speed):
                 # queue up next attack; use None for target to reference stored target on execution
                 delay(speed + 1, self.attack, None, weapon, persistent=True)
-
-    def get_player_attack_hit_message(
-        self, attacker, dam, tn, emote="air_elemental_melee"
-    ):
-        """
-        Get the hit message based on the damage dealt. This is the elemental's
-        version of the method, defaulting to the earth elemental version but
-        should be overridden by subguilds.
-
-        ex:
-            f"{color}$You() hurl a handful of dirt, but it scatters harmlessly.",
-        """
-
-        msgs = AttackEmotes.get_emote(attacker, emote, tn, which="left")
-
-        if dam <= 0:
-            to_me = msgs[0]
-        elif 1 <= dam <= 5:
-            to_me = msgs[1]
-        elif 6 <= dam <= 12:
-            to_me = msgs[2]
-        elif 13 <= dam <= 20:
-            to_me = msgs[3]
-        elif 21 <= dam <= 30:
-            to_me = msgs[4]
-        elif 31 <= dam <= 50:
-            to_me = msgs[5]
-        elif 51 <= dam <= 80:
-            to_me = msgs[6]
-        elif 81 <= dam <= 140:
-            to_me = msgs[7]
-        elif 141 <= dam <= 225:
-            to_me = msgs[8]
-        elif 225 <= dam <= 325:
-            to_me = msgs[9]
-        else:
-            to_me = msgs[10]
-
-        to_me = f"{to_me} ({dam})"
-        self.location.msg_contents(to_me, from_obj=self)
-
-        return to_me
 
     def at_damage(self, attacker, damage, damage_type=None):
         """

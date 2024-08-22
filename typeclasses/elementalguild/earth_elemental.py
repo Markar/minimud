@@ -45,7 +45,7 @@ class EarthElemental(Elemental):
             "mineral fortification": 1,
             # "geological insight": 1,
             # "seismic awareness": 1,
-            # "rock solid defense": 1,
+            "rock solid defense": 1,
             # "elemental harmony": 1,
             "earthen regeneration": 1,
             "assimilation": 1,
@@ -149,7 +149,8 @@ class EarthElemental(Elemental):
         con = self.db.constitution
         hp = self.db.hp
         hpmax = self.db.hpmax
-        skill_level = self.db.skills.get("mineral fortification", 0)
+        mineral_fort = self.db.skills.get("mineral fortification", 0)
+        rock_solid_defense = self.db.skills.get("rock solid defense", 0)
         status = self.get_display_status(self)
         hp_percentage = hp / hpmax
         reaction = int(self.db.reaction_percentage or 1) / 100
@@ -161,7 +162,7 @@ class EarthElemental(Elemental):
         flat_reduction = con * 0.1 + glvl * 0.05
 
         # Percentage damage reduction 2% per skill level
-        percentage_reduction = skill_level * 0.02
+        percentage_reduction = rock_solid_defense * 0.02
 
         # Apply flat reduction
         damage -= flat_reduction
@@ -172,11 +173,11 @@ class EarthElemental(Elemental):
         # Apply defense reduction
         damage -= self.defense(damage_type)
 
-        # apply reactive armor after defense if it's enabled
+        # apply mineral_fortification after defense if it's enabled
         if damage_type in ("blunt", "edged") and self.db.reactive_armor:
-            reactive_armor_absorbed = uniform(glvl / 3, glvl)
-            damage -= reactive_armor_absorbed
-            self.msg(f"|cYour reactive armor blocks some damage!")
+            mineral_fort_absorbed = uniform(mineral_fort / 3, mineral_fort)
+            damage -= mineral_fort_absorbed
+            self.msg(f"|cYour mineral fortification blocks some damage!")
 
         # Make sure damage is an integer, similar to floor rounding
         damage = int(damage)
