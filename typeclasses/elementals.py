@@ -5,7 +5,7 @@ from commands.elemental_cmds import ElementalCmdSet
 from typeclasses.characters import PlayerCharacter
 from typeclasses.elementalguild.earth_elemental_attack import EarthAttack
 from typeclasses.elementalguild.attack_emotes import AttackEmotes
-from typeclasses.utils import get_article, adjust_ep, adjust_fp, adjust_hp
+from typeclasses.utils import get_article, get_display_name
 
 
 class Elemental(PlayerCharacter):
@@ -44,9 +44,16 @@ class Elemental(PlayerCharacter):
         self.db.fpregen = 1
         self.db.epregen = 1
         self.db.strategy = "melee"
+        self.db.burnout = {"active": False, "count": 0, "max": 0}
         self.at_wield(EarthAttack)
         tickerhandler.add(
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
+        )
+        tickerhandler.add(
+            interval=60 * 5,
+            callback=self.at_burnout_tick,
+            idstring=f"{self}-superpower",
+            persistent=True,
         )
 
     def kickstart(self):
@@ -54,25 +61,62 @@ class Elemental(PlayerCharacter):
         tickerhandler.add(
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
         )
+        tickerhandler.add(
+            interval=60 * 5,
+            callback=self.at_burnout_tick,
+            idstring=f"{self}-superpower",
+            persistent=True,
+        )
 
     def at_tick(self):
         base_regen = self.db.hpregen
         base_ep_regen = self.db.epregen
         base_fp_regen = self.db.fpregen
 
-        adjust_hp(base_regen)
-        adjust_fp(base_ep_regen)
-        adjust_ep(base_fp_regen)
+        self.adjust_hp(base_regen)
+        self.adjust_fp(base_ep_regen)
+        self.adjust_ep(base_fp_regen)
 
-    def get_display_name(self, looker, **kwargs):
+    def at_burnout_tick(self):
         """
-        Adds color to the display name.
+        Regenerate burnout points.
         """
-        name = super().get_display_name(looker, **kwargs)
-        if looker == self:
-            # special color for our own name
-            return f"|c{name}|n"
-        return f"|g{name}|n"
+        if self.db.guild_level < 10:
+            return
+        self.msg(f"|gYour body ripples and shakes as energy flows into you")
+        self.db.burnout["count"] = self.db.burnout["max"]
+        self.db.engulfs = self.db.max_engulfs
+
+    def use_burnout(self):
+        """
+        Elemental superpower that increases the damage of their attacks.
+        """
+
+        if self.db.guild_level < 10:
+            self.msg("You are not powerful enough to use Burnout.")
+            return
+        if self.db.burnout["active"]:
+            self.msg("Your power is already surging.")
+            return
+        if self.db.burnout["count"] < 1:
+            self.msg("You are too exhausted.")
+            return
+
+        self.msg(
+            f"|cA radiant aura of elemental energy envelops you, your power surging to new heights!|n"
+        )
+
+        self.db.burnout["active"] = True
+        self.db.burnout["count"] -= 1
+        delay(6, self.deactivate_burnout, self)
+
+    def deactivate_burnout(self):
+        """
+        Deactivates the burnout superpower.
+        """
+        caller = self.db.caller
+        self.db.burnout["active"] = False
+        caller.msg(f"|cThe elemental energies dissipate, leaving you exhausted.|n")
 
     # property to mimic weapons
     @property

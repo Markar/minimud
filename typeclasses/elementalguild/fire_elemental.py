@@ -1,11 +1,11 @@
+import math
 from random import uniform
-from evennia.utils import delay
+from evennia.utils import delay, iter_to_str
 from evennia import TICKER_HANDLER as tickerhandler
 from commands.elemental_cmds import ElementalCmdSet
 from typeclasses.elementalguild.fire_elemental_attack import FireAttack
 from typeclasses.elementalguild.attack_emotes import AttackEmotes
 from typeclasses.elementals import Elemental
-from typeclasses.utils import adjust_ep, adjust_fp, adjust_hp
 
 
 class FireElemental(Elemental):
@@ -62,6 +62,58 @@ class FireElemental(Elemental):
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
         )
 
+    def get_display_status(self, looker, **kwargs):
+        """
+        Returns a quick view of the current status of this character
+        """
+
+        chunks = []
+
+        # add resource levels
+        hp = math.floor(self.db.hp)
+        hpmax = self.db.hpmax
+        fp = math.floor(self.db.fp)
+        fpmax = self.db.fpmax
+        ep = math.floor(self.db.ep)
+        epmax = self.db.epmax
+        burnout_count = self.db.burnout["count"]
+        burnout_max = self.db.burnout["max"]
+
+        boVis = ""
+        # regrowthVis = ""
+        if self.db.burnout["active"]:
+            boVis = "B"
+        if self.db.regrowth:
+            regrowthVis = "CG"
+
+        chunks.append(
+            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g |gBurnouts: |G{burnout_count}/{burnout_max} |Y{boVis} |Y{regrowthVis}"
+        )
+        print(f"looker != self {looker} and self {self}")
+        if looker != self:
+            chunks.append(
+                f"|gE: |G{looker.get_display_name(self, **kwargs)} ({looker.db.hp})"
+            )
+
+        # get all the current status flags for this character
+        if status_tags := self.tags.get(category="status", return_list=True):
+            # add these statuses to the string, if there are any
+            chunks.append(iter_to_str(status_tags))
+
+        if looker == self:
+            # if we're checking our own status, include cooldowns
+            all_cooldowns = [
+                (key, self.cooldowns.time_left(key, use_int=True))
+                for key in self.cooldowns.all
+            ]
+            all_cooldowns = [f"{c[0]} ({c[1]}s)" for c in all_cooldowns if c[1]]
+            if all_cooldowns:
+                chunks.append(f"Cooldowns: {iter_to_str(all_cooldowns, endsep=',')}")
+
+        chunks.append(f"\n")
+        # glue together the chunks and return
+        return " - ".join(chunks)
+
     def at_tick(self):
         base_regen = self.db.hpregen
         base_ep_regen = self.db.epregen
@@ -81,9 +133,9 @@ class FireElemental(Elemental):
 
         total_fp_regen = base_fp_regen + bonus_fp
 
-        adjust_hp(base_regen)
-        adjust_fp(base_ep_regen)
-        adjust_ep(total_fp_regen)
+        self.adjust_hp(base_regen)
+        self.adjust_fp(base_ep_regen)
+        self.adjust_ep(total_fp_regen)
 
     def get_display_name(self, looker, **kwargs):
         """

@@ -1,10 +1,7 @@
 import math
-from random import randint
-from evennia import CmdSet, search_tag
-from evennia.utils import iter_to_str
+from random import uniform, randint
+from evennia import CmdSet
 from evennia.utils.evtable import EvTable
-from evennia import TICKER_HANDLER as tickerhandler
-from evennia import logger
 from commands.command import Command
 from typeclasses.elementalguild.constants_and_helpers import SKILLS_COST
 
@@ -33,35 +30,39 @@ class CmdRejuvenate(Command):
         if not caller.cooldowns.ready("rejuvenate"):
             caller.msg(f"|BNot so fast!")
             return False
-        caller.cooldowns.add("rejuvenate", 3)
+        caller.cooldowns.add("rejuvenate", 4)
 
         wis = caller.db.wisdom
-        con = caller.db.constitution
-        intel = caller.db.intelligence
+        strength = caller.db.strength
         hp = caller.db.hp
         hpmax = caller.db.hpmax
         fp = caller.db.fp
         hp_amount = 0
 
-        damage = 10 + glvl * 2 + wis
-        to_heal = math.floor(10 + glvl * 2 + intel / 2 + wis / 2 + con / 2)
+        to_heal = math.floor(10 + glvl + strength / 2 + wis / 2)
         to_heal = randint(int(to_heal / 2), to_heal)
-        cost = damage * 0.25
+        to_heal = max(to_heal, 0)
+        cost = to_heal * 0.5
 
-        if cost > fp:
-            self.msg(f"|rYou can't seem to focus on rebuilding your form.")
+        if caller.db.fp < cost:
+            self.msg(f"|rYou can't seem to focus on restoring your form.")
             return
 
-        if hp + damage > hpmax:
+        if hp + to_heal > hpmax:
             hp_amount = hpmax - hp
-            caller.db.hp = hpmax
-            caller.db.fp -= cost
+            caller.adjust_hp(hpmax)
+            caller.adjust_fp(-cost)
+            # caller.db.hp = hpmax
+            # caller.db.fp -= cost
         else:
             hp_amount = hpmax - hp
-            caller.db.hp += max(damage, 0)
-            caller.db.fp -= cost
+            caller.adjust_hp(to_heal)
+            caller.adjust_fp(-cost)
+            # caller.db.hp += to_heal
+            # adjust_hp(caller, hpmax)
+            # caller.db.fp -= cost
 
-        msg = f"As you() concentrate, your() body glows with a soft, blue light, and water swirls around you, knitting wounds and restoring vitality. {hp_amount or 0} health restored for {cost or 0} focus."
+        msg = f"|MAs $pron(you) concentrate, $pron(your) body glows with a soft, blue light, and water swirls around you, knitting wounds and restoring vitality. {hp_amount or 0} health restored for {cost or 0} focus."
 
         caller.location.msg_contents(msg, from_obj=caller)
 
@@ -153,7 +154,7 @@ class CmdGTrain(Command):
         gtrain <skill>
 
     Example:
-        gtrain mineral fortification
+        gtrain water mastery
     """
 
     key = "gtrain"
@@ -294,4 +295,4 @@ class WaterElementalCmdSet(CmdSet):
         self.add(CmdPowers)
         self.add(CmdReaction)
         self.add(CmdGTrain)
-        self.add(CmdGTrain)
+        self.add(CmdGhelp)

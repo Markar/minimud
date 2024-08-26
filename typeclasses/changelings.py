@@ -113,8 +113,9 @@ FORM_CLASSES = {
     "Hawk": Hawk,
     "Condor": Condor,
     "Ostrich": Ostrich,
-    "Eagle": Eagle
+    "Eagle": Eagle,
 }
+
 
 class Changelings(PlayerCharacter):
     """
@@ -130,18 +131,18 @@ class Changelings(PlayerCharacter):
         self.db.int_increase_amount = int_increase_amount
         self.db.hpmax = 50 + (con_increase_amount * self.db.constitution)
         self.db.fpmax = 50 + (int_increase_amount * self.db.intelligence)
-        
+
         self.db.guild_level = 1
         self.db.gxp = 0
         self.db.skill_gxp = 0
         self.db.title = "the novice changeling"
-                
+
         self.db.natural_weapon = {
             "name": "punch",
             "damage_type": "blunt",
             "damage": 3,
             "speed": 2,
-            "energy_cost": 1
+            "energy_cost": 1,
         }
         self.db.guild = "changeling"
         self.db.subguild = "none"
@@ -152,7 +153,7 @@ class Changelings(PlayerCharacter):
         self.db.regrowth_rate = 0
         self.db.regrowth_cost = 0
         self.db.form = "Human"
-        
+
         self.db.engulfs = 0
         self.db.max_engulfs = 0
         self.db.skills = {
@@ -162,80 +163,68 @@ class Changelings(PlayerCharacter):
             "regeneration": 1,
         }
         self.at_wield(ChangelingAttack)
-        tickerhandler.add(interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True)
-        tickerhandler.add(interval=60*5, callback=self.at_engulf_tick, idstring=f"{self}-superpower", persistent=True)
-    
+        tickerhandler.add(
+            interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
+        )
+        tickerhandler.add(
+            interval=60 * 5,
+            callback=self.at_engulf_tick,
+            idstring=f"{self}-superpower",
+            persistent=True,
+        )
+
     def kickstart(self):
         self.msg("Kickstarting heartbeat")
-        tickerhandler.add(interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True)
-        tickerhandler.add(interval=60*5, callback=self.at_engulf_tick, idstring=f"{self}-superpower", persistent=True)
-        
-    def addhp(self, amount):
-        hp = self.db.hp
-        hpmax = self.db.hpmax
-        
-        if hp + amount > hpmax:
-            amt = hpmax - hp
-            self.db.hp += max(amt, 0)
-            return
-        else: 
-            self.db.hp += max(amount, 0)
-    
-    def addfp(self, amount):
-        fp = self.db.fp
-        fpmax = self.db.fpmax
-        
-        if fp + amount > fpmax:
-            amt = fpmax - fp
-            self.db.fp += max(amt, 0)
-            return
-        else:
-            self.db.fp += max(amount, 0)
-    
-    def addep(self, amount):
-        ep = self.db.ep
-        epmax = self.db.epmax
-        
-        if ep + amount > epmax:
-            amt = epmax - ep
-            self.db.ep += max(amt, 0)
-            return
-        if ep < epmax + amount:
-            self.db.ep += max(amount, 0)
-    
+        tickerhandler.add(
+            interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
+        )
+        tickerhandler.add(
+            interval=60 * 5,
+            callback=self.at_engulf_tick,
+            idstring=f"{self}-superpower",
+            persistent=True,
+        )
+
     def at_engulf_tick(self):
         self.msg(f"|gYour body ripples and shakes as energy flows into you")
         self.db.engulfs = self.db.max_engulfs
-    
+
     def at_tick(self):
         glvl = self.db.guild_level
         ep = self.db.ep
         regen_skill = self.db.skills["regeneration"]
-        
+
         hp = self.db.hp
         hpmax = self.db.hpmax
         base_regen = self.db.hpregen
         base_ep_regen = self.db.epregen
         base_fp_regen = self.db.fpregen
         hp_regen_amt = base_regen
-        
+
         if self.db.regrowth and hp < hpmax:
-            regrowth_rate = int(5 + regen_skill/2 + uniform(0, regen_skill/2) + glvl/8 + uniform(0, glvl/8))
-            regrowth_cost = int(regrowth_rate/3)
-        
+            regrowth_rate = int(
+                5
+                + regen_skill / 2
+                + uniform(0, regen_skill / 2)
+                + glvl / 8
+                + uniform(0, glvl / 8)
+            )
+            regrowth_cost = int(regrowth_rate / 3)
+
             if ep >= regrowth_cost and hp < hpmax:
                 hp_regen_amt += regrowth_rate
-                self.msg(f"|MYou feel the energy flowing through you, knitting your wounds together.")
+                self.msg(
+                    f"|MYou feel the energy flowing through you, knitting your wounds together."
+                )
                 self.db.ep -= regrowth_cost
             else:
                 self.msg(f"|rYou do not have enough energy to regrow.")
                 self.db.regrowth = False
-        
-        self.addhp(hp_regen_amt)
-        self.addfp(base_fp_regen)
-        self.addep(base_ep_regen)
-            
-        
+
+        self.adjust_hp(hp_regen_amt)
+        self.adjust_fp(base_fp_regen)
+        self.adjust_ep(base_ep_regen)
+
     def get_display_name(self, looker, **kwargs):
         """
         Adds color to the display name.
@@ -244,7 +233,7 @@ class Changelings(PlayerCharacter):
         if looker == self:
             # special color for our own name
             return f"|c{name}|n"
-        return f"|g{name}|n"    
+        return f"|g{name}|n"
 
     # property to mimic weapons
     @property
@@ -255,18 +244,19 @@ class Changelings(PlayerCharacter):
     def at_wield(self, weapon, **kwargs):
         self.msg(f"You cannot wield weapons.")
         return False
-    
+
     """
     This kicks off the auto attack of the form, which is weapon.at_attack
     The weapon is the form class, which is a subclass of ChangelingAttack
     and has the at_attack method. 
     """
+
     def attack(self, target, weapon, **kwargs):
         # can't attack if we're not in combat!
         # Loop through the form classes and assign the appropriate weapon
         if self.db.form in FORM_CLASSES:
             weapon = FORM_CLASSES[self.db.form]()
-        
+
         if not self.in_combat:
             return
         # can't attack if we're fleeing!
@@ -301,15 +291,15 @@ class Changelings(PlayerCharacter):
             if settings.get("auto attack") and (speed := weapon.speed):
                 # queue up next attack; use None for target to reference stored target on execution
                 delay(speed + 1, self.attack, None, weapon, persistent=True)
-    
+
     def get_player_attack_hit_message(self, attacker, dam, tn, emote="bite"):
         # attack = FORM_CLASSES[self.db.form].name
         """
         Get the hit message based on the damage dealt. This is the changeling's
-        version of the method, defaulting to bite but should be overridden by 
-        subguilds.        
-        
-        ex: 
+        version of the method, defaulting to bite but should be overridden by
+        subguilds.
+
+        ex:
             f"{color}$pron(Your) bite causes {tn}{color} to bleed slightly.",
         """
 
@@ -336,12 +326,12 @@ class Changelings(PlayerCharacter):
             to_me = msgs[9]
         else:
             to_me = msgs[10]
-            
+
         to_me = f"{to_me} ({dam})"
         self.location.msg_contents(to_me, from_obj=self)
-                    
+
         return to_me
-    
+
     def at_damage(self, attacker, damage, damage_type=None):
         """
         Apply damage to self, after taking into account damage resistances.
@@ -353,12 +343,12 @@ class Changelings(PlayerCharacter):
         form_toughness = form.toughness
         ec = self.db.skills["energy_control"]
         base_ec_amt = ec * (glvl / 5)
-        ec_amt = math.floor(uniform(base_ec_amt/2, base_ec_amt))
-        
+        ec_amt = math.floor(uniform(base_ec_amt / 2, base_ec_amt))
+
         dodge = self.db.dexterity / 5 + form_dodge * glvl / 12
         if dodge > 90:
             dodge = 90
-                    
+
         ran = randint(1, 100)
         if ran <= dodge:
             self.msg(f"|cYou dodge the attack!")
@@ -366,38 +356,37 @@ class Changelings(PlayerCharacter):
             return
         # self.msg(f"{self} takes damage: {damage}")
         # aply toughness
-        toughness = form_toughness + glvl/5 + self.db.constitution/10
+        toughness = form_toughness + glvl / 5 + self.db.constitution / 10
         # self.msg(f"|cToughness: {toughness}")
-        tougness_reduction = math.ceil(uniform(toughness/2, toughness))
-        if glvl < 5: 
+        tougness_reduction = math.ceil(uniform(toughness / 2, toughness))
+        if glvl < 5:
             tougness_reduction = tougness_reduction / 3
         if glvl < 10:
             tougness_reduction = tougness_reduction / 2
         damage -= math.ceil(tougness_reduction)
         # self.msg(f"|cToughness reduction: {tougness_reduction}")
-        
+
         # apply armor damage reduction
         damage -= self.defense(damage_type)
         # self.msg(f"|cArmor reduction: {self.defense(damage_type)}")
-        
+
         # apply energy control reduction
         if self.db.energy_control is True and damage_type in ["edged", "blunt"]:
             damage -= ec_amt
             self.db.ep -= 1
             self.msg(f"|cYou block some damage!")
-            
-            
-        # self.msg(f"|cEnergy control reduction: {ec_amt}")   
+
+        # self.msg(f"|cEnergy control reduction: {ec_amt}")
         self.db.hp -= max(damage, 0)
         # self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
         # The NPC's attack, emoting to the room
         # a scrawny gnoll tears into changeling at_damage Markar with brutal force! -18
         attacker.get_hit_message(self, damage, self.get_display_name(self))
-        
+
         # status = self.get_display_status(self)
         # self.msg(prompt=status)
-            
+
         if self.db.hp <= 0:
             self.tags.add("unconscious", category="status")
             self.tags.add("lying down", category="status")
@@ -407,26 +396,30 @@ class Changelings(PlayerCharacter):
             if self.in_combat:
                 combat = self.location.scripts.get("combat")[0]
                 combat.remove_combatant(self)
-                               
+
     def use_energy_control(self):
         """
         Improve your physical resistance
         """
-        
+
         if self.db.energy_control:
-            self.msg(f"|MYou feel the energy receding, flowing back into your core. The crackling sounds of the barrier fade away, and the protective shield dissolves into the air.")
+            self.msg(
+                f"|MYou feel the energy receding, flowing back into your core. The crackling sounds of the barrier fade away, and the protective shield dissolves into the air."
+            )
             self.db.energy_control = False
             return
-        
+
         self.db.energy_control = True
         self.db.ep -= 25
-        self.msg(f"|MAs you focus your mind, a surge of energy begins to flow through your body. You raise your hands, and a shimmering barrier of pure energy forms around you, crackling with power.")
-        
+        self.msg(
+            f"|MAs you focus your mind, a surge of energy begins to flow through your body. You raise your hands, and a shimmering barrier of pure energy forms around you, crackling with power."
+        )
+
     def get_form_help(self, form):
         form_class = FORM_CLASSES[form.title()]
         return form_class.__doc__
-    
-    def use_engulf(self, target,  **kwargs):
+
+    def use_engulf(self, target, **kwargs):
         """
         Engulf your target
         """
@@ -443,23 +436,23 @@ class Changelings(PlayerCharacter):
         if not self.cooldowns.ready("engulf"):
             self.msg(f"|BNot so fast!")
             return False
-        
+
         self.db.combat_target = target
         # execute the actual attack
-        
+
         hp = self.db.hp
         hpmax = self.db.hpmax
         fp = self.db.fp
         fpmax = self.db.fpmax
-        
+
         if self.db.engulfs < 1:
             self.msg(f"|rYou do not have the strength to engulf at this time.\n")
             return
-        if  hp > hpmax or fp > fpmax:
+        if hp > hpmax or fp > fpmax:
             self.msg(f"|rYou may not engulf a creature at this time.\n")
             return
-            
-        power = math.ceil(self.db.hpmax * (9 + self.db.guild_level/7) / 10)
+
+        power = math.ceil(self.db.hpmax * (9 + self.db.guild_level / 7) / 10)
         self.msg(f"engulf power: {power}")
         self.db.hp += power
         self.db.fp += power
@@ -467,7 +460,7 @@ class Changelings(PlayerCharacter):
         self.db.engulfs -= 1
         self.cooldowns.add("engulf", 5)
         self.msg(f"|rYou flow around {target} completely enclosing them in plasma!")
-        
+
     def get_display_status(self, looker, **kwargs):
         """
         Returns a quick view of the current status of this character
@@ -486,14 +479,14 @@ class Changelings(PlayerCharacter):
         fpmax = self.db.fpmax
         ep = math.floor(self.db.ep)
         epmax = self.db.epmax
-        
+
         ecVis = ""
         regrowthVis = ""
         if self.db.energy_control:
             ecVis = "EC"
         if self.db.regrowth:
             regrowthVis = "CG"
-            
+
         chunks.append(
             f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g Form: |G{self.db.form} |gEngulfs: |G{self.db.engulfs}/{self.db.max_engulfs} |Y{ecVis} |Y{regrowthVis}"
         )
@@ -518,9 +511,10 @@ class Changelings(PlayerCharacter):
             if all_cooldowns:
                 chunks.append(f"Cooldowns: {iter_to_str(all_cooldowns, endsep=',')}")
 
+        chunks.append(f"\n")
         # glue together the chunks and return
         return " - ".join(chunks)
-    
+
     def enter_combat(self, target, **kwargs):
         """
         initiate combat against another character
@@ -536,6 +530,7 @@ class Changelings(PlayerCharacter):
         if not (combat_script := location.scripts.get("combat")):
             # there's no combat instance; start one
             from typeclasses.scripts import CombatScript
+
             location.scripts.add(CombatScript, key="combat")
             combat_script = location.scripts.get("combat")
         combat_script = combat_script[0]

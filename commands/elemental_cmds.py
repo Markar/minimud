@@ -74,6 +74,8 @@ class CmdGuildStatSheet(Command):
         form = caller.db.subguild or "adventurer"
         gxp_needed = GUILD_LEVEL_COST_DICT[my_glvl + 1]
         reaction = caller.db.reaction_percentage or 50
+        burnout_count = caller.db.burnout["count"]
+        burnout_max = caller.db.burnout["max"]
 
         table = EvTable(f"|c{caller}", f"|c{title}", border="table")
         table.add_row(f"|GGuild Level", my_glvl)
@@ -81,6 +83,7 @@ class CmdGuildStatSheet(Command):
         table.add_row(f"|GSkill GXP", skill_gxp)
         table.add_row(f"|GForm", form.title())
         table.add_row(f"|GReaction", f"{reaction}%")
+        table.add_row(f"|GBurnouts", f"{burnout_count} / {burnout_max}")
 
         caller.msg(str(table))
 
@@ -249,6 +252,31 @@ class CmdGHelp(Command):
     help_category = "elemental"
 
 
+class CmdKickstart(Command):
+    key = "kickstart"
+
+    def func(self):
+        caller = self.caller
+        caller.kickstart()
+
+
+class CmdBurnout(Command):
+    """
+    Burnout is a powerful ability granted to members of the Elemental Guild. When activated, this superpower channels the raw essence of the elements, significantly amplifying the user's offensive and defensive capabilities. The elemental energies surge through the user's body, enhancing their attacks and fortifying their defenses. However, this immense power comes at a cost, as it rapidly depletes the user's energy reserves, requiring careful management to avoid exhaustion.
+
+    Usage:
+        burnout
+
+    """
+
+    key = "burnout"
+    help_category = "elemental"
+
+    def func(self):
+        caller = self.caller
+        caller.use_burnout()
+
+
 class CmdTest(Command):
     key = "test"
 
@@ -276,3 +304,5 @@ class ElementalCmdSet(CmdSet):
         self.add(CmdChooseForm)
         self.add(CmdSkills)
         self.add(CmdTest)
+        self.add(CmdKickstart)
+        self.add(CmdBurnout)

@@ -12,7 +12,7 @@ class AirAttack(ElementalAttack):
     can cause massive damage to their foes.
     """
 
-    speed = 2
+    speed = 3
     energy_cost = 3
 
     def _calculate_melee_damage(self, wielder):
