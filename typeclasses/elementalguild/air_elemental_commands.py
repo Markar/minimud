@@ -5,6 +5,15 @@ from evennia.utils.evtable import EvTable
 from commands.command import Command
 from typeclasses.elementalguild.constants_and_helpers import SKILLS_COST
 
+# skill_table.add_row(f"|GAir Shield", f"|M{air_shield_cost}", f"|Y{SKILL_RANKS[air_shield]}")
+# skill_table.add_row(f"|GWind Slash", f"|M{wind_slash_cost}", f"|Y{SKILL_RANKS[wind_slash]}")
+# skill_table.add_row(f"|GWhirlwind", f"|M{whirlwind_cost}", f"|Y{SKILL_RANKS[whirlwind]}")
+# skill_table.add_row(f"|GLightning Strike", f"|M{lightning_strike_cost}", f"|Y{SKILL_RANKS[lightning_strike]}")
+# skill_table.add_row(f"|GStorm Form", f"|M{storm_form_cost}", f"|Y{SKILL_RANKS[storm_form]}")
+# skill_table.add_row(f"|GAir Form", f"|M{air_form_cost}", f"|Y{SKILL_RANKS[air_form]}")
+# skill_table.add_row(f"|GTornado", f"|M{tornado_cost}", f"|Y{SKILL_RANKS[tornado]}")
+# skill_table.add_row(f"|GZephyr", f"|M{zephyr_cost}", f"|Y{SKILL_RANKS[zephyr]}")
+
 
 class CmdAerialRestoration(Command):
     """
@@ -30,7 +39,7 @@ class CmdAerialRestoration(Command):
             return
 
         if not caller.cooldowns.ready("aerial restoration"):
-            caller.msg(f"|BNot so fast!")
+            caller.msg(f"|CNot so fast!")
             return False
         caller.cooldowns.add("aerial restoration", 4)
 
@@ -41,7 +50,7 @@ class CmdAerialRestoration(Command):
 
         to_heal = math.floor(10 + glvl * 1.5 + wis / 2)
         to_heal = randint(to_heal / 2, to_heal)
-        cost = to_heal * 0.5
+        cost = to_heal * 1.5
 
         if fp < cost:
             self.msg(f"|rYou can't seem to focus on restoring your form.")
@@ -158,16 +167,7 @@ class CmdGTrain(Command):
     def func(self):
         caller = self.caller
         skill = self.args.strip().lower()
-        list = [
-            "wind mastery",
-            "aerial agility",
-            "storm resilience",
-            "gale force",
-            "cyclone armor",
-            "zephyr infusion",
-            "tempest control",
-            "elemental harmony",
-        ]
+        list = caller.db.skills.keys()
 
         if skill == "":
             self.msg(f"|gWhat would you like to raise?")
@@ -178,7 +178,7 @@ class CmdGTrain(Command):
             return
 
         skill_gxp = getattr(caller.db, "skill_gxp", 0)
-        cost = caller.db.skills[f"{skill}"] + 1
+        cost = caller.db.skills[f"{skill}"]
         cost = SKILLS_COST[cost]
 
         if skill_gxp < cost:

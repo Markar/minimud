@@ -1,9 +1,10 @@
-from random import uniform
+from random import uniform, randint
 from evennia.utils import delay, iter_to_str
 from evennia import TICKER_HANDLER as tickerhandler
 from commands.elemental_cmds import ElementalCmdSet
 from typeclasses.elementalguild.earth_elemental_attack import EarthAttack
 from typeclasses.elementals import Elemental
+from typeclasses.elementalguild.attack_emotes import AttackEmotes
 import math
 
 
@@ -40,16 +41,20 @@ class EarthElemental(Elemental):
         self.db.epregen = 1
         self.db.strategy = "melee"
         self.db.skills = {
-            # "stone mastery": 1,
-            # "earth resonance": 1,
+            "stone mastery": 1,
+            "earth resonance": 1,
             "mineral fortification": 1,
-            # "geological insight": 1,
-            # "seismic awareness": 1,
+            "geological insight": 1,
+            "seismic awareness": 1,
             "rock solid defense": 1,
-            # "elemental harmony": 1,
+            "elemental harmony": 1,
             "earthen regeneration": 1,
             "assimilation": 1,
         }
+        self.db.stone_skin = False
+        self.db.earth_form = False
+        self.db.earth_shield = False
+        self.db.mountain_stance = False
         self.at_wield(EarthAttack)
         tickerhandler.add(
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
@@ -78,16 +83,20 @@ class EarthElemental(Elemental):
         burnout_count = self.db.burnout["count"]
         burnout_max = self.db.burnout["max"]
 
-        boVis = ""
-        # regrowthVis = ""
-        if self.db.burnout["active"]:
-            boVis = "B"
-        if self.db.regrowth:
-            regrowthVis = "CG"
-
         chunks.append(
-            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g |gBurnouts: |G{burnout_count}/{burnout_max} |Y{boVis} |Y{regrowthVis}"
+            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g |gBurnouts: |G{burnout_count}/{burnout_max}"
         )
+        if self.db.burnout["active"]:
+            chunks.append(f"|YB")
+        if self.db.earth_shield:
+            chunks.append(f"|YES")
+        if self.db.earth_form:
+            chunks.append(f"|YEF")
+        if self.db.mountain_stance:
+            chunks.append(f"|YMS")
+        if self.db.earthen_renewal and self.db.earthen_renewal["duration"] > 0:
+            chunks.append(f"|YER")
+
         print(f"looker != self {looker} and self {self}")
         if looker != self:
             chunks.append(
@@ -129,10 +138,18 @@ class EarthElemental(Elemental):
         if regen < 20:
             bonus_fp = int(uniform(4, regen / 3))  # 4-6
 
+        if self.db.earthen_renewal["duration"] > 0:
+            rate = self.db.earthen_renewal["rate"]
+            bonus_fp += randint(int(rate / 2), rate + 1)
+            if self.db.earthen_renewal["duration"] == 1:
+                activateMsg = f"|C$Your() body stops glowing as you release the regenerative energy."
+                self.location.msg_contents(activateMsg, from_obj=self)
+            self.db.earthen_renewal["duration"] -= 1
+
         total_fp_regen = base_fp_regen + bonus_fp
         self.adjust_hp(base_regen)
-        self.adjust_fp(base_ep_regen)
-        self.adjust_ep(total_fp_regen)
+        self.adjust_fp(total_fp_regen)
+        self.adjust_ep(base_ep_regen)
 
     def get_display_name(self, looker, **kwargs):
         """
@@ -200,9 +217,10 @@ class EarthElemental(Elemental):
         con = self.db.constitution
         hp = self.db.hp
         hpmax = self.db.hpmax
-        mineral_fort = self.db.skills.get("mineral fortification", 0)
-        rock_solid_defense = self.db.skills.get("rock solid defense", 0)
-        status = self.get_display_status(self)
+        mineral_fort = self.db.skills.get("mineral fortification", 1)
+        rock_solid_defense = self.db.skills.get("rock solid defense", 1)
+        stone_mastery = self.db.skills.get("stone mastery", 1)
+        earth_resonance = self.db.skills.get("earth resonance", 1)
         hp_percentage = hp / hpmax
         reaction = int(self.db.reaction_percentage or 1) / 100
 
@@ -212,8 +230,25 @@ class EarthElemental(Elemental):
         # Flat damage reduction - 50 con = 5 reduction, glvl 30 = 1.5 reduction
         flat_reduction = con * 0.1 + glvl * 0.05
 
+        # Additional flat reduction from earth form
+        if self.db.earth_form:
+            flat_reduction += 5
+
+        # Additional flat reduction from mountain stance
+        if self.db.mountain_stance:
+            flat_reduction += 10
+
         # Percentage damage reduction 2% per skill level
         percentage_reduction = rock_solid_defense * 0.02
+
+        # Additional damage reduction from mountain stance
+        if self.db.mountain_stance:
+            percentage_reduction += 0.1
+
+        # Additional damage reduction from earth shield
+        if self.db.earth_shield:
+            earth_shield_reduction = stone_mastery * 0.02 + earth_resonance * 0.03
+            percentage_reduction += earth_shield_reduction
 
         # Apply flat reduction
         damage -= flat_reduction
@@ -225,10 +260,10 @@ class EarthElemental(Elemental):
         damage -= self.defense(damage_type)
 
         # apply mineral_fortification after defense if it's enabled
-        if damage_type in ("blunt", "edged") and self.db.reactive_armor:
-            mineral_fort_absorbed = uniform(mineral_fort / 3, mineral_fort)
-            damage -= mineral_fort_absorbed
-            self.msg(f"|cYour mineral fortification blocks some damage!")
+        if damage_type in ("blunt", "edged") and self.db.stone_skin:
+            stone_skin_absorbed = uniform(mineral_fort / 3, mineral_fort)
+            damage -= stone_skin_absorbed
+            self.msg(f"|cYour stone skin blocks some damage!")
 
         # Make sure damage is an integer, similar to floor rounding
         damage = int(damage)
@@ -243,7 +278,6 @@ class EarthElemental(Elemental):
 
         # Get the attack emote
         attacker.get_npc_attack_emote(self, damage, self.get_display_name(self))
-        self.msg(prompt=status)
 
         # Check if the character is below the reaction percentage
         if hp_percentage < reaction and glvl > 3:

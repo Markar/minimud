@@ -434,7 +434,7 @@ class Changelings(PlayerCharacter):
             self.db.combat_target = target
         target.enter_combat(self)
         if not self.cooldowns.ready("engulf"):
-            self.msg(f"|BNot so fast!")
+            self.msg(f"|CNot so fast!")
             return False
 
         self.db.combat_target = target

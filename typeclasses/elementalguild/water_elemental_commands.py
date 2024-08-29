@@ -5,6 +5,15 @@ from evennia.utils.evtable import EvTable
 from commands.command import Command
 from typeclasses.elementalguild.constants_and_helpers import SKILLS_COST
 
+# skill_table.add_row(f"|GAqua Shield", f"|M{aqua_shield_cost}", f"|Y{SKILL_RANKS[aqua_shield]}")
+# skill_table.add_row(f"|GWater Jet", f"|M{water_jet_cost}", f"|Y{SKILL_RANKS[water_jet]}")
+# skill_table.add_row(f"|GHealing Waters", f"|M{healing_waters_cost}", f"|Y{SKILL_RANKS[healing_waters]}")
+# skill_table.add_row(f"|GTidal Wave", f"|M{tidal_wave_cost}", f"|Y{SKILL_RANKS[tidal_wave]}")
+# skill_table.add_row(f"|GIce Shard", f"|M{ice_shard_cost}", f"|Y{SKILL_RANKS[ice_shard]}")
+# skill_table.add_row(f"|GWater Form", f"|M{water_form_cost}", f"|Y{SKILL_RANKS[water_form]}")
+# skill_table.add_row(f"|GSoothing Mist", f"|M{soothing_mist_cost}", f"|Y{SKILL_RANKS[soothing_mist]}")
+# skill_table.add_row(f"|GMaelstrom", f"|M{maelstrom_cost}", f"|Y{SKILL_RANKS[maelstrom]}")
+
 
 class CmdRejuvenate(Command):
     """
@@ -52,15 +61,10 @@ class CmdRejuvenate(Command):
             hp_amount = hpmax - hp
             caller.adjust_hp(hpmax)
             caller.adjust_fp(-cost)
-            # caller.db.hp = hpmax
-            # caller.db.fp -= cost
         else:
             hp_amount = hpmax - hp
-            caller.adjust_hp(to_heal)
-            caller.adjust_fp(-cost)
-            # caller.db.hp += to_heal
-            # adjust_hp(caller, hpmax)
-            # caller.db.fp -= cost
+            caller.db.hp += max(to_heal, 0)
+            caller.db.fp -= cost
 
         msg = f"|MAs $pron(you) concentrate, $pron(your) body glows with a soft, blue light, and water swirls around you, knitting wounds and restoring vitality. {hp_amount or 0} health restored for {cost or 0} focus."
 

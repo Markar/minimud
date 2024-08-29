@@ -675,7 +675,7 @@ class PlayerCharacter(Character):
             self.db.combat_target = target
         target.enter_combat(self)
         if not self.cooldowns.ready("fireball"):
-            self.msg(f"|BNot so fast!")
+            self.msg(f"|CNot so fast!")
             return False
 
         damage = 80
