@@ -17,8 +17,8 @@ class EarthElemental(Elemental):
         int_increase_amount = 5
         self.db.con_increase_amount = con_increase_amount
         self.db.int_increase_amount = int_increase_amount
-        self.db.hpmax = 50 + (con_increase_amount * self.db.constitution)
-        self.db.fpmax = 50 + (int_increase_amount * self.db.intelligence)
+        self.db.hpmax = 50 + (con_increase_amount * self.traits.con.value)
+        self.db.fpmax = 50 + (int_increase_amount * self.traits.int.value)
 
         self.db.guild_level = 1
         self.db.gxp = 0
@@ -53,15 +53,9 @@ class EarthElemental(Elemental):
         }
         self.db.stone_skin = False
         self.db.earth_form = False
-        self.db.earth_shield = False
+        self.db.earth_shield = {"hits": 0}
         self.db.mountain_stance = False
         self.at_wield(EarthAttack)
-        tickerhandler.add(
-            interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
-        )
-
-    def kickstart(self):
-        self.msg("Kickstarting heartbeat")
         tickerhandler.add(
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
         )
@@ -88,7 +82,7 @@ class EarthElemental(Elemental):
         )
         if self.db.burnout["active"]:
             chunks.append(f"|YB")
-        if self.db.earth_shield:
+        if self.db.earth_shield and self.db.earth_shield["hits"] > 0:
             chunks.append(f"|YES")
         if self.db.earth_form:
             chunks.append(f"|YEF")
@@ -140,13 +134,13 @@ class EarthElemental(Elemental):
 
         if self.db.earthen_renewal["duration"] > 0:
             rate = self.db.earthen_renewal["rate"]
-            bonus_fp += randint(int(rate / 2), rate + 1)
+            bonus_fp += uniform(rate / 2, rate + 1)
             if self.db.earthen_renewal["duration"] == 1:
                 activateMsg = f"|C$Your() body stops glowing as you release the regenerative energy."
                 self.location.msg_contents(activateMsg, from_obj=self)
             self.db.earthen_renewal["duration"] -= 1
 
-        total_fp_regen = base_fp_regen + bonus_fp
+        total_fp_regen = base_fp_regen + int(bonus_fp)
         self.adjust_hp(base_regen)
         self.adjust_fp(total_fp_regen)
         self.adjust_ep(base_ep_regen)
@@ -214,7 +208,7 @@ class EarthElemental(Elemental):
         Apply damage, after taking into account damage resistances.
         """
         glvl = self.db.guild_level
-        con = self.db.constitution
+        con = self.traits.con.value
         hp = self.db.hp
         hpmax = self.db.hpmax
         mineral_fort = self.db.skills.get("mineral fortification", 1)
@@ -232,7 +226,14 @@ class EarthElemental(Elemental):
 
         # Additional flat reduction from earth form
         if self.db.earth_form:
-            flat_reduction += 5
+            earth_form_reduction = int(
+                con * 0.1
+                + glvl * 0.1
+                + mineral_fort
+                + rock_solid_defense
+                + stone_mastery
+            )
+            flat_reduction += earth_form_reduction
 
         # Additional flat reduction from mountain stance
         if self.db.mountain_stance:
@@ -249,9 +250,17 @@ class EarthElemental(Elemental):
         if self.db.earth_shield:
             earth_shield_reduction = stone_mastery * 0.02 + earth_resonance * 0.03
             percentage_reduction += earth_shield_reduction
+            flat_reduction += stone_mastery + earth_resonance
 
-        # Apply flat reduction
-        damage -= flat_reduction
+            if self.db.earth_shield["hits"] == 1:
+                deactivateMsg = f"|C$Your() form loses its shimmer as the protective shield of stone dissipates."
+                self.location.msg_contents(deactivateMsg, from_obj=self)
+
+            self.db.earth_shield["hits"] -= 1
+            self.msg(f"|cYour earth shield blocks a lot of damage!|n")
+
+        # Apply randomized flat reduction
+        damage -= randint(int(flat_reduction / 2), flat_reduction)
 
         # Apply percentage reduction
         damage *= 1 - percentage_reduction

@@ -43,7 +43,7 @@ class CmdAerialRestoration(Command):
             return False
         caller.cooldowns.add("aerial restoration", 4)
 
-        wis = caller.db.wisdom
+        wis = caller.traits.wis.value
         hp = caller.db.hp
         hpmax = caller.db.hpmax
         fp = caller.db.fp

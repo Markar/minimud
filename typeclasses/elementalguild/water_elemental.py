@@ -16,8 +16,8 @@ class WaterElemental(Elemental):
         int_increase_amount = 5
         self.db.con_increase_amount = con_increase_amount
         self.db.int_increase_amount = int_increase_amount
-        self.db.hpmax = 50 + (con_increase_amount * self.db.constitution)
-        self.db.fpmax = 50 + (int_increase_amount * self.db.intelligence)
+        self.db.hpmax = 50 + (con_increase_amount * self.traits.con.value)
+        self.db.fpmax = 50 + (int_increase_amount * self.traits.int.value)
 
         self.db.guild_level = 1
         self.db.gxp = 0
@@ -242,15 +242,15 @@ class WaterElemental(Elemental):
         """
         self.msg(f"at damage in water elemental")
         glvl = self.db.guild_level
-        con = self.db.constitution
+        con = self.traits.con.value
         hp = self.db.hp
         hpmax = self.db.hpmax
         fluid_agility = self.db.skills.get("fluid agility", 0)
         aqua_resilience = self.db.skills.get("aqua resilience", 0)
         status = self.get_display_status(self)
-        self.msg(
-            f"|cYou have {fluid_agility} fluid agility and {aqua_resilience} aqua resilience.|n"
-        )
+        # self.msg(
+        #     f"|cYou have {fluid_agility} fluid agility and {aqua_resilience} aqua resilience.|n"
+        # )
         hp_percentage = hp / hpmax
         reaction = int(self.db.reaction_percentage or 1) / 100
 

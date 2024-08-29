@@ -129,8 +129,8 @@ class Changelings(PlayerCharacter):
         int_increase_amount = 7
         self.db.con_increase_amount = con_increase_amount
         self.db.int_increase_amount = int_increase_amount
-        self.db.hpmax = 50 + (con_increase_amount * self.db.constitution)
-        self.db.fpmax = 50 + (int_increase_amount * self.db.intelligence)
+        self.db.hpmax = 50 + (con_increase_amount * self.traits.con.value)
+        self.db.fpmax = 50 + (int_increase_amount * self.traits.int.value)
 
         self.db.guild_level = 1
         self.db.gxp = 0
@@ -356,7 +356,7 @@ class Changelings(PlayerCharacter):
             return
         # self.msg(f"{self} takes damage: {damage}")
         # aply toughness
-        toughness = form_toughness + glvl / 5 + self.db.constitution / 10
+        toughness = form_toughness + glvl / 5 + self.traits.con.value / 10
         # self.msg(f"|cToughness: {toughness}")
         tougness_reduction = math.ceil(uniform(toughness / 2, toughness))
         if glvl < 5:

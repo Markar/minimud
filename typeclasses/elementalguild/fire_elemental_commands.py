@@ -44,8 +44,8 @@ class CmdFlameRenewal(Command):
         caller.cooldowns.add("flame renewal", 6)
 
         glvl = caller.db.guild_level
-        wis = caller.db.wisdom
-        intel = caller.db.intelligence
+        wis = caller.traits.wis.value
+        intel = caller.traits.int.value
         hp = caller.db.hp
         hpmax = caller.db.hpmax
         fp = caller.db.fp

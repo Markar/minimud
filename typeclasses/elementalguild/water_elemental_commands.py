@@ -41,8 +41,8 @@ class CmdRejuvenate(Command):
             return False
         caller.cooldowns.add("rejuvenate", 4)
 
-        wis = caller.db.wisdom
-        strength = caller.db.strength
+        wis = caller.traits.wis.value
+        strength = caller.traits.str.value
         hp = caller.db.hp
         hpmax = caller.db.hpmax
         fp = caller.db.fp

@@ -17,8 +17,8 @@ class AirAttack(ElementalAttack):
 
     def _calculate_melee_damage(self, wielder):
         glvl = wielder.db.guild_level
-        str = wielder.db.strength
-        dex = wielder.db.dexterity
+        str = wielder.traits.str.value
+        dex = wielder.traits.dex.value
 
         stat_bonus = str / 5 + dex
         dmg = stat_bonus

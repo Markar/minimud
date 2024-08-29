@@ -434,8 +434,10 @@ class CmdGAdvance(Command):
             caller.db.max_engulfs = 1
         elif caller.db.guild_level >= 14:
             caller.db.max_engulfs = 2
-        elif caller.db.guild_level >= 30:
+        elif caller.db.guild_level >= 21:
             caller.db.max_engulfs = 3
+        elif caller.db.guild_level >= 30:
+            caller.db.max_engulfs = 4
 
     def func(self):
         caller = self.caller
@@ -650,7 +652,7 @@ class CmdCellularReconstruction(Command):
             return
 
         regen = caller.db.skills["regeneration"]
-        to_heal = math.floor(30 + gl / 2 + randint(0, caller.db.wisdom) + regen)
+        to_heal = math.floor(30 + gl / 2 + randint(0, caller.traits.wis.value) + regen)
 
         caller.adjust_hp(to_heal)
         caller.db.ep -= self.cost

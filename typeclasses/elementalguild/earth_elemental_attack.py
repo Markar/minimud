@@ -17,8 +17,8 @@ class EarthAttack(ElementalAttack):
 
     def _calculate_melee_damage(self, wielder):
         glvl = wielder.db.guild_level
-        str = wielder.db.strength
-        dex = wielder.db.dexterity
+        str = wielder.traits.str.value
+        dex = wielder.traits.dex.value
 
         stat_bonus = str / 2 + dex / 4
         dmg = 5 + stat_bonus + glvl * 3 / 2

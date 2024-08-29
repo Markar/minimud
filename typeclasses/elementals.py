@@ -20,8 +20,11 @@ class Elemental(PlayerCharacter):
         int_increase_amount = 5
         self.db.con_increase_amount = con_increase_amount
         self.db.int_increase_amount = int_increase_amount
-        self.db.hpmax = 50 + (con_increase_amount * self.db.constitution)
-        self.db.fpmax = 50 + (int_increase_amount * self.db.intelligence)
+        self.db.con_bonus = 0
+        self.db.hpmax = 50 + (
+            con_increase_amount * (self.traits.con.value + self.db.con_bonus)
+        )
+        self.db.fpmax = 50 + (int_increase_amount * self.traits.int.value)
 
         self.db.guild_level = 1
         self.db.gxp = 0
@@ -83,9 +86,10 @@ class Elemental(PlayerCharacter):
         """
         if self.db.guild_level < 10:
             return
-        self.msg(f"|gYour body ripples and shakes as energy flows into you")
+        self.msg(
+            f"|cThe flames around you flicker and reignite with renewed vigor, infusing you with a surge of energy!|n"
+        )
         self.db.burnout["count"] = self.db.burnout["max"]
-        self.db.engulfs = self.db.max_engulfs
 
     def use_burnout(self):
         """

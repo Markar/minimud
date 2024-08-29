@@ -46,6 +46,15 @@ class CmdGAdvance(Command):
             caller.db.epmax += 10
             self.msg(f"|rYou grow more powerful.")
 
+        if caller.db.guild_level >= 30:
+            caller.db.burnout["max"] = 4
+        elif caller.db.guild_level >= 21:
+            caller.db.burnout["max"] = 3
+        elif caller.db.guild_level >= 14:
+            caller.db.burnout["max"] = 2
+        elif caller.db.guild_level >= 7:
+            caller.db.burnout["max"] = 1
+
     def func(self):
         caller = self.caller
         caller.msg(f"|G{caller}")

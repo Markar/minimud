@@ -17,8 +17,8 @@ class WaterAttack(ElementalAttack):
 
     def _calculate_melee_damage(self, wielder):
         glvl = wielder.db.guild_level
-        wis = wielder.db.wisdom
-        intel = wielder.db.intelligence
+        wis = wielder.traits.wis.value
+        intel = wielder.traits.int.value
 
         stat_bonus = intel / 4 + wis / 2
         dmg = 5 + stat_bonus + glvl * 3 / 2

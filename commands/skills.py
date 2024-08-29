@@ -113,20 +113,20 @@ class CmdStatSheet(Command):
         )
 
         # display the primary stats
-        strcost = int(STAT_COST_DICT[caller.db.strength + 1])
-        dexcost = int(STAT_COST_DICT[caller.db.dexterity + 1])
-        wiscost = int(STAT_COST_DICT[caller.db.wisdom + 1])
-        concost = int(STAT_COST_DICT[caller.db.constitution + 1])
-        intcost = int(STAT_COST_DICT[caller.db.intelligence + 1])
-        chacost = int(STAT_COST_DICT[caller.db.charisma + 1])
+        strcost = int(STAT_COST_DICT[caller.traits.str.base + 1])
+        dexcost = int(STAT_COST_DICT[caller.traits.dex.base + 1])
+        wiscost = int(STAT_COST_DICT[caller.traits.wis.base + 1])
+        concost = int(STAT_COST_DICT[caller.traits.con.base + 1])
+        intcost = int(STAT_COST_DICT[caller.traits.int.base + 1])
+        chacost = int(STAT_COST_DICT[caller.traits.cha.base + 1])
 
         stats = [
-            [f"|GStr: |C{caller.db.strength or 0} | {strcost}xp"],
-            [f"|GDex: |C {caller.db.dexterity or 0} | {dexcost}xp"],
-            [f"|GWis: |C {caller.db.wisdom or 0} | {wiscost}xp"],
-            [f"|GCon: |C {caller.db.constitution or 0} | {concost}xp"],
-            [f"|GInt: |C {caller.db.intelligence or 0} | {intcost}xp"],
-            [f"|GCha: |C {caller.db.charisma or 0} | {chacost}xp\n"],
+            [f"|GStr: |C{caller.traits.str.name or 1} | {strcost}xp"],
+            [f"|GDex: |C {caller.traits.dex.name or 1} | {dexcost}xp"],
+            [f"|GWis: |C {caller.traits.wis.name or 1} | {wiscost}xp"],
+            [f"|GCon: |C {caller.traits.con.name or 1} | {concost}xp"],
+            [f"|GInt: |C {caller.traits.int.name or 1} | {intcost}xp"],
+            [f"|GCha: |C {caller.traits.cha.name or 1} | {chacost}xp\n"],
             [f"|GHp: |C {int(caller.db.hp) or 0} / {caller.db.hpmax}"],
             [f"|GFp: |C {int(caller.db.fp) or 0} / {caller.db.fpmax}"],
             [f"|GEp: |C {int(caller.db.ep) or 0} / {caller.db.epmax}"],
@@ -204,11 +204,11 @@ class CmdAdvance(Command):
     #     caller.db.stat_points -= 1
     #     caller.attributes.add(stat, current_stat+1)
     #     if stat == "con":
-    #         caller.db.hp = 50 + caller.db.con_increase_amount * caller.db.constitution
-    #         caller.db.hpmax = 50 + caller.db.con_increase_amount * caller.db.constitution
+    #         caller.db.hp = 50 + caller.db.con_increase_amount * caller.traits.con.value
+    #         caller.db.hpmax = 50 + caller.db.con_increase_amount * caller.traits.con.value
     #     if stat == "int":
-    #         caller.db.fp = 50 + caller.db.int_increase_amount * caller.db.intelligence
-    #         caller.db.fpmax = 50 + caller.db.int_increase_amount * caller.db.intelligence
+    #         caller.db.fp = 50 + caller.db.int_increase_amount * caller.traits.int.value
+    #         caller.db.fpmax = 50 + caller.db.int_increase_amount * caller.traits.int.value
 
     #     caller.msg(f"|rYou advance your {stat} to {caller.db.stat}.")
 
@@ -266,12 +266,16 @@ class CmdAdvance(Command):
                 caller.db.stat_points -= 1
                 caller.attributes.add(stat, current_stat + 1)
 
-                if stat == "constitution":
-                    caller.db.hp += caller.db.con_increase_amount or 0
-                    caller.db.hpmax += caller.db.con_increase_amount or 0
-                if stat == "intelligence":
-                    caller.db.fp += caller.db.int_increase_amount or 0
-                    caller.db.fpmax += caller.db.int_increase_amount or 0
+                if stat == "con":
+                    # caller.db.hp += caller.db.con_increase_amount or 0
+                    caller.db.hpmax = (
+                        caller.db.con_increase_amount * caller.traits.con.value
+                    )
+                if stat == "int":
+                    # caller.db.fp += caller.db.int_increase_amount or 0
+                    caller.db.fpmax += (
+                        caller.db.int_increase_amount * caller.traits.int.value
+                    )
 
                 self.msg(f"|rYou advance your {stat}")
 

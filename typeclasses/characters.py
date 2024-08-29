@@ -96,12 +96,13 @@ class Character(ObjectParent, ClothedCharacter):
 
     def at_object_creation(self):
         self.db.level = 1
-        self.db.strength = 1
-        self.db.dexterity = 1
-        self.db.intelligence = 1
-        self.db.wisdom = 1
-        self.db.constitution = 1
-        self.db.charisma = 1
+        self.traits.add("str", "Strength", trait_type="static", base=1, mod=0)
+        self.traits.add("dex", "Dexterity", trait_type="static", base=1, mod=0)
+        self.traits.add("int", "Intelligence", trait_type="static", base=1, mod=0)
+        self.traits.add("wis", "Wisdom", trait_type="static", base=1, mod=0)
+        self.traits.add("con", "Constitution", trait_type="static", base=1, mod=0)
+        self.traits.add("cha", "Charisma", trait_type="static", base=1, mod=0)
+
         # resource stats
         self.db.hp = 50
         self.db.hpmax = 50
@@ -161,7 +162,7 @@ class Character(ObjectParent, ClothedCharacter):
         """
         Apply damage, after taking into account damage resistances.
         """
-        # GENERALL NOT USED - OVERRIDEN BY NPC / PC / GUILD versions
+        # GENERALLY NOT USED - OVERRIDEN BY NPC / PC / GUILD versions
 
         # apply armor damage reduction
         damage -= self.defense(damage_type)
@@ -484,7 +485,7 @@ class Character(ObjectParent, ClothedCharacter):
             amt = epmax - ep
             self.db.ep += max(amt, 0)
             return
-        if ep < epmax + amount:
+        else:
             self.db.ep += amount
 
 

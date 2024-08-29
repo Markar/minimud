@@ -2,6 +2,7 @@ from random import randint, uniform
 
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
+
 class Elephant(ChangelingAttack):
     """
     The elephant is the largest land animal on Earth. It is known for its
@@ -21,32 +22,36 @@ class Elephant(ChangelingAttack):
     dodge = 7
 
     def _calculate_tusk_damage(self, wielder):
-        str = wielder.db.strength
+        str = wielder.traits.str.value
         stat_bonus = str / 2
         dmg = 10 + stat_bonus + wielder.db.guild_level / 4
-        
-        damage = randint(int(dmg*2/3), int(dmg))
+
+        damage = randint(int(dmg * 2 / 3), int(dmg))
         return damage
-    
+
     def _calculate_stomp_damage(self, wielder):
-        str = wielder.db.strength
+        str = wielder.traits.str.value
         stat_bonus = str / 2
         dmg = 1 + stat_bonus + wielder.db.guild_level / 4
-        
-        damage = randint(int(dmg*2/3), int(dmg))
+
+        damage = randint(int(dmg * 2 / 3), int(dmg))
         return damage
-    
+
     def at_attack(self, wielder, target, **kwargs):
         super().at_attack(wielder, target, **kwargs)
-        
+
         self.energy_cost = 1
         self.speed = 3
-        
+
         wielder.db.ep -= self.energy_cost
         target.at_damage(wielder, self._calculate_tusk_damage(wielder), "edged", "tusk")
         target.at_damage(wielder, self._calculate_tusk_damage(wielder), "edged", "tusk")
-        target.at_damage(wielder, self._calculate_stomp_damage(wielder), "blunt", "stomp")
-        target.at_damage(wielder, self._calculate_stomp_damage(wielder), "blunt", "stomp")
-        
+        target.at_damage(
+            wielder, self._calculate_stomp_damage(wielder), "blunt", "stomp"
+        )
+        target.at_damage(
+            wielder, self._calculate_stomp_damage(wielder), "blunt", "stomp"
+        )
+
         wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
         wielder.cooldowns.add("attack", self.speed)
