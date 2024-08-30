@@ -1,4 +1,4 @@
-from random import uniform, randint
+from random import uniform
 from evennia.utils import delay, iter_to_str
 from evennia import TICKER_HANDLER as tickerhandler
 from commands.elemental_cmds import ElementalCmdSet
@@ -68,18 +68,20 @@ class EarthElemental(Elemental):
         chunks = []
 
         # add resource levels
-        hp = math.floor(self.db.hp)
-        hpmax = self.db.hpmax
-        fp = math.floor(self.db.fp)
-        fpmax = self.db.fpmax
-        ep = math.floor(self.db.ep)
-        epmax = self.db.epmax
+        hp = int(self.db.hp)
+        hpmax = int(self.db.hpmax)
+        fp = int(self.db.fp)
+        fpmax = int(self.db.fpmax)
+        ep = int(self.db.ep)
+        epmax = int(self.db.epmax)
         burnout_count = self.db.burnout["count"]
         burnout_max = self.db.burnout["max"]
 
         chunks.append(
-            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g |gBurnouts: |G{burnout_count}/{burnout_max}"
+            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g"
         )
+        if self.db.burnout["count"] > 0:
+            chunks.append(f"|YBurnout: |G{burnout_count}/{burnout_max}|n")
         if self.db.burnout["active"]:
             chunks.append(f"|YB")
         if self.db.earth_shield and self.db.earth_shield["hits"] > 0:
@@ -225,6 +227,9 @@ class EarthElemental(Elemental):
         hp_percentage = hp / hpmax
         reaction = int(self.db.reaction_percentage or 1) / 100
 
+        percentage_reduction = 0
+        flat_reduction = 0
+
         # Apply (worn) defense reduction
         damage -= self.defense(damage_type)
 
@@ -246,15 +251,15 @@ class EarthElemental(Elemental):
         if self.db.mountain_stance:
             flat_reduction += 10
 
-        # Percentage damage reduction 2% per skill level
-        percentage_reduction = rock_solid_defense * 0.02
-
         # Additional damage reduction from mountain stance
         if self.db.mountain_stance:
             percentage_reduction += 0.1
 
+        # Percentage damage reduction 2% per skill level
+        percentage_reduction = rock_solid_defense * 0.02
+
         # Additional damage reduction from earth shield
-        if self.db.earth_shield:
+        if self.db.earth_shield["hits"] > 0:
             earth_shield_reduction = stone_mastery * 0.02 + earth_resonance * 0.03
             percentage_reduction += earth_shield_reduction
             flat_reduction += stone_mastery + earth_resonance
@@ -267,7 +272,7 @@ class EarthElemental(Elemental):
             self.msg(f"|cYour earth shield blocks a lot of damage!|n")
 
         # Apply randomized flat reduction
-        damage -= randint(int(flat_reduction / 2), flat_reduction)
+        damage -= uniform(flat_reduction / 2, flat_reduction)
 
         # Apply percentage reduction
         damage *= 1 - percentage_reduction
@@ -281,12 +286,14 @@ class EarthElemental(Elemental):
             damage -= stone_skin_absorbed
             self.msg(f"|cYour stone skin blocks some damage!")
 
+        # randomize damage
+        damage = uniform(damage / 2, damage)
+
         # Make sure damage is an integer, similar to floor rounding
         damage = int(damage)
 
         # Ensure damage doesn't go below zero
         damage = max(damage, 0)
-
         # Apply the damage to the character
         self.db.hp -= damage
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")

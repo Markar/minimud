@@ -881,8 +881,10 @@ class NPC(Character):
         if not weapon.at_pre_attack(self):
             return
 
+        print(f"npc attack: {self} and {target} and {weapon}")
         # attack with the weapon
         weapon.at_attack(self, target)
+        print("after npc attack")
         # queue up next attack; use None for target to reference stored target on execution
         delay(weapon.speed + 1, self.attack, None, weapon, persistent=True)
 

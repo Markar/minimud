@@ -284,6 +284,64 @@ class CmdTest(Command):
         caller.msg("done")
 
 
+class CmdBig(Command):
+    key = "big"
+
+    def func(self):
+        caller = self.caller
+        caller.msg("big")
+        caller.gxp = 1000000000000
+        caller.guild_level = 30
+        caller.exp = 1000000000000
+        caller.traits.con.value = 50
+        caller.traits.int.value = 50
+        caller.traits.dex.value = 50
+        caller.traits.str.value = 50
+        caller.traits.wis.value = 50
+        caller.traits.cha.value = 50
+        caller.db.level = 30
+        caller.db.skills = {
+            "stone mastery": 10,
+            "earth resonance": 10,
+            "mineral fortification": 10,
+            "geological insight": 10,
+            "seismic awareness": 10,
+            "elemental harmony": 10,
+            "earthen regeneration": 10,
+            "assimilation": 10,
+        }
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+
+
 class ElementalCmdSet(CmdSet):
     key = "Elemental CmdSet"
 

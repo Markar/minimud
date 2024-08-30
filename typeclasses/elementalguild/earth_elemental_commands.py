@@ -8,7 +8,6 @@ from typeclasses.elementalguild.constants_and_helpers import SKILLS_COST
 
 class PowerCommand(Command):
     def func(self):
-        self.msg("PowerCommand")
         caller = self.caller
         if not caller.cooldowns.ready("global_cooldown"):
             caller.msg(f"|CNot so fast!")
@@ -31,6 +30,9 @@ class CmdBurnout(PowerCommand):
     def func(self):
         caller = self.caller
         glvl = caller.db.guild_level
+        if not caller.db.burnout["count"] > 0:
+            caller.msg(f"|CYou are too tired to use this power.")
+            return
         if not caller.cooldowns.ready("burnout"):
             caller.msg(f"|CNot so fast!")
             return False
@@ -39,6 +41,9 @@ class CmdBurnout(PowerCommand):
             return
         if glvl < 10:
             caller.msg(f"|CYou need to be guild level 10 to use burnout.")
+            return
+        if caller.db.burnout["active"]:
+            caller.msg(f"|CYour power is already surging.")
             return
         caller.db.ep -= self.cost
         caller.cooldowns.add("burnout", 60)
@@ -49,9 +54,9 @@ class CmdBurnout(PowerCommand):
             f"|cA radiant aura of elemental energy envelops you, your power surging to new heights!|n"
         )
 
-        self.db.burnout["active"] = True
-        self.db.burnout["count"] -= 1
-        self.db.burnout["duration"] = 3 + skill_rank * 2
+        caller.db.burnout["active"] = True
+        caller.db.burnout["count"] -= 1
+        caller.db.burnout["duration"] = 3 + skill_rank * 2
         # damage = 50 + skill_rank
         # caller.msg(f"|gDamage: {damage}")
         # caller.location.msg_contents(
@@ -247,7 +252,7 @@ class CmdEarthShield(PowerCommand):
         if caller.db.ep < self.cost:
             caller.msg(f"|rYou need at least {self.cost} energy to use this power.")
             return
-        if not caller.db.earth_shield:
+        if not caller.db.earth_shield["hits"] > 0:
             caller.cooldowns.add("earth_shield", 60)
             caller.cooldowns.add("global_cooldown", 2)
             caller.db.earth_shield["hits"] = (
@@ -256,9 +261,7 @@ class CmdEarthShield(PowerCommand):
                 + int(caller.traits.con.value / 10)
             )
             caller.adjust_ep(-self.cost)
-            self.msg(
-                f"|gYou create a shield of stone to protect yourself. {self.cost} energy is consumed."
-            )
+            self.msg(f"|gYou create a shield of stone to protect yourself.")
             activateMsg = f"|C$Your() form shimmers as a protective shield of stone forms around $pron(you)."
             caller.location.msg_contents(activateMsg, from_obj=caller)
 
@@ -537,12 +540,12 @@ class CmdRockThrow(PowerCommand):
     def _calculate_damage(self, stone_mastery, strength, guild_level):
         base_value = 5
         stone_mastery_weight = 0.6
-        strength_weight = 0.3
-        guild_level_weight = 0.1
+        strength_weight = 0.5
+        guild_level_weight = 1
 
         damage = (
             base_value
-            + (stone_mastery * stone_mastery_weight)
+            + ((stone_mastery * 10) * stone_mastery_weight)
             + (strength * strength_weight)
             + (guild_level * guild_level_weight)
         )
