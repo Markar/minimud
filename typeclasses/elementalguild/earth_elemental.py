@@ -136,9 +136,16 @@ class EarthElemental(Elemental):
             rate = self.db.earthen_renewal["rate"]
             bonus_fp += uniform(rate / 2, rate + 1)
             if self.db.earthen_renewal["duration"] == 1:
-                activateMsg = f"|C$Your() body stops glowing as you release the regenerative energy."
-                self.location.msg_contents(activateMsg, from_obj=self)
+                deactivateMsg = f"|C$Your() body stops glowing as you release the regenerative energy."
+                self.location.msg_contents(deactivateMsg, from_obj=self)
             self.db.earthen_renewal["duration"] -= 1
+
+        if self.db.burnout["active"]:
+            if self.db.burnout["duration"] == 1:
+                self.db.burnout["active"] = False
+                deactivateMsg = f"|C$The flames around you flicker and die out, leaving you feeling drained."
+                self.location.msg_contents(deactivateMsg, from_obj=self)
+            self.db.burnout["duration"] -= 1
 
         total_fp_regen = base_fp_regen + int(bonus_fp)
         self.adjust_hp(base_regen)

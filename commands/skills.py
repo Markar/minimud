@@ -121,12 +121,12 @@ class CmdStatSheet(Command):
         chacost = int(STAT_COST_DICT[caller.traits.cha.base + 1])
 
         stats = [
-            [f"|GStr: |C{caller.traits.str.name or 1} | {strcost}xp"],
-            [f"|GDex: |C {caller.traits.dex.name or 1} | {dexcost}xp"],
-            [f"|GWis: |C {caller.traits.wis.name or 1} | {wiscost}xp"],
-            [f"|GCon: |C {caller.traits.con.name or 1} | {concost}xp"],
-            [f"|GInt: |C {caller.traits.int.name or 1} | {intcost}xp"],
-            [f"|GCha: |C {caller.traits.cha.name or 1} | {chacost}xp\n"],
+            [f"|GStr: |C {int(caller.traits.str.value or 1)} | {strcost}xp"],
+            [f"|GDex: |C {int(caller.traits.dex.value or 1)} | {dexcost}xp"],
+            [f"|GWis: |C {int(caller.traits.wis.value or 1)} | {wiscost}xp"],
+            [f"|GCon: |C {int(caller.traits.con.value or 1)} | {concost}xp"],
+            [f"|GInt: |C {int(caller.traits.int.value or 1)} | {intcost}xp"],
+            [f"|GCha: |C {int(caller.traits.cha.value or 1)} | {chacost}xp\n"],
             [f"|GHp: |C {int(caller.db.hp) or 0} / {caller.db.hpmax}"],
             [f"|GFp: |C {int(caller.db.fp) or 0} / {caller.db.fpmax}"],
             [f"|GEp: |C {int(caller.db.ep) or 0} / {caller.db.epmax}"],

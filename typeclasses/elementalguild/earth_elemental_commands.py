@@ -16,6 +16,53 @@ class PowerCommand(Command):
         caller.cooldowns.add("global_cooldown", 2)
 
 
+class CmdBurnout(PowerCommand):
+    """
+    This powerful ability allows the earth elemental to channel energy from all elemental forces, enhancing their physical abilities and combat prowess. While active, the elemental's attacks become more potent, and their movements more fluid and precise. The elemental's power is greatly increased while burnout is active, but the strain of maintaining this heightened state of power can be overwhelming, and the elemental must be cautious not to overextend themselves.
+
+    Usage:
+        burnout
+    """
+
+    key = "burnout"
+    help_category = "earth elemental"
+    cost = 10
+
+    def func(self):
+        caller = self.caller
+        glvl = caller.db.guild_level
+        if not caller.cooldowns.ready("burnout"):
+            caller.msg(f"|CNot so fast!")
+            return False
+        if caller.db.ep < self.cost:
+            caller.msg(f"|rYou need at least {self.cost} energy to use this power.")
+            return
+        if glvl < 10:
+            caller.msg(f"|CYou need to be guild level 10 to use burnout.")
+            return
+        caller.db.ep -= self.cost
+        caller.cooldowns.add("burnout", 60)
+        caller.cooldowns.add("global_cooldown", 2)
+        skill_rank = caller.db.skills.get("elemental harmony", 1)
+
+        self.msg(
+            f"|cA radiant aura of elemental energy envelops you, your power surging to new heights!|n"
+        )
+
+        self.db.burnout["active"] = True
+        self.db.burnout["count"] -= 1
+        self.db.burnout["duration"] = 3 + skill_rank * 2
+        # damage = 50 + skill_rank
+        # caller.msg(f"|gDamage: {damage}")
+        # caller.location.msg_contents(
+        #     f"|C$Your() form glows with a bright light as $pron(you) unleash a wave of destructive energy, damaging all enemies in the area.",
+        #     from_obj=caller,
+        # )
+        # for obj in caller.location.contents:
+        #     if obj != caller:
+        #         obj.at_damage(caller, damage, "blunt", "burnout")
+
+
 # Defensive powers
 class CmdStoneSkin(PowerCommand):
     """
@@ -31,6 +78,7 @@ class CmdStoneSkin(PowerCommand):
     key = "stone skin"
     aliases = ["ss"]
     help_category = "earth elemental"
+    cost = 25
 
     def func(self):
         caller = self.caller
@@ -38,9 +86,12 @@ class CmdStoneSkin(PowerCommand):
         if glvl < 5:
             caller.msg(f"|CYou need to be guild level 5 to use stone skin.")
             return
-
+        if caller.db.ep < self.cost:
+            caller.msg(f"|rYou need at least {self.cost} energy to use this power.")
+            return
         if not caller.db.stone_skin:
             caller.db.stone_skin = True
+            caller.db.ep -= self.cost
             caller.cooldowns.add("global_cooldown", 2)
             activateMsg = f"|C$Your() body hardens, rocky plates forming a protective barrier that absorbs and deflects incoming attacks."
             caller.location.msg_contents(activateMsg, from_obj=caller)
@@ -63,6 +114,7 @@ class CmdEarthForm(PowerCommand):
     key = "earth form"
     aliases = ["ef"]
     help_category = "earth elemental"
+    cost = 50
 
     def func(self):
         caller = self.caller
@@ -70,9 +122,12 @@ class CmdEarthForm(PowerCommand):
         if glvl < 24:
             caller.msg(f"|CYou need to be guild level 24 to use earth form.")
             return
-
+        if caller.db.ep < self.cost:
+            caller.msg(f"|rYou need at least {self.cost} energy to use this power.")
+            return
         if not caller.db.earth_form:
             caller.db.earth_form = True
+            caller.db.ep -= self.cost
             caller.cooldowns.add("global_cooldown", 2)
             activateMsg = f"|C$Your() form shifts and hardens, transforming into a denser, more resilient form of rock."
             caller.location.msg_contents(activateMsg, from_obj=caller)
@@ -112,6 +167,7 @@ class CmdMountainStance(PowerCommand):
         if not caller.db.mountain_stance:
             caller.db.mountain_stance = True
             caller.traits.con.mod += 10
+            caller.db.ep -= self.cost
             caller.cooldowns.add("global_cooldown", 2)
             activateMsg = f"|C$Your() form grows larger and more imposing, taking on the appearance of a mountain."
             caller.location.msg_contents(activateMsg, from_obj=caller)
@@ -150,7 +206,7 @@ class CmdEarthshakerStance(PowerCommand):
         if not caller.db.earthshaker_stance:
             caller.db.earthshaker_stance = True
             caller.traits.str.mod += 10
-
+            caller.db.ep -= self.cost
             caller.cooldowns.add("global_cooldown", 2)
             activateMsg = f"|cYou adopt the Earthshaker Stance, your movements becoming more forceful as the ground trembles beneath you.|n"
             caller.location.msg_contents(activateMsg, from_obj=caller)
@@ -636,18 +692,18 @@ class CmdPowers(Command):
         table = EvTable(f"|cPower", f"|cRank", f"|cCost", border="table")
         table.add_row(f"|GAssimilate", 1, 0)
         table.add_row(f"|GReaction", 1, 0)
-        table.add_row(f"|GRock Throw", 2, "5 FP")
-        table.add_row(f"|GTerran Restoration", 4, "variable")
-        table.add_row(f"|GQuicksand", 6, "10 FP")
-        table.add_row(f"|GStone Skin", 7, 0)
-        table.add_row(f"|GEarthen Renewal", 9, "50 EP")
-        table.add_row(f"|GBurnout", 10, "1 EP")
-        table.add_row(f"|GTremor", 12, "20 FP")
-        table.add_row(f"|GEarth Shield", 14, "50 EP")
-        table.add_row(f"|GEarthquake", 20, "50 FP")
-        table.add_row(f"|GEarth Form", 24, 0)
-        table.add_row(f"|GMountain Stance", 28, "75 EP")
-        table.add_row(f"|GEarthshaker Stance", 30, "75 EP")
+        table.add_row(f"|GRock Throw", 2, "5 Focus")
+        table.add_row(f"|GTerran Restoration", 4, "varies")
+        table.add_row(f"|GQuicksand", 6, "10 Focus")
+        table.add_row(f"|GStone Skin", 7, "25 Energy")
+        table.add_row(f"|GEarthen Renewal", 9, "50 Energy")
+        table.add_row(f"|GBurnout", 10, "10 Energy")
+        table.add_row(f"|GTremor", 12, "20 Focus")
+        table.add_row(f"|GEarth Shield", 14, "50 Energy")
+        table.add_row(f"|GEarthquake", 20, "50 Focus")
+        table.add_row(f"|GEarth Form", 24, "50 Energy")
+        table.add_row(f"|GMountain Stance", 28, "75 Energy")
+        table.add_row(f"|GEarthshaker Stance", 30, "75 Energy")
 
         caller.msg(str(table))
 
@@ -862,4 +918,5 @@ class EarthElementalCmdSet(CmdSet):
         self.add(CmdMountainStance)
         self.add(CmdEarthenRenewal)
         self.add(CmdEarthshakerStance)
+        self.add(CmdBurnout)
         self.add(Test)

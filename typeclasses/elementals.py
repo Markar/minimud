@@ -47,7 +47,7 @@ class Elemental(PlayerCharacter):
         self.db.fpregen = 1
         self.db.epregen = 1
         self.db.strategy = "melee"
-        self.db.burnout = {"active": False, "count": 0, "max": 0}
+        self.db.burnout = {"active": False, "count": 0, "max": 0, "duration": 0}
         self.at_wield(EarthAttack)
         tickerhandler.add(
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True

@@ -269,23 +269,6 @@ class CmdKickstart(Command):
         caller.kickstart()
 
 
-class CmdBurnout(Command):
-    """
-    Burnout is a powerful ability granted to members of the Elemental Guild. When activated, this superpower channels the raw essence of the elements, significantly amplifying the user's offensive and defensive capabilities. The elemental energies surge through the user's body, enhancing their attacks and fortifying their defenses. However, this immense power comes at a cost, as it rapidly depletes the user's energy reserves, requiring careful management to avoid exhaustion.
-
-    Usage:
-        burnout
-
-    """
-
-    key = "burnout"
-    help_category = "elemental"
-
-    def func(self):
-        caller = self.caller
-        caller.use_burnout()
-
-
 class CmdTest(Command):
     key = "test"
 
@@ -314,4 +297,3 @@ class ElementalCmdSet(CmdSet):
         self.add(CmdSkills)
         self.add(CmdTest)
         self.add(CmdKickstart)
-        self.add(CmdBurnout)
