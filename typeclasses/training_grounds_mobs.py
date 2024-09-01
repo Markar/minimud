@@ -1,6 +1,7 @@
 """
 Prototypes
 """
+
 from random import randint, uniform, choice
 
 # LARGE_RAT = {
@@ -246,16 +247,17 @@ ENEMY_7 = {
         "energy_cost": 7,
     },
     "exp_reward": 8,
-    "drops": [{
-        "key": "rat pelt",
-        "aliases": ["pelt"],
-        "desc": "The scruffy pelt of a large rat.",
-        "name_color": "g",
-        "power": 3
-    }],
+    "drops": [
+        {
+            "key": "rat pelt",
+            "aliases": ["pelt"],
+            "desc": "The scruffy pelt of a large rat.",
+            "name_color": "g",
+            "power": 3,
+        }
+    ],
     "can_attack": True,
 }
-
 
 
 NOVICE_ARCHER = {
@@ -380,4 +382,3 @@ ALIEN_SCOUT = {
     # }],
     "can_attack": True,
 }
-

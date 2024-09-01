@@ -182,6 +182,8 @@ class CmdMountainStance(PowerCommand):
             deactivateMsg = f"|C$Your() form shrinks and returns to its normal state."
             caller.location.msg_contents(deactivateMsg, from_obj=caller)
 
+        caller.db.hpmax = 50 + caller.traits.con.value * caller.db.con_increase_amount
+
 
 class CmdEarthshakerStance(PowerCommand):
     """

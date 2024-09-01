@@ -510,7 +510,7 @@ class PlayerCharacter(Character):
             "speed": 3,
             "energy_cost": 1,
         }
-        self.best_kill = {"name": "none", "level": 0, "xp": 0}
+        self.db.best_kill = {"name": "none", "level": 0, "xp": 0}
 
         # initialize hands
         self.db._wielded = {"left": None, "right": None}
@@ -882,9 +882,10 @@ class NPC(Character):
             return
 
         print(f"npc attack: {self} and {target} and {weapon}")
-        # attack with the weapon
+
         weapon.at_attack(self, target)
         print("after npc attack")
+
         # queue up next attack; use None for target to reference stored target on execution
         delay(weapon.speed + 1, self.attack, None, weapon, persistent=True)
 
@@ -914,16 +915,19 @@ class NPC(Character):
         damage = weapon.get("damage", 0)
         speed = weapon.get("speed", 10)
         hits = weapon.get("hits", 1)
+        print(f"hits {hits}")
         # attack with your natural attack skill - whatever that is
         result = self.use_skill(weapon.get("skill"), speed=speed)
         # apply the weapon damage as a modifier to skill
         damage = damage * result
 
         for _ in range(hits):
+            print(f"npc attack in range: {self} and {target} and {weapon}")
             # randomize the damage for each attack
             damage = math.ceil(uniform(damage / 2, damage))
             target.at_damage(wielder, damage, weapon.get("damage_type"))
 
+        print(f"after range")
         status = target.get_display_status(self)
         target.msg(prompt=status)
 

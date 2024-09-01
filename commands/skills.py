@@ -104,12 +104,12 @@ class CmdStatSheet(Command):
         best_kill_name = best_kill.get("name", "None")
         best_kill_level = best_kill.get("level", 0)
         best_kill_exp = best_kill.get("xp", 0)
-        self.msg(f"|500{caller} {caller.db.title} ({caller.db.alignment})")
-        self.msg(f"|GLevel: {caller.db.level or 0} | {levelcost} xp to next level")
-        self.msg(f"|GEXP: {caller.db.exp or 0}")
-        self.msg(f"|GStats: ({caller.db.stat_points} stats available)")
+        self.msg(f" |g{caller} {caller.db.title} ({caller.db.alignment})")
+        self.msg(f" |GLevel {caller.db.level or 0}, {levelcost} xp to next level")
+        self.msg(f" |GEXP: {caller.db.exp or 0}")
+        self.msg(f" |GStats: ({caller.db.stat_points} stats available)")
         self.msg(
-            f"|GBest Kill: {best_kill_name} (lvl {best_kill_level}) for {best_kill_exp} exp\n"
+            f" |GBest Kill: {best_kill_name} (lvl {best_kill_level}) for {best_kill_exp} exp\n"
         )
 
         # display the primary stats
@@ -120,19 +120,48 @@ class CmdStatSheet(Command):
         intcost = int(STAT_COST_DICT[caller.traits.int.base + 1])
         chacost = int(STAT_COST_DICT[caller.traits.cha.base + 1])
 
-        stats = [
-            [f"|GStr: |C {int(caller.traits.str.value or 1)} | {strcost}xp"],
-            [f"|GDex: |C {int(caller.traits.dex.value or 1)} | {dexcost}xp"],
-            [f"|GWis: |C {int(caller.traits.wis.value or 1)} | {wiscost}xp"],
-            [f"|GCon: |C {int(caller.traits.con.value or 1)} | {concost}xp"],
-            [f"|GInt: |C {int(caller.traits.int.value or 1)} | {intcost}xp"],
-            [f"|GCha: |C {int(caller.traits.cha.value or 1)} | {chacost}xp\n"],
-            [f"|GHp: |C {int(caller.db.hp) or 0} / {caller.db.hpmax}"],
-            [f"|GFp: |C {int(caller.db.fp) or 0} / {caller.db.fpmax}"],
-            [f"|GEp: |C {int(caller.db.ep) or 0} / {caller.db.epmax}"],
-        ]
-        rows = list(zip(*stats))
-        table = EvTable(table=rows, border="none")
+        table = EvTable(f"|G", "|GBase", "|GMod", "|GCost", border="none")
+        table.add_row(
+            f"|GStr",
+            f"|C{int(caller.traits.str.value or 1)}",
+            f"|C{int(caller.traits.str.mod or 0)}",
+            f"|C{strcost}",
+        ),
+        table.add_row(
+            f"|GDex",
+            f"|C{int(caller.traits.dex.value or 1)}",
+            f"|C{int(caller.traits.str.mod or 0)}",
+            f"|C{dexcost}",
+        ),
+        table.add_row(
+            f"|GWis",
+            f"|C{int(caller.traits.wis.value or 1)}",
+            f"|C{int(caller.traits.str.mod or 0)}",
+            f"|C{wiscost}",
+        ),
+        table.add_row(
+            f"|GCon",
+            f"|C{int(caller.traits.con.value or 1)}",
+            f"|C{int(caller.traits.str.mod or 0)}",
+            f"|C{concost}",
+        ),
+        table.add_row(
+            f"|GInt",
+            f"|C{int(caller.traits.int.value or 1)}",
+            f"|C{int(caller.traits.str.mod or 0)}",
+            f"|C{intcost}",
+        ),
+        table.add_row(
+            f"|GCha",
+            f"|C{int(caller.traits.cha.value or 1)}",
+            f"|C{int(caller.traits.str.mod or 0)}",
+            f"|C{chacost}\n",
+        ),
+
+        table.add_row(f"|GHp", f"|C {int(caller.db.hp) or 0} / {int(caller.db.hpmax)}"),
+        table.add_row(f"|GFp", f"|C {int(caller.db.fp) or 0} / {int(caller.db.fpmax)}"),
+        table.add_row(f"|GEp", f"|C {int(caller.db.ep) or 0} / {int(caller.db.epmax)}"),
+        table.reformat(width=50, align="l")
         self.msg(f"{str(table)}\n\n")
 
 
@@ -186,32 +215,6 @@ class CmdAdvance(Command):
         caller.db.stat_points += 5
         self.msg(f"You grow more powerful ({caller.db.level})")
 
-    # def _adv_stat_level(self, stat):
-    #     print(f"adv level {self} and caller: {self.caller}")
-    #     caller = self.caller
-    #     if not (caller.db.stat_points > 0):
-    #         print(f"caller stat points: {caller.db.stat_points}")
-    #         self.msg("You do not have any stat points available.")
-    #         return
-
-    #     current_stat = caller.attributes.get(stat, 0)
-
-    #     cost = STAT_COST_DICT[current_stat + 1]
-    #     if caller.db.exp < cost:
-    #         self.msg(f"|wYou need {cost-caller.db.exp} more experience to advance your {stat}.")
-    #         return
-    #     caller.db.exp -= cost
-    #     caller.db.stat_points -= 1
-    #     caller.attributes.add(stat, current_stat+1)
-    #     if stat == "con":
-    #         caller.db.hp = 50 + caller.db.con_increase_amount * caller.traits.con.value
-    #         caller.db.hpmax = 50 + caller.db.con_increase_amount * caller.traits.con.value
-    #     if stat == "int":
-    #         caller.db.fp = 50 + caller.db.int_increase_amount * caller.traits.int.value
-    #         caller.db.fpmax = 50 + caller.db.int_increase_amount * caller.traits.int.value
-
-    #     caller.msg(f"|rYou advance your {stat} to {caller.db.stat}.")
-
     def func(self):
         caller = self.caller
         try:
@@ -219,7 +222,7 @@ class CmdAdvance(Command):
             list = ["level", "str", "con", "dex", "int", "wis", "cha"]
 
             if stat == "":
-                self.msg(f"|gWhat would you like to raise?")
+                caller.msg(f"|gWhat would you like to raise?")
                 return
 
             if stat not in list:
@@ -246,15 +249,16 @@ class CmdAdvance(Command):
                 caller.db.exp -= cost
                 caller.db.level += 1
                 caller.db.stat_points += 5
+                caller.msg(f"|rYou grow more powerful ({caller.db.level})")
             else:
-                stat = STAT_DICT.get(self.args.strip())
+                self.msg(f"stat: {stat}")
                 caller = self.caller
                 if not (caller.db.stat_points > 0):
                     print(f"caller stat points: {caller.db.stat_points}")
                     self.msg("You do not have any stat points available.")
                     return
 
-                current_stat = caller.attributes.get(stat, 0)
+                current_stat = caller.traits.get(stat).base
 
                 cost = STAT_COST_DICT[current_stat + 1]
                 if caller.db.exp < cost:
@@ -264,15 +268,15 @@ class CmdAdvance(Command):
                     return
                 caller.db.exp -= cost
                 caller.db.stat_points -= 1
-                caller.attributes.add(stat, current_stat + 1)
+                caller.traits.get(stat).base = current_stat + 1
 
                 if stat == "con":
-                    # caller.db.hp += caller.db.con_increase_amount or 0
+                    self.msg(f"con increase amount: {caller.db.con_increase_amount}")
+                    self.msg(f"con value: {caller.traits.con.value}")
                     caller.db.hpmax = (
                         caller.db.con_increase_amount * caller.traits.con.value
                     )
                 if stat == "int":
-                    # caller.db.fp += caller.db.int_increase_amount or 0
                     caller.db.fpmax += (
                         caller.db.int_increase_amount * caller.traits.int.value
                     )
