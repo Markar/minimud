@@ -100,17 +100,18 @@ class CmdStatSheet(Command):
     def func(self):
         caller = self.caller
         levelcost = int(LEVEL_COST_DICT[caller.db.level + 1])
-        best_kill = caller.db.best_kill or "None"
-        best_kill_name = best_kill.get("name", "None")
-        best_kill_level = best_kill.get("level", 0)
-        best_kill_exp = best_kill.get("xp", 0)
         self.msg(f" |g{caller} {caller.db.title} ({caller.db.alignment})")
         self.msg(f" |GLevel {caller.db.level or 0}, {levelcost} xp to next level")
         self.msg(f" |GEXP: {caller.db.exp or 0}")
         self.msg(f" |GStats: ({caller.db.stat_points} stats available)")
-        self.msg(
-            f" |GBest Kill: {best_kill_name} (lvl {best_kill_level}) for {best_kill_exp} exp\n"
-        )
+        if caller.db.best_kill:
+            best_kill = caller.db.best_kill or "None"
+            best_kill_name = best_kill.get("name", "None")
+            best_kill_level = best_kill.get("level", 0)
+            best_kill_exp = best_kill.get("xp", 0)
+            self.msg(
+                f" |GBest Kill: {best_kill_name} (lvl {best_kill_level}) for {best_kill_exp} exp\n"
+            )
 
         # display the primary stats
         strcost = int(STAT_COST_DICT[caller.traits.str.base + 1])

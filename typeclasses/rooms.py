@@ -4,6 +4,7 @@ Room
 Rooms are simple containers that has no location of their own.
 
 """
+
 from evennia import search_object
 from evennia.utils import create, iter_to_str, logger, delay
 from evennia.objects.objects import DefaultRoom
@@ -23,6 +24,7 @@ from commands.elemental_cmds import CmdJoinElementals
 from commands.elemental_cmds import CmdLeaveElementals
 from commands.changeling_cmds import CmdJoinChangelings
 from commands.changeling_cmds import CmdLeaveChangelings
+
 
 class RoomParent(ObjectParent):
     """
@@ -49,6 +51,7 @@ class RoomParent(ObjectParent):
         super().at_object_leave(mover, destination, **kwargs)
         if combat := self.scripts.get("combat"):
             combat = combat[0]
+            print(f"at_object_leave room - remove_combatant: {combat}")
             combat.remove_combatant(mover)
         # only react if the arriving object is a character
         if "character" in mover._content_types:
@@ -73,10 +76,11 @@ class RoomParent(ObjectParent):
             return f"Special commands here: {', '.join(cmd_keys)}"
         else:
             return ""
-        
+
     def format_appearance(self, appearance, looker, **kwargs):
         """Don't left-strip the appearance string"""
         return appearance.rstrip()
+
 
 class Room(RoomParent, DefaultRoom):
     """
@@ -118,7 +122,8 @@ class XYGridRoom(RoomParent, XYZRoom):
     A subclass of the XYZGrid contrib's room, applying the local RoomParent mixin
     """
 
-    pass        
+    pass
+
 
 class XYGridShop(XYGridRoom):
     """
@@ -176,7 +181,8 @@ class XYZShopNTrain(XYGridTrain, XYGridShop):
     """
 
     pass
-            
+
+
 class ElementalRoomCmdSet(CmdSet):
     key = "elemental_room"
     priority = 1
@@ -184,6 +190,8 @@ class ElementalRoomCmdSet(CmdSet):
     def at_cmdset_creation(self):
         self.add(CmdJoinElementals())
         self.add(CmdLeaveElementals())
+
+
 class ElementalGuildJoinRoom(Room):
     def at_object_creation(self):
         print(f"at obj creation, self {self}")
@@ -195,9 +203,8 @@ class ElementalGuildJoinRoom(Room):
 
         # The air is filled with the faint hum of elemental energy, and you can feel the power of the elements coursing through the room. As you approach the platform, a sense of anticipation and excitement builds within you. This is the place where you will take your first steps towards mastering the elements and joining the ranks of the Elementals Guild.
         # "
-                    
-                    
-        
+
+
 class ChangelingRoomCmdSet(CmdSet):
     key = "changeling_room"
     priority = 1
@@ -205,6 +212,7 @@ class ChangelingRoomCmdSet(CmdSet):
     def at_cmdset_creation(self):
         self.add(CmdJoinChangelings())
         self.add(CmdLeaveChangelings())
+
 
 class ChangelingGuildJoinRoom(Room):
     def at_object_creation(self):
@@ -221,5 +229,3 @@ class ChangelingGuildJoinRoom(Room):
 
         # As you approach the console, a sense of excitement and anticipation fills you. This is the place where you will learn to harness the power of transformation and join the ranks of the Changeling Guild. The possibilities are endless, and the future is yours to shape.
         # "
-                    
-          

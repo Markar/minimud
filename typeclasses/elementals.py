@@ -39,7 +39,7 @@ class Elemental(PlayerCharacter):
             "energy_cost": 10,
         }
         self.db.guild = "elemental"
-        self.db.subguild = "earth"
+        self.db.subguild = "none"
         self.db._wielded = {"left": None, "right": None}
         self.db.emit = 1
         self.db.maxEmit = 1
@@ -48,6 +48,8 @@ class Elemental(PlayerCharacter):
         self.db.epregen = 1
         self.db.strategy = "melee"
         self.db.burnout = {"active": False, "count": 0, "max": 0, "duration": 0}
+        self.db.subguild = "earth"
+
         self.at_wield(EarthAttack)
         tickerhandler.add(
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
@@ -197,4 +199,31 @@ class Elemental(PlayerCharacter):
         # adding a combatant to combat just returns True if they're already there, so this is safe
         # if not combat_script.add_combatant(self, enemy=target):
         #     return
+        self.attack(target, weapon)
+
+    def enter_combat(self, target, **kwargs):
+        """
+        initiate combat against another character
+        """
+        if weapons := self.wielding:
+            weapon = weapons[0]
+        else:
+            weapon = self
+
+        self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
+        location = self.location
+
+        if not (combat_script := location.scripts.get("combat")):
+            # there's no combat instance; start one
+            from typeclasses.scripts import CombatScript
+
+            location.scripts.add(CombatScript, key="combat")
+            combat_script = location.scripts.get("combat")
+        combat_script = combat_script[0]
+
+        self.db.combat_target = target
+        # adding a combatant to combat just returns True if they're already there, so this is safe
+        if not combat_script.add_combatant(self, enemy=target):
+            return
+
         self.attack(target, weapon)

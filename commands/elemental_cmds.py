@@ -143,11 +143,11 @@ class CmdJoinElementals(Command):
         caller = self.caller
         if caller.db.guild == "adventurer":
             caller.msg(f"|rYou join the Elementals guild")
-            # caller.swap_typeclass("typeclasses.elementals.Elemental")
             caller.swap_typeclass(
                 "typeclasses.elementalguild.earth_elemental.EarthElemental",
                 clean_attributes=False,
             )
+            caller.cmdset.add(EarthElementalCmdSet, persistent=True)
         else:
             caller.msg(f"|rYou are already in a guild")
 

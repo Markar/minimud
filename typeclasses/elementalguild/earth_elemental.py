@@ -55,6 +55,8 @@ class EarthElemental(Elemental):
         self.db.earth_form = False
         self.db.earth_shield = {"hits": 0}
         self.db.mountain_stance = False
+        self.db.earthen_renewal = {"duration": 0, "rate": 0}
+        self.db.burnout = {"active": False, "count": 0, "max": 0, "duration": 0}
         self.at_wield(EarthAttack)
         tickerhandler.add(
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
@@ -134,13 +136,14 @@ class EarthElemental(Elemental):
         if regen < 20:
             bonus_fp = int(uniform(4, regen / 3))  # 4-6
 
-        if self.db.earthen_renewal["duration"] > 0:
-            rate = self.db.earthen_renewal["rate"]
-            bonus_fp += uniform(rate / 2, rate + 1)
-            if self.db.earthen_renewal["duration"] == 1:
-                deactivateMsg = f"|C$Your() body stops glowing as you release the regenerative energy."
-                self.location.msg_contents(deactivateMsg, from_obj=self)
-            self.db.earthen_renewal["duration"] -= 1
+        if self.db.earthen_renewal:
+            if self.db.earthen_renewal["duration"] > 0:
+                rate = self.db.earthen_renewal["rate"]
+                bonus_fp += uniform(rate / 2, rate + 1)
+                if self.db.earthen_renewal["duration"] == 1:
+                    deactivateMsg = f"|C$Your() body stops glowing as you release the regenerative energy."
+                    self.location.msg_contents(deactivateMsg, from_obj=self)
+                self.db.earthen_renewal["duration"] -= 1
 
         if self.db.burnout["active"]:
             if self.db.burnout["duration"] == 1:

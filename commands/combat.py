@@ -92,9 +92,9 @@ class CmdAttack(Command):
         current_fighters = combat_script.fighters
 
         # adding a combatant to combat just returns True if they're already there, so this is safe
-        if not combat_script.add_combatant(self.caller, enemy=target):
-            self.msg("You can't fight right now.")
-            return
+        # if not combat_script.add_combatant(self.caller, enemy=target):
+        #     self.msg("You can't fight right now.")
+        #     return
 
         self.caller.db.combat_target = target
         # execute the actual attack

@@ -757,6 +757,10 @@ class NPC(Character):
         ):
             delay(1, self.enter_combat, chara)
             delay(1, chara.enter_combat, self)
+        if self.db.target == chara:
+            print(f"npc at_character_arrive: re-aggro {self} and {chara}")
+            self.enter_combat(chara)
+            chara.enter_combat(self)
 
     def at_character_depart(self, chara, destination, **kwargs):
         """
@@ -852,16 +856,10 @@ class NPC(Character):
 
             location.scripts.add(CombatScript, key="combat")
             combat_script = location.scripts.get("combat")
+
         combat_script = combat_script[0]
-        print(f"set combat_target")
         self.db.combat_target = target
-        # adding a combatant to combat just returns True if they're already there, so this is safe
-        if not combat_script.add_combatant(self, enemy=target):
-            return
-        print(f"before npc attack")
         self.attack(target, weapon)
-        target.enter_combat(self)
-        # target.attack(self, target.db.weapon)
 
     def attack(self, target, weapon, **kwargs):
         # can't attack if we're not in combat, or if we're fleeing

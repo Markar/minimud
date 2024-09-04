@@ -37,13 +37,13 @@ class CombatScript(Script):
         """
         a, b = self.teams
         return a + b
-        
+
     @property
     def active(self):
         """
         Returns a list of all active combatants, regardless of alliance.
         """
-        
+
         return [
             obj
             for obj in self.fighters
@@ -116,27 +116,25 @@ class CombatScript(Script):
         Returns:
             True if combatant is successfully out of combat, False if not
         """
-        print(f"remove combatant")
+        print(f"removing combatant 1")
         # get the combatant's team
         team = self.get_team(combatant)
         if team is None:
-            print(f"team is none")
             # they're already not in combat
             return True
 
-        print(f"remove combatant 2")
+        print(f"removing {combatant} from combat")
         # remove combatant from their team
         self.db.teams[team].remove(combatant)
         # reset the cache
         del self.ndb.teams
 
-        print(f"remove combatant 3")
         # grant exp to the other team, if relevant
         if exp := combatant.db.exp_reward:
+            print(f"granting exp to the other team")
             for obj in self.db.teams[team - 1]:
                 obj.msg(f"You gain {exp} experience.")
                 obj.db.exp = (obj.db.exp or 0) + exp
-        print(f"Log: Killed {combatant}")
         self.check_victory()
         # remove their combat target if they have one
         del combatant.db.combat_target
@@ -153,7 +151,7 @@ class CombatScript(Script):
             # everyone lost or is gone
             self.delete()
             return
-        
+
         team_a, team_b = [
             [obj for obj in team if obj in active_fighters] for team in self.db.teams
         ]
@@ -176,6 +174,7 @@ class CombatScript(Script):
 
         # say farewell to the combat script!
         self.delete()
+
 
 class RestockScript(Script):
     """
@@ -219,6 +218,7 @@ class RestockScript(Script):
                     obj.db.value = obj.db.value or 1
                     # add to the shop stock
                     self.obj.add_stock(obj)
+
 
 class RespawnScript(Script):
     """
