@@ -2,6 +2,7 @@ from random import choice
 from evennia import CmdSet
 from evennia.utils import iter_to_str
 from evennia.utils.evtable import EvTable
+from typeclasses.scripts import get_or_create_combat_script
 
 from .command import Command
 from typeclasses.gear import BareHand
@@ -76,25 +77,17 @@ class CmdAttack(Command):
             self.msg(f"You can't attack {target.get_display_name(self.caller)}.")
             return
 
-        # if we were trying to flee, cancel that
+            # if we were trying to flee, cancel that
         del self.caller.db.fleeing
 
         # it's all good! let's get started!
-        if not (combat_script := location.scripts.get("combat")):
-            # there's no combat instance; start one
-            from typeclasses.scripts import CombatScript
-
-            location.scripts.add(CombatScript, key="combat")
-            combat_script = location.scripts.get("combat")
-
-        combat_script = combat_script[0]
-
+        combat_script = get_or_create_combat_script(location)
         current_fighters = combat_script.fighters
 
         # adding a combatant to combat just returns True if they're already there, so this is safe
-        # if not combat_script.add_combatant(self.caller, enemy=target):
-        #     self.msg("You can't fight right now.")
-        #     return
+        if not combat_script.add_combatant(self.caller, enemy=target):
+            self.msg("You can't fight right now.")
+            return
 
         self.caller.db.combat_target = target
         # execute the actual attack

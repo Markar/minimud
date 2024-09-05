@@ -149,9 +149,9 @@ class Character(ObjectParent, ClothedCharacter):
         optional post-move auto prompt
         """
         super().at_post_move(source_location, **kwargs)
-        if self.in_combat:
-            combat = self.location.scripts.get("combat")[0]
-            combat.remove_combatant(self)
+        # if self.in_combat:
+        #     combat = self.location.scripts.get("combat")[0]
+        #     combat.remove_combatant(self)
         # check if we have auto-prompt in settings
         if self.account and (settings := self.account.db.settings):
             if settings.get("auto prompt"):
@@ -685,31 +685,30 @@ class PlayerCharacter(Character):
         target.at_damage(self, damage, "fire")
         self.cooldowns.add("fireball", 1)
 
-    # def enter_combat(self, target, **kwargs):
-    #     """
-    #     initiate combat against another character
-    #     """
-    #     if weapons := self.wielding:
-    #         weapon = weapons[0]
-    #     else:
-    #         weapon = self
+    def enter_combat(self, target, **kwargs):
+        """
+        initiate combat against another character
+        """
+        if weapons := self.wielding:
+            weapon = weapons[0]
+        else:
+            weapon = self
 
-    #     self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
-    #     location = self.location
+        self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
+        location = self.location
 
-    #     if not (combat_script := location.scripts.get("combat")):
-    #         # there's no combat instance; start one
-    #         from typeclasses.scripts import CombatScript
-    #         location.scripts.add(CombatScript, key="combat")
-    #         combat_script = location.scripts.get("combat")
-    #     combat_script = combat_script[0]
-    #     print(f"set combat_target")
-    #     self.db.combat_target = target
-    #     # adding a combatant to combat just returns True if they're already there, so this is safe
-    #     if not combat_script.add_combatant(self, enemy=target):
-    #         return
-    #     print(f"before npc attack")
-    #     self.attack(target, weapon)
+        if not (combat_script := location.scripts.get("combat")):
+            # there's no combat instance; start one
+            from typeclasses.scripts import CombatScript
+
+            location.scripts.add(CombatScript, key="combat")
+            combat_script = location.scripts.get("combat")
+        combat_script = combat_script[0]
+        self.db.combat_target = target
+        # adding a combatant to combat just returns True if they're already there, so this is safe
+        if not combat_script.add_combatant(self, enemy=target):
+            return
+        self.attack(target, weapon)
 
     def respawn(self):
         """
@@ -832,7 +831,7 @@ class NPC(Character):
                 self.move_to(None, False, None, True, True, True, "teleport")
                 delay(5, self.at_respawn)
                 return
-
+        # change target to the attacker
         if not self.db.combat_target:
             self.enter_combat(attacker)
         else:
@@ -856,15 +855,21 @@ class NPC(Character):
 
             location.scripts.add(CombatScript, key="combat")
             combat_script = location.scripts.get("combat")
-
         combat_script = combat_script[0]
+
+        print(f"NPC: enter_combat: {self} and combat_target {self.db.combat_target}")
         self.db.combat_target = target
+        # adding a combatant to combat just returns True if they're already there, so this is safe
+        if not combat_script.add_combatant(self, enemy=target):
+            return
+
         self.attack(target, weapon)
 
     def attack(self, target, weapon, **kwargs):
         # can't attack if we're not in combat, or if we're fleeing
         if not self.in_combat or self.db.fleeing:
             return
+
         # if target is not set, use stored target
         if not target:
             # make sure there's a stored target
@@ -873,17 +878,15 @@ class NPC(Character):
         # verify that target is still here
         if self.location != target.location:
             return
+
         # make sure that we can use our chosen weapon
         if not (hasattr(weapon, "at_pre_attack") and hasattr(weapon, "at_attack")):
             return
         if not weapon.at_pre_attack(self):
             return
 
-        print(f"npc attack: {self} and {target} and {weapon}")
-
+        # attack with the weapon
         weapon.at_attack(self, target)
-        print("after npc attack")
-
         # queue up next attack; use None for target to reference stored target on execution
         delay(weapon.speed + 1, self.attack, None, weapon, persistent=True)
 
@@ -896,7 +899,6 @@ class NPC(Character):
         if not (weapon := self.db.natural_weapon):
             return
         # make sure wielder has enough strength left
-        self.msg(f"ep pre-attack: {self.db.ep}")
         if self.db.ep < weapon.get("energy_cost", 5):
             return False
         # can't attack if on cooldown

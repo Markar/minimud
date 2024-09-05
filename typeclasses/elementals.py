@@ -185,7 +185,8 @@ class Elemental(PlayerCharacter):
         else:
             weapon = self
 
-        self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
+        if target is not None:
+            self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
         location = self.location
 
         if not (combat_script := location.scripts.get("combat")):
@@ -195,35 +196,8 @@ class Elemental(PlayerCharacter):
             location.scripts.add(CombatScript, key="combat")
             combat_script = location.scripts.get("combat")
         combat_script = combat_script[0]
-        self.db.combat_target = target
-        # adding a combatant to combat just returns True if they're already there, so this is safe
-        # if not combat_script.add_combatant(self, enemy=target):
-        #     return
-        self.attack(target, weapon)
-
-    def enter_combat(self, target, **kwargs):
-        """
-        initiate combat against another character
-        """
-        if weapons := self.wielding:
-            weapon = weapons[0]
-        else:
-            weapon = self
-
-        self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
-        location = self.location
-
-        if not (combat_script := location.scripts.get("combat")):
-            # there's no combat instance; start one
-            from typeclasses.scripts import CombatScript
-
-            location.scripts.add(CombatScript, key="combat")
-            combat_script = location.scripts.get("combat")
-        combat_script = combat_script[0]
-
         self.db.combat_target = target
         # adding a combatant to combat just returns True if they're already there, so this is safe
         if not combat_script.add_combatant(self, enemy=target):
             return
-
         self.attack(target, weapon)

@@ -51,7 +51,6 @@ class RoomParent(ObjectParent):
         super().at_object_leave(mover, destination, **kwargs)
         if combat := self.scripts.get("combat"):
             combat = combat[0]
-            print(f"at_object_leave room - remove_combatant: {combat}")
             combat.remove_combatant(mover)
         # only react if the arriving object is a character
         if "character" in mover._content_types:

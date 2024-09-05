@@ -161,6 +161,8 @@ class FireElemental(Elemental):
         weapon = FireAttack()
 
         if not self.in_combat:
+            self.enter_combat(target)
+            target.enter_combat(self)
             return
         # can't attack if we're fleeing!
         if self.db.fleeing:

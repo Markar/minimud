@@ -181,13 +181,15 @@ class EarthElemental(Elemental):
         weapon = EarthAttack()
 
         if not self.in_combat:
+            self.enter_combat(target)
+            target.enter_combat(self)
             return
+
         # can't attack if we're fleeing!
         if self.db.fleeing:
             return
         # make sure that we can use our chosen weapon
         if not (hasattr(weapon, "at_pre_attack") and hasattr(weapon, "at_attack")):
-            self.msg(f"You cannot attack with {weapon.get_numbered_name(1, self)}.")
             return
         if not weapon.at_pre_attack(self):
             # the method handles its own error messaging
