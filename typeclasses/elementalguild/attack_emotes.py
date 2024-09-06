@@ -190,3 +190,60 @@ class AttackEmotes:
                 f"{color}$You() $conj(devour) {tn}{color} with the whirlwind!!!",
                 f"{color}$You() $conj(obliterate) {tn}{color} with the whirlwind!!!",
             ]
+        # WATER ELEMENTAL ATTACK EMOTES
+        if emote == "tidal_wave":
+            return [
+                f"{color}$You() summon a massive tidal wave that crashes down on {tn}{color}, drenching them from head to toe!",
+                f"{color}$pron(Your) tidal wave swells and surges towards {tn}{color}, sweeping them off their feet!",
+                f"{color}$You() conjure a tidal wave that engulfs {tn}{color}, leaving them gasping for air!",
+                f"{color}$pron(Your) tidal wave crashes into {tn}{color} with incredible force, leaving them completely submerged!",
+                f"{color}$You() create a tidal wave that traps {tn}{color} in a swirling vortex of water, making escape impossible!",
+                f"{color}$pron(Your) tidal wave rises higher and higher, swallowing {tn}{color} whole!",
+                f"{color}$You() unleash a tidal wave that crashes down on {tn}{color}, obliterating everything in its path!",
+                f"{color}$You() summon a tidal wave so powerful that it lifts {tn}{color} high into the air before crashing them back down!",
+                f"{color}$You() conjure a tidal wave that spins {tn}{color} around in a whirlpool of water, disorienting them!",
+                f"{color}$You() create a tidal wave that crashes into {tn}{color} with such force that it shatters the ground beneath them!",
+                f"{color}$You() summon a tidal wave that engulfs {tn}{color}, leaving them helpless against the overwhelming force of water!",
+            ]
+        if emote == "water_jet":
+            return [
+                f"{color}$You() unleash a torrential downpour, summoning a colossal water spout that crashes into {tn}{color}, drenching them from head to toe!",
+                f"{color}$pron(Your) water jet transforms into a mighty tidal wave, surging towards {tn}{color} with unstoppable force!",
+                f"{color}$You() conjure a water jet infused with the power of a raging storm, striking {tn}{color} with a thunderous impact!",
+                f"{color}$pron(Your) water jet transforms into a raging waterfall, cascading down upon {tn}{color} with immense power!",
+                f"{color}$You() create a water jet that morphs into a colossal tsunami, engulfing {tn}{color} in a swirling vortex of destruction!",
+                f"{color}$pron(Your) water jet rises higher and higher, transforming into a towering waterspout that lifts {tn}{color} into the sky!",
+                f"{color}$You() unleash a water jet so powerful that it creates a massive whirlpool, sucking {tn}{color} into its watery depths!",
+                f"{color}$You() summon a water jet infused with the fury of a hurricane, crashing down on {tn}{color} with devastating force!",
+                f"{color}$You() conjure a water jet that transforms into a swirling maelstrom, spinning {tn}{color} around in a vortex of chaos!",
+                f"{color}$You() create a water jet that crashes into {tn}{color} with the force of a tidal wave, leaving destruction in its wake!",
+                f"{color}$You() summon a water jet that engulfs {tn}{color}, unleashing a deluge of water that leaves them helpless and overwhelmed!",
+            ]
+        if emote == "maelstrom":
+            return [
+                f"{color}$You() create a massive maelstrom that engulfs {tn}{color}, trapping them in a swirling vortex of water!",
+                f"{color}$pron(Your) maelstrom surges towards {tn}{color}, sweeping them off their feet!",
+                f"{color}$You() conjure a maelstrom that crashes into {tn}{color}, leaving them gasping for air!",
+                f"{color}$pron(Your) maelstrom crashes into {tn}{color} with incredible force, leaving them completely submerged!",
+                f"{color}$You() create a maelstrom that traps {tn}{color} in a swirling vortex of water, making escape impossible!",
+                f"{color}$pron(Your) maelstrom rises higher and higher, swallowing {tn}{color} whole!",
+                f"{color}$You() unleash a maelstrom that crashes down on {tn}{color}, obliterating everything in its path!",
+                f"{color}$You() summon a maelstrom so powerful that it lifts {tn}{color} high into the air before crashing them back down!",
+                f"{color}$You() conjure a maelstrom that spins {tn}{color} around in a whirlpool of water, disorienting them!",
+                f"{color}$You() create a maelstrom that crashes into {tn}{color} with such force that it shatters the ground beneath them!",
+                f"{color}$You() summon a maelstrom that engulfs {tn}{color}, leaving them helpless against the overwhelming force of water!",
+            ]
+        if emote == "ice_shard":
+            return [
+                f"{color}$You() hurl a shard of ice at {tn}{color}, but it misses.",
+                f"{color}$pron(Your) ice shard grazes {tn}{color}, leaving a frosty mark.",
+                f"{color}$You() $conj(pelt) {tn}{color} with shards of ice.",
+                f"{color}$pron(Your) ice shard strikes {tn}{color} with a sharp chill.",
+                f"{color}$You() $conj(hurl) a shard of ice at {tn}{color}, knocking them back.",
+                f"{color}$pron(Your) ice shard pierces {tn}{color} with a cold sting.",
+                f"{color}$You() $conj(slam) {tn}{color} with a massive shard of ice.",
+                f"{color}$You() $conj(crush) {tn}{color} with a shard of ice!!",
+                f"{color}$You() $conj(pummel) {tn}{color} with shards of ice!!!",
+                f"{color}$You() $conj(smash) {tn}{color} with a massive shard of ice, leaving them frozen!!!",
+                f"{color}$You() $conj(destroy) {tn}{color} with a massive shard of ice, leaving them shattered!!!",
+            ]

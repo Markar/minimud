@@ -34,8 +34,6 @@ class WaterAttack(ElementalAttack):
         else:
             dmg += 65
 
-        dmg += 5 + glvl * 2 + stat_bonus
-
         damage = int(uniform(dmg / 2, dmg))
         return damage
 

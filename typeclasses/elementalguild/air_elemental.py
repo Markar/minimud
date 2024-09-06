@@ -5,7 +5,6 @@ from evennia import TICKER_HANDLER as tickerhandler
 from commands.elemental_cmds import ElementalCmdSet
 from typeclasses.elementalguild.air_elemental_attack import AirAttack
 
-# from typeclasses.elementalguild.attack_emotes import AttackEmotes
 from typeclasses.elementals import Elemental
 
 

@@ -1,5 +1,5 @@
 import math
-from random import uniform
+from random import uniform, randint
 from evennia.utils import delay, iter_to_str
 from evennia import TICKER_HANDLER as tickerhandler
 from commands.elemental_cmds import ElementalCmdSet
@@ -45,7 +45,7 @@ class WaterElemental(Elemental):
             "fluid agility": 1,
             "aqua resilience": 1,
             "tidal force": 1,
-            "hydro armor": 1,
+            "ice mastery": 1,
             "aqua infusion": 1,
             "wave control": 1,
             "elemental synergy": 1,
@@ -70,30 +70,24 @@ class WaterElemental(Elemental):
         chunks = []
 
         # add resource levels
-        hp = math.floor(self.db.hp)
-        hpmax = self.db.hpmax
-        fp = math.floor(self.db.fp)
-        fpmax = self.db.fpmax
-        ep = math.floor(self.db.ep)
-        epmax = self.db.epmax
+        hp = int(self.db.hp)
+        hpmax = int(self.db.hpmax)
+        fp = int(self.db.fp)
+        fpmax = int(self.db.fpmax)
+        ep = int(self.db.ep)
+        epmax = int(self.db.epmax)
         burnout_count = self.db.burnout["count"]
         burnout_max = self.db.burnout["max"]
 
-        boVis = ""
-        # regrowthVis = ""
-        if self.db.burnout["active"]:
-            boVis = "B"
-        if self.db.regrowth:
-            regrowthVis = "CG"
-
         chunks.append(
-            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g |gBurnouts: |G{burnout_count}/{burnout_max} |Y{boVis} |Y{regrowthVis}"
+            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g"
         )
-        print(f"looker != self {looker} and self {self}")
-        if looker != self:
-            chunks.append(
-                f"|gE: |G{looker.get_display_name(self, **kwargs)} ({looker.db.hp})"
-            )
+        if self.db.burnout["count"] > 0:
+            chunks.append(f"|YBurnout: |G{burnout_count}/{burnout_max}|n")
+        if self.db.burnout["active"]:
+            chunks.append(f"|YB")
+        if self.db.aqua_shield == True:
+            chunks.append(f"|YAS")
 
         # get all the current status flags for this character
         if status_tags := self.tags.get(category="status", return_list=True):
@@ -238,6 +232,43 @@ class WaterElemental(Elemental):
 
         return to_me
 
+    def _calculate_dodge(self):
+        glvl = self.db.guild_level
+
+        fluid_agility = self.db.skills.get("aerial agility", 1)
+
+        base_dodge = 0
+        max_dodge = 50
+
+        water_form_bonus = 0
+        if self.db.water_form:
+            water_form_bonus = 10
+
+        dodge = (
+            base_dodge
+            + water_form_bonus
+            + (fluid_agility * 1.5)
+            + (glvl * 0.2)
+            + (self.db.dexterity * 0.1)
+        )
+        # 20 + 9 + 16 + 6 + 3 = 54
+        if fluid_agility <= 4:
+            dodge += 1
+        if fluid_agility <= 7:
+            dodge += 2
+        if fluid_agility <= 10:
+            dodge += 3
+        if glvl >= 10:
+            dodge += 1
+        if glvl >= 20:
+            dodge += 2
+        if glvl >= 30:
+            dodge += 3
+        if dodge > max_dodge:
+            dodge = max_dodge
+
+        return dodge
+
     def at_damage(self, attacker, damage, damage_type=None):
         """
         Apply damage, after taking into account damage resistances.
@@ -247,45 +278,54 @@ class WaterElemental(Elemental):
         con = self.traits.con.value
         hp = self.db.hp
         hpmax = self.db.hpmax
-        fluid_agility = self.db.skills.get("fluid agility", 0)
         aqua_resilience = self.db.skills.get("aqua resilience", 0)
-        status = self.get_display_status(self)
-        # self.msg(
-        #     f"|cYou have {fluid_agility} fluid agility and {aqua_resilience} aqua resilience.|n"
-        # )
+        water_mastery = self.db.skills.get("water mastery", 0)
+
         hp_percentage = hp / hpmax
         reaction = int(self.db.reaction_percentage or 1) / 100
+
+        percentage_reduction = 0
+        flat_reduction = 0
+
+        # Calculate dodge
+        dodge = self._calculate_dodge()
+        ran = randint(1, 100)
+        if ran <= dodge:
+            self.msg(f"|cYou dodge the attack!")
+            attacker.msg(f"{self.get_display_name(attacker)} dodges your attack!")
+            return
+
+        # # Flat damage reduction - 50 con = 5 reduction, glvl 30 = 1.5 reduction
+        flat_reduction = (
+            con * 0.1 + glvl * 0.05 + aqua_resilience * 0.1 + water_mastery * 0.05
+        )
+
+        # # Percentage damage reduction 2% per skill level
+        percentage_reduction = aqua_resilience * 0.02
+
+        # apply aqua_shield after defense if it's enabled
+        if self.db.aqua_shield:
+            water_shield_absorbed = uniform(aqua_resilience / 3, aqua_resilience)
+            damage -= water_shield_absorbed
+            self.msg(f"|cYour water shield blocks some damage!")
+
+        # Apply randomized flat reduction
+        damage -= uniform(flat_reduction / 2, flat_reduction)
+
+        # Apply percentage reduction
+        damage *= 1 - percentage_reduction
 
         # Apply (worn) defense reduction
         damage -= self.defense(damage_type)
 
-        # # Flat damage reduction - 50 con = 5 reduction, glvl 30 = 1.5 reduction
-        # flat_reduction = con * 0.1 + glvl * 0.05
-
-        # # Percentage damage reduction 2% per skill level
-        # percentage_reduction = rock_solid_defense * 0.02
-
-        # # Apply flat reduction
-        # damage -= flat_reduction
-
-        # # Apply percentage reduction
-        # damage *= 1 - percentage_reduction
-
-        # # Apply defense reduction
-        # damage -= self.defense(damage_type)
-
-        # apply mineral_fortification after defense if it's enabled
-        # if damage_type in ("blunt", "edged") and self.db.reactive_armor:
-        #     mineral_fort_absorbed = uniform(mineral_fort / 3, mineral_fort)
-        #     damage -= mineral_fort_absorbed
-        #     self.msg(f"|cYour mineral fortification blocks some damage!")
+        # randomize damage
+        damage = uniform(damage / 2, damage)
 
         # Make sure damage is an integer, similar to floor rounding
         damage = int(damage)
 
         # Ensure damage doesn't go below zero
         damage = max(damage, 0)
-
         # Apply the damage to the character
         self.db.hp -= damage
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
@@ -293,7 +333,6 @@ class WaterElemental(Elemental):
 
         # Get the attack emote
         attacker.get_npc_attack_emote(self, damage, self.get_display_name(self))
-        self.msg(prompt=status)
 
         # Check if the character is below the reaction percentage
         if hp_percentage < reaction and glvl > 3:
