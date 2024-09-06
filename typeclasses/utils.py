@@ -1,5 +1,6 @@
 from evennia.prototypes import spawner
 from random import randint, uniform
+from commands.command import Command
 
 
 def get_article(word):
@@ -51,3 +52,12 @@ def SpawnMob(self, xp, level, hits, name, tag):
         mob.db.level = level
         mob.db.natural_weapon["damage"] = damage
         mob.db.natural_weapon["hits"] = hits
+
+
+class PowerCommand(Command):
+    def func(self):
+        caller = self.caller
+        if not caller.cooldowns.ready("global_cooldown"):
+            caller.msg(f"|CNot so fast!")
+            return False
+        caller.cooldowns.add("global_cooldown", 2)

@@ -34,8 +34,6 @@ class AirAttack(ElementalAttack):
         else:
             dmg += 65
 
-        dmg += glvl * 2
-
         damage = int(uniform(dmg / 2, dmg))
         return damage
 
@@ -44,11 +42,23 @@ class AirAttack(ElementalAttack):
 
         if wielder.db.strategy == "melee":
             self.speed = 2
-            self._calculate_melee_damage(wielder)
+
+        dmg = self._calculate_melee_damage(wielder)
+
+        storm_form_cost_multiplier = 3
+        wind_mastery = wielder.db.wind_mastery
+        tempest_control = wielder.db.tempest_control
+
+        if wielder.db.storm_form:
+            storm_cost = (
+                storm_form_cost_multiplier
+                - (wind_mastery * 0.1)
+                + (tempest_control * 0.3)
+            )
+            self.energy_cost = self.energy_cost * storm_cost
 
         # Subtract energy and apply damage to target before their defenses
         wielder.db.ep -= self.energy_cost
-        dmg = self._calculate_melee_damage(wielder)
         target.at_damage(wielder, dmg, "blunt", "air_elemental_melee")
 
         wielder.msg(f"[ Cooldown: {self.speed} seconds ]")

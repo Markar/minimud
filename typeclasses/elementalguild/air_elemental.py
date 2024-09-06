@@ -4,7 +4,8 @@ from evennia.utils import delay, iter_to_str
 from evennia import TICKER_HANDLER as tickerhandler
 from commands.elemental_cmds import ElementalCmdSet
 from typeclasses.elementalguild.air_elemental_attack import AirAttack
-from typeclasses.elementalguild.attack_emotes import AttackEmotes
+
+# from typeclasses.elementalguild.attack_emotes import AttackEmotes
 from typeclasses.elementals import Elemental
 
 
@@ -40,12 +41,14 @@ class AirElemental(Elemental):
         self.db.fpregen = 1
         self.db.epregen = 1
         self.db.strategy = "melee"
+        self.db.cyclone_armor = {"hits": 0}
+        self.db.storm_form = False
+        self.db.air_form = False
         self.db.skills = {
             "wind mastery": 1,
             "aerial agility": 1,
             "storm resilience": 1,
             "gale force": 1,
-            "cyclone armor": 1,
             "zephyr infusion": 1,
             "tempest control": 1,
             "elemental harmony": 1,
@@ -70,25 +73,29 @@ class AirElemental(Elemental):
         chunks = []
 
         # add resource levels
-        hp = math.floor(self.db.hp)
-        hpmax = self.db.hpmax
-        fp = math.floor(self.db.fp)
-        fpmax = self.db.fpmax
-        ep = math.floor(self.db.ep)
-        epmax = self.db.epmax
+        hp = int(self.db.hp)
+        hpmax = int(self.db.hpmax)
+        fp = int(self.db.fp)
+        fpmax = int(self.db.fpmax)
+        ep = int(self.db.ep)
+        epmax = int(self.db.epmax)
         burnout_count = self.db.burnout["count"]
         burnout_max = self.db.burnout["max"]
 
-        boVis = ""
-        # regrowthVis = ""
-        if self.db.burnout["active"]:
-            boVis = "B"
-        if self.db.regrowth:
-            regrowthVis = "CG"
-
         chunks.append(
-            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g |gBurnouts: |G{burnout_count}/{burnout_max} |Y{boVis} |Y{regrowthVis}"
+            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g"
         )
+        if self.db.burnout["count"] > 0:
+            chunks.append(f"|YBurnout: |G{burnout_count}/{burnout_max}|n")
+        if self.db.burnout["active"]:
+            chunks.append(f"|YB")
+        if self.db.storm_form:
+            chunks.append(f"|gStorm")
+        if self.db.air_form:
+            chunks.append(f"|gAir")
+        if self.db.cyclone_armor["hits"] > 0:
+            chunks.append(f"|gCA")
+
         print(f"looker != self {looker} and self {self}")
         if looker != self:
             chunks.append(
@@ -196,46 +203,133 @@ class AirElemental(Elemental):
                 # queue up next attack; use None for target to reference stored target on execution
                 delay(speed + 1, self.attack, None, weapon, persistent=True)
 
+    def _calculate_dodge(self):
+        glvl = self.db.guild_level
+
+        aerial_agility = self.db.skills.get("aerial agility", 1)
+        wind_mastery = self.db.skills.get("wind mastery", 1)
+
+        base_dodge = 20
+        max_dodge = 80
+
+        dodge = (
+            base_dodge
+            + (aerial_agility * 2)
+            + (glvl * 0.3)
+            + (self.db.dexterity * 0.2)
+            + (wind_mastery * 0.25)
+        )
+        # 20 + (22 + 8) + 9 + 16 + 2.5 = 77.5
+        if aerial_agility <= 4:
+            dodge += 2
+        if aerial_agility <= 7:
+            dodge += 4
+        if aerial_agility <= 10:
+            dodge += 6
+        if glvl >= 10:
+            dodge += 1
+        if glvl >= 20:
+            dodge += 2
+        if glvl >= 30:
+            dodge += 3
+        if dodge > max_dodge:
+            dodge = max_dodge
+
+        return dodge
+
     def at_damage(self, attacker, damage, damage_type=None):
         """
         Apply damage, after taking into account damage resistances.
         """
         glvl = self.db.guild_level
+        con = self.traits.con.value
         hp = self.db.hp
         hpmax = self.db.hpmax
-        dex = self.db.dexterity
-        form_dodge = 25
 
-        dodge = form_dodge + glvl + dex / 3
-        if dodge > 90:
-            dodge = 90
+        storm_resilience = self.db.skills.get("storm resilience", 1)
+        cyclone_armor = self.db.skills.get("cyclone armor", 1)
+        wind_mastery = self.db.skills.get("wind mastery", 1)
+
+        hp_percentage = hp / hpmax
+        reaction = int(self.db.reaction_percentage or 1) / 100
+
+        percentage_reduction = 0
+        flat_reduction = 0
+
+        dodge = self._calculate_dodge()
 
         ran = randint(1, 100)
         if ran <= dodge:
             self.msg(f"|cYou dodge the attack!")
             attacker.msg(f"{self.get_display_name(attacker)} dodges your attack!")
             return
-        elif ran + ran <= dodge:
-            self.msg(f"|cYou parry the attack!")
-            attacker.msg(f"{self.get_display_name(attacker)} parries your attack!")
-            damage *= 100 - dodge / 200
 
-        status = self.get_display_status(self)
+        # Apply (worn) defense reduction
         damage -= self.defense(damage_type)
 
+        # Flat damage reduction - 50 con = 5 reduction, glvl 30 = 1.5 reduction
+        flat_reduction = (
+            con * 0.1 + glvl * 0.05 + wind_mastery * 0.05 + storm_resilience * 0.1
+        )
+
+        # Percentage damage reduction 2% per skill level
+        percentage_reduction = 0
+
+        # Additional damage reduction from earth shield
+        if self.db.cyclone_armor["hits"] > 0:
+            cyclone_armor_reduction = cyclone_armor * 0.03 + storm_resilience * 0.02
+            percentage_reduction += cyclone_armor_reduction
+            flat_reduction += cyclone_armor + storm_resilience
+
+            if self.db.cyclone_armor["hits"] == 1:
+                deactivateMsg = f"|C$Your() cyclone armor dissipates, leaving $pron(you) vulnerable to attacks."
+                self.location.msg_contents(deactivateMsg, from_obj=self)
+
+            self.db.cyclone_armor["hits"] -= 1
+            if randint(1, 100) <= 33:
+                self.msg(
+                    f"|cYour cyclone armor absorbs the incoming attack, but is weakened by the impact.|n"
+                )
+            elif randint(1, 100) <= 66:
+                self.msg(
+                    f"|cA swirling vortex of air forms around you, deflecting the incoming attack with a powerful gust.|n"
+                )
+            elif randint(1, 100) <= 100:
+                self.msg(
+                    f"|cThe force of the blow is diminished as the shield of air absorbs the impact, leaving you unharmed and ready to counterattack!|n"
+                )
+
+        # Apply randomized flat reduction
+        damage -= uniform(flat_reduction / 2, flat_reduction)
+
+        # Apply percentage reduction
+        damage *= 1 - percentage_reduction
+
+        # Apply defense reduction
+        damage -= self.defense(damage_type)
+
+        # randomize damage
+        damage = uniform(damage / 2, damage)
+
+        # Make sure damage is an integer, similar to floor rounding
+        damage = int(damage)
+
+        # Ensure damage doesn't go below zero
+        damage = max(damage, 0)
+        # Apply the damage to the character
+        self.db.hp -= damage
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
 
-        self.db.hp -= max(damage, 0)
+        # Get the attack emote
         attacker.get_npc_attack_emote(self, damage, self.get_display_name(self))
-        self.msg(prompt=status)
 
-        hp_percentage = hp / hpmax
-        reaction = int(self.db.reaction_percentage or 1) / 100
-        if hp_percentage < reaction:
-            self.execute_cmd("aerial restoration")
+        # Check if the character is below the reaction percentage
+        if hp_percentage < reaction and glvl > 3:
+            self.msg(f"|cYou are below {reaction*100}% health!|n")
+            self.execute_cmd("terran restoration")
 
-        if self.db.hp <= 0:
+        if hp <= 0:
             self.tags.add("unconscious", category="status")
             self.tags.add("lying down", category="status")
             self.msg(
