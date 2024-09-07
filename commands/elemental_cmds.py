@@ -14,6 +14,10 @@ from typeclasses.elementalguild.constants_and_helpers import (
     SKILLS_COST,
     SKILL_RANKS,
     GUILD_LEVEL_COST_DICT,
+    WATER_TITLES,
+    FIRE_TITLES,
+    AIR_TITLES,
+    EARTH_TITLES,
 )
 
 
@@ -37,6 +41,16 @@ class CmdGAdvance(Command):
     def _adv_level(self):
         caller = self.caller
         cost = GUILD_LEVEL_COST_DICT[caller.db.guild_level + 1]
+        titles = EARTH_TITLES
+        if caller.db.form == "water":
+            titles = WATER_TITLES
+        if caller.db.form == "fire":
+            titles = FIRE_TITLES
+        if caller.db.form == "air":
+            titles = AIR_TITLES
+
+        caller.db.title = titles[caller.db.guild_level]
+
         if caller.db.gxp < cost:
             self.msg(f"|wYou need {cost - caller.db.gxp} more experience to advance.")
             return
@@ -289,17 +303,16 @@ class CmdBig(Command):
 
     def func(self):
         caller = self.caller
-        caller.msg("big")
-        caller.gxp = 1000000000000
-        caller.guild_level = 30
-        caller.exp = 1000000000000
-        caller.traits.con.value = 50
-        caller.traits.int.value = 50
-        caller.traits.dex.value = 50
-        caller.traits.str.value = 50
-        caller.traits.wis.value = 50
-        caller.traits.cha.value = 50
-        caller.db.level = 30
+        caller.msg("GO BIG")
+        caller.db.gxp = 1000000000000
+        caller.db.exp = 1000000000000
+        caller.traits.con.base = 49
+        caller.traits.int.base = 49
+        caller.traits.dex.base = 49
+        caller.traits.str.base = 49
+        caller.traits.wis.base = 49
+        caller.traits.cha.base = 49
+        caller.db.level = 49
         caller.db.skills = {
             "stone mastery": 10,
             "earth resonance": 10,
@@ -354,4 +367,5 @@ class ElementalCmdSet(CmdSet):
         self.add(CmdChooseForm)
         self.add(CmdSkills)
         self.add(CmdTest)
+        self.add(CmdBig)
         self.add(CmdKickstart)

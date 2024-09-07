@@ -263,9 +263,6 @@ class AirElemental(Elemental):
             attacker.msg(f"{self.get_display_name(attacker)} dodges your attack!")
             return
 
-        # Apply (worn) defense reduction
-        damage -= self.defense(damage_type)
-
         # Flat damage reduction - 50 con = 5 reduction, glvl 30 = 1.5 reduction
         flat_reduction = (
             con * 0.1 + glvl * 0.05 + wind_mastery * 0.05 + storm_resilience * 0.1
@@ -304,7 +301,7 @@ class AirElemental(Elemental):
         # Apply percentage reduction
         damage *= 1 - percentage_reduction
 
-        # Apply defense reduction
+        # Apply (worn) defense reduction
         damage -= self.defense(damage_type)
 
         # randomize damage
