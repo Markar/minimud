@@ -267,10 +267,10 @@ class CmdLightningStrike(PowerCommand):
         caller.cooldowns.add("global_cooldown", 2)
         skill_rank = caller.db.skills.get("tempest control", 1) * 10
 
-        damage = self._calculate_damage(skill_rank, caller.traits.str.value, glvl)
+        damage = self._calculate_damage(skill_rank, caller.traits.wis.value, glvl)
         self.msg(f"|gDamage: {damage}")
         target.at_damage(caller, damage, "lightning", "lightning_strike")
-        damage = self._calculate_damage(skill_rank, caller.traits.str.value, glvl)
+        damage = self._calculate_damage(skill_rank, caller.traits.wis.value, glvl)
         self.msg(f"|gDamage: {damage}")
         target.at_damage(caller, damage, "lightning", "lightning_strike")
 
@@ -397,6 +397,13 @@ class CmdCycloneArmor(PowerCommand):
                 + int(caller.traits.con.value / 10)
             )
             caller.adjust_ep(-self.cost)
+        self.msg(
+            f"|cYou raise your arms and a swirling vortex of wind surrounds you, forming a protective barrier."
+        )
+        caller.location.msg_contents(
+            f"|c$You raise $pron(your) arms and a swirling vortex of wind surrounds $you(), forming a protective barrier.",
+            from_obj=caller,
+        )
 
 
 class CmdAerialRestoration(PowerCommand):
@@ -464,6 +471,7 @@ class CmdBurnout(PowerCommand):
     key = "burnout"
     help_category = "air elemental"
     cost = 10
+    guild_level = 10
 
     def func(self):
         caller = self.caller

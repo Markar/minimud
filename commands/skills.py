@@ -65,16 +65,49 @@ STAT_COST_DICT = {
     40: 3220000,
     41: 4350000,
     42: 5880000,
-    43: 7940000,
-    44: 10740000,
-    45: 14500000,
-    46: 19600000,
-    47: 26500000,
-    48: 35800000,
-    49: 48400000,
-    50: 65500000,
-    51: 88500000,
+    43: 7040000,
+    44: 7740000,
+    45: int(7740000 * 1.1),
+    46: int(8514000 * 1.1),
+    47: int(9365400 * 1.1),
+    48: int(10301940 * 1.1),
+    49: int(11332134 * 1.1),
+    50: int(12465347 * 1.1),
+    51: int(13711881 * 1.1),
+    52: int(15083069 * 1.1),
+    53: int(16591376 * 1.1),
+    54: int(18250513 * 1.1),
+    55: int(20075564 * 1.1),
+    56: int(22083120 * 1.1),
+    57: int(24291432 * 1.1),
+    58: int(26720575 * 1.1),
+    59: int(29392432 * 1.1),
+    60: int(32331775 * 1.1),
+    61: int(35565752 * 1.1),
+    62: int(39124427 * 1.1),
+    63: int(43040970 * 1.1),
+    64: int(47352267 * 1.1),
+    65: int(52199093 * 1.1),
+    66: int(57626402 * 1.1),
+    67: int(63683942 * 1.1),
+    68: int(70426436 * 1.1),
+    69: int(77914280 * 1.1),
+    70: int(86214708 * 1.1),
+    71: int(95401179 * 1.1),
+    72: int(105554297 * 1.1),
+    73: int(116109726 * 1.1),
+    74: int(127720698 * 1.1),
+    75: int(140492768 * 1.1),
+    76: int(154541045 * 1.1),
+    77: int(170095149 * 1.1),
+    78: int(187354663 * 1.1),
+    79: int(206576129 * 1.1),
+    80: int(228060742 * 1.1),
+    81: int(252166816 * 1.1),
 }
+# self.msg(sum(STAT_COST_DICT.values()))
+# 2,936,390,438
+
 
 LEVEL_COST_DICT = {
     2: 300,
@@ -128,6 +161,8 @@ LEVEL_COST_DICT = {
     50: 54338000,
     51: 58856600,
 }
+# 56,579,101
+# 565,791,017
 
 
 class CmdStatSheet(Command):
@@ -139,6 +174,7 @@ class CmdStatSheet(Command):
     aliases = ("sheet", "score", "sc")
 
     def func(self):
+        self.msg(sum(LEVEL_COST_DICT.values()))
         caller = self.caller
         levelcost = int(LEVEL_COST_DICT[caller.db.level + 1])
         self.msg(f" |g{caller} {caller.db.title} ({caller.db.alignment})")
@@ -257,6 +293,22 @@ class CmdAdvance(Command):
         caller.db.stat_points += 5
         self.msg(f"You grow more powerful ({caller.db.level})")
 
+    def set_max_hp(self):
+        caller = self.caller
+        caller.db.hpmax = (
+            50
+            + caller.db.level
+            + caller.db.con_increase_amount * caller.traits.con.value
+        )
+
+    def set_max_fp(self):
+        caller = self.caller
+        caller.db.fpmax = (
+            50
+            + caller.db.level
+            + caller.db.int_increase_amount * caller.traits.int.value
+        )
+
     def func(self):
         caller = self.caller
         try:
@@ -291,10 +343,8 @@ class CmdAdvance(Command):
                 caller.db.exp -= cost
                 caller.db.level += 1
                 caller.db.stat_points += 5
-                caller.db.hpmax = caller.db.con_increase_amont * caller.traits.con.value
-                caller.db.fpmax += (
-                    caller.db.int_increase_amount * caller.traits.int.value
-                )
+                self.set_max_hp()
+                self.set_max_fp()
                 caller.msg(f"|rYou grow more powerful ({caller.db.level})")
             else:
                 self.msg(f"stat: {stat}")
@@ -319,15 +369,13 @@ class CmdAdvance(Command):
                 if stat == "con":
                     self.msg(f"con increase amount: {caller.db.con_increase_amount}")
                     self.msg(f"con value: {caller.traits.con.value}")
-                    caller.db.hpmax = (
-                        caller.db.con_increase_amount * caller.traits.con.value
-                    )
+                    self.set_max_hp()
                 if stat == "int":
-                    caller.db.fpmax += (
-                        caller.db.int_increase_amount * caller.traits.int.value
-                    )
+                    self.msg(f"int increase amount: {caller.db.int_increase_amount}")
+                    self.msg(f"int value: {caller.traits.int.value}")
+                    self.set_max_fp()
 
-                self.msg(f"|rYou advance your {stat}")
+                self.msg(f"|rYou advance your {stat} to {current_stat + 1}.")
 
         except ValueError:
             self.msg("Usage: Advance, adv <stat or level>")

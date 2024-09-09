@@ -1,5 +1,5 @@
 import math
-from random import uniform
+from random import randint, uniform, choice
 from evennia.utils import delay, iter_to_str
 from evennia import TICKER_HANDLER as tickerhandler
 from commands.elemental_cmds import ElementalCmdSet
@@ -13,8 +13,8 @@ class FireElemental(Elemental):
     def at_object_creation(self):
         self.cmdset.add(ElementalCmdSet, persistent=True)
         super().at_object_creation()
-        con_increase_amount = 12
-        int_increase_amount = 5
+        con_increase_amount = 10
+        int_increase_amount = 15
         self.db.con_increase_amount = con_increase_amount
         self.db.int_increase_amount = int_increase_amount
         self.db.hpmax = 50 + (con_increase_amount * self.traits.con.value)
@@ -70,25 +70,23 @@ class FireElemental(Elemental):
         chunks = []
 
         # add resource levels
-        hp = math.floor(self.db.hp)
-        hpmax = self.db.hpmax
-        fp = math.floor(self.db.fp)
-        fpmax = self.db.fpmax
-        ep = math.floor(self.db.ep)
-        epmax = self.db.epmax
+        hp = int(self.db.hp)
+        hpmax = int(self.db.hpmax)
+        fp = int(self.db.fp)
+        fpmax = int(self.db.fpmax)
+        ep = int(self.db.ep)
+        epmax = int(self.db.epmax)
         burnout_count = self.db.burnout["count"]
         burnout_max = self.db.burnout["max"]
 
-        boVis = ""
-        # regrowthVis = ""
-        if self.db.burnout["active"]:
-            boVis = "B"
-        if self.db.regrowth:
-            regrowthVis = "CG"
-
         chunks.append(
-            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g |gBurnouts: |G{burnout_count}/{burnout_max} |Y{boVis} |Y{regrowthVis}"
+            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g"
         )
+        if self.db.burnout["count"] > 0:
+            chunks.append(f"|YBurnout: |G{burnout_count}/{burnout_max}|n")
+        if self.db.burnout["active"]:
+            chunks.append(f"|YB")
+
         print(f"looker != self {looker} and self {self}")
         if looker != self:
             chunks.append(
@@ -116,9 +114,12 @@ class FireElemental(Elemental):
 
     def at_tick(self):
         base_regen = self.db.hpregen
+        bonus_hp = 0
         base_ep_regen = self.db.epregen
+        bonus_ep = 0
         base_fp_regen = self.db.fpregen
-        regen = self.db.skills["ember infusion"]
+        bonus_fp = 0
+        regen = self.db.skills.get("ember infusion")
 
         if regen < 2:
             bonus_fp = 0
@@ -131,11 +132,21 @@ class FireElemental(Elemental):
         if regen < 20:
             bonus_fp = int(uniform(4, regen / 3))  # 4-6
 
-        total_fp_regen = base_fp_regen + bonus_fp
+        if self.db.heat_wave["duration"] > 0:
+            rate = self.db.heat_wave["rate"]
+            bonus_fp += uniform(rate / 2, rate + 1)
+            if self.db.heat_wave["duration"] == 1:
+                deactivateMsg = f"|C$Your() body cools down, and the air around $pron(you) returns to normal."
+                self.location.msg_contents(deactivateMsg, from_obj=self)
+            self.db.heat_wave["duration"] -= 1
 
-        self.adjust_hp(base_regen)
-        self.adjust_fp(base_ep_regen)
-        self.adjust_ep(total_fp_regen)
+        total_hp_regen = base_regen + bonus_hp
+        total_fp_regen = base_fp_regen + bonus_fp
+        total_ep_regen = base_ep_regen + bonus_ep
+
+        self.adjust_hp(total_hp_regen)
+        self.adjust_fp(total_fp_regen)
+        self.adjust_ep(total_ep_regen)
 
     def get_display_name(self, looker, **kwargs):
         """
@@ -197,63 +208,98 @@ class FireElemental(Elemental):
                 # queue up next attack; use None for target to reference stored target on execution
                 delay(speed + 1, self.attack, None, weapon, persistent=True)
 
-    def get_player_attack_hit_message(
-        self, attacker, dam, tn, emote="fire_elemental_melee"
-    ):
-        """
-        Get the hit message based on the damage dealt. This is the elemental's
-        version of the method, defaulting to the earth elemental version but
-        should be overridden by subguilds.
+    def _calculate_dodge(self):
+        glvl = self.db.guild_level
 
-        ex:
-            f"{color}$You() swipe at {tn}{color} with a fiery claw, leaving scorch marks.",
-        """
+        blazing_speed = self.db.skills.get("blazing speed", 1)
+        base_dodge = 1
+        max_dodge = 40
 
-        msgs = AttackEmotes.get_emote(attacker, emote, tn, which="left")
+        dodge = (
+            base_dodge + (blazing_speed * 2) + (glvl * 0.3) + (self.db.dexterity * 0.2)
+        )
 
-        if dam <= 0:
-            to_me = msgs[0]
-        elif 1 <= dam <= 5:
-            to_me = msgs[1]
-        elif 6 <= dam <= 12:
-            to_me = msgs[2]
-        elif 13 <= dam <= 20:
-            to_me = msgs[3]
-        elif 21 <= dam <= 30:
-            to_me = msgs[4]
-        elif 31 <= dam <= 50:
-            to_me = msgs[5]
-        elif 51 <= dam <= 80:
-            to_me = msgs[6]
-        elif 81 <= dam <= 140:
-            to_me = msgs[7]
-        elif 141 <= dam <= 225:
-            to_me = msgs[8]
-        elif 225 <= dam <= 325:
-            to_me = msgs[9]
-        else:
-            to_me = msgs[10]
+        if blazing_speed <= 4:
+            dodge += 2
+        if blazing_speed <= 7:
+            dodge += 4
+        if blazing_speed <= 10:
+            dodge += 6
+        if glvl >= 10:
+            dodge += 1
+        if glvl >= 20:
+            dodge += 2
+        if glvl >= 30:
+            dodge += 3
+        if dodge > max_dodge:
+            dodge = max_dodge
 
-        to_me = f"{to_me} ({dam})"
-        self.location.msg_contents(to_me, from_obj=self)
-
-        return to_me
+        return dodge
 
     def at_damage(self, attacker, damage, damage_type=None):
         """
         Apply damage, after taking into account damage resistances.
         """
         glvl = self.db.guild_level
-        status = self.get_display_status(self)
+        hp = self.db.hp
+        hpmax = self.db.hpmax
+        damage -= self.defense(damage_type)
+        inferno_resilience = self.db.skills.get("inferno resilience", 1)
+        molten_armor = self.db.skills.get("molten armor", 1)
+
+        hp_percentage = hp / hpmax
+        reaction = int(self.db.reaction_percentage or 1) / 100
+
+        percentage_reduction = 0
+        flat_reduction = 0
+
+        dodge = self._calculate_dodge()
+
+        ran = randint(1, 100)
+        if ran <= dodge:
+            self.msg(f"You dodge the attack!")
+            attacker.msg(f"{self.get_display_name(attacker)} dodges your attack!")
+            return
+
+        # Flat damage reduction - 50 con = 5 reduction, glvl 30 = 1.5 reduction
+        flat_reduction = self.traits.con.value * 0.1 + glvl * 0.05 + inferno_resilience
+
+        # Additional damage reduction from cyclone armor
+        if self.db.flame_shield["hits"] > 0:
+            flame_shield_reduction = molten_armor * 0.03 + inferno_resilience * 0.02
+            percentage_reduction += flame_shield_reduction
+            flat_reduction += molten_armor + inferno_resilience
+
+            if self.db.flame_shield["hits"] == 1:
+                deactivateMsg = f"|C$Your() flame shield flickers and fades, leaving only a wisp of smoke behind."
+                self.location.msg_contents(deactivateMsg, from_obj=self)
+
+        # Apply randomized flat reduction
+        damage -= uniform(flat_reduction / 2, flat_reduction)
+
+        # Apply percentage reduction
+        damage *= 1 - percentage_reduction
+
+        # Apply (worn) defense reduction
         damage -= self.defense(damage_type)
 
+        # randomize damage
+        damage = uniform(damage / 2, damage)
+
+        # Make sure damage is an integer, similar to floor rounding
+        damage = int(damage)
+
+        # Ensure damage doesn't go below zero
+        damage = max(damage, 0)
+        # Apply the damage to the character
+        self.db.hp -= damage
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
 
-        self.db.hp -= max(damage, 0)
+        # Get the attack emote
         attacker.get_npc_attack_emote(self, damage, self.get_display_name(self))
-        self.msg(prompt=status)
 
+        # Check if the character is below the reaction percentage
         if glvl > 3:
             hp = self.db.hp
             hpmax = self.db.hpmax

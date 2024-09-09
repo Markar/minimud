@@ -804,11 +804,12 @@ class NPC(Character):
             self.tags.add("defeated", category="status")
             attacker.add_best_kill(self)
             # we've been defeated!
-            if combat_script := self.location.scripts.get("combat"):
-                combat_script = combat_script[0]
-                if not combat_script.remove_combatant(self):
-                    # something went wrong...
-                    return
+            if self.location:
+                if combat_script := self.location.scripts.get("combat"):
+                    combat_script = combat_script[0]
+                    if not combat_script.remove_combatant(self):
+                        # something went wrong...
+                        return
 
                 # create loot drops
                 corpse = {

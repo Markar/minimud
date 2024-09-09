@@ -4,12 +4,12 @@ from typeclasses.elementalguild.elemental_attack import ElementalAttack
 
 class FireAttack(ElementalAttack):
     """
-    Earth elementals are known for their strength and durability. They are
-    often found in rocky areas such as mountains and caves, where they can
-    blend in with their surroundings. Earth elementals have the ability to
-    control the earth and rocks around them, using them to attack their
-    enemies. They are also known for their ability to create earthquakes
-    and landslides, which can cause massive damage to their foes.
+    Fire elementals are known for their damage and destruction. They are often
+    found in hot areas such as deserts and volcanoes, where they can
+    move quickly and easily. Fire elementals have the ability to control
+    the fire around them, using it to attack their enemies. They are also
+    known for their ability to create powerful flames and explosions, which
+    can cause massive damage to their foes.
     """
 
     speed = 3
@@ -24,15 +24,15 @@ class FireAttack(ElementalAttack):
         dmg = stat_bonus
 
         if glvl < 10:
-            dmg += 10
+            dmg += 7
         elif glvl < 20:
-            dmg += 30
+            dmg += 14
         elif glvl < 30:
-            dmg += 60
+            dmg += 28
         elif glvl < 40:
-            dmg += 90
+            dmg += 42
         else:
-            dmg += 120
+            dmg += 65
 
         dmg += glvl * 3
 

@@ -13,7 +13,7 @@ class WaterElemental(Elemental):
         self.cmdset.add(ElementalCmdSet, persistent=True)
         super().at_object_creation()
         con_increase_amount = 12
-        int_increase_amount = 5
+        int_increase_amount = 13
         self.db.con_increase_amount = con_increase_amount
         self.db.int_increase_amount = int_increase_amount
         self.db.hpmax = 50 + (con_increase_amount * self.traits.con.value)

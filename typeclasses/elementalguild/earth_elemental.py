@@ -13,8 +13,8 @@ class EarthElemental(Elemental):
     def at_object_creation(self):
         self.cmdset.add(ElementalCmdSet, persistent=True)
         super().at_object_creation()
-        con_increase_amount = 12
-        int_increase_amount = 5
+        con_increase_amount = 15
+        int_increase_amount = 10
         self.db.con_increase_amount = con_increase_amount
         self.db.int_increase_amount = int_increase_amount
         self.db.hpmax = 50 + (con_increase_amount * self.traits.con.value)

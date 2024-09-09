@@ -42,11 +42,11 @@ class CmdGAdvance(Command):
         caller = self.caller
         cost = GUILD_LEVEL_COST_DICT[caller.db.guild_level + 1]
         titles = EARTH_TITLES
-        if caller.db.form == "water":
+        if caller.db.subguild == "water":
             titles = WATER_TITLES
-        if caller.db.form == "fire":
+        if caller.db.subguild == "fire":
             titles = FIRE_TITLES
-        if caller.db.form == "air":
+        if caller.db.subguild == "air":
             titles = AIR_TITLES
 
         caller.db.title = titles[caller.db.guild_level]
@@ -117,9 +117,7 @@ class CmdGuildStatSheet(Command):
 
         # Assuming SKILLS_COST is a dictionary that maps ranks to costs
         for skill, rank in skills:
-            skill_table.add_row(
-                f"|G{skill.title()}", f"{SKILLS_COST[rank]}", f"{SKILL_RANKS[rank]}"
-            )
+            skill_table.add_row(f"|G{skill.title()}", f"{rank}", f"{SKILLS_COST[rank]}")
 
         caller.msg(str(skill_table))
 

@@ -247,3 +247,130 @@ class AttackEmotes:
                 f"{color}$You() $conj(smash) {tn}{color} with a massive shard of ice, leaving them frozen!!!",
                 f"{color}$You() $conj(destroy) {tn}{color} with a massive shard of ice, leaving them shattered!!!",
             ]
+        # FIRE ELEMENTAL ATTACK EMOTES
+        if emote == "fireball":
+            return [
+                f"{color}$You() hurl a fireball at {tn}{color}, but it fizzles out.",
+                f"{color}$pron(Your) fireball singes {tn}{color}, leaving a faint burn.",
+                f"{color}$You() $conj(scorch) {tn}{color} with a fiery blast.",
+                f"{color}$pron(Your) fireball strikes {tn}{color} with a searing heat.",
+                f"{color}$You() $conj(blaze) {tn}{color} with a powerful fireball.",
+                f"{color}$pron(Your) fireball engulfs {tn}{color} in flames.",
+                f"{color}$You() $conj(incinerate) {tn}{color} with a blazing fireball.",
+                f"{color}$You() $conj(char) {tn}{color} with a fireball!!",
+                f"{color}$You() $conj(immolate) {tn}{color} with a fireball!!",
+                f"{color}$You() $conj(consume) {tn}{color} with a fireball!!!",
+                f"{color}$You() $conj(obliterate) {tn}{color} with a fireball!!!",
+            ]
+        if emote == "ember_strike":
+            return [
+                f"{color}$You() lash out at {tn}{color} with a burst of embers, missing entirely.",
+                f"{color}$pron(Your) ember strike sears {tn}{color}, leaving a charred mark.",
+                f"{color}$You() $conj(scorch) {tn}{color} with a fiery touch, igniting their skin.",
+                f"{color}$pron(Your) ember strike leaves {tn}{color} with a blistering heat.",
+                f"{color}$You() $conj(ignite) {tn}{color} with a powerful ember strike, setting them ablaze.",
+                f"{color}$pron(Your) ember strike engulfs {tn}{color} in a fiery inferno.",
+                f"{color}$You() $conj(incinerate) {tn}{color} with a blazing ember strike, reducing them to ashes.",
+                f"{color}$You() $conj(char) {tn}{color} with an ember strike, leaving a trail of smoke.",
+                f"{color}$You() $conj(immolate) {tn}{color} with an ember strike, consuming them in flames.",
+                f"{color}$You() $conj(consume) {tn}{color} with an ember strike, turning them to cinders.",
+                f"{color}$You() $conj(obliterate) {tn}{color} with an ember strike, leaving nothing but ash.",
+            ]
+        if emote == "blazing_maelstrom":
+            return [
+                f"{color}$You() create a massive blazing maelstrom that engulfs {tn}{color}, trapping them in a swirling vortex of fire!",
+                f"{color}$pron(Your) blazing maelstrom surges towards {tn}{color}, engulfing them in a whirlwind of flames!",
+                f"{color}$You() conjure a blazing maelstrom that crashes into {tn}{color}, leaving them scorched and smoldering!",
+                f"{color}$pron(Your) blazing maelstrom strikes {tn}{color} with incredible force, leaving them consumed by flames!",
+                f"{color}$You() create a blazing maelstrom that traps {tn}{color} in a swirling vortex of fire, making escape impossible!",
+                f"{color}$pron(Your) blazing maelstrom rises higher and higher, engulfing {tn}{color} in a towering inferno!",
+                f"{color}$You() unleash a blazing maelstrom that crashes down on {tn}{color}, obliterating everything in its path!",
+                f"{color}$You() summon a blazing maelstrom so powerful that it lifts {tn}{color} high into the air before incinerating them!",
+                f"{color}$You() conjure a blazing maelstrom that engulfs {tn}{color}, leaving them helpless against the overwhelming force of fire!",
+                f"{color}$You() create a blazing maelstrom that crashes into {tn}{color} with such force that it leaves them consumed by flames!",
+                f"{color}$You() summon a blazing maelstrom that engulfs {tn}{color} in a whirlwind of fire, reducing them to a smoldering heap!",
+            ]
+        if emote == "inferno":
+            return [
+                f"{color}$You() create a massive inferno that engulfs {tn}{color} in a blazing conflagration!",
+                f"{color}$pron(Your) inferno surges towards {tn}{color}, leaving them scorched and smoldering!",
+                f"{color}$You() conjure an inferno that crashes into {tn}{color}, leaving them engulfed in a blazing inferno!",
+                f"{color}$pron(Your) inferno strikes {tn}{color} with incredible force, leaving them consumed by flames!",
+                f"{color}$You() create an inferno that traps {tn}{color} in a swirling vortex of fire, making escape impossible!",
+                f"{color}$pron(Your) inferno rises higher and higher, engulfing {tn}{color} in a towering inferno!",
+                f"{color}$You() unleash an inferno that crashes down on {tn}{color}, obliterating everything in its path!",
+                f"{color}$You() summon an inferno so powerful that it lifts {tn}{color} high into the air before incinerating them!",
+                f"{color}$You() conjure an inferno that engulfs {tn}{color}, leaving them helpless against the overwhelming force of fire!",
+                f"{color}$You() create an inferno that crashes into {tn}{color} with such force that it leaves them consumed by flames!",
+                f"{color}$You() summon an inferno that engulfs {tn}{color} in a whirlwind of fire, reducing them to a smoldering heap!",
+            ]
+        if emote == "fire_whip":
+            return [
+                f"{color}$You() lash out at {tn}{color} with a fiery whip, but it misses.",
+                f"{color}$pron(Your) fire whip singes {tn}{color}, leaving a faint burn.",
+                f"{color}$You() $conj(scorch) {tn}{color} with a fiery lash.",
+                f"{color}$pron(Your) fire whip strikes {tn}{color} with a searing heat.",
+                f"{color}$You() $conj(blaze) {tn}{color} with a powerful fire whip.",
+                f"{color}$pron(Your) fire whip engulfs {tn}{color} in flames.",
+                f"{color}$You() $conj(incinerate) {tn}{color} with a blazing fire whip.",
+                f"{color}$You() $conj(char) {tn}{color} with a fire whip!!",
+                f"{color}$You() $conj(immolate) {tn}{color} with a fire whip!!",
+                f"{color}$You() $conj(consume) {tn}{color} with a fire whip!!!",
+                f"{color}$You() $conj(obliterate) {tn}{color} with a fire whip!!!",
+            ]
+        if emote == "lava_burst":
+            return [
+                f"{color}$You() hurl a burst of lava at {tn}{color}, but it fizzles out.",
+                f"{color}$pron(Your) lava burst singes {tn}{color}, leaving a faint burn.",
+                f"{color}$You() $conj(scorch) {tn}{color} with a fiery blast.",
+                f"{color}$pron(Your) lava burst strikes {tn}{color} with a searing heat.",
+                f"{color}$You() $conj(blaze) {tn}{color} with a powerful lava burst.",
+                f"{color}$pron(Your) lava burst engulfs {tn}{color} in flames.",
+                f"{color}$You() $conj(incinerate) {tn}{color} with a blazing lava burst.",
+                f"{color}$You() $conj(char) {tn}{color} with a lava burst!!",
+                f"{color}$You() $conj(immolate) {tn}{color} with a lava burst!!",
+                f"{color}$You() $conj(consume) {tn}{color} with a lava burst!!!",
+                f"{color}$You() $conj(obliterate) {tn}{color} with a lava burst!!!",
+            ]
+        if emote == "fire_punch":
+            return [
+                f"{color}$You() swipe at {tn}{color} with a fiery fist, but it misses.",
+                f"{color}$pron(Your) fire punch singes {tn}{color}, leaving a faint burn.",
+                f"{color}$You() $conj(scorch) {tn}{color} with a fiery strike.",
+                f"{color}$pron(Your) fire punch strikes {tn}{color} with a searing heat.",
+                f"{color}$You() $conj(blaze) {tn}{color} with a powerful fire punch.",
+                f"{color}$pron(Your) fire punch engulfs {tn}{color} in flames.",
+                f"{color}$You() $conj(incinerate) {tn}{color} with a blazing punch.",
+                f"{color}$You() $conj(char) {tn}{color} with a fiery punch!!",
+                f"{color}$You() $conj(immolate) {tn}{color} with a fiery punch!!",
+                f"{color}$You() $conj(consume) {tn}{color} with a fiery punch!!!",
+                f"{color}$You() $conj(obliterate) {tn}{color} with a fiery punch!!!",
+            ]
+        if emote == "sunburst":
+            return [
+                f"{color}$You() try to create a sunburst, but nothing happens.",
+                f"{color}$pron(Your) sunburst shines brightly, illuminating the area around {tn}{color}.",
+                f"{color}$You() $conj(burn) {tn}{color} with the intense light of a sunburst.",
+                f"{color}$pron(Your) sunburst leaves {tn}{color} blinded by the sudden burst of light.",
+                f"{color}$You() $conj(scorch) {tn}{color} with the searing heat of a sunburst.",
+                f"{color}$pron(Your) sunburst engulfs {tn}{color} in a blinding flash of light.",
+                f"{color}$You() $conj(incinerate) {tn}{color} with the intense heat of a sunburst.",
+                f"{color}$You() $conj(char) {tn}{color} with a sunburst!!",
+                f"{color}$You() $conj(immolate) {tn}{color} with a sunburst!!",
+                f"{color}$You() $conj(consume) {tn}{color} with a sunburst!!!",
+                f"{color}$You() $conj(obliterate) {tn}{color} with a sunburst!!!",
+            ]
+        if emote == "flamestrike":
+            return [
+                f"{color}$You() try to create a flamestrike, but nothing happens.",
+                f"{color}$pron(Your) flamestrike scorches the ground near {tn}{color}.",
+                f"{color}$You() $conj(burn) {tn}{color} with a fiery blast.",
+                f"{color}$pron(Your) flamestrike leaves {tn}{color} feeling the heat.",
+                f"{color}$You() $conj(scorch) {tn}{color} with a powerful flamestrike.",
+                f"{color}$pron(Your) flamestrike engulfs {tn}{color} in flames.",
+                f"{color}$You() $conj(incinerate) {tn}{color} with a blazing flamestrike.",
+                f"{color}$You() $conj(char) {tn}{color} with a flamestrike!!",
+                f"{color}$You() $conj(immolate) {tn}{color} with a flamestrike!!",
+                f"{color}$You() $conj(consume) {tn}{color} with a flamestrike!!!",
+                f"{color}$You() $conj(obliterate) {tn}{color} with a flamestrike!!!",
+            ]

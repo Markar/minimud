@@ -249,7 +249,6 @@ class CmdWaterJet(PowerCommand):
         if not caller.cooldowns.ready("water_jet"):
             caller.msg(f"|BNot so fast!")
             return False
-        caller.cooldowns.add("water_jet", 4)
 
         if not target:
             target = caller.search(self.args)

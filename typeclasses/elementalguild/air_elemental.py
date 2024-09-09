@@ -13,8 +13,8 @@ class AirElemental(Elemental):
     def at_object_creation(self):
         self.cmdset.add(ElementalCmdSet, persistent=True)
         super().at_object_creation()
-        con_increase_amount = 12
-        int_increase_amount = 5
+        con_increase_amount = 13
+        int_increase_amount = 12
         self.db.con_increase_amount = con_increase_amount
         self.db.int_increase_amount = int_increase_amount
         self.db.hpmax = 50 + (con_increase_amount * self.traits.con.value)
@@ -265,17 +265,14 @@ class AirElemental(Elemental):
 
         # Flat damage reduction - 50 con = 5 reduction, glvl 30 = 1.5 reduction
         flat_reduction = (
-            con * 0.1 + glvl * 0.05 + wind_mastery * 0.05 + storm_resilience * 0.1
+            con * 0.1 + glvl * 0.05 + wind_mastery * 0.05 + storm_resilience
         )
 
-        # Percentage damage reduction 2% per skill level
-        percentage_reduction = 0
-
-        # Additional damage reduction from earth shield
+        # Additional damage reduction from cyclone armor
         if self.db.cyclone_armor["hits"] > 0:
             cyclone_armor_reduction = cyclone_armor * 0.03 + storm_resilience * 0.02
             percentage_reduction += cyclone_armor_reduction
-            flat_reduction += cyclone_armor + storm_resilience
+            flat_reduction += storm_resilience + storm_resilience + wind_mastery * 0.5
 
             if self.db.cyclone_armor["hits"] == 1:
                 deactivateMsg = f"|C$Your() cyclone armor dissipates, leaving $pron(you) vulnerable to attacks."
