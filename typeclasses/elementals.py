@@ -39,10 +39,7 @@ class Elemental(PlayerCharacter):
             "energy_cost": 10,
         }
         self.db.guild = "elemental"
-        self.db.subguild = "none"
         self.db._wielded = {"left": None, "right": None}
-        self.db.emit = 1
-        self.db.maxEmit = 1
         self.db.hpregen = 1
         self.db.fpregen = 1
         self.db.epregen = 1

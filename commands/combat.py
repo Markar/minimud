@@ -67,6 +67,7 @@ class CmdAttack(Command):
         else:
             # use our bare hands if we aren't wielding anything
             weapon = BareHand()
+
         # find our enemy!
         target = self.caller.search(self.target)
         if not target:
@@ -90,6 +91,7 @@ class CmdAttack(Command):
             return
 
         self.caller.db.combat_target = target
+
         # execute the actual attack
         self.caller.attack(target, weapon)
 
@@ -365,7 +367,6 @@ class CmdStatus(Command):
         if not self.args:
             target = self.caller
             status = target.get_display_status(self.caller)
-            self.msg(prompt=status)
         else:
             print(f"status args: {self.caller.search(self.args.strip())}")
             target = self.caller.search(self.args.strip())

@@ -258,6 +258,7 @@ class Changelings(PlayerCharacter):
             weapon = FORM_CLASSES[self.db.form]()
 
         if not self.in_combat:
+            print("CHANGELING You are not in combat.")
             self.enter_combat(target)
             target.enter_combat(self)
             return
@@ -384,7 +385,7 @@ class Changelings(PlayerCharacter):
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
         # The NPC's attack, emoting to the room
         # a scrawny gnoll tears into changeling at_damage Markar with brutal force! -18
-        attacker.get_hit_message(self, damage, self.get_display_name(self))
+        attacker.get_npc_attack_emote(self, damage, self.get_display_name(self))
 
         # status = self.get_display_status(self)
         # self.msg(prompt=status)
@@ -475,12 +476,12 @@ class Changelings(PlayerCharacter):
         #     chunks.append(self.get_display_name(looker, **kwargs))
 
         # add resource levels
-        hp = math.floor(self.db.hp)
-        hpmax = self.db.hpmax
-        fp = math.floor(self.db.fp)
-        fpmax = self.db.fpmax
-        ep = math.floor(self.db.ep)
-        epmax = self.db.epmax
+        hp = int(self.db.hp)
+        hpmax = int(self.db.hpmax)
+        fp = int(self.db.fp)
+        fpmax = int(self.db.fpmax)
+        ep = int(self.db.ep)
+        epmax = int(self.db.epmax)
 
         ecVis = ""
         regrowthVis = ""
@@ -526,7 +527,10 @@ class Changelings(PlayerCharacter):
         else:
             weapon = self
 
-        self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
+        if target is not None:
+            self.at_emote(
+                "changeling $conj(charges) at {target}!", mapping={"target": target}
+            )
         location = self.location
 
         if not (combat_script := location.scripts.get("combat")):
@@ -538,6 +542,6 @@ class Changelings(PlayerCharacter):
         combat_script = combat_script[0]
         self.db.combat_target = target
         # adding a combatant to combat just returns True if they're already there, so this is safe
-        # if not combat_script.add_combatant(self, enemy=target):
-        #     return
+        if not combat_script.add_combatant(self, enemy=target):
+            return
         self.attack(target, weapon)

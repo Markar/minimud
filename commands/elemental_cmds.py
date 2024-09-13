@@ -49,8 +49,6 @@ class CmdGAdvance(Command):
         if caller.db.subguild == "air":
             titles = AIR_TITLES
 
-        caller.db.title = titles[caller.db.guild_level]
-
         if caller.db.gxp < cost:
             self.msg(f"|wYou need {cost - caller.db.gxp} more experience to advance.")
             return
@@ -58,6 +56,7 @@ class CmdGAdvance(Command):
             caller.db.gxp -= cost
             caller.db.guild_level += 1
             caller.db.epmax += 10
+            caller.db.title = titles[caller.db.guild_level]
             self.msg(f"|rYou grow more powerful.")
 
         if caller.db.guild_level >= 30:

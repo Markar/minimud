@@ -178,6 +178,7 @@ class EarthElemental(Elemental):
         return False
 
     def attack(self, target, weapon, **kwargs):
+        self.msg("You attack! EARTH ELEMENTAL")
         weapon = EarthAttack()
 
         if not self.in_combat:

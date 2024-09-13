@@ -57,15 +57,6 @@ class CmdBurnout(PowerCommand):
         caller.db.burnout["active"] = True
         caller.db.burnout["count"] -= 1
         caller.db.burnout["duration"] = 3 + skill_rank * 2
-        # damage = 50 + skill_rank
-        # caller.msg(f"|gDamage: {damage}")
-        # caller.location.msg_contents(
-        #     f"|C$Your() form glows with a bright light as $pron(you) unleash a wave of destructive energy, damaging all enemies in the area.",
-        #     from_obj=caller,
-        # )
-        # for obj in caller.location.contents:
-        #     if obj != caller:
-        #         obj.at_damage(caller, damage, "blunt", "burnout")
 
 
 # Defensive powers
@@ -702,7 +693,7 @@ class CmdPowers(Command):
         table.add_row(f"|GQuicksand", 6, "10 Focus")
         table.add_row(f"|GStone Skin", 7, "25 Energy")
         table.add_row(f"|GEarthen Renewal", 9, "50 Energy")
-        table.add_row(f"|GBurnout", 10, "10 Energy")
+        table.add_row(f"|GBurnout", 7, "10 Energy")
         table.add_row(f"|GTremor", 12, "20 Focus")
         table.add_row(f"|GEarth Shield", 14, "50 Energy")
         table.add_row(f"|GEarthquake", 20, "50 Focus")

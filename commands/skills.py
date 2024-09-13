@@ -174,13 +174,13 @@ class CmdStatSheet(Command):
     aliases = ("sheet", "score", "sc")
 
     def func(self):
-        self.msg(sum(LEVEL_COST_DICT.values()))
         caller = self.caller
         levelcost = int(LEVEL_COST_DICT[caller.db.level + 1])
         self.msg(f" |g{caller} {caller.db.title} ({caller.db.alignment})")
         self.msg(f" |GLevel {caller.db.level or 0}, {levelcost} xp to next level")
         self.msg(f" |GEXP: {caller.db.exp or 0}")
         self.msg(f" |GStats: ({caller.db.stat_points} stats available)")
+        self.msg(f" |GCoins: {caller.db.coins or 0}")
         if caller.db.best_kill:
             best_kill = caller.db.best_kill or "None"
             best_kill_name = best_kill.get("name", "None")
