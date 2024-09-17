@@ -7,10 +7,8 @@ from typeclasses.utils import get_article, get_display_name
 from typeclasses.cybercorpsguild.cybercorps_commands import CybercorpsCmdSet
 from typeclasses.cybercorpsguild.cybercorps_wares import (
     HandRazors,
-    NanoBlade,
-    TacticalShotgun,
 )
-from typeclasses.cybercorpsguild.cybercorps_attack import CybercorpsAttack
+from typeclasses.cybercorpsguild.cybercorps_wares import CybercorpsWaresCmdSet
 
 
 class Cybercorps(PlayerCharacter):
@@ -20,6 +18,7 @@ class Cybercorps(PlayerCharacter):
 
     def at_object_creation(self):
         self.cmdset.add(CybercorpsCmdSet, persistent=True)
+        self.cmdset.add(CybercorpsWaresCmdSet, persistent=True)
         super().at_object_creation()
         con_increase_amount = 20
         int_increase_amount = 5
@@ -58,7 +57,7 @@ class Cybercorps(PlayerCharacter):
             "corporate espionage": 1,
             "energy solutions": 1,
         }
-        self.db.melee_weapon = None
+        self.db.melee_weapon = HandRazors()
         self.db.ranged_weapon = None
         # list of owned wares
         self.db.wares = ["hand razors"]
@@ -251,7 +250,6 @@ class Cybercorps(PlayerCharacter):
         return status
 
     def attack(self, target, weapon, **kwargs):
-        guild_weapon = HandRazors()
 
         if not self.in_combat:
             self.enter_combat(target)
@@ -274,7 +272,6 @@ class Cybercorps(PlayerCharacter):
             self.msg("You don't see your target.")
             return
 
-        guild_weapon.at_attack(self, target)
         melee_weapon = self.db.melee_weapon
         ranged_weapon = self.db.ranged_weapon
 
@@ -310,6 +307,7 @@ class Cybercorps(PlayerCharacter):
 
         percentage_reduction = 0
         flat_reduction = 0
+        flat_reduction_cap = 0
 
         # Flat damage reduction - 50 con = 5 reduction, glvl 30 = 1.5 reduction
         flat_reduction = con * 0.1 + glvl * 0.05
@@ -346,16 +344,30 @@ class Cybercorps(PlayerCharacter):
         #     self.msg(f"|cYour earth shield blocks a lot of damage!|n")
 
         # Apply randomized flat reduction
+        if self.db.level < 5:
+            flat_reduction_cap = 2
+        elif self.db.level < 10:
+            flat_reduction_cap = 4
+        elif self.db.level < 15:
+            flat_reduction_cap = 6
+        elif self.db.level < 20:
+            flat_reduction_cap = 12
+        elif self.db.level < 25:
+            flat_reduction_cap = 20
+
+        # Apply (worn) defense reduction
+        armor = self.defense(damage_type)
+        flat_reduction += int(uniform(armor * 0.25, armor))
+
+        # Apply the flat reduction cap
+        if flat_reduction > flat_reduction_cap:
+            flat_reduction = flat_reduction_cap
+
+        # Apply the flat reduction
         damage -= uniform(flat_reduction / 2, flat_reduction)
 
         # Apply percentage reduction
         damage *= 1 - percentage_reduction
-
-        # Apply (worn) defense reduction
-        armor = self.defense(damage_type)
-        self.msg(f"dmg {damage} armor {armor}")
-        damage -= int(uniform(armor * 0.25, armor))
-        self.msg(f"2 dmg {damage} armor {armor}")
 
         # randomize damage
         damage = uniform(damage / 2, damage)

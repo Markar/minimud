@@ -1,18 +1,10 @@
 import math
 from random import randint, uniform
 from evennia import CmdSet
+from commands.command import Command
 from evennia.utils.evtable import EvTable
 from evennia.utils import delay
-from commands.command import Command
-from typeclasses.cybercorpsguild.cybercorps_wares import (
-    HandRazors,
-    NanoBlade,
-    TacticalShotgun,
-    StealthBlade,
-    ShockHand,
-    SmartGun,
-    EnergySword,
-)
+
 
 from typeclasses.cybercorpsguild.cyber_constants_and_helpers import (
     SKILLS_COST,
@@ -20,16 +12,6 @@ from typeclasses.cybercorpsguild.cyber_constants_and_helpers import (
     GUILD_LEVEL_COST_DICT,
     TITLES,
 )
-
-WaresObjects = {
-    "hand razors": HandRazors,
-    "nanoblade": NanoBlade,
-    "tactical shotgun": TacticalShotgun,
-    "stealth blade": StealthBlade,
-    "shock hand": ShockHand,
-    "smart gun": SmartGun,
-    "energy sword": EnergySword,
-}
 
 
 class PowerCommand(Command):
@@ -39,147 +21,6 @@ class PowerCommand(Command):
             caller.msg(f"|CNot so fast!")
             return False
         caller.cooldowns.add("global_cooldown", 2)
-
-
-class CmdLoadout(Command):
-    """
-    Equip a weapon from your inventory.
-
-    Usage:
-        loadout <weapon>
-    """
-
-    key = "loadout"
-    help_category = "cybercorps"
-
-    def func(self):
-        caller = self.caller
-        args = self.args.strip().lower()
-        melee = caller.db.melee_weapon or HandRazors
-        ranged = caller.db.ranged_weapon or HandRazors
-
-        if not args:
-            caller.msg("Usage: loadout <weapon>")
-            return
-
-        if not args in WaresObjects.keys():
-            caller.msg(f"|rYou can't equip the {args}.")
-            return
-
-        if args == "nanoblade":
-            if melee.name == "nanoblade":
-                caller.msg(f"|rYou already have the nanoblade equipped.")
-                return
-
-            caller.db.melee_weapon = NanoBlade()
-            caller.msg(
-                f"|gYou equip the nanoblade, a weapon that can cut through almost anything."
-            )
-
-        if args == "stealth blade":
-            if melee.name == "stealth blade":
-                caller.msg(f"|rYou already have the stealth blade equipped.")
-                return
-
-            caller.db.melee_weapon = StealthBlade()
-            caller.msg(
-                f"|gYou equip the stealth blade, a weapon that can cut through almost anything."
-            )
-
-        if args == "tactical shotgun":
-            if ranged.name == "tactical shotgun":
-                caller.msg(f"|rYou already have the tactical shotgun equipped.")
-                return
-
-            caller.db.ranged_weapon = TacticalShotgun()
-            caller.msg(f"|gYou equip the tactical shotgun, a versatile weapon.")
-
-        if args == "smart gun":
-            if ranged.name == "smart gun":
-                caller.msg(f"|rYou already have the smart gun equipped.")
-                return
-
-            caller.db.ranged_weapon = SmartGun()
-            caller.msg(f"|gYou equip the smart gun, a versatile weapon.")
-
-        if args == "shock hand":
-            if melee.name == "shock hand":
-                caller.msg(f"|rYou already have the shock hand equipped.")
-                return
-            caller.db.melee_weapon = ShockHand()
-            caller.msg(
-                f"|gYou equip the shock hand, a weapon that can deliver a powerful shock."
-            )
-        if args == "energy sword":
-            if melee.name == "energy sword":
-                caller.msg(f"|rYou already have the energy sword equipped.")
-                return
-            caller.db.melee_weapon = EnergySword()
-            caller.msg(
-                f"|gYou equip the energy sword, a weapon that can cut through almost anything."
-            )
-
-        if args == "adaptive armor":
-            if caller.db.adaptive_armor:
-                caller.msg(f"|rYou already have adaptive armor equipped.")
-                return
-
-            caller.db.adaptive_armor = True
-            caller.msg(f"|gYou equip the adaptive armor.")
-
-        return
-
-
-class CmdLoadoutRemove(Command):
-    """
-    Unequip a ware from your inventory.
-
-    Usage:
-        loadout remove <ware>
-    """
-
-    key = "loadout remove"
-    help_category = "cybercorps"
-
-    def func(self):
-        caller = self.caller
-        args = self.args.strip().lower()
-        melee = caller.db.melee_weapon or HandRazors
-        ranged = caller.db.ranged_weapon or None
-
-        if not args:
-            caller.msg("Usage: loadout remove <ware>")
-            return
-
-        if not args in caller.db.wares:
-            caller.msg(f"|rYou can't unequip {args}.")
-            return
-
-        if args == "handrazors":
-            caller.msg(f"|gYou don't want to be caught without your hand razors.")
-
-        if args == "nanoblade":
-            if not melee.name == args:
-                caller.msg(f"|rYou don't have the nanoblade equipped.")
-                return
-            caller.db.melee_weapon = None
-            caller.msg(f"|gYou gracefully put the nanoblade back into its sheath.")
-
-        if args == "tactical shotgun":
-            if not ranged.name == args:
-                caller.msg(f"|rYou don't have the tactical shotgun equipped.")
-                return
-            caller.db.ranged_weapon = False
-            caller.msg(f"|gYou put the tactical shotgun on your back.")
-
-        if args == "adaptive armor":
-            if not caller.db.adaptive_armor:
-                caller.msg(f"|rYou don't have adaptive armor equipped.")
-                return
-            caller.db.adaptive_armor = False
-            caller.msg(f"|gYou remove the adaptive armor.")
-
-        return
 
 
 class CmdPulseGrenade(PowerCommand):
@@ -570,12 +411,20 @@ class CmdGuildStatSheet(Command):
         skill_gxp = caller.db.skill_gxp or 0
         gxp_needed = GUILD_LEVEL_COST_DICT[my_glvl + 1]
         reaction = caller.db.reaction_percentage or 50
+        melee_weapon = "None"
+        if caller.db.melee_weapon:
+            melee_weapon = caller.db.melee_weapon.name
+        ranged_weapon = "None"
+        if caller.db.ranged_weapon:
+            ranged_weapon = caller.db.ranged_weapon.name
 
         table = EvTable(f"|c{caller}", f"|c{title}", border="table")
         table.add_row(f"|GGuild Level", my_glvl)
         table.add_row(f"|GGXP", f"{gxp} / {gxp_needed}")
         table.add_row(f"|GSkill GXP", skill_gxp)
         table.add_row(f"|GReaction", f"{reaction}%")
+        table.add_row(f"|GMelee Weapon", melee_weapon)
+        table.add_row(f"|GRanged Weapon", ranged_weapon)
 
         caller.msg(str(table))
 
@@ -589,6 +438,14 @@ class CmdGuildStatSheet(Command):
             skill_table.add_row(f"|G{skill.title()}", f"{rank}", f"{SKILLS_COST[rank]}")
 
         caller.msg(str(skill_table))
+
+
+class CmdKickstart(Command):
+    key = "kickstart"
+
+    def func(self):
+        caller = self.caller
+        caller.kickstart()
 
 
 class CmdSkills(Command):
@@ -613,67 +470,24 @@ class CmdSkills(Command):
         caller.msg(str(table))
 
 
-class CmdWares(Command):
-    """
-    List of wares available to the Cybercorps Guild.
-
-    Usage:
-        wares
-
-    """
-
-    key = "wares"
-    help_category = "cybercorps"
-
-    def func(self):
-        caller = self.caller
-        ware = self.args.strip().lower()
-
-        if ware in WaresObjects.keys():
-            obj = WaresObjects[ware]
-            caller.msg(
-                f"    |g{obj.name.title()}\n    |GCost: {obj.cost}\n|G{obj.__doc__}\n"
-            )
-            return
-
-        if not ware:
-            table = EvTable(f"|gName", f"|gDescription", f"|gCost", border="table")
-            table.add_row(
-                f"|GAdaptive Armor", "Armor that can adapt to different threats.", 0
-            )
-
-            for obj in WaresObjects.values():
-                if obj.name in caller.db.wares:
-                    table.add_row(
-                        f"|Y{obj.name.title()}",
-                        f"|Y{obj.short}",
-                        f"|Y{obj.cost}",
-                    )
-                else:
-                    table.add_row(
-                        f"|G{obj.name.title()}", f"|G{obj.short}", f"|G{obj.cost}"
-                    )
-            caller.msg(str(table))
-        return
-
-
 class CmdTest(Command):
     key = "test"
 
     # from typeclasses.elementalguild.earth_elemental_commands import EarthElementalCmdSet
     # from typeclasses.elementalguild.fire_elemental_commands import FireElementalCmdSet
+    from typeclasses.cybercorpsguild.cybercorps_wares import CybercorpsWaresCmdSet
 
     def func(self):
         caller = self.caller
         caller.msg("test")
         # from commands.shops import ShopCmdSet
-        del caller.db.docwagon
-        del caller.db.skills
-        del caller.db.guild_level
-        del caller.db.strategy
-        del caller.db.wares
+        # del caller.db.docwagon
+        # del caller.db.skills
+        # del caller.db.guild_level
+        # del caller.db.strategy
+        # del caller.db.wares
 
-        # caller.cmdset.delete(FireElementalCmdSet)
+        caller.cmdset.add(CybercorpsCmdSet, permanent=True)
         # caller.cmdset.delete(EarthElementalCmdSet)
         # caller.cmdset.delete(EarthElementalCmdSet)
         # caller.cmdset.delete(CybercorpsCmdSet)
@@ -701,6 +515,29 @@ class CmdTestRestock(Command):
         caller.msg("done")
 
 
+class CmdUpdateChessboard(Command):
+    key = "upd chessboard"
+
+    def func(self):
+        caller = self.caller
+        from typeclasses.chessboardrooms import (
+            ChessboardDecayingSkeleton,
+            ChessboardGnoll,
+            ChessboardGnollPup,
+        )
+
+        skeletons = ChessboardDecayingSkeleton.objects.all()
+        gnolls = ChessboardGnoll.objects.all()
+        pups = ChessboardGnollPup.objects.all()
+
+        for room in pups:
+            caller.msg(f"room: {room}")
+            for obj in room.contents:
+                check = obj.is_typeclass("typeclasses.characters.NPC", exact=False)
+                obj.delete()
+            room.at_object_creation()
+
+
 class CybercorpsCmdSet(CmdSet):
     key = "Cybercorps CmdSet"
 
@@ -714,141 +551,14 @@ class CybercorpsCmdSet(CmdSet):
         self.add(CmdPowers)
         self.add(CmdGTrain)
         self.add(CmdTest)
+        self.add(CmdKickstart)
         self.add(CmdTestRestock)
-        self.add(CmdWares)
 
         self.add(CmdSyntheticConversion)
         self.add(CmdReaction)
         self.add(CmdDocWagon)
-        self.add(CmdLoadout)
-        self.add(CmdLoadoutRemove)
 
         self.add(CmdAdaptiveArmor)
         self.add(CmdPulseGrenade)
 
-
-class CmdJoinCybercorps(Command):
-    """
-    Join the Cybercorps Mega corporation
-    """
-
-    key = "join cybercorps"
-
-    def func(self):
-        caller = self.caller
-        if caller.db.guild == "adventurer":
-            caller.msg(f"|rYou sign up to join the Cybercorps Mega Corporation")
-            caller.swap_typeclass(
-                "typeclasses.cybercorps.Cybercorps",
-                clean_attributes=False,
-            )
-            caller.cmdset.add(CybercorpsCmdSet, persistent=True)
-        else:
-            caller.msg(f"|rYou are already in a guild")
-
-
-class CmdLeaveCybercorps(Command):
-    """
-    Leave the Cybercorps Mega Corporation
-    """
-
-    key = "leave cybercorps"
-
-    def strip(self):
-        caller = self.caller
-        caller.cmdset.delete(CybercorpsCmdSet)
-        del caller.db.docwagon
-        del caller.db.skills
-        del caller.db.guild_level
-        del caller.db.strategy
-        del caller.db.wares
-
-        return
-
-    def func(self):
-        caller = self.caller
-        if caller.db.guild == "cybercorps":
-            caller.swap_typeclass("typeclasses.characters.PlayerCharacter")
-            self.strip()
-            caller.msg(f"|rYou leave the Cybercorps Mega Corporation")
-        else:
-            caller.msg(f"|rYou are already an adventurer")
-
-
-class CmdListWares(Command):
-    """
-    List wares available for purchase from the Cybercorps Mega Corporation
-    """
-
-    key = "list"
-
-    def func(self):
-        caller = self.caller
-        table = EvTable(f"|gWares", f"|gSkill", f"|gRank", f"|gCost", border="table")
-        for ware in WaresObjects.values():
-            table.add_row(
-                f"|G{ware.name}", f"|G{ware.skill}", f"|G{ware.rank}", f"|G{ware.cost}"
-            )
-
-        caller.msg(str(table))
-
-
-class CmdBuyWares(Command):
-    """
-    Buy wares from the Cybercorps Mega Corporation
-    """
-
-    key = "buy"
-
-    def func(self):
-        caller = self.caller
-        ware = self.args.strip().lower()
-
-        if caller.db.guild != "cybercorps":
-            caller.msg(
-                f"|rYou need to be part of the Cybercorps Mega Corporation to buy wares."
-            )
-            return
-        if not ware:
-            caller.msg(f"|rUsage: wares buy <ware>")
-            return
-
-        if ware in caller.db.wares:
-            caller.msg(f"|rYou already have the {ware}.")
-            return
-
-        for obj in WaresObjects.values():
-            if obj.name.lower() == ware:
-                ware = obj
-
-                if caller.db.skills[f"{ware.skill}"] < ware.rank:
-                    caller.msg(
-                        f"|rYou need to be level {ware.rank} in {ware.skill} to buy the {ware.name}."
-                    )
-                    return
-
-                if caller.db.coins < ware.cost:
-                    caller.msg(
-                        f"|rYou need {ware.cost - caller.db.coins} more coins to buy the {ware.name}."
-                    )
-                    return
-
-                caller.db.wares.append(ware.name)
-                caller.db.coins -= ware.cost
-                caller.msg(
-                    f"|gYou buy the {ware.name} from the Cybercorps Mega Corporation."
-                )
-                return
-
-        caller.msg(f"|rYou can't buy the {ware.name}.")
-        return
-
-
-class CybercorpsWaresCmdSet(CmdSet):
-    key = "Cybercorps Wares CmdSet"
-
-    def at_cmdset_creation(self):
-        super().at_cmdset_creation()
-
-        self.add(CmdBuyWares)
-        self.add(CmdListWares)
+        self.add(CmdUpdateChessboard)

@@ -23,8 +23,8 @@ class Anole(ChangelingAttack):
         Calculate the damage of the attack
         """
         dex = wielder.traits.dex.value
-        wis = wielder.traits.wis.value
-        stat_bonus = (dex + wis) / 5
+        str = wielder.traits.str.value
+        stat_bonus = (dex + str) / 5
         base_dmg = 10 + wielder.db.guild_level / 2
         dmg = base_dmg + stat_bonus
 

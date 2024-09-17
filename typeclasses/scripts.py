@@ -198,8 +198,7 @@ class RestockScript(Script):
     """
 
     def at_script_creation(self):
-        # self.interval = 3600
-        self.interval = 6
+        self.interval = 3600
 
     def at_repeat(self):
         """
@@ -207,24 +206,20 @@ class RestockScript(Script):
         """
         logger.log_info("restocking")
         if not (storage := self.obj.db.storage):
-            logger.log_info(f"no storage for {self.obj}")
             # the object we're attached to has no storage location, so it can't hold stock
             return
         if not (inventory := self.obj.db.inventory):
-            logger.log_info(f"no inventory for {self.obj}")
             # we don't have an inventory list attribute set up
             return
 
         # go through the inventory listing and possibly restock a few of everything
         for prototype, max_count in inventory:
-            logger.log_info(f"prototype: {prototype} and max_count: {max_count}")
             # current stock of this type
             in_stock = [
                 obj
                 for obj in storage.contents
                 if obj.tags.has(prototype, category=PROTOTYPE_TAG_CATEGORY)
             ]
-            logger.log_info(f"in_stock: {in_stock}")
             if len(in_stock) >= max_count:
                 # already enough of these
                 continue

@@ -782,10 +782,20 @@ class NPC(Character):
                 # use the exit
                 self.execute_cmd(exits[0].name)
 
+    def randomize_stats(self):
+        level = self.db.level
+        xp = self.db.exp_reward
+        damage = self.db.natural_weapon["damage"]
+        hpmax = self.db.hpmax
+
+        self.db.level = randint(level - 2, level + 2)
+        self.db.exp_reward = int(uniform(xp * 0.8, xp * 1.2))
+        self.db.damage = int(uniform(damage * 0.8, damage * 1.2))
+        self.db.hpmax = int(uniform(hpmax * 0.8, hpmax * 1.2))
+
     def at_respawn(self):
-        print(f"at_respawn in npc: {self} and home {self.home}")
         self.use_heal()
-        # self.move_to(self.home)
+        self.randomize_stats()
         self.move_to(self.home, False, None, True, True, True, "teleport")
 
     def at_damage(self, attacker, damage, damage_type=None, emote="bite"):
@@ -830,9 +840,6 @@ class NPC(Character):
                 }
 
                 corpses = spawner.spawn(corpse)
-                # for corpse in corpses:
-                #     delay(10, corpse.delete)
-                #     self.location.msg_contents(f"A {corpse.key} appears.", from_obj=self)
 
                 if self.db.drops:
                     objs = spawn(*list(self.db.drops))

@@ -5,7 +5,7 @@ from typeclasses.utils import SpawnMob
 class NewbieGoblin(XYGridRoom):
     def at_object_creation(self):
         super().at_object_creation()
-        SpawnMob(self, 2800, 5, 1, "GOBLIN", "training_grounds")
+        SpawnMob(self, 2800, 5, 1, "NOVICE_GOBLIN", "training_grounds")
 
 
 class NewbieRogueApprentice(XYGridRoom):

@@ -42,6 +42,7 @@ chessboard
 #
 @open leave = chaos#2
 
+# open_xyz_exits.py
 
 ### DELETE ROOMS
 from typeclasses.rooms import NewbieSnake
@@ -88,6 +89,12 @@ msg = self.caller.get_npc_attack_emote(self.caller, 4, "fart")
 
 ### SET LOCAL KEY
  self.caller.location.key = "Millennium Square"
+    py
+        room = self.search("688")
+        room.key = "Sunlit Meadow"
 
 ### DELETE CMDSET ON PLAYER
  self.caller.cmdset.delete(ChangelingCmdSet)
+
+### SET ROOM KEY
+ py setattr(here, "key", "Nexus Road - CyberBank HQ")

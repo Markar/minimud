@@ -36,15 +36,19 @@ def SpawnMob(self, xp, level, hits, name, tag):
     level = randint(level, level + 2)
     xp = int(uniform(xp, xp * 1.2))
     damage = 5 + int(xp / 100)
-    hpmax = int(xp / 5)
-    if xp < 500:
-        hpmax += int(xp / 2)
-    if xp > 500:
+    hpmax = 100 + int(xp / 5)
+    if xp >= 500:
         hpmax += 50
-    if xp > 1000:
+        damage += 3
+    if xp >= 800:
         hpmax += 50
-    if xp > 2000:
+        damage += 5
+    if xp >= 1200:
         hpmax += 50
+        damage += 3
+    if xp >= 2000:
+        hpmax += 50
+        damage += 3
     hits = hits
 
     if hits > 1:

@@ -7,7 +7,7 @@
 #
 @dig/teleport Reception Hall;town#02 : typeclasses.rooms.Room = west;w,east;e
 #
-@desc |yThis is the reception hall.
+@desc |YAdjacent to Millennium Square, the Celestial Gardens offer a serene escape from the bustling activity of the plaza. This enchanting area is a harmonious blend of nature and technology, where lush greenery and vibrant flowers coexist with advanced, eco-friendly innovations.|/|/The gardens are laid out in a series of interconnected terraces, each one featuring a unique theme. Bioluminescent plants cast a gentle glow, illuminating the pathways with a soft, ethereal light. Holographic butterflies flit among the flowers, their wings shimmering with digital patterns. The air is filled with the soothing sounds of trickling water from a series of cascading fountains, each one powered by a combination of magic and advanced engineering.|/|/In the center of the gardens stands a majestic tree, its branches adorned with glowing crystals that pulse with a calming energy. Beneath its canopy, a circular seating area invites visitors to rest and reflect. Benches made from a blend of natural wood and sleek metal provide comfortable spots to sit and take in the beauty of the surroundings.|/|/Scattered throughout the gardens are interactive displays and kiosks that offer information about the various plants and their magical properties. Small, enchanted creatures, such as pixies and mechanical birds, add a touch of whimsy to the environment, making the Celestial Gardens a favorite spot for both relaxation and exploration.|/|/The Celestial Gardens are a testament to the seamless integration of nature and technology, providing a peaceful haven for all who visit. Whether you're seeking a moment of tranquility or a place to marvel at the wonders of the world, the gardens offer a perfect retreat from the vibrant energy of Millennium Square.
 #
 @teleport town#01
 #
@@ -21,94 +21,93 @@
 #
 #
 #
-@dig/teleport Southbound Pathway;town#04 : typeclasses.rooms.Room = north;n,south;s
+@dig/teleport Nexus Road - CyberBank HQ;town#04 : typeclasses.rooms.Room = north;n,south;s
 #
-# @desc |YAs you leave the bustling energy of Millennium Square behind, you find yourself on the Southbound Pathway. The road is a seamless blend of cobblestone and sleek, metallic panels, reflecting the town's unique fusion of old and new. Enchanted lanterns line the path, casting a soft, ethereal glow that guides your way.|/|/To your left, lush, enchanted gardens burst with vibrant flora, their colors shifting in harmony with the ever-changing sky. On your right, futuristic buildings with holographic signs advertise exotic goods and services. The air is filled with a mix of floral scents and the faint hum of advanced machinery, creating a sense of both tranquility and anticipation.
-py setattr(here, "key", "Southbound Pathway")
+@desc |YNexus Road brings you to the imposing CyberBank HQ, a towering structure of glass and steel that exudes both security and sophistication. The building's facade is adorned with holographic displays showcasing the latest financial services and security features. A large, glowing emblem of the bank's logo hovers above the entrance, symbolizing trust and innovation.
 #
 #
 #
 @dig/teleport Western Pathway Junction;town#05 : typeclasses.rooms.Room = north;n,south;s
 #
-@desc |YHeading west from the Southbound Pathway, you find yourself on the Western Pathway Junction. The road here is a harmonious blend of cobblestone and sleek, metallic panels, reflecting the town's unique fusion of old and new. Enchanted lanterns line the path, casting a soft, ethereal glow that guides your way.|/|/To the north, the road leads back towards the vibrant energy of Millennium Square, where the obelisk pulses with otherworldly power.|/|/To the south, a narrow path veers off, leading towards the tranquil Enchanted Grove, where bioluminescent trees and mystical creatures await. The air is filled with a mix of floral scents and the faint hum of advanced machinery, creating a sense of both tranquility and anticipation.|/|/The Western Pathway Junction is a crossroads of adventure, offering a choice between the bustling energy of Millennium Square and the serene escape of the Enchanted Grove.
+@desc |YInside, the lobby is a blend of modern elegance and cutting-edge technology. The floor is polished marble, and the walls are lined with interactive screens providing real-time financial news and updates. Automated tellers and customer service androids efficiently assist clients, ensuring quick and secure transactions.|/|/The air is filled with a faint hum of machinery and the soft murmur of conversations. Private meeting rooms and consultation booths offer spaces for clients to discuss their financial needs in confidence. The CyberBank HQ is a fortress of financial stability on Nexus Road, providing a wide range of banking services from basic accounts to advanced investment opportunities.
 #
 @teleport town#04
 #
 #
 #
-@dig/teleport Road;town#06 : typeclasses.rooms.Room = east;e,west;w;
+@dig/teleport Nexus Road - MedTech;town#06 : typeclasses.rooms.Room = east;e,west;w;
 #
-@desc |yBefore the hospital.
+@desc |YNexus Road leads you to the MedTech Clinic, a state-of-the-art medical facility that stands out with its sleek, sterile design and glowing blue cross emblem. The clinic's facade is a blend of glass and metal, reflecting the advanced technology within. Holographic signs display health tips and clinic services, while automated doors slide open to welcome patients.
 #
 #
 #
-@dig/teleport Hospital;town#07 : typeclasses.rooms.Room = north;n,south;s
+@dig/teleport MedTech Clinic;town#07 : typeclasses.rooms.Room = north;n,south;s
 #
-@desc |yThe hospital.
+@desc |YInside, the clinic is a haven of calm efficiency. The waiting area features comfortable seating and interactive screens providing health information. Medical drones glide silently through the air, assisting the staff with various tasks. The air is filled with a faint antiseptic scent, underscoring the clinic's commitment to cleanliness and safety.|/|/Patients are attended to by a mix of human doctors and advanced medical androids, ensuring the highest level of care. The clinic offers a range of services, from routine check-ups and emergency care to cybernetic implant maintenance and advanced surgical procedures. The MedTech Clinic is a beacon of hope and healing on Nexus Road, providing essential medical services to all who need them.
 #
 @teleport town#06
 #
 #
 #
-@dig/teleport Road before the lockers;town#08 : typeclasses.rooms.Room = east;e,west;w
+@dig/teleport Neon Nexus Alley;town#08 : typeclasses.rooms.Room = east;e,west;w
 #
-@desc |yYou can see lockers to the east.
+@desc |YA narrow, bustling corridor bathed in the vibrant glow of neon lights. Holographic advertisements flicker and dance on the walls, casting colorful reflections on the rain-slicked pavement. The air is filled with the hum of distant machinery and the chatter of street vendors peddling cybernetic enhancements and exotic wares. The alley is alive with energy, a melting pot of diverse characters and futuristic technology, making it a perfect spot for both adventure and intrigue.
 #
 #
 #
-@dig/teleport Lockers;town#09 : typeclasses.rooms.Room = east;e,west;w
+@dig/teleport Neon Nexus Arcade;town#09 : typeclasses.rooms.Room = east;e,west;w
 #
-@desc |yThe locker room.
+@desc |YThe Neon Nexus Arcade is a sensory overload of flashing lights and electronic sounds. Rows of arcade machines line the walls, each offering a different game or challenge. The air is filled with the sounds of digital battles and the cheers of victorious players. This is a place where both young and old come to test their skills and escape reality for a while.
 #
 @teleport town#08
 #
 
 
 #
-@dig/teleport Road before Gypsy;town#10 : typeclasses.rooms.Room = north;n,south;s
+@dig/teleport Nexus Road;town#10 : typeclasses.rooms.Room = north;n,south;s
 #
-@desc |yBefore the Gypsy.
+@desc |YNexus Road is a bustling thoroughfare that leads directly to the heart of the Neon Nexus Market. The road is lined with sleek, futuristic buildings adorned with vibrant neon signs and holographic advertisements. The pavement beneath your feet is a mix of smooth asphalt and glowing pathways, guiding you towards the market.
 #
 
 
-
 #
-@dig/teleport Gypsy;town#11 : typeclasses.rooms.Room = east;e,west;w
+@dig/teleport Neon Nexus Market;town#11 : typeclasses.rooms.Room = east;e,west;w
 #
-@desc |yThe Gypsy
+@desc |YThe Neon Nexus Market is a vibrant hub of activity, filled with stalls and kiosks selling a dazzling array of goods. Neon signs flash above each vendor, advertising everything from cybernetic implants to exotic street food. The air is thick with the scent of spices and the hum of electronic chatter, creating an atmosphere of organized chaos and endless possibilities.
 #
 @teleport town#10
 #
 
 
 #
-@dig/teleport Road before the Housing office;town#12 : typeclasses.rooms.Room = north;n,south;s
+@dig/teleport Nexus Road;town#12 : typeclasses.rooms.Room = north;n,south;s
+
 #
-@desc |yYou can see the housing office to the east.
+@desc |YAs you walk, the sounds of the city surround you. Distant conversations, the hum of electric vehicles, and the occasional burst of music from nearby shops. Street vendors line the sidewalks, offering a variety of goods from cybernetic enhancements to exotic street food. The air is filled with the enticing aromas of grilled meats and spicy noodles, mingling with the scent of ozone from the high-tech devices on display.
 #
 
 
 #
-@dig/teleport Housing Office;town#13 : typeclasses.rooms.Room = east;e,west;w
+@dig/teleport Cyber Cafe;town#13 : typeclasses.rooms.Room = east;e,west;w
 #
-@desc |yThe housing office.
+@desc |YThe Neon Nexus Cyber Cafe is a sleek, modern establishment where patrons can relax and recharge. Rows of high-tech booths offer access to the latest in virtual reality entertainment, while the bar serves up a variety of neon-colored drinks. The cafe's ambient lighting and futuristic décor create a cool, inviting atmosphere, perfect for unwinding after a long day.
 #
 @teleport town#10
 #
 
 
 #
-@dig/teleport Markar's lane;town#14 : typeclasses.rooms.Room = west;w,east;e
+@dig/teleport Nexus Road;town#14 : typeclasses.rooms.Room = west;w,east;e
 #
-@desc |yFollowing along Markar's lane, you can see the Chaos realm to the northwest.
+@desc |YThe energy of Nexus Road is palpable, a dynamic blend of commerce and culture that draws people from all walks of life. As you approach the market, the road widens, and the vibrant activity of the market begins to spill out onto the street, promising a world of discovery just ahead.
 #
 
 
 
 #
-@dig/teleport Markar's lane;town#15 : typeclasses.rooms.Room = west;w,east;e
+@dig/teleport Approach to Nexus Portal Chamber;town#15 : typeclasses.rooms.Room = west;w,east;e
 #
-@desc |yFollowing along Markar's lane, you can see the Chaos realm to the north.
+@desc |YAs you make your way towards the Nexus Portal Chamber, the atmosphere around you begins to change, signaling the transition from the bustling streets of the Nexus to a place of mystical energy and advanced technology. The pathway is lined with sleek, metallic panels that pulse with a soft, rhythmic light, guiding you forward.|/|/The air is filled with a faint hum of machinery and the occasional crackle of magical energy, creating an intriguing blend of sounds. Holographic signs and digital displays provide information about the portal and its destinations, their glowing text shifting and changing as you pass by.|/|/The corridor widens as you approach the chamber, and the walls become adorned with intricate carvings and glowing runes that seem to come alive with energy. The floor beneath your feet transitions from smooth metal to a mosaic of polished tiles and arcane symbols, each step resonating with a subtle vibration.
 #
 
 
@@ -116,52 +115,52 @@ py setattr(here, "key", "Southbound Pathway")
 #
 @dig/teleport Entrance to the Chaos realm;town#16 : typeclasses.rooms.Room = north;n,south;s
 #
-@desc |yStanding before the entrance to the realm of Chaos.
+@desc |YThe Nexus Portal Chamber is a breathtaking fusion of advanced technology and ancient magic, serving as a gateway between the high-tech cityscape of the Nexus and the enchanting realms beyond. The chamber is a large, circular room with walls made of sleek, reflective metal interwoven with glowing, arcane runes that pulse with a rhythmic energy.|/|/In the center of the room stands the portal itself, a towering archway constructed from a blend of futuristic alloys and enchanted stone. The archway is adorned with intricate carvings and holographic symbols that shift and change, reflecting the dynamic nature of the portal. Within the archway, a swirling vortex of light and energy crackles with power, its colors constantly shifting in a mesmerizing dance.|/|/The floor of the chamber is a mosaic of polished tiles and glowing sigils, forming a complex pattern that channels the portal's energy. Soft, ambient lighting emanates from hidden sources, casting a gentle glow that highlights the room's features without overpowering the ethereal light of the portal.|/|/Around the perimeter of the chamber, various consoles and control panels are manned by a mix of human technicians and magical beings, ensuring the portal's stability and guiding travelers to their destinations. The air is filled with a low hum of machinery and the faint whisper of magical incantations, creating an atmosphere of both anticipation and wonder.
 #
 
 
 
 #
-@dig/teleport Markar's lane;town#17 : typeclasses.rooms.Room = west;w,east;e
+@dig/teleport Corporate Plaza;town#17 : typeclasses.rooms.Room = west;w,east;e
 #
-@desc |yMarkar's lane is the best, you can see Chaos to the northeast.
-#
-
-
-#
-@dig/teleport Qfwfq's lane;town#18 : typeclasses.rooms.Room = south;s,north;n
-#
-@desc |yQfwfq's lane runs north-south through Foundation.
+@desc |YNexus Road passes through the Corporate Plaza, where towering office buildings and sleek corporate headquarters dominate the skyline. The area is impeccably clean and orderly, with well-dressed professionals moving briskly between meetings. Holographic displays showcase corporate achievements and upcoming projects, adding to the air of efficiency and ambition.
 #
 
 
 #
-@dig/teleport Qfwfq's lane;town#19 : typeclasses.rooms.Room = south;s,north;n
+@dig/teleport Nexus Road - Corporate Plaza;town#18 : typeclasses.rooms.Room = south;s,north;n
 #
-@desc |yQfwfq's lane runs north-south through Foundation.
+@desc |YAs you proceed along Nexus Road, the atmosphere begins to shift, signaling your approach to the Corporate Plaza. The buildings grow taller and more imposing, their sleek, mirrored surfaces reflecting the vibrant neon lights of the city. The road itself becomes impeccably maintained, with smooth asphalt and clearly marked lanes for autonomous vehicles.|/|/The Corporate Plaza itself looms ahead, a testament to the power and influence of the corporations that drive the city's economy. As you draw closer, the energy of Nexus Road intensifies, promising opportunities and challenges in the heart of the business district.
+#
+
+
+#
+@dig/teleport Nexus Road - Corporate Plaza;town#19 : typeclasses.rooms.Room = south;s,north;n
+#
+@desc |YThe air is filled with a sense of purpose and ambition, as well-dressed professionals move briskly between towering office buildings. Holographic billboards display corporate logos and advertisements for the latest technological innovations, casting a dynamic glow over the area. The hum of electric vehicles and the occasional whir of drones overhead add to the high-tech ambiance.|/|/Sidewalks are lined with manicured greenery and modern sculptures, providing a touch of nature amidst the urban landscape. Cafes and bistros with sleek, minimalist designs offer a place for business meetings and quick breaks, their outdoor seating areas bustling with activity.
 #
 open east;e,west;w = town#04
 
 
 
 #
-@dig/teleport Road;town#20 : typeclasses.rooms.Room = west;w,east;e
+@dig/teleport Mystic Alley;town#20 : typeclasses.rooms.Room = west;w,east;e
 #
-@desc |yRoad to the pub.
+@desc |YA cobblestone path illuminated by glowing, enchanted lanterns that float gently above. The air is filled with the scent of blooming nightshade flowers and the soft hum of magical energy. As you walk, you notice small, ethereal creatures darting between the shadows, adding a touch of mystery to the journey. The alley leads you towards the welcoming glow of The Enchanted Tankard.
 #
 
 
 #
 @dig/teleport Road;town#21 : typeclasses.rooms.Room = south;s,north;n
 #
-@desc |yRoad along Foundation square.
+@desc |YA winding trail lined with bioluminescent plants that cast a gentle, magical light. The air is filled with the soft rustle of leaves and the distant sound of laughter and music. As you follow the path, you catch glimpses of fairies flitting among the trees, their wings sparkling like tiny stars. The path leads you directly to the entrance of The Enchanted Tankard.
 #
 
 
 #
-@dig/teleport Road;town#22 : typeclasses.rooms.Room = south;s,north;n
+@dig/teleport Enchanted Courtyard;town#22 : typeclasses.rooms.Room = south;s,north;n
 #
-@desc |ySouthwest corner of Foundation square.
+@desc |YA serene, open space surrounded by ancient, ivy-covered walls. The ground is paved with smooth, enchanted stones that glow faintly underfoot. In the center, a fountain of crystal-clear water bubbles gently, its surface reflecting the twinkling lights of magical fireflies. The courtyard serves as a tranquil prelude to the lively ambiance of The Enchanted Tankard further north.
 #
 
 
@@ -174,21 +173,22 @@ open east;e,west;w = town#04
 @dig/teleport Southbound Pathway;town#24 : typeclasses.rooms.Room = east;e,west;w
 #
 @desc |YAs you leave the bustling energy of Millennium Square behind, you find yourself on the Southbound Pathway. The road is a seamless blend of cobblestone and sleek, metallic panels, reflecting the town's unique fusion of old and new. Enchanted lanterns line the path, casting a soft, ethereal glow that guides your way.|/|/To your left, lush, enchanted gardens burst with vibrant flora, their colors shifting in harmony with the ever-changing sky. On your right, futuristic buildings with holographic signs advertise exotic goods and services. The air is filled with a mix of floral scents and the faint hum of advanced machinery, creating a sense of both tranquility and anticipation.
-py setattr(here, "key", "Southbound Pathway")
+#
+
+#
+@dig/teleport Residential Zone;town#25 : typeclasses.rooms.Room = east;e,west;w
+@desc |YIn the Residential Zone of Nexus Road, the pace slows down. Modern apartment buildings with sleek designs and green terraces provide a stark contrast to the bustling commercial areas. The street is quieter here, with residents enjoying a stroll or chatting at small cafes. The occasional hovercar glides by, adding to the serene yet futuristic atmosphere.
+#
+@dig/teleport Neon Nexus Road;town#44 : typeclasses.rooms.Room = east;e,west;w
+#
+@desc |YHolographic advertisements flicker and dance on the walls, casting colorful reflections on the rain-slicked pavement. The air is filled with the hum of distant machinery and the chatter of street vendors peddling cybernetic enhancements and exotic wares.
 #
 
 
 #
-@dig/teleport Road south of center;town#25 : typeclasses.rooms.Room = east;e,west;w
+@dig/teleport Neon Nexus Plaza;town#26 : typeclasses.rooms.Room = north;n,south;s
 #
-@desc |YAs you venture south from the western pathway junction, the cobblestone path narrows, flanked by ancient oak trees whose branches form a natural canopy overhead. The air is filled with the scent of blooming wildflowers, and the distant sound of a babbling brook adds a serene ambiance. Sunlight filters through the leaves, casting dappled shadows on the ground, creating a tranquil and inviting atmosphere.
-#
-
-
-#
-@dig/teleport Road south of center;town#26 : typeclasses.rooms.Room = north;n,south;s
-#
-@desc |yYou can make out the entrance to the realm of Science to the east.
+@desc |YThe Neon Nexus Plaza is a sprawling open space, dominated by a massive holographic display that projects news and advertisements. People from all walks of life gather here, their faces illuminated by the ever-changing neon lights. The plaza is a melting pot of cultures and technologies, where the old meets the new in a dazzling display of urban life.
 #
 open north;n,south;s = town#08
 #
@@ -209,59 +209,63 @@ open north;n,south;s = town#08
 
 
 #
-@dig/teleport George's road;town#29 : typeclasses.rooms.Room = south;s,north;n
+@dig/teleport Sunlit Meadow;town#29 : typeclasses.rooms.Room = south;s,north;n
 #
-@desc |yAlong George's south in the southwest corner of town.
-#
-
-
-#
-@dig/teleport Witching corner;town#30 : typeclasses.rooms.Room = west;w,east;e
-#
-@desc |yThis is the witching corner, where Witches like to practice.
+@desc |YContinuing along the southern trail, you arrive at the Sunlit Meadow, a serene and open expanse that offers a refreshing change from the dense foliage of the Whispering Grove to the west. The meadow is bathed in warm sunlight, with tall grasses and wildflowers swaying gently in the breeze. The vibrant colors of the flowers create a stunning mosaic, attracting a variety of butterflies and bees that flit from bloom to bloom.
 #
 
 
 #
-@dig/teleport Newbie Way;town#31 : typeclasses.rooms.Room = east;e,west;w
+@dig/teleport Whispering Grove;town#30 : typeclasses.rooms.Room = west;w,east;e
 #
-@desc |yNewbieland is visible to the south.
+@desc |YAs you follow the Southbound Trail around the bend, you enter the Whispering Grove. This tranquil area is a hidden gem, nestled between the bustling town and the welcoming Newcomer’s Haven. The soft dirt trail continues through a grove of ancient, whispering trees whose leaves rustle gently in the breeze, creating a soothing, almost musical sound.
+#
+
+
+#
+@dig/teleport Path to Newcomer's Haven';town#31 : typeclasses.rooms.Room = east;e,west;w
+#
+@desc |YThe trail is lined with bioluminescent flowers that glow softly, illuminating your way with a magical light. Tall, futuristic lampposts, powered by arcane energy, stand at intervals, casting a gentle, otherworldly glow. The ground beneath your feet is a mix of soft dirt and smooth, metallic tiles that hum with a faint, mystical energy.
 #
 
 
 #
 @dig/teleport Newbie Way;town#32 : typeclasses.rooms.Room = east;e,west;w
 #
-@desc |yNewbieland is visible to the southwest.
+@desc |YAs you approach the Neon Nexus Market, Nexus Road becomes increasingly vibrant. Street vendors set up stalls along the sidewalks, offering a variety of goods from fresh produce to handmade crafts. The air is filled with the sounds of haggling and the enticing aromas of street food. The market's energy spills out onto the road, drawing you in with its promise of discovery.
 #
 
 
 #
-@dig/teleport Newbie Way;town#33 : typeclasses.rooms.Room = east;e,west;w
+@dig/teleport Cyber Bazaar;town#33 : typeclasses.rooms.Room = east;e,west;w
 #
-@desc |yThe southeastern corner of town. Newbieland is visible to the southwest.
-#
-
-
-#
-@dig/teleport Flimsy's path;town#34 : typeclasses.rooms.Room = north;n,south;s
-#
-@desc |yAlong Flimsy's path, running north-south on the eastern side of town.
+@desc |YThe Cyber Bazaar section of Nexus Road is a tech lover's paradise. Stalls and shops offer the latest in cybernetic implants, advanced gadgets, and cutting-edge software. The air is filled with the hum of machinery and the excited chatter of customers and vendors. Neon signs and holographic displays create a dazzling, high-tech atmosphere that promises endless possibilities.
 #
 
 
 #
-@dig/teleport Flimsy's path;town#35 : typeclasses.rooms.Room = north;n,south;s
+@dig/teleport Entertaintment Strip;town#34 : typeclasses.rooms.Room = north;n,south;s
 #
-@desc |yAlong Flimsy's path, running north-south on the eastern side of town.
+@desc |YNeon Nexus's Entertainment Strip is alive with neon lights and the sounds of laughter and music. Clubs, bars, and theaters line the street, each vying for attention with dazzling displays and holographic performers. The air is filled with the scent of street food and the promise of a good time, making this a popular destination for both locals and visitors.
 #
 
 
 #
-@dig/teleport Along Newbie Way;town#36 : typeclasses.rooms.Room = south;s,north;n
+@dig/teleport Tech District;town#35 : typeclasses.rooms.Room = north;n,south;s
 #
-@desc |yNewbieland is visible to the south.
+@desc |YNexus Road winds through the Tech District, where sleek skyscrapers tower above, their facades adorned with holographic billboards advertising the latest in cybernetic enhancements and AI technology. The sidewalks are bustling with tech enthusiasts and corporate employees, all moving with purpose. The hum of electric vehicles and the occasional drone overhead add to the futuristic ambiance.
 #
+
+
+#
+@dig/teleport Path to Newcomer's Haven';town#36 : typeclasses.rooms.Room = south;s,north;n
+#
+@desc |YAs you walk, holographic butterflies flit around, their wings shimmering with digital patterns. The air is filled with the harmonious sounds of nature and the occasional hum of distant machinery. Enchanted trees with metallic leaves rustle in the breeze, creating a soothing, melodic sound.|/|/Ahead, the welcoming sight of Newcomer's Haven comes into view, its futuristic cottages and magical charm promising safety and camaraderie just a few steps away.
+#
+
+
+
+
 
 
 #
@@ -318,3 +322,36 @@ open north;n,south;s = town#08
 @dig/teleport The Cybercorps Mega Corporation;town#42 : typeclasses.rooms.CybercorpsWaresRoom = east;e,west;w
 #
 @desc |yAs you step into the CyberCorps Wares Shop, the atmosphere shifts to one of sleek sophistication and cutting-edge technology. The shop is a marvel of modern design, with walls lined with polished metal and illuminated by soft, ambient lighting that highlights the high-tech merchandise on display.|/|/The entrance is flanked by two holographic displays, welcoming you with animated advertisements showcasing the latest in cybernetic enhancements and advanced weaponry. The floor is a seamless expanse of dark, reflective material that seems to absorb sound, creating a hushed, almost reverent atmosphere.|/|/To your left, a series of glass cases house an array of cybernetic implants, each one more advanced than the last. From neural interfaces that enhance cognitive functions to biomechanical limbs that offer superhuman strength, the selection is both impressive and intimidating. Each item is accompanied by a holographic information panel, detailing its specifications and potential applications.|/|/On the right, a wall of weaponry catches your eye. Sleek plasma rifles, compact laser pistols, and formidable gauss cannons are displayed with meticulous care. The weapons are mounted on illuminated racks, each one casting a soft glow that accentuates their lethal beauty. Interactive displays allow you to examine the weapons in detail, providing information on their capabilities and customization options.|/|/In the center of the shop, a circular counter staffed by impeccably dressed androids offers personalized assistance. Their synthetic voices are calm and precise, ready to answer any questions and guide you through the purchasing process. Behind the counter, a large screen displays real-time data feeds and promotional videos, showcasing the latest innovations from CyberCorps.|/|/The back of the shop features a private consultation area, where clients can discuss their needs and receive expert advice on the best enhancements and equipment for their specific requirements. Comfortable seating and a serene ambiance make this area a welcome respite from the high-tech hustle of the main shop floor.|/|/Throughout the shop, the air is filled with a subtle hum of advanced machinery and the faint scent of ozone, a reminder of the powerful technology that surrounds you. The overall effect is one of awe and excitement, a testament to the cutting-edge advancements that CyberCorps has to offer. This is not just a shop; it is a gateway to a future where the line between human and machine is increasingly blurred.
+#
+@tel town#41
+#
+@dig/teleport The Cybercorps Mega Corporation;town#43 : typeclasses.rooms.CybercorpsShop = west;w,east;e
+#
+@desc |yStepping into the Cybercorps Armory, you are greeted by the sleek, metallic sheen of a high-tech shop dedicated to equipping adventurers with the latest in cybernetic armor and supplies. The walls are lined with reinforced steel panels, interspersed with holographic displays showcasing various pieces of gear. Soft, ambient lighting casts a cool blue glow, creating an atmosphere of cutting-edge technology and efficiency.|/|/The shop is meticulously organized, with rows of shelves and display cases filled with an array of armor pieces, from lightweight nanofiber vests to heavy-duty titanium chestguards. Each item is tagged with a digital readout detailing its specifications, including armor rating, material composition, and integrated features. A central counter, manned by a friendly yet professional android attendant, offers personalized assistance and expert advice on selecting the best gear for your needs.|/|/In one corner, a section dedicated to basic supplies features everything from energy packs and medkits to multi-tools and repair kits. The shelves are stocked with essentials for any cyber-adventurer, ensuring you're well-prepared for the challenges ahead. A small workbench area allows for on-the-spot modifications and upgrades, with a variety of tools and components neatly arranged for easy access.
+#
+# 45 is earlier in the sequence of rooms
+#
+@tel town#20
+#
+@dig/teleport The Enchanted Tankard;town#45 : typeclasses.rooms.Room = west;w,east;e
+#
+@desc |YThe bar itself is a marvel of both magic and technology. Crafted from ancient, enchanted wood, it pulses with a faint, otherworldly energy. Embedded within the bar are sleek, touch-sensitive panels that allow patrons to browse the menu and place orders with a simple tap. The menu features a mix of traditional ales and futuristic cocktails, each with a whimsical twist-like the "Dragon's Breath", a fiery drink that emits a harmless, smoky vapor.|/|/Behind the bar, a friendly bartender, part human and part automaton, expertly mixes drinks while engaging in lively conversation with the patrons. Shelves lined with glowing bottles of various potions and elixirs add to the pub's enchanting atmosphere.|/|/The seating area is a mix of plush, high-backed chairs and rustic wooden benches, providing a comfortable spot for adventurers to relax and share tales of their exploits. In one corner, a small stage hosts performances by bards and holographic entertainers, filling the air with music and laughter.
+#
+@tel town#21
+#
+@dig/teleport Arcane Bridge;town#46 : typeclasses.rooms.Room = west;w,east;e
+#
+@desc |YCrossing the Arcane Bridge, you feel a subtle vibration underfoot, as if the very stones are infused with magic. The bridge arches gracefully over a shimmering stream that glows with an otherworldly light. Ancient runes carved into the stone railings pulse with a soft, blue glow, guiding your way towards the lively atmosphere of Millennium.
+#
+@tel town#46
+#
+@dig/teleport Nexus Gateway;town#47 : typeclasses.rooms.Room = west;w,east;e
+#
+@desc |YThe Nexus Gateway marks the transition from the high-tech, neon-lit streets of the Nexus to a realm infused with enchanting fantasy elements. The gateway itself is an impressive archway, constructed from a blend of sleek metal and ancient stone, adorned with glowing runes that pulse with magical energy. Holographic banners flutter above, displaying symbols of both futuristic technology and mystical lore.|/|/As you pass through the archway, the atmosphere shifts dramatically. The hum of machinery and the glow of neon lights give way to the serene sounds of nature and the soft, ethereal light of enchanted lanterns. The path ahead is lined with bioluminescent plants and trees with leaves that shimmer like precious gems. The air is filled with the scent of blooming flowers and the distant melody of a magical stream.|/|/The Nexus Gateway serves as a portal between two worlds, inviting adventurers to leave behind the bustling cityscape and step into a land where magic and nature reign supreme. This exit promises new adventures and discoveries in a realm where the wonders of fantasy await.
+#
+@tel town#47
+#
+@dig/teleport Starlit Lane;town#48 : typeclasses.rooms.Room = west;w,east;e
+#
+@desc |YStarlit Lane is a picturesque street where the night sky seems to blend seamlessly with the magical lights that line the path. The cobblestones underfoot are embedded with tiny, glowing crystals that twinkle like stars. The air is filled with the soft melodies of a distant bard, creating a sense of wonder and anticipation as you make your way out of the city
+
