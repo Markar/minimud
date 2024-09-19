@@ -1,80 +1,35 @@
-from random import randint, uniform, choice
-from evennia.prototypes import spawner, prototypes
-from string import punctuation
-from evennia import AttributeProperty
-from evennia.utils import lazy_property, iter_to_str, delay, logger
-from evennia.contrib.rpg.traits import TraitHandler
-from evennia.contrib.game_systems.cooldowns import CooldownHandler
+import math
+from random import uniform, randint
+from evennia.utils import delay, iter_to_str
 from evennia import TICKER_HANDLER as tickerhandler
-from evennia.contrib.game_systems.clothing.clothing import (
-    ClothedCharacter,
-    get_worn_clothes,
-)
 from commands.elemental_cmds import ElementalCmdSet
-from typeclasses.characters import PlayerCharacter
 from typeclasses.elementalguild.water_elemental_attack import WaterAttack
 from typeclasses.elementalguild.attack_emotes import AttackEmotes
 from typeclasses.elementals import Elemental
 
-from typeclasses.elementalguild.water_elemental_commands import CmdRejuvenate
 
 class WaterElemental(Elemental):
-    skill_info = {
-        "water mastery": {
-            "description": "Increases the elemental's control over water, enhancing the effectiveness of all water-based abilities.",
-            "effect": "Boosts damage and precision of water-related skills.",
-        },
-        "fluid agility": {
-            "description": "Enhances the elemental's speed and flexibility, making it more elusive in combat.",
-            "effect": "Increases movement speed and evasion.",
-        },
-        "aqua resilience": {
-            "description": "Improves the elemental's resistance to water and ice damage, allowing for greater endurance in battle.",
-            "effect": "Increases health and resistance to water and ice damage.",
-        },
-        "tidal force": {
-            "description": "Grants the elemental the ability to channel powerful currents, improving the impact of its attacks.",
-            "effect": "Increases critical hit chance and damage for water-based attacks.",
-        },
-        "hydro armor": {
-            "description": "Surrounds the elemental with a protective layer of water, providing additional defense and offensive capabilities.",
-            "effect": "Increases armor and adds a slowing effect to melee attacks.",
-        },
-        "aqua infusion": {
-            "description": "Infuses the elemental's core with the essence of water, enhancing its regenerative abilities.",
-            "effect": "Increases health regeneration rate and reduces cooldowns for healing abilities.",
-        },
-        "wave control": {
-            "description": "Improves the elemental's ability to manipulate large-scale water movements, increasing the effectiveness of area-of-effect attacks.",
-            "effect": "Boosts the range and damage of area-of-effect water abilities.",
-        },
-        "elemental synergy": {
-            "description": "Enhances the elemental's ability to work in harmony with other elements, boosting the effectiveness of combined elemental attacks.",
-            "effect": "Increases synergy and damage when using multi-elemental abilities.",
-        },
-    }
-
     def at_object_creation(self):
         self.cmdset.add(ElementalCmdSet, persistent=True)
         super().at_object_creation()
         con_increase_amount = 12
-        int_increase_amount = 5
+        int_increase_amount = 13
         self.db.con_increase_amount = con_increase_amount
         self.db.int_increase_amount = int_increase_amount
-        self.db.hpmax = 50 + (con_increase_amount * self.db.constitution)        
-        self.db.fpmax = 50 + (int_increase_amount * self.db.intelligence)
-        
+        self.db.hpmax = 50 + (con_increase_amount * self.traits.con.value)
+        self.db.fpmax = 50 + (int_increase_amount * self.traits.int.value)
+
         self.db.guild_level = 1
         self.db.gxp = 0
         self.db.skill_gxp = 0
         self.db.title = "the novice water elemental"
-        
+
         self.db.natural_weapon = {
             "name": "water_attack",
             "damage_type": "blunt",
             "damage": 12,
             "speed": 3,
-            "energy_cost": 10
+            "energy_cost": 10,
         }
         self.db.guild = "elemental"
         self.db.subguild = "water"
@@ -90,62 +45,91 @@ class WaterElemental(Elemental):
             "fluid agility": 1,
             "aqua resilience": 1,
             "tidal force": 1,
-            "hydro armor": 1,
+            "ice mastery": 1,
             "aqua infusion": 1,
             "wave control": 1,
             "elemental synergy": 1,
         }
-                
+
         self.at_wield(WaterAttack)
-        tickerhandler.add(interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True)
-    
+        tickerhandler.add(
+            interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
+        )
+
     def kickstart(self):
         self.msg("Kickstarting heartbeat")
-        tickerhandler.add(interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True)
-        
-    def addhp(self, amount):
-        hp = self.db.hp
-        hpmax = self.db.hpmax
-        
-        if hp + amount > hpmax:
-            amt = hpmax - hp
-            self.db.hp += max(amt, 0)
-            return
-        else: 
-            self.db.hp += max(amount, 0)
-    
-    def addfp(self, amount):
-        fp = self.db.fp
-        fpmax = self.db.fpmax
-        
-        if fp + amount > fpmax:
-            amt = fpmax - fp
-            self.db.fp += max(amt, 0)
-            return
-        else:
-            self.db.fp += max(amount, 0)
-    
-    def addep(self, amount):
-        ep = self.db.ep
-        epmax = self.db.epmax
-        
-        if ep + amount > epmax:
-            amt = epmax - ep
-            self.db.ep += max(amt, 0)
-            return
-        if ep < epmax + amount:
-            self.db.ep += max(amount, 0)
-        
+        tickerhandler.add(
+            interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
+        )
+
+    def get_display_status(self, looker, **kwargs):
+        """
+        Returns a quick view of the current status of this character
+        """
+
+        chunks = []
+
+        # add resource levels
+        hp = int(self.db.hp)
+        hpmax = int(self.db.hpmax)
+        fp = int(self.db.fp)
+        fpmax = int(self.db.fpmax)
+        ep = int(self.db.ep)
+        epmax = int(self.db.epmax)
+        burnout_count = self.db.burnout["count"]
+        burnout_max = self.db.burnout["max"]
+
+        chunks.append(
+            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g"
+        )
+        if self.db.burnout["count"] > 0:
+            chunks.append(f"|YBurnout: |G{burnout_count}/{burnout_max}|n")
+        if self.db.burnout["active"]:
+            chunks.append(f"|YB")
+        if self.db.aqua_shield == True:
+            chunks.append(f"|YAS")
+
+        # get all the current status flags for this character
+        if status_tags := self.tags.get(category="status", return_list=True):
+            # add these statuses to the string, if there are any
+            chunks.append(iter_to_str(status_tags))
+
+        if looker == self:
+            # if we're checking our own status, include cooldowns
+            all_cooldowns = [
+                (key, self.cooldowns.time_left(key, use_int=True))
+                for key in self.cooldowns.all
+            ]
+            all_cooldowns = [f"{c[0]} ({c[1]}s)" for c in all_cooldowns if c[1]]
+            if all_cooldowns:
+                chunks.append(f"Cooldowns: {iter_to_str(all_cooldowns, endsep=',')}")
+
+        chunks.append(f"\n")
+        # glue together the chunks and return
+        return " - ".join(chunks)
+
     def at_tick(self):
-        base_regen = self.db.hpregen
+        base_hp_regen = self.db.hpregen
         base_ep_regen = self.db.epregen
         base_fp_regen = self.db.fpregen
-        
-        self.addhp(base_regen)
-        self.addfp(base_ep_regen)
-        self.addep(base_fp_regen)
-            
-        
+        regen = self.db.skills["aqua infusion"]
+
+        if regen < 2:
+            bonus_fp = 0
+        if regen < 5:
+            bonus_fp = int(uniform(0, regen / 2))  # 0-2
+        if regen < 10:
+            bonus_fp = int(uniform(1, regen / 2))  # 1-3
+        if regen < 15:
+            bonus_fp = int(uniform(3, regen / 3))  # 3-5
+        if regen < 20:
+            bonus_fp = int(uniform(4, regen / 3))  # 4-6
+
+        total_fp_regen = base_fp_regen + bonus_fp
+        self.adjust_hp(base_hp_regen)
+        self.adjust_fp(base_ep_regen)
+        self.adjust_ep(total_fp_regen)
+
     def get_display_name(self, looker, **kwargs):
         """
         Adds color to the display name.
@@ -154,7 +138,7 @@ class WaterElemental(Elemental):
         if looker == self:
             # special color for our own name
             return f"|c{name}|n"
-        return f"|g{name}|n"    
+        return f"|g{name}|n"
 
     # property to mimic weapons
     @property
@@ -165,11 +149,13 @@ class WaterElemental(Elemental):
     def at_wield(self, weapon, **kwargs):
         self.msg(f"You cannot wield weapons.")
         return False
-    
+
     def attack(self, target, weapon, **kwargs):
         weapon = WaterAttack()
-            
+
         if not self.in_combat:
+            self.enter_combat(target)
+            target.enter_combat(self)
             return
         # can't attack if we're fleeing!
         if self.db.fleeing:
@@ -203,19 +189,21 @@ class WaterElemental(Elemental):
             if settings.get("auto attack") and (speed := weapon.speed):
                 # queue up next attack; use None for target to reference stored target on execution
                 delay(speed + 1, self.attack, None, weapon, persistent=True)
-    
-    def get_player_attack_hit_message(self, attacker, dam, tn, emote="fire_elemental_melee"):
+
+    def get_player_attack_hit_message(
+        self, attacker, dam, tn, emote="fire_elemental_melee"
+    ):
         """
         Get the hit message based on the damage dealt. This is the elemental's
-        version of the method, defaulting to the earth elemental version but 
+        version of the method, defaulting to the earth elemental version but
         should be overridden by subguilds.
-        
-        ex: 
+
+        ex:
             f"{color}$You() swipe at {tn}{color} with a fiery claw, leaving scorch marks.",
         """
-        
+
         msgs = AttackEmotes.get_emote(attacker, emote, tn, which="left")
-        
+
         if dam <= 0:
             to_me = msgs[0]
         elif 1 <= dam <= 5:
@@ -238,35 +226,120 @@ class WaterElemental(Elemental):
             to_me = msgs[9]
         else:
             to_me = msgs[10]
-            
+
         to_me = f"{to_me} ({dam})"
         self.location.msg_contents(to_me, from_obj=self)
-                    
+
         return to_me
-    
+
+    def _calculate_dodge(self):
+        glvl = self.db.guild_level
+
+        fluid_agility = self.db.skills.get("aerial agility", 1)
+
+        base_dodge = 0
+        max_dodge = 50
+
+        water_form_bonus = 0
+        if self.db.water_form:
+            water_form_bonus = 10
+
+        dodge = (
+            base_dodge
+            + water_form_bonus
+            + (fluid_agility * 1.5)
+            + (glvl * 0.2)
+            + (self.db.dexterity * 0.1)
+        )
+        # 20 + 9 + 16 + 6 + 3 = 54
+        if fluid_agility <= 4:
+            dodge += 1
+        if fluid_agility <= 7:
+            dodge += 2
+        if fluid_agility <= 10:
+            dodge += 3
+        if glvl >= 10:
+            dodge += 1
+        if glvl >= 20:
+            dodge += 2
+        if glvl >= 30:
+            dodge += 3
+        if dodge > max_dodge:
+            dodge = max_dodge
+
+        return dodge
+
     def at_damage(self, attacker, damage, damage_type=None):
         """
         Apply damage, after taking into account damage resistances.
         """
+        self.msg(f"at damage in water elemental")
         glvl = self.db.guild_level
-        status = self.get_display_status(self)
-        damage -= self.defense(damage_type)
+        con = self.traits.con.value
         hp = self.db.hp
         hpmax = self.db.hpmax
-            
-        self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
-        attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
-        
-        hp -= max(damage, 0)
-        attacker.get_npc_attack_emote(self, damage, self.get_display_name(self))
-        self.msg(prompt=status)
-        
+        aqua_resilience = self.db.skills.get("aqua resilience", 0)
+        water_mastery = self.db.skills.get("water mastery", 0)
+
         hp_percentage = hp / hpmax
         reaction = int(self.db.reaction_percentage or 1) / 100
-        if hp_percentage < reaction:
+
+        percentage_reduction = 0
+        flat_reduction = 0
+
+        # Calculate dodge
+        dodge = self._calculate_dodge()
+        ran = randint(1, 100)
+        if ran <= dodge:
+            self.msg(f"|cYou dodge the attack!")
+            attacker.msg(f"{self.get_display_name(attacker)} dodges your attack!")
+            return
+
+        # # Flat damage reduction - 50 con = 5 reduction, glvl 30 = 1.5 reduction
+        flat_reduction = (
+            con * 0.1 + glvl * 0.05 + aqua_resilience * 0.1 + water_mastery * 0.05
+        )
+
+        # # Percentage damage reduction 2% per skill level
+        percentage_reduction = aqua_resilience * 0.02
+
+        # apply aqua_shield after defense if it's enabled
+        if self.db.aqua_shield:
+            water_shield_absorbed = uniform(aqua_resilience / 3, aqua_resilience)
+            damage -= water_shield_absorbed
+            self.msg(f"|cYour water shield blocks some damage!")
+
+        # Apply randomized flat reduction
+        damage -= uniform(flat_reduction / 2, flat_reduction)
+
+        # Apply percentage reduction
+        damage *= 1 - percentage_reduction
+
+        # Apply (worn) defense reduction
+        damage -= self.defense(damage_type)
+
+        # randomize damage
+        damage = uniform(damage / 2, damage)
+
+        # Make sure damage is an integer, similar to floor rounding
+        damage = int(damage)
+
+        # Ensure damage doesn't go below zero
+        damage = max(damage, 0)
+        # Apply the damage to the character
+        self.db.hp -= damage
+        self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
+        attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
+
+        # Get the attack emote
+        attacker.get_npc_attack_emote(self, damage, self.get_display_name(self))
+
+        # Check if the character is below the reaction percentage
+        if hp_percentage < reaction and glvl > 3:
+            self.msg(f"|cYou are below {reaction*100}% health!|n")
             self.execute_cmd("rejuvenate")
-            
-        if self.db.hp <= 0:
+
+        if hp <= 0:
             self.tags.add("unconscious", category="status")
             self.tags.add("lying down", category="status")
             self.msg(
@@ -275,4 +348,3 @@ class WaterElemental(Elemental):
             if self.in_combat:
                 combat = self.location.scripts.get("combat")[0]
                 combat.remove_combatant(self)
-                              

@@ -1,6 +1,7 @@
 """
 Prototypes
 """
+
 from random import randint, uniform, choice
 
 SCRAWNY_GNOLL = {
@@ -15,7 +16,7 @@ SCRAWNY_GNOLL = {
     "name_color": "r",
     "str": 15,
     "level": lambda: randint(3, 5),
-    "energyac": 40,
+    "energyac": 0,
     "natural_weapon": {
         "name": "claws",
         "damage_type": "edged",
@@ -70,13 +71,15 @@ GNOLL_WARLORD = {
         "energy_cost": 15,
     },
     "exp_reward": 50,
-    "drops": [{
-        "key": "gnoll warlord's battle axe",
-        "aliases": ["axe"],
-        "desc": "A massive battle axe once wielded by a gnoll warlord.",
-        "name_color": "r",
-        "power": 30
-    }],
+    "drops": [
+        {
+            "key": "gnoll warlord's battle axe",
+            "aliases": ["axe"],
+            "desc": "A massive battle axe once wielded by a gnoll warlord.",
+            "name_color": "r",
+            "power": 30,
+        }
+    ],
     "can_attack": True,
 }
 

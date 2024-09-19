@@ -59,3 +59,8 @@ s
 #
 @open chessboard,leave = (5,8,chessboard)
 #
+
+
+
+#
+@desc |YYou stand before the imposing gates of Castle Crushbone, a fortress that exudes an aura of ancient power and foreboding. The massive stone walls, weathered by time and battle, rise high into the sky, their surfaces etched with the scars of countless sieges. Iron spikes crown the battlements, glinting menacingly in the dim light.|/|/The entrance itself is a grand archway, flanked by towering statues of fierce orc warriors, their eyes seemingly watching your every move. Heavy wooden doors, reinforced with iron bands, stand slightly ajar, creaking ominously with the slightest breeze. Vines and moss cling to the stone, adding a touch of wildness to the otherwise formidable structure.|/|/The air is thick with the scent of damp earth and the faint, metallic tang of old blood. As you step closer, you can hear the distant sounds of clashing weapons and the guttural growls of orcish guards patrolling the inner courtyard. The ground beneath your feet is uneven, littered with broken weapons and the remnants of past battles.|/|/Despite the eerie atmosphere, there is a sense of anticipation in the air, as if the castle itself is waiting for the next brave soul to challenge its depths. Will you dare to enter and face the unknown dangers that lie within Castle Crushbone?

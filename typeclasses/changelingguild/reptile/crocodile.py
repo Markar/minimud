@@ -2,6 +2,7 @@ from random import randint, uniform
 
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
+
 class Crocodile(ChangelingAttack):
     """
     Crocodiles are large, aquatic reptiles that are known for their powerful jaws
@@ -22,36 +23,35 @@ class Crocodile(ChangelingAttack):
     power = 20
     toughness = 23
     dodge = 2
-    
+
     def _calculate_tail_damage(self, wielder):
-        dex = wielder.db.dexterity
-        str = wielder.db.strength
-        stat_bonus = (dex+str) / 3
-        base_dmg = 17 + wielder.db.guild_level/2
+        dex = wielder.traits.dex.value
+        str = wielder.traits.str.value
+        stat_bonus = (dex + str) / 3
+        base_dmg = 17 + wielder.db.guild_level / 2
         dmg = base_dmg + stat_bonus
-        
-        damage = int(uniform(dmg/2, dmg))
+
+        damage = int(uniform(dmg / 2, dmg))
         return damage
-    
+
     def _calculate_bite_damage(self, wielder):
-        dex = wielder.db.dexterity
-        str = wielder.db.strength
-        stat_bonus = (dex+str) / 3
+        dex = wielder.traits.dex.value
+        str = wielder.traits.str.value
+        stat_bonus = (dex + str) / 3
         base_dmg = 32 + wielder.db.guild_level
         dmg = base_dmg + stat_bonus
-        
-        damage = int(uniform(dmg/2, dmg))
+
+        damage = int(uniform(dmg / 2, dmg))
         return damage
-    
+
     def at_attack(self, wielder, target, **kwargs):
 
         self.energy_cost = 3
-        self.speed = 3   
-        
+        self.speed = 3
+
         wielder.db.ep -= self.energy_cost
         target.at_damage(wielder, self._calculate_damage(wielder), "edged", "bite")
         target.at_damage(wielder, self._calculate_damage(wielder), "blunt", "tail")
-        
+
         wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
         wielder.cooldowns.add("attack", self.speed)
-

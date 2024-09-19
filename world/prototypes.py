@@ -1,6 +1,7 @@
 """
 Prototypes
 """
+
 from random import randint, uniform, choice
 
 MOB_CORPSE = {
@@ -180,7 +181,7 @@ SMITHING_FURNACE = {
 COOKING_OVEN = {
     "key": "oven",
     "desc": "A cast iron stove - or is it an oven? Well, it's hot and you can cook on it.",
-    "tags": [("oven", "crafting_tool"),("stove", "crafting_tool")],
+    "tags": [("oven", "crafting_tool"), ("stove", "crafting_tool")],
     "locks": "get:false()",
 }
 
@@ -257,25 +258,39 @@ BERRY_BUSH = {
 BLACKBERRY = {
     "key": "blackberry",
     "desc": "A juicy blackberry.",
-    "tags": [("blackberry", "crafting_material"), ("berry", "crafting_material"), ("fruit", "crafting_material"), "edible"],
+    "tags": [
+        ("blackberry", "crafting_material"),
+        ("berry", "crafting_material"),
+        ("fruit", "crafting_material"),
+        "edible",
+    ],
     "energy": 1,
     "value": 0,
 }
 BLUEBERRY = {
     "key": "blueberry",
     "desc": "A single blueberry.",
-    "tags": [("blueberry", "crafting_material"), ("berry", "crafting_material"), ("fruit", "crafting_material"), "edible"],
+    "tags": [
+        ("blueberry", "crafting_material"),
+        ("berry", "crafting_material"),
+        ("fruit", "crafting_material"),
+        "edible",
+    ],
     "energy": 1,
     "value": 0,
 }
 RASPBERRY = {
     "key": "raspberry",
     "desc": "A large red raspberry.",
-    "tags": [("raspberry", "crafting_material"), ("berry", "crafting_material"), ("fruit", "crafting_material"), "edible"],
+    "tags": [
+        ("raspberry", "crafting_material"),
+        ("berry", "crafting_material"),
+        ("fruit", "crafting_material"),
+        "edible",
+    ],
     "energy": 1,
     "value": 0,
 }
-
 
 
 LUMBER_TREE = {
@@ -440,4 +455,29 @@ DEER_ANTLER = {
         ("bone", "crafting_material"),
     ],
 }
+CYBER_CHESTGUARD = {
+    "typeclass": "typeclasses.objects.ClothingObject",
+    "key": "Nanofiber Vest",
+    "desc": "A high-tech chestguard made from reinforced nanofiber and titanium alloy, offering superior protection and integrated with advanced sensors for enhanced situational awareness.",
+    "armor": 6,
+    "value": 750,
+    "clothing_type": "chestguard",
+}
 
+CYBER_LEG_GUARDS = {
+    "typeclass": "typeclasses.objects.ClothingObject",
+    "key": "Nanofiber pants",
+    "desc": "A pair of advanced leg guards constructed from reinforced nanofiber and titanium alloy, designed for maximum protection and mobility.",
+    "armor": 3,
+    "value": 500,
+    "clothing_type": "legguard",
+}
+
+CYBER_BOOTS = {
+    "typeclass": "typeclasses.objects.ClothingObject",
+    "key": "Nanofiber boots",
+    "desc": "A pair of high-tech boots made from reinforced nanofiber and titanium alloy, designed for maximum durability and enhanced agility. Integrated with shock absorbers and traction control for optimal performance.",
+    "armor": 2,
+    "value": 400,
+    "clothing_type": "footwear",
+}

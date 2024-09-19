@@ -27,6 +27,6 @@ class ElementalAttack:
         The auto attack for elementals. Only put things that are shared
         between all forms here.
         """
-        
+        print("ElementalAttack at_attack")
         wielder.db.gxp += self.gxp_rate
         wielder.db.skill_gxp += self.skill_gxp_rate
