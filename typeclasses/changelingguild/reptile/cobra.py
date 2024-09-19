@@ -1,6 +1,7 @@
 from random import randint, uniform
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
+
 class Cobra(ChangelingAttack):
     """
     Cobras are venomous snakes known for their distinctive hoods, which they
@@ -16,25 +17,25 @@ class Cobra(ChangelingAttack):
     power = 14
     toughness = 14
     dodge = 10
-    
+
     def _calculate_damage(self, wielder):
-        dex = wielder.db.dexterity
-        str = wielder.db.strength
-        stat_bonus = (str+dex) / 3
+        dex = wielder.traits.dex.value
+        str = wielder.traits.str.value
+        stat_bonus = (str + dex) / 3
         base_dmg = 47 + wielder.db.guild_level * 2
         dmg = base_dmg + stat_bonus
-        
-        damage = int(uniform(dmg/2, dmg))
+
+        damage = int(uniform(dmg / 2, dmg))
         return damage
-    
+
     def at_attack(self, wielder, target, **kwargs):
         super().at_attack(wielder, target, **kwargs)
-        
+
         self.energy_cost = 1
         self.speed = 3
-        
+
         wielder.db.ep -= self.energy_cost
         target.at_damage(wielder, self._calculate_damage(wielder), "poison", "bite")
-        
+
         wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
         wielder.cooldowns.add("attack", self.speed)

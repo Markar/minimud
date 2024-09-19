@@ -1,6 +1,7 @@
 from random import randint, uniform
 from typeclasses.changelingguild.changeling_attack import ChangelingAttack
 
+
 class Eagle(ChangelingAttack):
     """
     Eagles are birds of prey known for their speed and agility. They are
@@ -11,45 +12,45 @@ class Eagle(ChangelingAttack):
     solitary birds and are highly territorial, defending their hunting
     grounds from other birds of prey.
     """
+
     speed = 2
     power = 25
     toughness = 10
     dodge = 2
 
     def _calculate_beak_damage(self, wielder):
-        str = wielder.db.strength
-        dex = wielder.db.dexterity
-        stat_bonus = str/3 + dex/5
+        str = wielder.traits.str.value
+        dex = wielder.traits.dex.value
+        stat_bonus = str / 3 + dex / 5
         dmg = 14 + stat_bonus + wielder.db.guild_level * 2
-        
-        damage = randint(int(dmg*2/3), int(dmg))
+
+        damage = randint(int(dmg * 2 / 3), int(dmg))
         return damage
-    
+
     def _calculate_claw_damage(self, wielder):
-        str = wielder.db.strength
-        dex = wielder.db.dexterity
-        stat_bonus = str/7 + dex/6
+        str = wielder.traits.str.value
+        dex = wielder.traits.dex.value
+        stat_bonus = str / 7 + dex / 6
         dmg = stat_bonus + wielder.db.guild_level / 3
-        
-        damage = randint(int(dmg*2/3), int(dmg))
+
+        damage = randint(int(dmg * 2 / 3), int(dmg))
         return damage
-     
+
     def _calculate_wing_damage(self, wielder):
-        str = wielder.db.strength
-        dex = wielder.db.dexterity
-        stat_bonus = (str+dex)/10
+        str = wielder.traits.str.value
+        dex = wielder.traits.dex.value
+        stat_bonus = (str + dex) / 10
         dmg = stat_bonus + wielder.db.guild_level / 6
-        
-        damage = randint(int(dmg*2/3), int(dmg))
+
+        damage = randint(int(dmg * 2 / 3), int(dmg))
         return damage
-    
-    
+
     def at_attack(self, wielder, target, **kwargs):
         super().at_attack(wielder, target, **kwargs)
-        
+
         self.energy_cost = 1
         self.speed = 3
-        
+
         wielder.db.ep -= self.energy_cost
         target.at_damage(wielder, self._calculate_beak_damage(wielder), "edged", "bite")
         target.at_damage(wielder, self._calculate_claw_damage(wielder), "blunt", "claw")

@@ -33,6 +33,8 @@ SERVERNAME = "Millennium"
 # Defines the base character type as PlayerCharacter instead of Character
 BASE_CHARACTER_TYPECLASS = "typeclasses.characters.PlayerCharacter"
 
+SERVER_LOG_MAX_SIZE = 50000000  # 50MB
+
 ######################################################################
 # Config for contrib packages
 ######################################################################
@@ -47,6 +49,8 @@ PROTOTYPE_MODULES += ["typeclasses.training_grounds_mobs"]
 PROTOTYPE_MODULES += ["typeclasses.training_grounds_rooms"]
 PROTOTYPE_MODULES += ["typeclasses.mystical_forest_mobs"]
 PROTOTYPE_MODULES += ["typeclasses.mystical_forest_rooms"]
+PROTOTYPE_MODULES += ["typeclasses.crushbone_mobs"]
+PROTOTYPE_MODULES += ["typeclasses.crushbone_rooms"]
 PROTOTYPE_MODULES += ["typeclasses.rooms"]
 XYZROOM_PROTOTYPE_OVERRIDE = {"typeclass": "typeclasses.rooms.XYGridRoom"}
 XYZEXIT_PROTOTYPE_OVERRIDE = {"typeclass": "typeclasses.exits.XYGridExit"}

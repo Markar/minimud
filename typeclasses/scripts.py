@@ -1,5 +1,6 @@
-from random import randint, uniform, choice
-from evennia.utils import make_iter, logger
+from random import randint, choice
+from evennia.utils import make_iter
+from evennia import logger
 from evennia.scripts.scripts import DefaultScript
 from evennia.prototypes.prototypes import PROTOTYPE_TAG_CATEGORY
 from evennia.prototypes.spawner import spawn
@@ -37,13 +38,12 @@ class CombatScript(Script):
         """
         a, b = self.teams
         return a + b
-        
+
     @property
     def active(self):
         """
         Returns a list of all active combatants, regardless of alliance.
         """
-        
         return [
             obj
             for obj in self.fighters
@@ -69,10 +69,9 @@ class CombatScript(Script):
         Returns:
             True if combatant is successfully in the combat instance, False if not
         """
-        # if combatant in self.fighters:
-        #     print(f"{combatant} is already in combat.")
-        #     # already in combat here
-        #     return True
+        if combatant in self.fighters:
+            # already in combat here
+            return True
 
         # if neither ally nor enemy are given, they're not actually fighting anyone
         if not (ally or enemy):
@@ -116,27 +115,22 @@ class CombatScript(Script):
         Returns:
             True if combatant is successfully out of combat, False if not
         """
-        print(f"remove combatant")
         # get the combatant's team
         team = self.get_team(combatant)
         if team is None:
-            print(f"team is none")
             # they're already not in combat
             return True
 
-        print(f"remove combatant 2")
         # remove combatant from their team
         self.db.teams[team].remove(combatant)
         # reset the cache
         del self.ndb.teams
 
-        print(f"remove combatant 3")
         # grant exp to the other team, if relevant
         if exp := combatant.db.exp_reward:
             for obj in self.db.teams[team - 1]:
                 obj.msg(f"You gain {exp} experience.")
                 obj.db.exp = (obj.db.exp or 0) + exp
-        print(f"Log: Killed {combatant}")
         self.check_victory()
         # remove their combat target if they have one
         del combatant.db.combat_target
@@ -148,12 +142,12 @@ class CombatScript(Script):
 
         If one side is victorious, message the remaining members and delete ourself.
         """
-        print(f"check victory")
         if not (active_fighters := self.active):
             # everyone lost or is gone
             self.delete()
             return
-        
+
+        # create a filtered list of only active fighters for each team
         team_a, team_b = [
             [obj for obj in team if obj in active_fighters] for team in self.db.teams
         ]
@@ -177,6 +171,27 @@ class CombatScript(Script):
         # say farewell to the combat script!
         self.delete()
 
+
+def get_or_create_combat_script(location):
+    """
+    A helper function to find the current combat script in a location, or create
+    a new combat script if one isn't already present.
+
+    Args:
+        location (Room): The location being checked for a combat instance.
+
+    Returns:
+        script (CombatScript): The combat script attached to the given location.
+    """
+    if not (combat_script := location.scripts.get("combat")):
+        # there's no combat instance; start one
+        location.scripts.add(CombatScript, key="combat")
+        combat_script = location.scripts.get("combat")
+
+    combat_script = combat_script[0]
+    return combat_script
+
+
 class RestockScript(Script):
     """
     A script for a shop room that periodically restocks its inventory.
@@ -189,50 +204,7 @@ class RestockScript(Script):
         """
         The primary hook for timed scripts
         """
-        if not (storage := self.obj.db.storage):
-            # the object we're attached to has no storage location, so it can't hold stock
-            return
-        if not (inventory := self.obj.db.inventory):
-            # we don't have an inventory list attribute set up
-            return
-
-        # go through the inventory listing and possibly restock a few of everything
-        for prototype, max_count in inventory:
-            # current stock of this type
-            in_stock = [
-                obj
-                for obj in storage.contents
-                if obj.tags.has(prototype, category=PROTOTYPE_TAG_CATEGORY)
-            ]
-            if len(in_stock) >= max_count:
-                # already enough of these
-                continue
-            # get a random number of new stock, only process if >0
-            if new_stock := randint(0, 3):
-                # cap it so we don't exceed max
-                new_stock = min(new_stock, max_count - len(in_stock))
-                # make some new stuff!
-                objs = spawn(*[prototype] * new_stock)
-                # customize with the material options
-                for obj in objs:
-                    # make sure it has an initial value
-                    obj.db.value = obj.db.value or 1
-                    # add to the shop stock
-                    self.obj.add_stock(obj)
-
-class RespawnScript(Script):
-    """
-    A script for a shop room that periodically restocks its inventory.
-    """
-
-    def at_script_creation(self):
-        # self.interval = 3600
-        self.interval = 600
-
-    def at_repeat(self):
-        """
-        The primary hook for timed scripts
-        """
+        logger.log_info("restocking")
         if not (storage := self.obj.db.storage):
             # the object we're attached to has no storage location, so it can't hold stock
             return

@@ -31,50 +31,6 @@ MAP1 = r"""
 """
 
 
-class RoadNode(xymap_legend.MapNode):
-    display_symbol = "#"
-    prototype = {
-        "prototype_parent": "xyz_room",
-        "tags": [("chessboard", "zone")],
-        "key": "A road",
-        "desc": "A wide road through Chessboard.",
-    }
-
-
-class GateNode(xymap_legend.MapNode):
-    display_symbol = "θ"
-    prototype = {
-        "prototype_parent": "xyz_room",
-        "tags": [("chessboard", "zone")],
-        "key": "A road",
-        "desc": "The road here leads out of Chessboard and into the wilderness.",
-    }
-
-
-class BuildingNode(xymap_legend.MapNode):
-    prototype = {
-        "prototype_parent": "xyz_room",
-        "key": "Inside",
-        "desc": "A building in Chessboard.",
-    }
-
-
-class ShopNode(xymap_legend.MapNode):
-    prototype = {
-        "prototype_parent": "xyz_room",
-        "typeclass": "typeclasses.rooms.XYGridShop",
-        "key": "Inside",
-        "desc": "A shop in Chessboard.",
-    }
-
-
-# LEGEND = {
-#     "R": RoadNode,
-#     "G": GateNode,
-#     "B": BuildingNode,
-#     "$": ShopNode,
-# }
-
 PROTOTYPES = {
     (1, 1): {
         "typeclass": "typeclasses.chessboardrooms.ChessboardGnoll",
@@ -124,7 +80,6 @@ PROTOTYPES = {
         "key": "Square of the black rook",
         "desc": "|YOn the square of the chessboard, a towering gnoll stands menacingly. Its hyena-like face snarls, revealing sharp teeth, while its muscular frame is covered in matted fur and crude armor. The gnoll's eyes gleam with a feral intelligence, and it grips a blood-stained spear, ready to strike at any moment.",
     },
-    
     (2, 1): {
         "typeclass": "typeclasses.chessboardrooms.ChessboardGnollPup",
         "tags": [("chessboard", "zone")],
@@ -177,49 +132,49 @@ PROTOTYPES = {
         "typeclass": "typeclasses.chessboardrooms.ChessboardDecayingSkeleton",
         "tags": [("chessboard", "zone")],
         "key": "Light square of a chessboard",
-        "desc": "On the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
+        "desc": "|YOn the light square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
     },
     (3, 2): {
         "typeclass": "typeclasses.chessboardrooms.ChessboardDecayingSkeleton",
         "tags": [("chessboard", "zone")],
         "key": "Dark square of a chessboard",
-        "desc": "On the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
+        "desc": "|YOn the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
     },
     (3, 3): {
         "typeclass": "typeclasses.chessboardrooms.ChessboardDecayingSkeleton",
         "tags": [("chessboard", "zone")],
         "key": "Light square of a chessboard",
-        "desc": "On the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
+        "desc": "|YOn the light square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
     },
     (3, 4): {
         "typeclass": "typeclasses.chessboardrooms.ChessboardDecayingSkeleton",
         "tags": [("chessboard", "zone")],
         "key": "Dark square of a chessboard",
-        "desc": "On the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
+        "desc": "|YOn the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
     },
     (3, 5): {
         "typeclass": "typeclasses.chessboardrooms.ChessboardDecayingSkeleton",
         "tags": [("chessboard", "zone")],
         "key": "Light square of a chessboard",
-        "desc": "On the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
+        "desc": "|YOn the light square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
     },
     (3, 6): {
         "typeclass": "typeclasses.chessboardrooms.ChessboardDecayingSkeleton",
         "tags": [("chessboard", "zone")],
         "key": "Dark square of a chessboard",
-        "desc": "On the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
+        "desc": "|YOn the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
     },
     (3, 7): {
         "typeclass": "typeclasses.chessboardrooms.ChessboardDecayingSkeleton",
         "tags": [("chessboard", "zone")],
         "key": "Light square of a chessboard",
-        "desc": "On the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
+        "desc": "|YOn the light square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
     },
     (3, 8): {
         "typeclass": "typeclasses.chessboardrooms.ChessboardDecayingSkeleton",
         "tags": [("chessboard", "zone")],
         "key": "Dark square of a chessboard",
-        "desc": "On the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
+        "desc": "|YOn the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
     },
     (4, 1): {
         "typeclass": "typeclasses.chessboardrooms.ChessboardGnoll",
@@ -321,49 +276,49 @@ PROTOTYPES = {
         "typeclass": "typeclasses.chessboardrooms.ChessboardDecayingSkeleton",
         "tags": [("chessboard", "zone")],
         "key": "Light square of a chessboard",
-        "desc": "On the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
+        "desc": "|YOn the light square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
     },
     (6, 2): {
         "typeclass": "typeclasses.chessboardrooms.ChessboardDecayingSkeleton",
         "tags": [("chessboard", "zone")],
         "key": "Dark square of a chessboard",
-        "desc": "On the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
+        "desc": "|YOn the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
     },
     (6, 3): {
         "typeclass": "typeclasses.chessboardrooms.ChessboardDecayingSkeleton",
         "tags": [("chessboard", "zone")],
         "key": "Light square of a chessboard",
-        "desc": "On the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
+        "desc": "|YOn the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
     },
     (6, 4): {
         "typeclass": "typeclasses.chessboardrooms.ChessboardDecayingSkeleton",
         "tags": [("chessboard", "zone")],
         "key": "Dark square of a chessboard",
-        "desc": "On the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
+        "desc": "|YOn the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
     },
     (6, 5): {
         "typeclass": "typeclasses.chessboardrooms.ChessboardDecayingSkeleton",
         "tags": [("chessboard", "zone")],
         "key": "Light square of a chessboard",
-        "desc": "On the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
+        "desc": "|YOn the light square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
     },
     (6, 6): {
         "typeclass": "typeclasses.chessboardrooms.ChessboardDecayingSkeleton",
         "tags": [("chessboard", "zone")],
         "key": "Dark square of a chessboard",
-        "desc": "On the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
+        "desc": "|YOn the light square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
     },
     (6, 7): {
         "typeclass": "typeclasses.chessboardrooms.ChessboardDecayingSkeleton",
         "tags": [("chessboard", "zone")],
         "key": "Light square of a chessboard",
-        "desc": "On the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
+        "desc": "|YOn the light square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
     },
     (6, 8): {
         "typeclass": "typeclasses.chessboardrooms.ChessboardDecayingSkeleton",
         "tags": [("chessboard", "zone")],
         "key": "Dark square of a chessboard",
-        "desc": "On the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
+        "desc": "|YOn the dark square of the chessboard, a decaying skeleton lies sprawled, its bony fingers still clutching a rusted sword. The hollow eye sockets seem to stare into the void, and tattered remnants of armor cling to its frame, telling tales of battles long forgotten.",
     },
     (7, 1): {
         "typeclass": "typeclasses.chessboardrooms.ChessboardGnoll",

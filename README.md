@@ -42,6 +42,7 @@ chessboard
 #
 @open leave = chaos#2
 
+# open_xyz_exits.py
 
 ### DELETE ROOMS
 from typeclasses.rooms import NewbieSnake
@@ -53,8 +54,17 @@ for x in all:
 
 ### RESET LOCKS
  self.caller.tags.add("player", category="type")
+ from evennia import search_object
  bark = search_object("Bark")[0]
  bark.locks.add("call:false(); control:perm(Developer); delete:id(3) or perm(Admin);drop:holds(); edit:pid(3) or perm(Admin); examine:perm(Builder); get:false(); puppet:id(4270) or pid(3) or perm(Developer) or pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin); tell:perm(Admin); view:all()")
+ 
+ # The ID must match the player's account: so 9 for this account
+ Name/key: Pits (#6827)
+ Typeclass: PlayerCharacter (typeclasses.characters.PlayerCharacter)
+ Sessions: #37
+ Account: Chummer (#9)
+ #
+ chummer.locks.add("call:false(); control:perm(Developer); delete:id(9) or perm(Admin);drop:holds(); edit:pid(9) or perm(Admin); examine:perm(Builder); get:false(); puppet:id(4270) or pid(9) or perm(Developer) or pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin); tell:perm(Admin); view:all()")
 
 ### SEARCH BY TAG
   hasPlayerTags = caller.tags.has("player", "status")
@@ -75,10 +85,16 @@ for x in all:
      obj.location = self.location
         
 ### TEST FUNCTION CALL
-msg = self.caller.get_hit_message(self.caller, 4, "fart")
+msg = self.caller.get_npc_attack_emote(self.caller, 4, "fart")
 
 ### SET LOCAL KEY
  self.caller.location.key = "Millennium Square"
+    py
+        room = self.search("688")
+        room.key = "Sunlit Meadow"
 
 ### DELETE CMDSET ON PLAYER
  self.caller.cmdset.delete(ChangelingCmdSet)
+
+### SET ROOM KEY
+ py setattr(here, "key", "Nexus Road - CyberBank HQ")

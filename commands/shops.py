@@ -35,9 +35,9 @@ class CmdList(Command):
             return
 
         # build a table from the sale listings
-        table = EvTable("Item", "Amt", "Price", border="rows")
+        table = EvTable(f"|wItem", f"|wStock", f"|wPrice", border="table")
         for key, val in condensed.items():
-            table.add_row(key[0], val, key[1])
+            table.add_row(f"|G{key[0]}", f"|Gval", f"|G{key[1]}")
 
         # send it to the player
         self.msg(str(table))
@@ -117,7 +117,9 @@ class CmdBuy(Command):
             return
 
         # confirm that this is what the player wants to buy
-        confirm = yield (f"Do you want to buy {obj_name} for {total} coin{'' if total == 1 else 's'}? Yes/No")
+        confirm = yield (
+            f"Do you want to buy {obj_name} for {total} coin{'' if total == 1 else 's'}? Yes/No"
+        )
 
         # if it's not a form of yes, cancel
         if confirm.lower().strip() not in ("yes", "y"):
@@ -130,7 +132,9 @@ class CmdBuy(Command):
 
         self.caller.db.coins -= total
 
-        self.msg(f"You exchange {total} coin{'' if total == 1 else 's'} for {count} {obj_name}.")
+        self.msg(
+            f"You exchange {total} coin{'' if total == 1 else 's'} for {count} {obj_name}."
+        )
 
 
 class CmdSell(Command):
@@ -190,7 +194,9 @@ class CmdSell(Command):
         total = sum([obj.attributes.get("value", 0) for obj in objs])
 
         # confirm that this is what the player wants to buy
-        confirm = yield (f"Do you want to sell {obj_name} for {total} coin{'' if total == 1 else 's'}? Yes/No")
+        confirm = yield (
+            f"Do you want to sell {obj_name} for {total} coin{'' if total == 1 else 's'}? Yes/No"
+        )
 
         # if it's not a form of yes, cancel
         if confirm.lower().strip() not in ("yes", "y"):
@@ -258,7 +264,11 @@ class CmdDonate(Command):
             return
 
         # filter possible donatable objects by the types accepted here
-        candidates = [obj for obj in self.caller.contents if obj.tags.has(donations, category="crafting_material")]
+        candidates = [
+            obj
+            for obj in self.caller.contents
+            if obj.tags.has(donations, category="crafting_material")
+        ]
 
         # we want a stack of the item, matching the parsed count
         objs = self.caller.search(self.args, candidates=candidates, stacked=self.count)
@@ -275,7 +285,9 @@ class CmdDonate(Command):
         total = sum([obj.attributes.get("value", 0) for obj in objs]) // 2
 
         # confirm that this is what the player wants to buy
-        confirm = yield (f"Do you want to trade in {obj_name} for {total} experience? Yes/No")
+        confirm = yield (
+            f"Do you want to trade in {obj_name} for {total} experience? Yes/No"
+        )
 
         # if it's not a form of yes, cancel
         if confirm.lower().strip() not in ("yes", "y"):
@@ -289,9 +301,7 @@ class CmdDonate(Command):
         exp = self.caller.db.exp or 0
         self.caller.db.exp = exp + total
 
-        self.msg(
-            f"You exchange {obj_name} for {total} experience."
-        )
+        self.msg(f"You exchange {obj_name} for {total} experience.")
 
 
 class ShopCmdSet(CmdSet):
