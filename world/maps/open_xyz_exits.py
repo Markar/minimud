@@ -1,3 +1,20 @@
+# open mystic forest
+@tel newbie#1
+@open south;s,north;n = (4, 4, mystical_forest)
+
+# open chessboard
+@tel chaos#2
+@open chessboard,leave = (5,8,chessboard)
+
+# open training grounds
+@tel chaos#3
+@open north;n,south;s = (1, 1, training_grounds)
+
+# open crushbone
+
+
+
+
 @tel chaos#1
 #
 @dig/teleport Path to the Training Grounds;chaos#3 : typeclasses.rooms.Room = west;w,east;e
@@ -6,7 +23,7 @@
 #
 @dig/teleport Training Grounds;training_grounds#1 : typeclasses.rooms.Room = enter,leave
 #
-@desc |YYou step into the Training Grounds, a state-of-the-art facility designed to hone the skills of adventurers. The walls are lined with advanced training equipment, from energy-based weapons to magical artifacts, each station offering a unique challenge. |/|/In the center of the room, a large, open space is dedicated to sparring and combat practice. Here, seasoned trainers-both cybernetic warriors and mystical sages—guide newcomers through rigorous drills. The air is filled with the sounds of clashing weapons, bursts of magical energy, and the encouraging shouts of instructors.
+@desc |YYou step into the Training Grounds, a state-of-the-art facility designed to hone the skills of adventurers. The walls are lined with advanced training equipment, from energy-based weapons to magical artifacts, each station offering a unique challenge. |/|/In the center of the room, a large, open space is dedicated to sparring and combat practice. Here, seasoned trainers-both cybernetic warriors and mystical sages-guide newcomers through rigorous drills. The air is filled with the sounds of clashing weapons, bursts of magical energy, and the encouraging shouts of instructors.
 #
 @open north;n,south;s = (1, 1, training_grounds)
 #
