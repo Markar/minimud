@@ -33,6 +33,8 @@ SERVERNAME = "Millennium"
 # Defines the base character type as PlayerCharacter instead of Character
 BASE_CHARACTER_TYPECLASS = "typeclasses.characters.PlayerCharacter"
 
+SERVER_LOG_MAX_SIZE = 50000000  # 50MB
+
 ######################################################################
 # Config for contrib packages
 ######################################################################

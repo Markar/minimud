@@ -66,21 +66,25 @@ class CmdListWares(Command):
 
     def func(self):
         caller = self.caller
-        table = EvTable(f"|wWares", f"|wSkill", f"|wRank", f"|wCost", border="table")
+        table = EvTable(
+            f"|wWares", f"|wSkill", f"|wRank", f"|wCost", f"|wLevel", border="table"
+        )
         for ware in WaresObjects.values():
             if ware.name in caller.db.wares:
                 table.add_row(
                     f"|Y{ware.name}",
                     f"|Y{ware.skill}",
-                    f"|Y{ware.rank}",
+                    f"|Y{ware.skill_req}",
                     f"|Y{ware.cost}",
+                    f"|Y{ware.rank}",
                 )
             else:
                 table.add_row(
                     f"|G{ware.name}",
                     f"|G{ware.skill}",
-                    f"|G{ware.rank}",
+                    f"|Y{ware.skill_req}",
                     f"|G{ware.cost}",
+                    f"|G{ware.rank}",
                 )
 
         caller.msg(str(table))
@@ -114,15 +118,14 @@ class CmdBuyWares(Command):
             if obj.name.lower() == ware:
                 ware = obj
 
-                if ware.type == "melee":
-                    if caller.db.guild_level < ware.rank:
-                        caller.msg(
-                            f"|rYou need to be guild level {ware.rank} to buy the {ware.name}."
-                        )
-                        return
-                elif caller.db.skills[f"{ware.skill}"] < ware.rank:
+                if caller.db.guild_level < ware.rank:
                     caller.msg(
-                        f"|rYou need to be level {ware.rank} in {ware.skill} to buy the {ware.name}."
+                        f"|rYou need to be guild level {ware.rank} to buy the {ware.name}."
+                    )
+                    return
+                if caller.db.skills.get(ware.skill, 0) < ware.skill_req:
+                    caller.msg(
+                        f"|rYou need to have at least {ware.skill_req} ranks in {ware.skill} to buy the {ware.name}."
                     )
                     return
 

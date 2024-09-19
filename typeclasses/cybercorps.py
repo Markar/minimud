@@ -50,6 +50,9 @@ class Cybercorps(PlayerCharacter):
         self.db.epregen = 1
         self.db.strategy = "melee"
         self.db.skills = {
+            "standard weapons": 1,
+            "energy weapons": 1,
+            "heavy weapons": 1,
             "cybernetic enhancements": 1,
             "artificial intelligence": 1,
             "security services": 1,
@@ -91,13 +94,14 @@ class Cybercorps(PlayerCharacter):
         base_ep_regen = self.db.epregen
         base_fp_regen = self.db.fpregen
         biotech_research = self.db.skills.get("biotech research", 1)
+        energy_solutions = self.db.skills.get("energy solutions", 1)
 
         bonus_hp = 0
         bonus_fp = 0
         bonus_ep = 0
 
         bonus_hp += int(uniform(biotech_research, biotech_research + 1))  # 0-2
-
+        bonus_ep += int(uniform(energy_solutions * 0.2, energy_solutions * 0.3))  # 0-3
         total_hp_regen = base_regen + int(bonus_hp)
         total_fp_regen = base_fp_regen + int(bonus_fp)
         total_ep_regen = base_ep_regen + int(bonus_ep)
@@ -249,6 +253,7 @@ class Cybercorps(PlayerCharacter):
         self.msg(prompt=status)
         return status
 
+    # region Attack
     def attack(self, target, weapon, **kwargs):
 
         if not self.in_combat:
@@ -288,6 +293,7 @@ class Cybercorps(PlayerCharacter):
                 # queue up next attack; use None for target to reference stored target on execution
                 delay(1, self.attack, None, weapon, persistent=True)
 
+    # region At_damage
     def at_damage(self, attacker, damage, damage_type=None):
         """
         Apply damage, after taking into account damage resistances.
@@ -312,12 +318,13 @@ class Cybercorps(PlayerCharacter):
         # Flat damage reduction - 50 con = 5 reduction, glvl 30 = 1.5 reduction
         flat_reduction = con * 0.1 + glvl * 0.05
 
-        # Additional flat reduction from earth form
+        # Additional flat reduction from adaptive armor
         if self.db.adaptive_armor:
             adaptive_armor_reduction = int(
                 con * 0.1 + glvl * 0.1 + cybernetic_enhancements
             )
             flat_reduction += adaptive_armor_reduction
+            self.db.ep -= 1
 
         # Additional flat reduction from mountain stance
         # if self.db.mountain_stance:

@@ -863,10 +863,10 @@ class NPC(Character):
         else:
             weapon = self
 
-        self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
+        self.at_emote(f"$conj(charges) at {target}!", mapping={"target": target})
         location = self.location
         if not location:
-            self.msg("You are nowhere!")
+            print(f"NPC You are nowhere {self} and target {target}!")
             return
 
         if not (combat_script := location.scripts.get("combat")):
@@ -875,9 +875,9 @@ class NPC(Character):
 
             location.scripts.add(CombatScript, key="combat")
             combat_script = location.scripts.get("combat")
+
         combat_script = combat_script[0]
 
-        print(f"NPC: enter_combat: {self} and combat_target {self.db.combat_target}")
         self.db.combat_target = target
         # adding a combatant to combat just returns True if they're already there, so this is safe
         if not combat_script.add_combatant(self, enemy=target):
@@ -919,6 +919,7 @@ class NPC(Character):
         """
         if self != wielder:
             return
+
         if not (weapon := self.db.natural_weapon):
             return
         # make sure wielder has enough strength left
@@ -934,11 +935,12 @@ class NPC(Character):
         """
         attack with your natural weapon
         """
+        print(f"npc attack: {self} and {target} and {wielder}")
         weapon = self.db.natural_weapon
         damage = weapon.get("damage", 0)
         speed = weapon.get("speed", 10)
         hits = weapon.get("hits", 1)
-        print(f"hits {hits}")
+
         # attack with your natural attack skill - whatever that is
         result = self.use_skill(weapon.get("skill"), speed=speed)
         # apply the weapon damage as a modifier to skill
@@ -950,7 +952,6 @@ class NPC(Character):
             damage = math.ceil(uniform(damage / 2, damage))
             target.at_damage(wielder, damage, weapon.get("damage_type"))
 
-        print(f"after range")
         status = target.get_display_status(self)
         # target.msg(prompt=status)
 

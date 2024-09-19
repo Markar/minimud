@@ -5,9 +5,9 @@ from commands.command import Command
 from evennia.utils.evtable import EvTable
 from evennia.utils import delay
 
-
 from typeclasses.cybercorpsguild.cyber_constants_and_helpers import (
     SKILLS_COST,
+    ENERGY_SOLUTIONS_COST,
     SKILL_RANKS,
     GUILD_LEVEL_COST_DICT,
     TITLES,
@@ -23,6 +23,7 @@ class PowerCommand(Command):
         caller.cooldowns.add("global_cooldown", 2)
 
 
+# region Pulse Grenade
 class CmdPulseGrenade(PowerCommand):
     """
     A grenade that emits a burst of energy, stunning and damaging targets within its radius.
@@ -67,6 +68,7 @@ class CmdPulseGrenade(PowerCommand):
         return
 
 
+# region Adaptive Armor
 class CmdAdaptiveArmor(PowerCommand):
     """
     Adaptive armor is a type of cybernetic enhancement that can change its properties based on the situation. The armor is made of advanced materials that can shift and adapt to different threats, providing protection against physical, energy, and environmental hazards. Adaptive armor is often used by soldiers and security personnel who need versatile protection in combat situations.
@@ -77,7 +79,7 @@ class CmdAdaptiveArmor(PowerCommand):
 
     key = "adaptive armor"
     help_category = "cybercorps"
-    cost = 25
+    cost = 50
     guild_level = 10
 
     def func(self):
@@ -92,14 +94,22 @@ class CmdAdaptiveArmor(PowerCommand):
             caller.msg(f"|rYou need more energy to do that.")
             return
         if caller.db.adaptive_armor:
-            caller.msg(f"|rThe adaptive armor retracts, leaving you unprotected.")
+            caller.location.msg_contents(
+                f"|c{caller} deactivates their adaptive armor.", from_obj=caller
+            )
             caller.db.adaptive_armor = False
             return
 
+        caller.db.ep -= self.cost
+        caller.cooldowns.add("adaptive_armor", 50)
+        caller.cooldowns.add("global_cooldown", 2)
         caller.db.adaptive_armor = True
-        caller.msg(f"|The adaptive armor expands to cover your body.")
+        caller.location.msg_contents(
+            f"|c{caller} activates their adaptive armor.", from_obj=caller
+        )
 
 
+# region DocWagon
 class CmdDocWagon(PowerCommand):
     """
     DocWagon is a premier emergency medical service provider known for its rapid response and high-tech solutions. Founded in 2037, DocWagon has revolutionized the medical services industry with its unique offerings, including:
@@ -128,24 +138,20 @@ class CmdDocWagon(PowerCommand):
         if glvl < 10:
             caller.msg(f"|CYou need to be guild level 10 to use burnout.")
             return
-        if caller.db.docwagon["active"]:
-            caller.msg(f"|CYour response team is already here.")
-            return
         caller.db.ep -= self.cost
         caller.cooldowns.add("docwagon", 60)
         caller.cooldowns.add("global_cooldown", 2)
         skill_rank = caller.db.skills.get("Security Services", 1)
 
-        self.msg(f"|cA DocWagon response team is on their way!|n")
-        caller.adjust_hp(caller.traits.hpmax.value)
-        caller.adjust_fp(caller.traits.fpmax.value)
-        caller.adjust_ep(caller.traits.epmax.value)
+        self.msg(f"|304A DocWagon medical team arrives to treat you!|n")
+        caller.adjust_hp(caller.db.hpmax)
+        caller.adjust_fp(caller.db.fpmax)
 
-        caller.db.docwagon["active"] = True
         caller.db.docwagon["count"] -= 1
         caller.db.docwagon["duration"] = 3 + skill_rank * 2
 
 
+# region Synthetic Conversion
 class CmdSyntheticConversion(Command):
     """
     A soldier of the Cybercorps can use synthetic conversion to turn the body into synthetic materials that can be repurposed for industrial use.
@@ -175,7 +181,7 @@ class CmdSyntheticConversion(Command):
                 caller.msg("Convert what synthetically?")
 
 
-# Other powers
+# region Other powers
 class CmdPowers(Command):
     """
     List of powers available to the Elemental, their rank, and their cost.
@@ -260,12 +266,16 @@ class CmdGTrain(Command):
         cost = caller.db.skills[f"{skill}"]
         cost = SKILLS_COST[cost]
 
+        if skill == "energy solutions":
+            cost = caller.db.skills[f"{skill}"]
+            cost = ENERGY_SOLUTIONS_COST[cost]
+
         if skill_gxp < cost:
             self.msg(f"|wYou need {cost-skill_gxp} more experience to train {skill}.")
             return
 
         confirm = yield (
-            f"It will cost you {cost} experience to advance {skill}. Confirm? Yes/No"
+            f"It will cost you {int(cost)} experience to advance {skill}. Confirm? Yes/No"
         )
         if confirm.lower() not in (
             "yes",
@@ -276,9 +286,12 @@ class CmdGTrain(Command):
 
         setattr(caller.db, "skill_gxp", skill_gxp - cost)
         caller.db.skills[skill] += 1
+        if skill == "energy solutions":
+            caller.db.epmax += 10
         caller.msg(f"|yYou grow more experienced in {skill}")
 
 
+# region Ghelp
 class CmdGhelp(Command):
     """
     Help files for the Cybercorps Guild.
@@ -347,6 +360,7 @@ class CmdGhelp(Command):
         caller.msg(f"|rNo help found for {skill}.")
 
 
+# region GAdvance
 class CmdGAdvance(Command):
     """
     Advance your guild level by spending gxp.
@@ -374,18 +388,25 @@ class CmdGAdvance(Command):
         else:
             caller.db.gxp -= cost
             caller.db.guild_level += 1
-            caller.db.epmax += 10
             caller.db.title = TITLES[caller.db.guild_level]
             self.msg(f"|rYou are now {caller.db.title} ({caller.db.guild_level}).")
 
-        if caller.db.guild_level >= 7:
-            caller.db.docwagon["max"] = 1
-        elif caller.db.guild_level >= 14:
-            caller.db.docwagon["max"] = 2
-        elif caller.db.guild_level >= 21:
-            caller.db.docwagon["max"] = 3
-        elif caller.db.guild_level >= 30:
-            caller.db.docwagon["max"] = 4
+            max = 0
+            if caller.db.guild_level >= 7:
+                max += 1
+            if caller.db.guild_level >= 14:
+                max += 1
+            if caller.db.guild_level >= 21:
+                max += 1
+            if caller.db.guild_level >= 28:
+                max += 1
+            if caller.db.guild_level >= 30:
+                max += 1
+            caller.db.docwagon["max"] = max
+            energy_solutions = caller.db.skills.get("energy solutions", 1)
+            ep_max_bonus = energy_solutions * 10
+            ep_max_bonus += math.floor(caller.db.guild_level / 5) * 50
+            caller.db.epmax = 50 * caller.db.guild_level + ep_max_bonus
 
     def func(self):
         caller = self.caller
@@ -394,6 +415,7 @@ class CmdGAdvance(Command):
         self._adv_level()
 
 
+# region Gscore
 class CmdGuildStatSheet(Command):
     """
     Display your guild stats
@@ -418,6 +440,9 @@ class CmdGuildStatSheet(Command):
         if caller.db.ranged_weapon:
             ranged_weapon = caller.db.ranged_weapon.name
 
+        doc_count = caller.db.docwagon["count"]
+        doc_max = caller.db.docwagon["max"]
+
         table = EvTable(f"|c{caller}", f"|c{title}", border="table")
         table.add_row(f"|GGuild Level", my_glvl)
         table.add_row(f"|GGXP", f"{gxp} / {gxp_needed}")
@@ -425,6 +450,7 @@ class CmdGuildStatSheet(Command):
         table.add_row(f"|GReaction", f"{reaction}%")
         table.add_row(f"|GMelee Weapon", melee_weapon)
         table.add_row(f"|GRanged Weapon", ranged_weapon)
+        table.add_row(f"|GDocWagon Revives", f"{doc_count} / {doc_max}")
 
         caller.msg(str(table))
 
@@ -435,11 +461,21 @@ class CmdGuildStatSheet(Command):
 
         # Assuming SKILLS_COST is a dictionary that maps ranks to costs
         for skill, rank in skills:
-            skill_table.add_row(f"|G{skill.title()}", f"{rank}", f"{SKILLS_COST[rank]}")
+            if skill == "energy solutions":
+                skill_table.add_row(
+                    f"|G{skill.title()}",
+                    f"{rank}",
+                    f"{int(ENERGY_SOLUTIONS_COST[rank])}",
+                )
+            else:
+                skill_table.add_row(
+                    f"|G{skill.title()}", f"{rank}", f"{SKILLS_COST[rank]}"
+                )
 
         caller.msg(str(skill_table))
 
 
+# region Kickstart
 class CmdKickstart(Command):
     key = "kickstart"
 
@@ -448,6 +484,7 @@ class CmdKickstart(Command):
         caller.kickstart()
 
 
+# region Skills
 class CmdSkills(Command):
     """
     List of skills available to the Cyber, their rank, and their cost.
@@ -465,11 +502,19 @@ class CmdSkills(Command):
 
         table = EvTable(f"|cSkill", f"|cRank", f"|cCost", border="table")
         for skill, rank in caller.db.skills.items():
-            table.add_row(f"|G{skill.title()}", f"{rank}", f"{SKILLS_COST[rank]}")
+            if skill == "energy solutions":
+                table.add_row(
+                    f"|G{skill.title()}",
+                    f"{rank}",
+                    f"{int(ENERGY_SOLUTIONS_COST[rank])}",
+                )
+            else:
+                table.add_row(f"|G{skill.title()}", f"{rank}", f"{SKILLS_COST[rank]}")
 
         caller.msg(str(table))
 
 
+# region Test
 class CmdTest(Command):
     key = "test"
 
@@ -498,6 +543,7 @@ class CmdTest(Command):
         caller.msg("done")
 
 
+# region TestRestock
 class CmdTestRestock(Command):
     key = "testrestock"
 
@@ -526,18 +572,24 @@ class CmdUpdateChessboard(Command):
             ChessboardGnollPup,
         )
 
-        skeletons = ChessboardDecayingSkeleton.objects.all()
-        gnolls = ChessboardGnoll.objects.all()
-        pups = ChessboardGnollPup.objects.all()
+        creatures = (
+            list(ChessboardDecayingSkeleton.objects.all())
+            + list(ChessboardGnoll.objects.all())
+            + list(ChessboardGnollPup.objects.all())
+        )
 
-        for room in pups:
+        for room in creatures:
             caller.msg(f"room: {room}")
             for obj in room.contents:
                 check = obj.is_typeclass("typeclasses.characters.NPC", exact=False)
-                obj.delete()
+                if check:
+                    caller.msg(f"check: {check}")
+                    obj.delete()
             room.at_object_creation()
+        caller.msg("done")
 
 
+# region CmdSet
 class CybercorpsCmdSet(CmdSet):
     key = "Cybercorps CmdSet"
 

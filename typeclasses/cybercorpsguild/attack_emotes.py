@@ -147,7 +147,7 @@ class AttackEmotes:
                 f"{color}$You() blast {tn}{color} with your plasma cannon, causing a massive wound.",
                 f"{color}$You() obliterate {tn}{color} with your plasma cannon, causing a catastrophic wound.",
             ]
-        if emote == "gauss cannon":
+        if emote == "gauss_cannon":
             return [
                 f"{color}$You() fire at {tn}{color} with your gauss cannon, but the shot goes wide.",
                 f"{color}$You() graze {tn}{color} with your gauss cannon, leaving a scorch mark.",
@@ -159,7 +159,7 @@ class AttackEmotes:
                 f"{color}$You() blast {tn}{color} with your gauss cannon, causing a massive wound.",
                 f"{color}$You() obliterate {tn}{color} with your gauss cannon, causing a catastrophic wound.",
             ]
-        if emote == "pulse rifle":
+        if emote == "pulse_rifle":
             return [
                 f"{color}$You() fire at {tn}{color} with your pulse rifle, but the shot goes wide.",
                 f"{color}$You() graze {tn}{color} with your pulse rifle, leaving a scorch mark.",
@@ -171,7 +171,7 @@ class AttackEmotes:
                 f"{color}$You() blast {tn}{color} with your pulse rifle, causing a massive wound.",
                 f"{color}$You() obliterate {tn}{color} with your pulse rifle, causing a catastrophic wound.",
             ]
-        if emote == "plasma rifle":
+        if emote == "plasma_rifle":
             return [
                 f"{color}$You() fire at {tn}{color} with your plasma rifle, but the shot goes wide.",
                 f"{color}$You() graze {tn}{color} with your plasma rifle, leaving a scorch mark.",
@@ -183,7 +183,7 @@ class AttackEmotes:
                 f"{color}$You() blast {tn}{color} with your plasma rifle, causing a massive wound.",
                 f"{color}$You() obliterate {tn}{color} with your plasma rifle, causing a catastrophic wound.",
             ]
-        if emote == "laser sniper rifle":
+        if emote == "laser_sniper_rifle":
             return [
                 f"{color}$You() fire at {tn}{color} with your laser sniper rifle, but the shot goes wide.",
                 f"{color}$You() graze {tn}{color} with your laser sniper rifle, leaving a scorch mark.",
@@ -194,4 +194,68 @@ class AttackEmotes:
                 f"{color}$You() fire a laser bolt at {tn}{color}, causing a fatal wound.",
                 f"{color}$You() blast {tn}{color} with your laser sniper rifle, causing a massive wound.",
                 f"{color}$You() obliterate {tn}{color} with your laser sniper rifle, causing a catastrophic wound.",
+            ]
+        if emote == "rocket_launcher":
+            return [
+                f"{color}$You() fire at {tn}{color} with your rocket launcher, but the rocket goes wide.",
+                f"{color}$You() graze {tn}{color} with your rocket launcher, leaving a scorch mark.",
+                f"{color}$You() hit {tn}{color} with your rocket launcher, causing a minor burn.",
+                f"{color}$You() blast {tn}{color} with your rocket launcher, causing a severe burn.",
+                f"{color}$You() fire a rocket at {tn}{color}, causing a critical wound.",
+                f"{color}$You() hit {tn}{color} with a rocket blast, causing a mortal wound.",
+                f"{color}$You() fire a rocket at {tn}{color}, causing a fatal wound.",
+                f"{color}$You() blast {tn}{color} with your rocket launcher, causing a massive wound.",
+                f"{color}$You() obliterate {tn}{color} with your rocket launcher, causing a catastrophic wound.",
+            ]
+        if emote == "rail_pistol":
+            return [
+                f"{color}$You() fire at {tn}{color} with your rail pistol, but the shot goes wide.",
+                f"{color}$You() graze {tn}{color} with your rail pistol, leaving a scorch mark.",
+                f"{color}$You() hit {tn}{color} with your rail pistol, causing a minor burn.",
+                f"{color}$You() blast {tn}{color} with your rail pistol, causing a severe burn.",
+                f"{color}$You() fire a rail bolt at {tn}{color}, causing a critical wound.",
+                f"{color}$You() hit {tn}{color} with a rail blast, causing a mortal wound.",
+                f"{color}$You() fire a rail bolt at {tn}{color}, causing a fatal wound.",
+                f"{color}$You() blast {tn}{color} with your rail pistol, causing a massive wound.",
+                f"{color}$You() obliterate {tn}{color} with your rail pistol, causing a catastrophic wound.",
+            ]
+        if emote == "chain_blade":
+            return [
+                f"{color}$You() swing at {tn}{color} with your chainblade, but miss.",
+                f"{color}$You() graze {tn}{color} with your chainblade.",
+                f"{color}$You() nick {tn}{color} with your chainblade, drawing blood.",
+                f"{color}$You() cut {tn}{color} with your chainblade, causing a wound.",
+                f"{color}$You() carve into {tn}{color} with your chainblade, leaving a gash.",
+                f"{color}$You() slash {tn}{color} with your chainblade, causing a deep wound.",
+                f"{color}$You() rend {tn}{color} with your chainblade, causing a critical wound.",
+                f"{color}$You() cleave {tn}{color} with your chainblade, causing a mortal wound.",
+                f"{color}$You() eviscerate {tn}{color} with your chainblade, causing a fatal wound.",
+                f"{color}$You() disembowel {tn}{color} with your chainblade, causing a massive wound.",
+                f"{color}$You() obliterate {tn}{color} with your chainblade, causing a catastrophic wound.",
+            ]
+        if emote == "graviton_hammer":
+            return [
+                f"{color}$You() swing at {tn}{color} with your graviton hammer, but miss.",
+                f"{color}$You() graze {tn}{color} with your graviton hammer.",
+                f"{color}$You() nick {tn}{color} with your graviton hammer, drawing blood.",
+                f"{color}$You() hit {tn}{color} with your graviton hammer, causing a wound.",
+                f"{color}$You() carve into {tn}{color} with your graviton hammer, leaving a gash.",
+                f"{color}$You() strike {tn}{color} with your graviton hammer, causing a deep wound.",
+                f"{color}$You() crush {tn}{color} with your graviton hammer, causing a critical wound.",
+                f"{color}$You() smash {tn}{color} with your graviton hammer, causing a mortal wound.",
+                f"{color}$You() pulverize {tn}{color} with your graviton hammer, causing a fatal wound.",
+                f"{color}$You() shatter {tn}{color} with your graviton hammer, causing a massive wound.",
+                f"{color}$You() obliterate {tn}{color} with your graviton hammer, causing a catastrophic wound.",
+            ]
+        if emote == "vortex_ar9":
+            return [
+                f"{color}$You() fire at {tn}{color} with your Vortex AR-9, but the shot misses its mark.",
+                f"{color}$You() clip {tn}{color} with your Vortex AR-9, leaving a superficial wound.",
+                f"{color}$You() strike {tn}{color} with your Vortex AR-9, causing a moderate injury.",
+                f"{color}$You() hit {tn}{color} with your Vortex AR-9, inflicting a serious wound.",
+                f"{color}$You() land a precise shot on {tn}{color}, causing significant damage.",
+                f"{color}$You() unleash a burst at {tn}{color}, resulting in a grievous wound.",
+                f"{color}$You() fire a well-aimed shot at {tn}{color}, causing a critical injury.",
+                f"{color}$You() unload a powerful volley at {tn}{color}, causing devastating damage.",
+                f"{color}$You() decimate {tn}{color} with your Vortex AR-9, causing catastrophic damage.",
             ]

@@ -67,6 +67,9 @@ def SpawnMob(self, xp, level, hits, name, tag):
         mob.db.level = level
         mob.db.natural_weapon["damage"] = damage
         mob.db.natural_weapon["hits"] = hits
+        mob.db.natural_weapon["energy_cost"] = 0
+
+    return mob
 
 
 class PowerCommand(Command):
