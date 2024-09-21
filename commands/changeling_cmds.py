@@ -156,7 +156,6 @@ class CmdMorph(Command):
 
     def func(self):
         caller = self.caller
-        caller.msg(f"caller: {caller.db.ep}")
         form = self.args.strip().lower()
         try:
             my_glvl = caller.db.guild_level
@@ -349,6 +348,7 @@ class CmdPowers(Command):
         caller.msg(str(table))
 
 
+# region Gtrain
 class CmdGTrain(Command):
     """
     Train your guild skills by spending skill experience points. Each rank
@@ -378,7 +378,8 @@ class CmdGTrain(Command):
             return
 
         skill_gxp = getattr(caller.db, "skill_gxp", 0)
-        cost = SKILLS_COST[caller.db.skills[f"{skill}"] + 1]
+        cost = caller.db.skills[f"{skill}"]
+        cost = SKILLS_COST[cost]
 
         if skill_gxp < cost:
             self.msg(f"|wYou need {cost-skill_gxp} more experience to train {skill}.")
@@ -494,10 +495,10 @@ class CmdGuildStatSheet(Command):
         energy_control = caller.db.skills["energy_control"]
         regeneration = caller.db.skills["regeneration"]
 
-        body_control_cost = SKILLS_COST[body_control + 1]
-        drain_cost = SKILLS_COST[drain + 1]
-        energy_control_cost = SKILLS_COST[energy_control + 1]
-        regeneration_cost = SKILLS_COST[regeneration + 1]
+        body_control_cost = SKILLS_COST[body_control]
+        drain_cost = SKILLS_COST[drain]
+        energy_control_cost = SKILLS_COST[energy_control]
+        regeneration_cost = SKILLS_COST[regeneration]
 
         skill_table.add_row(
             f"|GBody Control",
@@ -611,6 +612,7 @@ class CmdAbsorb(Command):
                 ep = target.db.ep
                 epmax = target.db.epmax
                 power = corpse.db.power or 0
+                power = power * self.caller.db.skills["drain"]
 
                 if ep + power > epmax:
                     target.db.ep = epmax

@@ -7,7 +7,6 @@ from evennia.utils import delay
 
 from typeclasses.cybercorpsguild.cyber_constants_and_helpers import (
     SKILLS_COST,
-    ENERGY_SOLUTIONS_COST,
     SKILL_RANKS,
     GUILD_LEVEL_COST_DICT,
     TITLES,
@@ -181,7 +180,57 @@ class CmdSyntheticConversion(Command):
                 caller.msg("Convert what synthetically?")
 
 
-# region Other powers
+# region Nano Reinforced Skeleton
+class CmdNanoReinforcedSkeleton(PowerCommand):
+    """
+    The Nano-Reinforced Endoskeleton is a cutting-edge cybernetic implant that enhances the user’s physical resilience and durability. By integrating advanced nanomaterials into the skeletal structure, this implant significantly boosts constitution, allowing the user to withstand greater physical stress and recover more quickly from injuries.
+    """
+
+    key = "nano reinforced skeleton"
+    aliases = ["nrs", "nano"]
+    help_category = "cybercorps"
+    cost = 75
+
+    # make this command only work in the cybercorps guild
+    def func(self):
+        caller = self.caller
+        glvl = caller.db.guild_level
+        cybernetic_enhancements = caller.db.skills.get("cybernetic enhancements", 1)
+
+        if glvl < 20:
+            caller.msg(
+                f"|CYou need to be guild level 20 to use nano reinforced skeleton."
+            )
+            return
+        if caller.db.ep < self.cost:
+            caller.msg(f"|rYou need at least {self.cost} energy to use this power.")
+            return
+        if caller.db.nano_reinforced_skeleton:
+            caller.msg(f"|CYou already have a nano reinforced skeleton.")
+            return
+        if not caller.cooldowns.ready("nano_reinforced_skeleton"):
+            caller.msg(f"|CYour skeleton can't handle that right now.")
+            return False
+
+        if not caller.db.nano_reinforced_skeleton:
+            caller.db.nano_reinforced_skeleton = True
+            caller.traits.con.mod += cybernetic_enhancements * 3
+            caller.db.nrs_amount = cybernetic_enhancements * 3
+            caller.db.ep -= self.cost
+            caller.cooldowns.add("global_cooldown", 2)
+            caller.cooldowns.add("nano_reinforced_skeleton", 600)
+            activate_msg = f"|CYou install your nano reinforced skeleton."
+            caller.location.msg_contents(activate_msg, from_obj=caller)
+        else:
+            caller.db.nano_reinforced_skeleton = False
+            caller.traits.con.mod -= caller.db.nrs_amount
+            deactivate_msg = f"|CYou uninstall your nano reinforced skeleton."
+            caller.location.msg_contents(deactivate_msg, from_obj=caller)
+
+        caller.db.hpmax = 50 + caller.traits.con.value * caller.db.con_increase_amount
+
+
+# region Powers
 class CmdPowers(Command):
     """
     List of powers available to the Elemental, their rank, and their cost.
@@ -203,6 +252,8 @@ class CmdPowers(Command):
         table.add_row(f"|GLoadout Remove", 1, 0)
         table.add_row(f"|GAdaptive Armor", 10, "25 Energy")
         table.add_row(f"|GDocWagon Revive", 7, "10 Energy")
+        table.add_row(f"|GPulse Grenade", 5, "10 Energy")
+        table.add_row(f"|GNano Reinforced Skeleton", 20, "75 Energy")
 
         caller.msg(str(table))
 
@@ -265,10 +316,6 @@ class CmdGTrain(Command):
         skill_gxp = getattr(caller.db, "skill_gxp", 0)
         cost = caller.db.skills[f"{skill}"]
         cost = SKILLS_COST[cost]
-
-        if skill == "energy solutions":
-            cost = caller.db.skills[f"{skill}"]
-            cost = ENERGY_SOLUTIONS_COST[cost]
 
         if skill_gxp < cost:
             self.msg(f"|wYou need {cost-skill_gxp} more experience to train {skill}.")
@@ -343,6 +390,11 @@ class CmdGhelp(Command):
             caller.msg(
                 "|cEnergy Solutions|n\n\n"
                 "Energy solutions are technologies and strategies that can help reduce energy consumption, increase energy efficiency, and promote the use of renewable energy sources. Energy solutions can include technologies such as solar panels, wind turbines, and energy-efficient appliances. Energy solutions are essential for addressing climate change and reducing the environmental impact of energy production and consumption."
+            )
+        if skill == "nano reinforced skeleton":
+            caller.msg(
+                "|cNano Reinforced Skeleton|n\n\n"
+                "The Nano-Reinforced Endoskeleton is a cutting-edge cybernetic implant that enhances the user's physical resilience and durability. By integrating advanced nanomaterials into the skeletal structure, this implant significantly boosts constitution, allowing the user to withstand greater physical stress and recover more quickly from injuries."
             )
 
         caller.msg(f"|rNo help found for {skill}.")
@@ -439,6 +491,7 @@ class CmdGuildStatSheet(Command):
         table.add_row(f"|GMelee Weapon", melee_weapon)
         table.add_row(f"|GRanged Weapon", ranged_weapon)
         table.add_row(f"|GDocWagon Revives", f"{doc_count} / {doc_max}")
+        table.add_row(f"|GNano Reinforced Skeleton", caller.db.nano_reinforced_skeleton)
 
         caller.msg(str(table))
 
@@ -449,16 +502,7 @@ class CmdGuildStatSheet(Command):
 
         # Assuming SKILLS_COST is a dictionary that maps ranks to costs
         for skill, rank in skills:
-            if skill == "energy solutions":
-                skill_table.add_row(
-                    f"|G{skill.title()}",
-                    f"{rank}",
-                    f"{int(ENERGY_SOLUTIONS_COST[rank])}",
-                )
-            else:
-                skill_table.add_row(
-                    f"|G{skill.title()}", f"{rank}", f"{SKILLS_COST[rank]}"
-                )
+            skill_table.add_row(f"|G{skill.title()}", f"{rank}", f"{SKILLS_COST[rank]}")
 
         caller.msg(str(skill_table))
 
@@ -490,14 +534,7 @@ class CmdSkills(Command):
 
         table = EvTable(f"|cSkill", f"|cRank", f"|cCost", border="table")
         for skill, rank in caller.db.skills.items():
-            if skill == "energy solutions":
-                table.add_row(
-                    f"|G{skill.title()}",
-                    f"{rank}",
-                    f"{int(ENERGY_SOLUTIONS_COST[rank])}",
-                )
-            else:
-                table.add_row(f"|G{skill.title()}", f"{rank}", f"{SKILLS_COST[rank]}")
+            table.add_row(f"|G{skill.title()}", f"{rank}", f"{SKILLS_COST[rank]}")
 
         caller.msg(str(table))
 
@@ -600,5 +637,6 @@ class CybercorpsCmdSet(CmdSet):
 
         self.add(CmdAdaptiveArmor)
         self.add(CmdPulseGrenade)
+        self.add(CmdNanoReinforcedSkeleton)
 
         self.add(CmdUpdateChessboard)

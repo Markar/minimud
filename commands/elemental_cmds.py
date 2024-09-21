@@ -53,11 +53,12 @@ class CmdGAdvance(Command):
             self.msg(f"|wYou need {cost - caller.db.gxp} more experience to advance.")
             return
         else:
+            title = titles[caller.db.guild_level]
             caller.db.gxp -= cost
             caller.db.guild_level += 1
             caller.db.epmax += 10
-            caller.db.title = titles[caller.db.guild_level]
-            self.msg(f"|rYou grow more powerful.")
+            caller.db.title = title
+            self.msg(f"|rYou become {title} ({caller.db.guild_level}).")
 
         if caller.db.guild_level >= 30:
             caller.db.burnout["max"] = 4
@@ -71,7 +72,6 @@ class CmdGAdvance(Command):
     def func(self):
         caller = self.caller
         caller.msg(f"|G{caller}")
-        print(f"in advance function")
 
         self._adv_level()
         print(f"after _adv_level {caller.db.gxp}")
@@ -175,6 +175,24 @@ class CmdLeaveElementals(Command):
         if caller.db.guild == "elemental":
             caller.swap_typeclass("typeclasses.characters.PlayerCharacter")
             caller.cmdset.delete(ElementalCmdSet)
+            del caller.db.earth_form
+            del caller.db.earth_shield
+            del caller.db.earthen_renewal
+            del caller.db.stone_skin
+            del caller.db.mountain_stance
+            del caller.db.subguild
+            del caller.db.skills
+            del caller.db.fire_form
+            del caller.db.lava_form
+            del caller.db.heat_wave
+            del caller.db.burnout
+            del caller.db.water_form
+            del caller.db.aqua_form
+            del caller.db.ice_shield
+            del caller.db.cyclone_armor
+            del caller.db.storm_form
+            del caller.db.air_form
+
             caller.msg(f"|rYou leave the Elementals guild")
         else:
             caller.msg(f"|rYou are already an adventurer")

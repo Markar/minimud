@@ -20,6 +20,7 @@ _MAX_CAPACITY = 10
 # LOOK INTO RESTORING THESE STATUSES
 
 
+# region Character
 class Character(ObjectParent, ClothedCharacter):
     """
     The base typeclass for all characters, both player characters and NPCs
@@ -50,7 +51,7 @@ class Character(ObjectParent, ClothedCharacter):
         """
         # use dex as a fallback for unskilled
         if not (evade := self.use_skill("evasion")):
-            evade = self.db.dexterity
+            evade = self.traits.dex
         # if you have more focus, you can escape more easily
         if (randint(0, 99) - self.db.fp) < evade:
             return True
@@ -489,6 +490,7 @@ class Character(ObjectParent, ClothedCharacter):
             self.db.ep += amount
 
 
+# region PC
 class PlayerCharacter(Character):
     """
     The typeclass for all player characters, including special player-feedback features.
@@ -726,6 +728,7 @@ class PlayerCharacter(Character):
         self.msg(prompt=self.get_display_status(self))
 
 
+# region NPC
 class NPC(Character):
     """
     The base typeclass for non-player characters, implementing behavioral AI.
@@ -846,7 +849,7 @@ class NPC(Character):
                     for obj in objs:
                         obj.location = self.location
                 self.move_to(None, False, None, True, True, True, "teleport")
-                delay(5, self.at_respawn)
+                delay(360, self.at_respawn)
                 return
         # change target to the attacker
         if not self.db.combat_target:

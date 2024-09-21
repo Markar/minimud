@@ -29,6 +29,7 @@ class CmdJoinCybercorps(Command):
             caller.msg(f"|rYou are already in a guild")
 
 
+# region Leave Cybercorps
 class CmdLeaveCybercorps(Command):
     """
     Leave the Cybercorps Mega Corporation
@@ -44,6 +45,11 @@ class CmdLeaveCybercorps(Command):
         del caller.db.guild_level
         del caller.db.strategy
         del caller.db.wares
+        del caller.db.melee_weapon
+        del caller.db.ranged_weapon
+        del caller.db.adaptive_armor
+        del caller.db.nano_reinforced_skeleton
+        del caller.db.nrs_amount
 
         return
 
@@ -57,6 +63,7 @@ class CmdLeaveCybercorps(Command):
             caller.msg(f"|rYou are already an adventurer")
 
 
+# region List Wares
 class CmdListWares(Command):
     """
     List wares available for purchase from the Cybercorps Mega Corporation

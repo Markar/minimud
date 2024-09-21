@@ -776,9 +776,6 @@ class CmdFireForm(PowerCommand):
         caller.db.fire_form["rate"] = 1
 
         caller.adjust_ep(-self.cost)
-        caller.msg(
-            f"|CYou transform into a being of pure flame, your body radiating intense heat and light."
-        )
         caller.location.msg_contents(
             f"|C$You() transform into a being of pure flame, $pron(your) body radiating intense heat and light.",
             from_obj=caller,
@@ -816,9 +813,6 @@ class CmdLavaForm(PowerCommand):
         caller.db.lava_form["rate"] = 1
 
         caller.adjust_ep(-self.cost)
-        caller.msg(
-            f"|CYou transform into a being of molten lava, your body radiating intense heat and light."
-        )
         caller.location.msg_contents(
             f"|C$You() transform into a being of molten lava, $pron(your) body radiating intense heat and light.",
             from_obj=caller,

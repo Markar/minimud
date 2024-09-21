@@ -347,7 +347,6 @@ class CmdAdvance(Command):
                 self.set_max_fp()
                 caller.msg(f"|rYou grow more powerful ({caller.db.level})")
             else:
-                self.msg(f"stat: {stat}")
                 caller = self.caller
                 if not (caller.db.stat_points > 0):
                     print(f"caller stat points: {caller.db.stat_points}")
@@ -367,12 +366,8 @@ class CmdAdvance(Command):
                 caller.traits.get(stat).base = current_stat + 1
 
                 if stat == "con":
-                    self.msg(f"con increase amount: {caller.db.con_increase_amount}")
-                    self.msg(f"con value: {caller.traits.con.value}")
                     self.set_max_hp()
                 if stat == "int":
-                    self.msg(f"int increase amount: {caller.db.int_increase_amount}")
-                    self.msg(f"int value: {caller.traits.int.value}")
                     self.set_max_fp()
 
                 self.msg(f"|rYou advance your {stat} to {current_stat + 1}.")

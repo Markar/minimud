@@ -50,6 +50,10 @@ class FireElemental(Elemental):
             "firestorm control": 1,
             "elemental synergy": 1,
         }
+        self.db.burnout = {"active": False, "count": 0, "max": 0, "duration": 0}
+        self.db.heat_wave = {"rate": 0, "duration": 0}
+        self.db.fire_form = False
+        self.db.lava_form = False
 
         self.at_wield(FireAttack)
         tickerhandler.add(
@@ -216,7 +220,10 @@ class FireElemental(Elemental):
         max_dodge = 40
 
         dodge = (
-            base_dodge + (blazing_speed * 2) + (glvl * 0.3) + (self.db.dexterity * 0.2)
+            base_dodge
+            + (blazing_speed * 2)
+            + (glvl * 0.3)
+            + (self.traits.dex.value * 0.2)
         )
 
         if blazing_speed <= 4:

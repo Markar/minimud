@@ -43,6 +43,7 @@ class AirElemental(Elemental):
         self.db.cyclone_armor = {"hits": 0}
         self.db.storm_form = False
         self.db.air_form = False
+        self.db.burnout = {"active": False, "count": 0, "max": 0, "duration": 0}
         self.db.skills = {
             "wind mastery": 1,
             "aerial agility": 1,
@@ -215,7 +216,7 @@ class AirElemental(Elemental):
             base_dodge
             + (aerial_agility * 2)
             + (glvl * 0.3)
-            + (self.db.dexterity * 0.2)
+            + (self.traits.dex.value * 0.2)
             + (wind_mastery * 0.25)
         )
         # 20 + (22 + 8) + 9 + 16 + 2.5 = 77.5

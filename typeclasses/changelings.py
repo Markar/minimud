@@ -196,9 +196,9 @@ class Changelings(PlayerCharacter):
 
         hp = self.db.hp
         hpmax = self.db.hpmax
-        base_regen = self.db.hpregen
-        base_ep_regen = self.db.epregen
-        base_fp_regen = self.db.fpregen
+        base_regen = 1
+        base_ep_regen = 1
+        base_fp_regen = 1
         hp_regen_amt = base_regen
 
         if self.db.regrowth and hp < hpmax:
@@ -260,7 +260,8 @@ class Changelings(PlayerCharacter):
         if not self.in_combat:
             print("CHANGELING You are not in combat.")
             self.enter_combat(target)
-            target.enter_combat(self)
+            if target:
+                target.enter_combat(self)
             return
         # can't attack if we're fleeing!
         if self.db.fleeing:
@@ -348,7 +349,7 @@ class Changelings(PlayerCharacter):
         base_ec_amt = ec * (glvl / 5)
         ec_amt = math.floor(uniform(base_ec_amt / 2, base_ec_amt))
 
-        dodge = self.db.dexterity / 5 + form_dodge * glvl / 12
+        dodge = self.traits.dex.value / 5 + form_dodge * glvl / 12
         if dodge > 90:
             dodge = 90
 

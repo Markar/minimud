@@ -60,14 +60,16 @@ class Cybercorps(PlayerCharacter):
         }
         self.db.melee_weapon = HandRazors()
         self.db.ranged_weapon = None
+        self.db.adaptive_armor = False
+        self.db.nano_reinforced_skeleton = False
+        self.db.nrs_amount = 0
         # list of owned wares
         self.db.wares = ["hand razors"]
+        self.db.docwagon = {"count": 0, "max": 0}
 
         tickerhandler.add(
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
         )
-
-        self.db.docwagon = {"count": 0, "max": 0}
         tickerhandler.add(
             interval=60 * 5,
             callback=self.at_docwagon_tick,
@@ -388,9 +390,9 @@ class Cybercorps(PlayerCharacter):
         attacker.get_npc_attack_emote(self, damage, self.get_display_name(self))
 
         # Check if the character is below the reaction percentage
-        if hp_percentage < reaction and glvl > 3:
+        if hp_percentage < reaction and self.db.docwagon["count"] > 0:
             self.msg(f"|cYou are below {reaction*100}% health!|n")
-            self.execute_cmd("terran restoration")
+            self.execute_cmd("docwagon revive")
 
         if hp <= 0:
             self.tags.add("unconscious", category="status")

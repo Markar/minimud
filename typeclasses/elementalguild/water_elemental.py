@@ -35,7 +35,6 @@ class WaterElemental(Elemental):
         self.db.subguild = "water"
         self.db._wielded = {"left": None, "right": None}
         self.db.reaction_percentage = 50
-        self.db.maxEmit = 1
         self.db.hpregen = 1
         self.db.fpregen = 1
         self.db.epregen = 1
@@ -50,6 +49,11 @@ class WaterElemental(Elemental):
             "wave control": 1,
             "elemental synergy": 1,
         }
+
+        self.db.burnout = {"active": False, "count": 0, "max": 0, "duration": 0}
+        self.db.water_form = False
+        self.db.aqua_shield = False
+        self.db.ice_shield = {"hits": 0}
 
         self.at_wield(WaterAttack)
         tickerhandler.add(
@@ -82,12 +86,18 @@ class WaterElemental(Elemental):
         chunks.append(
             f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g"
         )
+
         if self.db.burnout["count"] > 0:
             chunks.append(f"|YBurnout: |G{burnout_count}/{burnout_max}|n")
         if self.db.burnout["active"]:
             chunks.append(f"|YB")
         if self.db.aqua_shield == True:
             chunks.append(f"|YAS")
+
+        if looker != self:
+            chunks.append(
+                f"|gE: |G{looker.get_display_name(self, **kwargs)} ({looker.db.hp})"
+            )
 
         # get all the current status flags for this character
         if status_tags := self.tags.get(category="status", return_list=True):
@@ -104,7 +114,7 @@ class WaterElemental(Elemental):
             if all_cooldowns:
                 chunks.append(f"Cooldowns: {iter_to_str(all_cooldowns, endsep=',')}")
 
-        chunks.append(f"\n")
+        # chunks.append(f"\n")
         # glue together the chunks and return
         return " - ".join(chunks)
 
@@ -249,7 +259,7 @@ class WaterElemental(Elemental):
             + water_form_bonus
             + (fluid_agility * 1.5)
             + (glvl * 0.2)
-            + (self.db.dexterity * 0.1)
+            + (self.traits.dex.value * 0.1)
         )
         # 20 + 9 + 16 + 6 + 3 = 54
         if fluid_agility <= 4:
