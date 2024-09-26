@@ -58,7 +58,20 @@ class CmdEat(Command):
             return
 
         energy = obj.attributes.get("energy", 0)
+        hp = obj.attributes.get("hp", 0)
         self.caller.db.ep += energy
+        self.caller.db.hp += hp
+
+        power = obj.attributes.get("power", 0)
+        if power > 0:
+            self.caller.db.fp += power
+            self.caller.db.hp += power
+            self.caller.location.msg_contents(
+                f"{self.caller} eats {obj} and looks more powerful."
+            )
+            obj.delete()
+            return
+
         self.caller.at_emote(
             f"$conj({self.cmdstring}) the {{target}}.", mapping={"target": obj}
         )

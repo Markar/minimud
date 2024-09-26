@@ -3,6 +3,7 @@ from evennia import CmdSet
 from evennia.utils import iter_to_str
 from evennia.utils.evtable import EvTable
 from typeclasses.scripts import get_or_create_combat_script
+from evennia.contrib.game_systems.clothing.clothing import CmdWear
 
 from .command import Command
 from typeclasses.gear import BareHand
@@ -63,6 +64,7 @@ class CmdAttack(Command):
         # else:
         #     # grab whatever we're wielding
         if wielded := self.caller.wielding:
+            self.msg(f"You are wielding {iter_to_str(wielded)}.")
             weapon = wielded[0]
         else:
             # use our bare hands if we aren't wielding anything
@@ -278,6 +280,34 @@ class CmdHeal(Command):
         caller.use_heal()
 
 
+class CmdWearNew(CmdWear):
+    """
+    Wear an item of clothing
+
+    Usage:
+        wear <item>
+    """
+
+    key = "wear"
+    help_category = "combat"
+
+    def func(self):
+        caller = self.caller
+        item = caller.search(self.args)
+
+        if not item:
+            return
+
+        if not item.db.clothing_type:
+            self.msg("You can't wear that.")
+            return
+
+        if not caller.can_wear(item):
+            return
+
+        super().func()
+
+
 # class CmdFireball(Command):
 #     """
 #     Casts a fireball
@@ -392,3 +422,4 @@ class CombatCmdSet(CmdSet):
         self.add(CmdStatus)
         # self.add(CmdFireball)
         self.add(CmdHeal)
+        self.add(CmdWearNew)

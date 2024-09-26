@@ -54,7 +54,6 @@ class AirElemental(Elemental):
             "elemental harmony": 1,
         }
 
-        self.at_wield(AirAttack)
         tickerhandler.add(
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
         )

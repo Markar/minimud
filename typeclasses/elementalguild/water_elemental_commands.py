@@ -220,7 +220,7 @@ class CmdWaterJet(PowerCommand):
     aliases = ["waterjet", "wj"]
     help_category = "water elemental"
     guild_level = 3
-    cost = 5
+    cost = 10
 
     def _calculate_damage(self, wave_control, wisdom, guild_level):
         base_value = 5
@@ -236,7 +236,7 @@ class CmdWaterJet(PowerCommand):
         )
 
         # Ensure damage is within the range of 100 to 300
-        damage = max(1, min(damage, 300))
+        damage = max(1, min(damage, 80))
 
         # Adding some randomness to the damage
         damage = int(uniform(damage * 0.6, damage * 1.4))
@@ -296,11 +296,11 @@ class CmdIceShard(PowerCommand):
     key = "ice shard"
     aliases = ["iceshard", "is"]
     help_category = "water elemental"
-    guild_level = 1
-    cost = 3
+    guild_level = 15
+    cost = 12
 
     def _calculate_damage(self, wave_control, wisdom, guild_level):
-        base_value = 5
+        base_value = 30
         wave_control_weight = 10
         wisdom_weight = 0.3
         guild_level_weight = 1
@@ -359,7 +359,6 @@ class CmdIceShard(PowerCommand):
         )
 
         damage = self._calculate_damage(skill_rank, caller.traits.str.value, glvl)
-        self.msg(f"|gDamage: {damage}")
         target.at_damage(caller, damage, "water", "tidal_wave")
 
 
@@ -466,24 +465,25 @@ class CmdTidalWave(PowerCommand):
     guild_level = 29
     cost = 40
 
-    def _calculate_damage(self, wave_control, wisdom, guild_level):
-        base_value = 9
+    def _calculate_damage(self, caller):
+        base_value = 10
         wave_control_weight = 9
         wisdom_weight = 0.3
         guild_level_weight = 1
+        wave_control = caller.db.skills.get("wave control", 1)
 
         damage = (
             base_value
             + (wave_control * wave_control_weight)
-            + (wisdom * wisdom_weight)
-            + (guild_level * guild_level_weight)
+            + (self.traits.wis.value * wisdom_weight)
+            + (caller.db.guild_level * guild_level_weight)
         )
 
         # Ensure damage is within the range of 100 to 300
         damage = max(15, min(damage, 300))
 
         # Adding some randomness to the damage
-        damage = int(uniform(damage * 0.6, damage * 1))
+        damage = int(uniform(damage * 0.5, damage * 1.5))
 
         return damage
 
@@ -508,10 +508,6 @@ class CmdTidalWave(PowerCommand):
             target.enter_combat(caller)
             caller.enter_combat(target)
 
-        if caller.db.ep < self.cost:
-            caller.msg(f"|rYou need at least {self.cost} energy to use this power.")
-            return
-
         if caller.db.fp < self.cost:
             caller.msg(f"|rYou need at least {self.cost} focus to use this power.")
             return
@@ -531,9 +527,7 @@ class CmdTidalWave(PowerCommand):
             exclude=[caller, target],
         )
 
-        skill_rank = caller.db.skills.get("wave control", 1)
-        damage = self._calculate_damage(skill_rank, caller.traits.str.value, glvl)
-        self.msg(f"|gDamage: {damage}")
+        damage = self._calculate_damage(caller)
         target.at_damage(caller, damage, "water", "tidal_wave")
 
 
@@ -975,8 +969,9 @@ class WaterElementalCmdSet(CmdSet):
         self.add(CmdWaterJet)
         self.add(CmdMaelstrom)
         self.add(CmdTidalWave)
-        self.add(CmdPowers)
+        self.add(CmdIceShard)
 
+        self.add(CmdPowers)
         self.add(CmdGTrain)
         self.add(CmdGhelp)
         self.add(CmdWaterElementalHp)

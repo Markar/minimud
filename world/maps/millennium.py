@@ -355,3 +355,23 @@ open north;n,south;s = town#08
 #
 @desc |YStarlit Lane is a picturesque street where the night sky seems to blend seamlessly with the magical lights that line the path. The cobblestones underfoot are embedded with tiny, glowing crystals that twinkle like stars. The air is filled with the soft melodies of a distant bard, creating a sense of wonder and anticipation as you make your way out of the city
 
+#
+@tel town#48
+#
+@dig/teleport Training Grounds;town#49 : typeclasses.rooms.Room = south;s,north;n
+#
+@desc |YThe training grounds are a large open area where aspiring warriors practice their skills. Various training dummies and holographic targets are scattered around, with warriors of all levels honing their techniques. The ground is marked with scuffs and scorch marks from countless training sessions. Instructors shout commands and offer guidance, while the sound of clashing weapons and grunts of effort echo through the space. A large gate at the far end leads to the Warriors Guild, flanked by banners bearing the guild's emblem.
+#
+
+@tel town#49
+#
+@dig/teleport Hall of Echoes;town#50 : typeclasses.rooms.Room = south;s,north;n
+#
+@desc |YThe Hall of Echoes is a grand, echoing chamber filled with statues and holograms of legendary warriors from the guild's history. The floor is made of polished stone, reflecting the light from flickering torches and glowing runes. The air is filled with a sense of reverence and history, as if the very walls are whispering tales of past glories. At the far end of the hall, a massive door leads to the inner sanctum of the Warriors Guild, guarded by a pair of imposing sentinels.
+#
+
+@tel town#50
+#
+@dig/teleport The Warrior Guild Hall;town#51 : typeclasses.rooms.WarriorGuildJoinRoom = south;s,north;n
+#
+@desc |YAs you step into the grand hall of the Warriors Guild, you are immediately enveloped by an aura of strength and camaraderie. The room is vast, with high ceilings adorned with banners depicting the guild's emblem: a crossed sword and shield. The walls are lined with suits of armor and weapons, each one a testament to the martial prowess of the guild's members.|/|/At the center of the hall stands a large, circular platform made of polished stone. Surrounding the platform are four towering statues, each representing a different warrior archetype. The knight is a figure clad in gleaming plate armor, wielding a massive sword and shield. The berserker is a fierce, muscular warrior, brandishing a massive axe and roaring in battle. The archer is a lithe, agile figure, drawing back a bow with deadly precision. The mage is a cloaked figure, surrounded by crackling energy and arcane symbols.|/|/The air is filled with the sound of clashing weapons and the shouts of sparring warriors. As you approach the platform, a sense of anticipation and excitement builds within you. This is the place where you will take your first steps towards mastering the art of combat and joining the ranks of the Warriors Guild.

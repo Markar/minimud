@@ -12,7 +12,7 @@ class Anole(ChangelingAttack):
     pet shops.
     """
 
-    energy_cost = 3
+    energy_cost = 1
     speed = 3
     power = 5
     toughness = 8
@@ -36,9 +36,6 @@ class Anole(ChangelingAttack):
         The auto attack of Anole
         """
         super().at_attack(wielder, target, **kwargs)
-
-        self.energy_cost = 3
-        self.speed = 3
 
         wielder.db.ep -= self.energy_cost
         target.at_damage(wielder, self._calculate_damage(wielder), "edged", "bite")

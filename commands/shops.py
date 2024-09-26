@@ -23,21 +23,34 @@ class CmdList(Command):
 
         listings = []
         for obj in storage.contents:
-            # check if the object has a price set
             if price := obj.db.price:
-                # add it and its price to the listings
                 listings.append((obj.name, price))
+        # for obj in storage.contents:
+        #     print(f" obj in storage.contents {obj}")
+        #     # check if the object has a price set
+        #     if price := obj.db.price:
+        #         # add it and its price to the listings
+        #         listings.append((obj.name, price))
 
-        condensed = Counter(listings)
-        listings = [[key[0], val, key[1]] for key, val in condensed.items()]
-        if not condensed:
-            self.msg("This shop has nothing for sale right now.")
-            return
+        # condensed = Counter(listings)
+        # print(f"condensed {condensed}")
+        # listings = [[key[0], val, key[1]] for key, val in condensed.items()]
+        # print(f"listings {listings}")
+        # if not condensed:
+        #     self.msg("This shop has nothing for sale right now.")
+        #     return
 
         # build a table from the sale listings
         table = EvTable(f"|wItem", f"|wStock", f"|wPrice", border="table")
-        for key, val in condensed.items():
-            table.add_row(f"|G{key[0]}", f"|Gval", f"|G{key[1]}")
+        for obj in storage.contents:
+            name = getattr(obj, "name", obj.key)
+            stock = getattr(obj, "stock", 0)
+            price = getattr(obj, "price", 0)
+            type = getattr(obj, "type", "gear")
+            table.add_row(obj.name, obj.db.stock, price)
+        # for key, val in condensed.items():
+        #     print(key, val)
+        #     table.add_row(f"|G{key[0]}", f"|G{val}", f"|G{key[1]}")
 
         # send it to the player
         self.msg(str(table))

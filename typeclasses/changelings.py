@@ -1,120 +1,14 @@
 from random import randint, uniform, uniform
-from evennia.prototypes import spawner, prototypes
-from string import punctuation
-from evennia import AttributeProperty
 from evennia.utils import lazy_property, iter_to_str, delay, logger
 from evennia.contrib.rpg.traits import TraitHandler
 from evennia.contrib.game_systems.cooldowns import CooldownHandler
 from evennia import TICKER_HANDLER as tickerhandler
-from evennia.contrib.game_systems.clothing.clothing import (
-    ClothedCharacter,
-    get_worn_clothes,
-)
 import math
 from commands.changeling_cmds import ChangelingCmdSet
 from typeclasses.characters import PlayerCharacter
 
 from typeclasses.changelingguild.attack_emotes import AttackEmotes
-
-from typeclasses.changelingguild.changeling_attack import ChangelingAttack
-from typeclasses.changelingguild.slime import Slime
-from typeclasses.changelingguild.human import Human
-from typeclasses.changelingguild.reptile.anole import Anole
-from typeclasses.changelingguild.reptile.teiid import Teiid
-from typeclasses.changelingguild.reptile.gecko import Gecko
-from typeclasses.changelingguild.reptile.skink import Skink
-from typeclasses.changelingguild.reptile.iguana import Iguana
-from typeclasses.changelingguild.reptile.boa import Boa
-from typeclasses.changelingguild.reptile.viper import Viper
-from typeclasses.changelingguild.reptile.caiman import Caiman
-from typeclasses.changelingguild.reptile.cobra import Cobra
-from typeclasses.changelingguild.reptile.gilamonster import GilaMonster
-from typeclasses.changelingguild.reptile.python import Python
-from typeclasses.changelingguild.reptile.crocodile import Crocodile
-from typeclasses.changelingguild.reptile.alligator import Alligator
-from typeclasses.changelingguild.reptile.anaconda import Anaconda
-from typeclasses.changelingguild.reptile.komodo_dragon import KomodoDragon
-from typeclasses.changelingguild.mammal.rat import Rat
-from typeclasses.changelingguild.mammal.cat import Cat
-from typeclasses.changelingguild.mammal.lynx import Lynx
-from typeclasses.changelingguild.mammal.fox import Fox
-from typeclasses.changelingguild.mammal.badger import Badger
-from typeclasses.changelingguild.mammal.wolverine import Wolverine
-from typeclasses.changelingguild.mammal.wolf import Wolf
-from typeclasses.changelingguild.mammal.black_bear import BlackBear
-from typeclasses.changelingguild.mammal.grizzly_bear import GrizzlyBear
-from typeclasses.changelingguild.mammal.elephant import Elephant
-from typeclasses.changelingguild.mammal.cheetah import Cheetah
-from typeclasses.changelingguild.mammal.leopard import Leopard
-from typeclasses.changelingguild.mammal.jaguar import Jaguar
-from typeclasses.changelingguild.mammal.tiger import Tiger
-from typeclasses.changelingguild.mammal.lion import Lion
-from typeclasses.changelingguild.avian.hummingbird import Hummingbird
-from typeclasses.changelingguild.avian.finch import Finch
-from typeclasses.changelingguild.avian.sparrow import Sparrow
-from typeclasses.changelingguild.avian.swallow import Swallow
-from typeclasses.changelingguild.avian.crow import Crow
-from typeclasses.changelingguild.avian.raven import Raven
-from typeclasses.changelingguild.avian.crane import Crane
-from typeclasses.changelingguild.avian.kestrel import Kestrel
-from typeclasses.changelingguild.avian.owl import Owl
-from typeclasses.changelingguild.avian.osprey import Osprey
-from typeclasses.changelingguild.avian.falcon import Falcon
-from typeclasses.changelingguild.avian.hawk import Hawk
-from typeclasses.changelingguild.avian.condor import Condor
-from typeclasses.changelingguild.avian.ostrich import Ostrich
-from typeclasses.changelingguild.avian.eagle import Eagle
-
-FORM_CLASSES = {
-    "ChangelingAttack": ChangelingAttack,
-    "Slime": Slime,
-    "Human": Human,
-    "Anole": Anole,
-    "Teiid": Teiid,
-    "Gecko": Gecko,
-    "Skink": Skink,
-    "Iguana": Iguana,
-    "Boa": Boa,
-    "Viper": Viper,
-    "Caiman": Caiman,
-    "Cobra": Cobra,
-    "Gila Monster": GilaMonster,
-    "Python": Python,
-    "Crocodile": Crocodile,
-    "Alligator": Alligator,
-    "Anaconda": Anaconda,
-    "Komodo Dragon": KomodoDragon,
-    "Rat": Rat,
-    "Cat": Cat,
-    "Lynx": Lynx,
-    "Fox": Fox,
-    "Badger": Badger,
-    "Wolverine": Wolverine,
-    "Wolf": Wolf,
-    "Black Bear": BlackBear,
-    "Grizzly Bear": GrizzlyBear,
-    "Elephant": Elephant,
-    "Cheetah": Cheetah,
-    "Leopard": Leopard,
-    "Jaguar": Jaguar,
-    "Tiger": Tiger,
-    "Lion": Lion,
-    "Hummingbird": Hummingbird,
-    "Finch": Finch,
-    "Sparrow": Sparrow,
-    "Swallow": Swallow,
-    "Crow": Crow,
-    "Raven": Raven,
-    "Crane": Crane,
-    "Kestrel": Kestrel,
-    "Owl": Owl,
-    "Osprey": Osprey,
-    "Falcon": Falcon,
-    "Hawk": Hawk,
-    "Condor": Condor,
-    "Ostrich": Ostrich,
-    "Eagle": Eagle,
-}
+from typeclasses.changelingguild.changeling_constants_and_helpers import FORM_CLASSES
 
 
 class Changelings(PlayerCharacter):
@@ -160,9 +54,23 @@ class Changelings(PlayerCharacter):
             "body_control": 1,
             "drain": 1,
             "energy_control": 1,
+            "energy_dissipation": 1,
             "regeneration": 1,
         }
-        self.at_wield(ChangelingAttack)
+        self.db.body_control = {
+            "active": False,
+            "amount": 0,
+            "boostedStat": None,
+            "nerfedStat": None,
+        }
+        self.db.ec = {
+            "active": False,
+            "duration": 0,
+        }
+        self.db.ed = {
+            "active": False,
+            "duration": 0,
+        }
         tickerhandler.add(
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
         )
@@ -201,6 +109,33 @@ class Changelings(PlayerCharacter):
         base_fp_regen = 1
         hp_regen_amt = base_regen
 
+        ec_active = getattr(self.db, "ec", {}).get("active", False)
+        ec_duration = getattr(self.db, "ec", {}).get("duration", 0)
+        ed_active = getattr(self.db, "ed", {}).get("active", False)
+        ed_duration = getattr(self.db, "ed", {}).get("duration", 0)
+
+        # tick down EC duration
+        if ec_active:
+            if ec_duration < 1:
+                self.msg(f"|cYour energy control fades.")
+                setattr(self.db, "ec", {"active": False, "duration": 0})
+            elif ec_duration == 10:
+                self.msg(f"|cYou sense your energy control is fading.")
+                setattr(self.db, "ec", {"active": True, "duration": ec_duration - 1})
+            else:
+                setattr(self.db, "ec", {"active": True, "duration": ec_duration - 1})
+
+        # tick down ED duration
+        if ed_active:
+            if ed_duration < 1:
+                self.msg(f"|cYour energy dissipation fades.")
+                setattr(self.db, "ed", {"active": False, "duration": 0})
+            elif ed_duration == 10:
+                self.msg(f"|cYou sense your energy dissipation is fading.")
+                setattr(self.db, "ed", {"active": True, "duration": ed_duration - 1})
+            else:
+                setattr(self.db, "ed", {"active": True, "duration": ed_duration - 1})
+
         if self.db.regrowth and hp < hpmax:
             regrowth_rate = int(
                 5
@@ -221,9 +156,11 @@ class Changelings(PlayerCharacter):
                 self.msg(f"|rYou do not have enough energy to regrow.")
                 self.db.regrowth = False
 
+        ep_bonus = regen_skill / 2 + glvl / 10
+
         self.adjust_hp(hp_regen_amt)
         self.adjust_fp(base_fp_regen)
-        self.adjust_ep(base_ep_regen)
+        self.adjust_ep(base_ep_regen + ep_bonus)
 
     def get_display_name(self, looker, **kwargs):
         """
@@ -241,10 +178,6 @@ class Changelings(PlayerCharacter):
         weapon = self.db.natural_weapon
         return weapon.get("speed", 3)
 
-    def at_wield(self, weapon, **kwargs):
-        self.msg(f"You cannot wield weapons.")
-        return False
-
     """
     This kicks off the auto attack of the form, which is weapon.at_attack
     The weapon is the form class, which is a subclass of ChangelingAttack
@@ -258,7 +191,6 @@ class Changelings(PlayerCharacter):
             weapon = FORM_CLASSES[self.db.form]()
 
         if not self.in_combat:
-            print("CHANGELING You are not in combat.")
             self.enter_combat(target)
             if target:
                 target.enter_combat(self)
@@ -341,13 +273,41 @@ class Changelings(PlayerCharacter):
         Apply damage to self, after taking into account damage resistances.
         """
         form = FORM_CLASSES[self.db.form]
-        # apply dodge
         glvl = self.db.guild_level
         form_dodge = form.dodge
         form_toughness = form.toughness
-        ec = self.db.skills["energy_control"]
-        base_ec_amt = ec * (glvl / 5)
-        ec_amt = math.floor(uniform(base_ec_amt / 2, base_ec_amt))
+        ec = getattr(self.db, "skills", {}).get("energy_control", 1)
+        ed = getattr(self.db, "skills", {}).get("energy_dissipation", 1)
+
+        # if(energy_diss_skill <= 2) energy_diss = (guild_level * 2) + random(guild_level/2) + random(30) + 2*energy_diss_skill;
+        # if(energy_diss_skill <= 5) energy_diss = (guild_level * 2) + random(guild_level/2) + random(40) + 2*energy_diss_skill;
+        # if(admin || energy_diss_skill >=7)
+        # energy_diss = 2*energy_diss_skill + (guild_level * 2) + random(guild_level/2) + random(50) + random(2*energy_diss_skill);
+        #     energy_diss = (guild_level * 2) + random(guild_level/2) + random(30) + random(2 * energy_diss_skill);
+        #     return;
+        if ec <= 2:
+            ec_amt = (glvl * 2) + uniform(0, glvl / 2) + uniform(0, 30) + (ec * 2)
+        if ec <= 5:
+            ec_amt = (glvl * 2) + uniform(0, glvl / 2) + uniform(0, 40) + (ec * 2)
+        if ec >= 7:
+            ec_amt = (
+                (glvl * 2)
+                + uniform(0, glvl / 2)
+                + uniform(0, 50)
+                + uniform(0, 2 * ec)
+                + (ec * 2)
+            )
+
+        if ed < 3:
+            ed_amt = (glvl * 2) + uniform(0, glvl / 2) + uniform(ed, glvl) + ed
+        elif ed < 6:
+            ed_amt = (
+                (glvl * 2) + uniform(0, glvl / 2) + uniform(ed, glvl * 1.5) + 2 * ed
+            )
+        else:
+            ed_amt = (
+                (glvl * 2) + uniform(0, glvl / 2) + uniform(ed, glvl * 2) + 2.5 * ed
+            )
 
         dodge = self.traits.dex.value / 5 + form_dodge * glvl / 12
         if dodge > 90:
@@ -375,21 +335,33 @@ class Changelings(PlayerCharacter):
         # self.msg(f"|cArmor reduction: {self.defense(damage_type)}")
 
         # apply energy control reduction
-        if self.db.energy_control is True and damage_type in ["edged", "blunt"]:
+        ec_active = getattr(self.db, "ec", {}).get("active", False)
+        ec_duration = getattr(self.db, "ec", {}).get("duration", 0)
+        ed_active = getattr(self.db, "ed", {}).get("active", False)
+
+        if ec_active and damage_type in ["edged", "blunt"]:
             damage -= ec_amt
+
+        if ed_active and damage_type in [
+            "energy",
+            "lightning",
+            "fire",
+            "cold",
+            "acid",
+            "poison",
+            "radiation",
+            "mind",
+        ]:
+            damage -= ed_amt
             self.db.ep -= 1
             self.msg(f"|cYou block some damage!")
 
-        # self.msg(f"|cEnergy control reduction: {ec_amt}")
         self.db.hp -= max(damage, 0)
         # self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
         # The NPC's attack, emoting to the room
         # a scrawny gnoll tears into changeling at_damage Markar with brutal force! -18
         attacker.get_npc_attack_emote(self, damage, self.get_display_name(self))
-
-        # status = self.get_display_status(self)
-        # self.msg(prompt=status)
 
         if self.db.hp <= 0:
             self.tags.add("unconscious", category="status")
@@ -401,69 +373,9 @@ class Changelings(PlayerCharacter):
                 combat = self.location.scripts.get("combat")[0]
                 combat.remove_combatant(self)
 
-    def use_energy_control(self):
-        """
-        Improve your physical resistance
-        """
-
-        if self.db.energy_control:
-            self.msg(
-                f"|MYou feel the energy receding, flowing back into your core. The crackling sounds of the barrier fade away, and the protective shield dissolves into the air."
-            )
-            self.db.energy_control = False
-            return
-
-        self.db.energy_control = True
-        self.db.ep -= 25
-        self.msg(
-            f"|MAs you focus your mind, a surge of energy begins to flow through your body. You raise your hands, and a shimmering barrier of pure energy forms around you, crackling with power."
-        )
-
     def get_form_help(self, form):
         form_class = FORM_CLASSES[form.title()]
         return form_class.__doc__
-
-    def use_engulf(self, target, **kwargs):
-        """
-        Engulf your target
-        """
-        self.msg(f"self engulf {self}")
-        if not target:
-            self.msg(f"|GTarget whom?")
-            return
-
-        if not self.db.combat_target:
-            self.enter_combat(target)
-        else:
-            self.db.combat_target = target
-        target.enter_combat(self)
-        if not self.cooldowns.ready("engulf"):
-            self.msg(f"|CNot so fast!")
-            return False
-
-        self.db.combat_target = target
-        # execute the actual attack
-
-        hp = self.db.hp
-        hpmax = self.db.hpmax
-        fp = self.db.fp
-        fpmax = self.db.fpmax
-
-        if self.db.engulfs < 1:
-            self.msg(f"|rYou do not have the strength to engulf at this time.\n")
-            return
-        if hp > hpmax or fp > fpmax:
-            self.msg(f"|rYou may not engulf a creature at this time.\n")
-            return
-
-        power = math.ceil(self.db.hpmax * (9 + self.db.guild_level / 7) / 10)
-        self.msg(f"engulf power: {power}")
-        self.db.hp += power
-        self.db.fp += power
-        self.db.combat_target.at_damage(self, power)
-        self.db.engulfs -= 1
-        self.cooldowns.add("engulf", 5)
-        self.msg(f"|rYou flow around {target} completely enclosing them in plasma!")
 
     def get_display_status(self, looker, **kwargs):
         """
@@ -484,15 +396,20 @@ class Changelings(PlayerCharacter):
         ep = int(self.db.ep)
         epmax = int(self.db.epmax)
 
+        ec_active = getattr(self.db, "ec", {}).get("active", False)
+
         ecVis = ""
+        edVis = ""
         regrowthVis = ""
-        if self.db.energy_control:
+        if ec_active:
             ecVis = "EC"
+        if self.db.energy_dissipation:
+            edVis = "ED"
         if self.db.regrowth:
             regrowthVis = "CG"
 
         chunks.append(
-            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g Form: |G{self.db.form} |gEngulfs: |G{self.db.engulfs}/{self.db.max_engulfs} |Y{ecVis} |Y{regrowthVis}"
+            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g Form: |G{self.db.form} |gEngulfs: |G{self.db.engulfs}/{self.db.max_engulfs} |Y{ecVis} |Y {edVis} |Y{regrowthVis}"
         )
         print(f"looker != self {looker} and self {self}")
         if looker != self:
@@ -529,20 +446,48 @@ class Changelings(PlayerCharacter):
             weapon = self
 
         if target is not None:
-            self.at_emote(
-                "changeling $conj(charges) at {target}!", mapping={"target": target}
-            )
+            self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
         location = self.location
 
         if not (combat_script := location.scripts.get("combat")):
             # there's no combat instance; start one
             from typeclasses.scripts import CombatScript
 
+            print("changeling combat script not found")
+
             location.scripts.add(CombatScript, key="combat")
-            combat_script = location.scripts.get("combat")
+
+        combat_script = location.scripts.get("combat")
+        print(f"changeling 1 combat script: {combat_script}")
         combat_script = combat_script[0]
+        print(f"changeling 2 combat script: {combat_script}")
+
         self.db.combat_target = target
+
+        print(f"changeling combat target: {target}")
         # adding a combatant to combat just returns True if they're already there, so this is safe
         if not combat_script.add_combatant(self, enemy=target):
+            print(f"combat script add combatant failed")
             return
         self.attack(target, weapon)
+
+    def can_wear(self, item):
+        """
+        Check if the character can wear an item
+        """
+        armor = getattr(item.db, "armor", False)
+        type = getattr(item.db, "type", False)
+        allowed_types = ["light"]
+
+        if not item:
+            return False
+
+        if not item.db.clothing_type:
+            self.msg(f"{item} is not wearable.")
+            return False
+
+        if armor and type not in allowed_types:
+            self.msg(f"You can't wear that kind of armor.")
+            return False
+
+        return True

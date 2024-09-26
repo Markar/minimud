@@ -14,7 +14,7 @@ py here.scripts.get('combat').delete()
 >>> here.scripts.get('combat').delete()
 (1, {'scripts.CombatScript': 1})
 
-# Delete all in limbo
+# Bomb all in limbo
 py _ = [obj.delete() for obj in self.search("#2").contents]
 
 evennia xyzgrid add world.maps.newbie_land
@@ -65,6 +65,10 @@ for x in all:
  Account: Chummer (#9)
  #
  chummer.locks.add("call:false(); control:perm(Developer); delete:id(9) or perm(Admin);drop:holds(); edit:pid(9) or perm(Admin); examine:perm(Builder); get:false(); puppet:id(4270) or pid(9) or perm(Developer) or pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin); tell:perm(Admin); view:all()")
+
+ pits.locks.add("call:false(); control:perm(Developer); delete:id(9) or perm(Admin);drop:holds(); edit:pid(9) or perm(Admin); examine:perm(Builder); get:false(); puppet:id(4270) or pid(9) or perm(Developer) or pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin); tell:perm(Admin); view:all()")
+
+qf.locks.add("call:false(); control:perm(Developer); delete:id(10) or perm(Admin);drop:holds(); edit:pid(10) or perm(Admin); examine:perm(Builder); get:false(); puppet:id(4270) or pid(10) or perm(Developer) or pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin); tell:perm(Admin); view:all()")
 
 ### SEARCH BY TAG
   hasPlayerTags = caller.tags.has("player", "status")

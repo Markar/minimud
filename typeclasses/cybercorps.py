@@ -403,3 +403,25 @@ class Cybercorps(PlayerCharacter):
             if self.in_combat:
                 combat = self.location.scripts.get("combat")[0]
                 combat.remove_combatant(self)
+
+
+def can_wear(self, item):
+    """
+    Check if the character can wear an item
+    """
+    armor = getattr(item.db, "armor", False)
+    type = getattr(item.db, "type", False)
+    allowed_types = ["light", "medium", "heavy"]
+
+    if not item:
+        return False
+
+    if not item.db.clothing_type:
+        self.msg(f"{item} is not wearable.")
+        return False
+
+    if armor and type not in allowed_types:
+        self.msg(f"You can't wear that kind of armor.")
+        return False
+
+    return True

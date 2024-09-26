@@ -109,20 +109,10 @@ class MeleeWeapon(Object):
 
         # subtract the energy required to use this
         wielder.db.ep -= self.attributes.get("energy_cost", 0)
-        if not damage:
-            # the attack failed
-            wielder.at_emote(
-                "$conj(swings) {weapon} at $you(target), but $conj(misses).",
-                mapping={"target": target, "weapon": self},
-            )
-        else:
-            wielder.at_emote(
-                f"$conj({damage_type or 'swings'}) $you(target) with $pron(their) {{weapon}}.",
-                mapping={"target": target, "weapon": self},
-            )
-            print(f"attack succeded: {wielder} {damage} {damage_type}")
-            # the attack succeeded! apply the damage
-            target.at_damage(wielder, damage, damage_type)
+
+        # the attack succeeded! apply the damage
+        target.at_damage(wielder, damage, damage_type)
+
         wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
         wielder.cooldowns.add("attack", self.speed)
 

@@ -13,6 +13,8 @@ from evennia.contrib.game_systems.cooldowns import CooldownHandler
 from world.prototypes import MOB_CORPSE, IRON_DAGGER
 import math
 from .objects import ObjectParent
+from typeclasses.general_attack_emotes import AttackEmotes
+from typeclasses.utils import SetNPCStats
 
 _IMMOBILE = ("sitting", "lying down", "unconscious")
 _MAX_CAPACITY = 10
@@ -559,23 +561,61 @@ class PlayerCharacter(Character):
             return False
         return super().at_pre_object_receive(object, source_location, **kwargs)
 
+    def get_player_attack_hit_message(self, attacker, dam, tn, emote="general_weapon"):
+        """
+        Get the hit message based on the damage dealt. This is the elemental's
+        version of the method, defaulting to the earth elemental version but
+        should be overridden by subguilds.
+
+        ex:
+            f"{color}$You() hurl a handful of dirt, but it scatters harmlessly.",
+        """
+
+        # self.msg(f"attacker {attacker} dam {dam} tn {tn} emote {emote}")
+        msgs = AttackEmotes.get_emote(attacker, emote, tn, which="left")
+
+        if dam <= 0:
+            to_me = msgs[0]
+        elif 1 <= dam <= 5:
+            to_me = msgs[1]
+        elif 6 <= dam <= 12:
+            to_me = msgs[2]
+        elif 13 <= dam <= 20:
+            to_me = msgs[3]
+        elif 21 <= dam <= 30:
+            to_me = msgs[4]
+        elif 31 <= dam <= 50:
+            to_me = msgs[5]
+        elif 51 <= dam <= 80:
+            to_me = msgs[6]
+        elif 81 <= dam <= 140:
+            to_me = msgs[7]
+        elif 141 <= dam <= 225:
+            to_me = msgs[8]
+        elif 225 <= dam <= 325:
+            to_me = msgs[9]
+        else:
+            to_me = msgs[10]
+
+        to_me = f"{to_me} ({dam})"
+        self.location.msg_contents(to_me, from_obj=self)
+
+        return to_me
+
     def at_damage(self, attacker, damage, damage_type=None):
         """
         Apply damage, after taking into account damage resistances.
         """
-        # GENERALLY NOT CALLED - OVERRIDEN BY GUILD VERSION
+        # ONLY CALLED BY ADVENTURER - OVERRIDEN BY GUILD VERSION
         self.msg(f"at_damage in PC")
         # apply armor damage reduction
         damage -= self.defense(damage_type)
+
         if damage < 0:
             damage = 0
         self.db.hp -= max(damage, 0)
-        # self.msg(f"You take {damage} damage from {attacker.get_display_name(self)} PC.")
-        # attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
-        # self.get_npc_attack_emote(attacker, damage, f"PC at_damage {self.get_display_name(attacker)}")
-        attacker.get_player_attack_hit_message(
-            attacker, damage, f"PC at_damage {self.get_display_name(attacker)}"
-        )
+
+        attacker.get_npc_attack_emote(self, damage, self.get_display_name(self))
 
         status = self.get_display_status(self)
         self.msg(prompt=status)
@@ -590,52 +630,51 @@ class PlayerCharacter(Character):
                 combat = self.location.scripts.get("combat")[0]
                 combat.remove_combatant(self)
 
-    # def attack(self, target, weapon, **kwargs):
-    #     """
-    #     Execute an attack
+    def attack(self, target, weapon, **kwargs):
+        """
+        Execute an attack
 
-    #     Args:
-    #         target (Object or None): the entity being attacked. if None, attempts to use the combat_target db attribute
-    #         weapon (Object): the object dealing damage
-    #     """
-    #     self.msg(f"PC attack: {self} and {target} and {weapon}")
-    #     # can't attack if we're not in combat!
-    #     if not self.in_combat:
-    #         return
-    #     # can't attack if we're fleeing!
-    #     if self.db.fleeing:
-    #         return
-    #     # make sure that we can use our chosen weapon
-    #     if not (hasattr(weapon, "at_pre_attack") and hasattr(weapon, "at_attack")):
-    #         self.msg(f"You cannot attack with {weapon.get_numbered_name(1, self)}.")
-    #         return
-    #     if not weapon.at_pre_attack(self):
-    #         # the method handles its own error messaging
-    #         return
+        Args:
+            target (Object or None): the entity being attacked. if None, attempts to use the combat_target db attribute
+            weapon (Object): the object dealing damage
+        """
+        # can't attack if we're not in combat!
+        if not self.in_combat:
+            return
+        # can't attack if we're fleeing!
+        if self.db.fleeing:
+            return
+        # make sure that we can use our chosen weapon
+        if not (hasattr(weapon, "at_pre_attack") and hasattr(weapon, "at_attack")):
+            self.msg(f"You cannot attack with {weapon.get_numbered_name(1, self)}.")
+            return
+        if not weapon.at_pre_attack(self):
+            # the method handles its own error messaging
+            return
 
-    #     # if target is not set, use stored target
-    #     if not target:
-    #         # make sure there's a stored target
-    #         if not (target := self.db.combat_target):
-    #             self.msg("You cannot attack nothing.")
-    #             return
+        # if target is not set, use stored target
+        if not target:
+            # make sure there's a stored target
+            if not (target := self.db.combat_target):
+                self.msg("You cannot attack nothing.")
+                return
 
-    #     if target.location != self.location:
-    #         self.msg("You don't see your target.")
-    #         return
+        if target.location != self.location:
+            self.msg("You don't see your target.")
+            return
 
-    #     print(f"weapon {weapon}")
-    #     # attack with the weapon
-    #     weapon.at_attack(self, target)
+        print(f"weapon {weapon}")
+        # attack with the weapon
+        weapon.at_attack(self, target)
 
-    #     status = self.get_display_status(target)
-    #     self.msg(prompt=status)
+        status = self.get_display_status(target)
+        self.msg(prompt=status)
 
-    #     # check if we have auto-attack in settings
-    #     if self.account and (settings := self.account.db.settings):
-    #         if settings.get("auto attack") and (speed := weapon.speed):
-    #             # queue up next attack; use None for target to reference stored target on execution
-    #             delay(speed + 1, self.attack, None, weapon, persistent=True)
+        # check if we have auto-attack in settings
+        if self.account and (settings := self.account.db.settings):
+            if settings.get("auto attack") and (speed := weapon.speed):
+                # queue up next attack; use None for target to reference stored target on execution
+                delay(speed + 1, self.attack, None, weapon, persistent=True)
 
     def use_heal(self):
         """
@@ -697,7 +736,7 @@ class PlayerCharacter(Character):
         else:
             weapon = self
 
-        self.at_emote("PC $conj(charges) at {target}!", mapping={"target": target})
+        self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
         location = self.location
 
         if not (combat_script := location.scripts.get("combat")):
@@ -706,14 +745,11 @@ class PlayerCharacter(Character):
 
             location.scripts.add(CombatScript, key="combat")
             combat_script = location.scripts.get("combat")
-            self.msg(f"ENTER_COMBAT combat_script: {combat_script}")
+
         combat_script = combat_script[0]
-        self.msg(f"ENTER_COMBAT2 combat_script: {combat_script}")
         self.db.combat_target = target
-        self.msg(f"ENTER_COMBAT3 combat_script: {combat_script}")
         # adding a combatant to combat just returns True if they're already there, so this is safe
         if not combat_script.add_combatant(self, enemy=target):
-            self.msg(f"ENTER_COMBAT4 combat_script: {combat_script}")
             return
         self.attack(target, weapon)
 
@@ -788,9 +824,17 @@ class NPC(Character):
     def randomize_stats(self):
         level = self.db.level
         xp = self.db.exp_reward
-        damage = self.db.natural_weapon["damage"]
-        hpmax = self.db.hpmax
+        hits = self.db.hits
+        print(f"level {level} xp {xp} hits {hits}")
 
+        # get transformed stats
+        stats = SetNPCStats(self, level, xp, hits)
+        damage = stats.damage
+        hpmax = stats.hpmax
+        xp = stats.xp
+        hits = stats.hits
+
+        # randomize transformed stats
         self.db.level = randint(level - 2, level + 2)
         self.db.exp_reward = int(uniform(xp * 0.8, xp * 1.2))
         self.db.damage = int(uniform(damage * 0.8, damage * 1.2))
@@ -801,7 +845,7 @@ class NPC(Character):
         self.randomize_stats()
         self.move_to(self.home, False, None, True, True, True, "teleport")
 
-    def at_damage(self, attacker, damage, damage_type=None, emote="bite"):
+    def at_damage(self, attacker, damage, damage_type=None, emote="general_weapon"):
         """
         Apply damage, after taking into account damage resistances.
         """
@@ -840,6 +884,7 @@ class NPC(Character):
                     "desc": f"|YThe decaying corpse of {self} lies here. It looks heavy, and full of nutrients.|n",
                     "location": self.location,
                     "power": self.db.level * 8,
+                    "tags": ["edible"],
                 }
 
                 corpses = spawner.spawn(corpse)
@@ -847,9 +892,9 @@ class NPC(Character):
                 if self.db.drops:
                     objs = spawn(*list(self.db.drops))
                     for obj in objs:
-                        obj.location = self.location
+                        obj.move_to(self.location)
                 self.move_to(None, False, None, True, True, True, "teleport")
-                delay(360, self.at_respawn)
+                delay(360, self.at_respawn, persistent=True)
                 return
         # change target to the attacker
         if not self.db.combat_target:

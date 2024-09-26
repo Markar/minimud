@@ -25,6 +25,10 @@ from typeclasses.cybercorpsguild.rooms.room_commands import (
     CmdLeaveCybercorps,
     CybercorpsWaresCmdSet,
 )
+from typeclasses.warriorsguild.rooms.room_commands import (
+    CmdJoinWarriors,
+    CmdLeaveWarriors,
+)
 
 
 class RoomParent(ObjectParent):
@@ -271,6 +275,28 @@ class ChangelingGuildJoinRoom(Room):
         # At the far end of the chamber, a large, imposing figure stands guard. This is the guild’s leader, a master changeling who has perfected the art of transformation. Their form is constantly shifting, flickering between different appearances as they observe you with keen, calculating eyes.
 
         # As you approach the console, a sense of excitement and anticipation fills you. This is the place where you will learn to harness the power of transformation and join the ranks of the Changeling Guild. The possibilities are endless, and the future is yours to shape.
+        # "
+
+
+class WarriorRoomCmdSet(CmdSet):
+    key = "warrior_room"
+    priority = 1
+
+    def at_cmdset_creation(self):
+        self.add(CmdJoinWarriors())
+        self.add(CmdLeaveWarriors())
+
+
+class WarriorGuildJoinRoom(Room):
+    def at_object_creation(self):
+        print(f"at obj creation, self {self}")
+        self.cmdset.add_default(WarriorRoomCmdSet)
+        # self.desc = f"
+        # As you step into the grand hall of the Warriors Guild, you are immediately enveloped by an aura of strength and camaraderie. The room is vast, with high ceilings adorned with banners depicting the guild’s emblem: a crossed sword and shield. The walls are lined with suits of armor and weapons, each one a testament to the martial prowess of the guild’s members.
+
+        # At the center of the hall stands a large, circular platform made of polished stone. Surrounding the platform are four towering statues, each representing a different warrior archetype. The knight is a figure clad in gleaming plate armor, wielding a massive sword and shield. The berserker is a fierce, muscular warrior, brandishing a massive axe and roaring in battle. The archer is a lithe, agile figure, drawing back a bow with deadly precision. The mage is a cloaked figure, surrounded by crackling energy and arcane symbols.
+
+        # The air is filled with the sound of clashing weapons and the shouts of sparring warriors. As you approach the platform, a sense of anticipation and excitement builds within you. This is the place where you will take your first steps towards mastering the art of combat and joining the ranks of the Warriors Guild.
         # "
 
 

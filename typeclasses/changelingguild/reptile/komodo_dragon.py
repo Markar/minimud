@@ -45,9 +45,6 @@ class KomodoDragon(ChangelingAttack):
 
     def at_attack(self, wielder, target, **kwargs):
 
-        self.energy_cost = 3
-        self.speed = 3
-
         wielder.db.ep -= self.energy_cost
         if randint(0, 1) == 0:
             target.at_damage(

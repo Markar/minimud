@@ -70,18 +70,20 @@ IRON_HAUBERK = {
     "typeclass": "typeclasses.objects.ClothingObject",
     "key": "iron hauberk",
     "desc": "A standard iron chainmail tunic.",
-    "armor": 8,
-    "value": 20,
+    "armor": 4,
+    "value": 250,
     "clothing_type": "chestguard",
+    "type": "heavy",
 }
 
 IRON_CHAUSSES = {
     "typeclass": "typeclasses.objects.ClothingObject",
     "key": "iron chausses",
     "desc": "A pair of mail chausses constructed from iron.",
-    "armor": 8,
-    "value": 20,
+    "armor": 3,
+    "value": 175,
     "clothing_type": "legguard",
+    "type": "heavy",
 }
 
 LEATHER_BOOTS = {
@@ -89,8 +91,22 @@ LEATHER_BOOTS = {
     "key": "leather boots",
     "desc": "A sturdy pair of leather boots.",
     "armor": 1,
-    "value": 5,
+    "value": 100,
     "clothing_type": "shoes",
+    "type": "light",
+}
+
+DWARVEN_RINGMAIL_TUNIC = {
+    "typeclass": "typeclasses.objects.ClothingObject",
+    "key": "Dwarven Ringmail Tunic",
+    "desc": "A ringmail tunic skillfully crafted by dwarves. Noone knows how it ended up in the hands of an orc. It provides extra protection from fire, cold, and magic.",
+    "armor": 12,
+    "fireac": 8,
+    "coldac": 8,
+    "magicac": 8,
+    "value": 500,
+    "clothing_type": "chestguard",
+    "type": "medium",
 }
 
 SMALL_BAG = {

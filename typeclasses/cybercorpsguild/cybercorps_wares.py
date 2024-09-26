@@ -21,7 +21,7 @@ class HandRazors(CybercorpsAttack):
     name = "hand razors"
     cost = 0
     rank = 1
-    skill = "standard"
+    skill = "standard weapons"
     skill_req = 1
     short = "A pair of retractable hand razors."
     type = "melee"
@@ -65,7 +65,7 @@ class ShockHand(CybercorpsAttack):
     speed = 4
     energy_cost = 0
     name = "shock hand"
-    skill = "energy"
+    skill = "energy weapons"
     skill_req = 2
     rank = 5
     cost = 5
@@ -108,7 +108,7 @@ class StealthBlade(CybercorpsAttack):
     speed = 4
     energy_cost = 0
     name = "stealth blade"
-    skill = "standard"
+    skill = "standard weapons"
     skill_req = 4
     cost = 10
     rank = 22
@@ -157,7 +157,7 @@ class NanoBlade(CybercorpsAttack):
     speed = 4
     energy_cost = 0
     name = "nanoblade"
-    skill = "standard"
+    skill = "standard weapons"
     skill_req = 6
     cost = 5
     rank = 28
@@ -204,7 +204,7 @@ class EnergySword(CybercorpsAttack):
     speed = 3
     energy_cost = 0
     name = "energy sword"
-    skill = "energy"
+    skill = "energy weapons"
     skill_req = 3
     rank = 13
     cost = 20
@@ -247,7 +247,7 @@ class TacticalShotgun(CybercorpsAttack):
     speed = 6
     energy_cost = 1
     name = "tactical shotgun"
-    skill = "standard"
+    skill = "standard weapons"
     skill_req = 2
     cost = 5
     rank = 11
@@ -304,7 +304,7 @@ class SmartGun(CybercorpsAttack):
     speed = 3
     energy_cost = 1
     name = "smart gun"
-    skill = "standard"
+    skill = "standard weapons"
     skill_req = 5
     rank = 25
     cost = 1
@@ -361,7 +361,7 @@ class RailPistol(CybercorpsAttack):
     speed = 3
     energy_cost = 1
     name = "rail pistol"
-    skill = "standard"
+    skill = "standard weapons"
     skill_req = 3
     rank = 20
     cost = 2
@@ -417,7 +417,7 @@ class LaserPistol(CybercorpsAttack):
     speed = 3
     energy_cost = 1
     name = "laser pistol"
-    skill = "energy"
+    skill = "energy weapons"
     skill_req = 1
     rank = 3
     cost = 1
@@ -471,7 +471,7 @@ class PhotonBlaster(CybercorpsAttack):
     speed = 3
     energy_cost = 3
     name = "photon blaster"
-    skill = "energy"
+    skill = "energy weapons"
     skill_req = 4
     rank = 21
     cost = 2
@@ -524,7 +524,7 @@ class PlasmaCannon(CybercorpsAttack):
     speed = 6
     energy_cost = 25
     name = "plasma cannon"
-    skill = "heavy"
+    skill = "heavy weapons"
     skill_req = 6
     rank = 29
     cost = 3
@@ -574,7 +574,7 @@ class GaussCannon(CybercorpsAttack):
     speed = 6
     energy_cost = 25
     name = "gauss cannon"
-    skill = "heavy"
+    skill = "heavy weapons"
     skill_req = 5
     rank = 27
     cost = 5
@@ -626,7 +626,7 @@ class PulseRifle(CybercorpsAttack):
     speed = 3
     energy_cost = 6
     name = "pulse rifle"
-    skill = "energy"
+    skill = "energy weapons"
     skill_req = 6
     rank = 26
     cost = 3
@@ -679,7 +679,7 @@ class PlasmaRifle(CybercorpsAttack):
     speed = 6
     energy_cost = 25
     name = "plasma rifle"
-    skill = "energy"
+    skill = "energy weapons"
     skill_req = 5
     rank = 23
     cost = 4
@@ -735,7 +735,7 @@ class LaserSniperRifle(CybercorpsAttack):
     speed = 9
     energy_cost = 30
     name = "laser sniper rifle"
-    skill = "energy"
+    skill = "energy weapons"
     skill_req = 7
     rank = 30
     cost = 6
@@ -780,7 +780,7 @@ class RocketLauncher(CybercorpsAttack):
     speed = 6
     energy_cost = 8
     name = "rocket launcher"
-    skill = "heavy"
+    skill = "heavy weapons"
     skill_req = 3
     rank = 17
     cost = 15
@@ -828,7 +828,7 @@ class FlameThrower(CybercorpsAttack):
     speed = 6
     energy_cost = 5
     name = "flamethrower"
-    skill = "heavy"
+    skill = "heavy weapons"
     skill_req = 2
     rank = 8
     cost = 3
@@ -878,7 +878,7 @@ class GravitonHammer(CybercorpsAttack):
     speed = 6
     energy_cost = 5
     name = "graviton hammer"
-    skill = "heavy"
+    skill = "heavy weapons"
     skill_req = 7
     rank = 30
     cost = 4
@@ -925,7 +925,7 @@ class ChainBlade(CybercorpsAttack):
     speed = 6
     energy_cost = 0
     name = "chain blade"
-    skill = "heavy"
+    skill = "heavy weapons"
     skill_req = 4
     rank = 24
     cost = 1
@@ -968,7 +968,7 @@ class VortexAR9(CybercorpsAttack):
     speed = 3
     energy_cost = 10
     name = "vortex ar9"
-    skill = "standard"
+    skill = "standard weapons"
     skill_req = 7
     rank = 15
     cost = 3
@@ -1022,7 +1022,7 @@ class ShockwaveHammer(CybercorpsAttack):
     speed = 6
     energy_cost = 5
     name = "shockwave hammer"
-    skill = "heavy"
+    skill = "heavy weapons"
     skill_req = 1
     rank = 5
     cost = 4

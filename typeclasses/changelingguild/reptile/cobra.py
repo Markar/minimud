@@ -15,8 +15,10 @@ class Cobra(ChangelingAttack):
     """
 
     power = 14
-    toughness = 14
-    dodge = 10
+    toughness = 10
+    dodge = 14
+    speed = 3
+    energy_cost = 3
 
     def _calculate_damage(self, wielder):
         dex = wielder.traits.dex.value
@@ -30,9 +32,6 @@ class Cobra(ChangelingAttack):
 
     def at_attack(self, wielder, target, **kwargs):
         super().at_attack(wielder, target, **kwargs)
-
-        self.energy_cost = 1
-        self.speed = 3
 
         wielder.db.ep -= self.energy_cost
         target.at_damage(wielder, self._calculate_damage(wielder), "poison", "bite")

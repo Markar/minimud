@@ -175,6 +175,10 @@ class CmdLeaveElementals(Command):
         if caller.db.guild == "elemental":
             caller.swap_typeclass("typeclasses.characters.PlayerCharacter")
             caller.cmdset.delete(ElementalCmdSet)
+            caller.cmdset.delete(EarthElementalCmdSet)
+            caller.cmdset.delete(FireElementalCmdSet)
+            caller.cmdset.delete(WaterElementalCmdSet)
+            caller.cmdset.delete(AirElementalCmdSet)
             del caller.db.earth_form
             del caller.db.earth_shield
             del caller.db.earthen_renewal

@@ -1,0 +1,354 @@
+SKILLS_COST = [
+    0,  # Total: 0
+    1800,  # Total: 1800
+    9016,  # Total: 10,816
+    25297,  # Total: 36,113
+    54353,  # Total: 90,466
+    99978,  # Total: 190,444
+    166074,  # Total: 356,518
+    256675,  # Total: 613,193
+    375971,  # Total: 989,164
+    528332,  # Total: 1,517,496
+    718332,  # Total: 2,235,828
+    950773,  # Total: 3,186,601
+    1230709,  # Total: 4,417,310
+    1563470,  # Total: 5,980,780
+    1954686,  # Total: 7,935,466
+    2410311,  # Total: 10,345,777
+    2936647,  # Total: 13,282,424
+    3540368,  # Total: 16,822,792
+    4228544,  # Total: 21,051,336
+    5008665,  # Total: 26,060,001
+    5888665,  # Total: 31,948,666
+    6876946,  # Total: 38,825,612
+    7982402,  # Total: 46,808,014
+    9214443,  # Total: 56,022,457
+    10583019,  # Total: 66,605,476
+    12098644,  # Total: 78,704,120
+]
+
+GUILD_LEVEL_COST_DICT = {
+    2: 300,  # Total: 300
+    3: 400,  # Total: 700
+    4: 648,  # Total: 1,348
+    5: 951,  # Total: 2,299
+    6: 1529,  # Total: 3,828
+    7: 2409,  # Total: 6,237
+    8: 3330,  # Total: 9,567
+    9: 4645,  # Total: 14,212
+    10: 6000,  # Total: 20,212
+    11: 7500,  # Total: 27,712
+    12: 10000,  # Total: 37,712
+    13: 12900,  # Total: 50,612
+    14: 16000,  # Total: 66,612
+    15: 22500,  # Total: 89,112
+    16: 32000,  # Total: 121,112
+    17: 47000,  # Total: 168,112
+    18: 67000,  # Total: 235,112
+    19: 90000,  # Total: 325,112
+    20: 120000,  # Total: 445,112
+    21: 160000,  # Total: 605,112
+    22: 220000,  # Total: 825,112
+    23: 295000,  # Total: 1,120,112
+    24: 445000,  # Total: 1,565,112
+    25: 675000,  # Total: 2,240,112
+    26: 950000,  # Total: 3,190,112
+    27: 1300000,  # Total: 4,490,112
+    28: 1900000,  # Total: 6,390,112
+    29: 2900000,  # Total: 9,290,112
+    30: 4200000,  # Total: 13,490,112
+    31: 4200000000000,  # Total: 4200013490112
+}
+
+
+SKILL_RANKS = {
+    0: "Very poor",
+    1: "Poor",
+    2: "Below average",
+    3: "Average",
+    4: "Above average",
+    5: "Moderate",
+    6: "Good",
+    7: "Very good",
+    8: "High",
+    9: "Very high",
+    10: "Excellent",
+    12: "Exceptional",
+    14: "Masterful",
+    16: "Supreme",
+    17: "God-like",
+}
+
+
+def get_article(word):
+    vowels = "aeiou"
+    return "an" if word[0].lower() in vowels else "a"
+
+
+from typeclasses.changelingguild.changeling_attack import ChangelingAttack
+from typeclasses.changelingguild.slime import Slime
+from typeclasses.changelingguild.human import Human
+from typeclasses.changelingguild.reptile.anole import Anole
+from typeclasses.changelingguild.reptile.teiid import Teiid
+from typeclasses.changelingguild.reptile.gecko import Gecko
+from typeclasses.changelingguild.reptile.skink import Skink
+from typeclasses.changelingguild.reptile.iguana import Iguana
+from typeclasses.changelingguild.reptile.boa import Boa
+from typeclasses.changelingguild.reptile.viper import Viper
+from typeclasses.changelingguild.reptile.caiman import Caiman
+from typeclasses.changelingguild.reptile.cobra import Cobra
+from typeclasses.changelingguild.reptile.gilamonster import GilaMonster
+from typeclasses.changelingguild.reptile.python import Python
+from typeclasses.changelingguild.reptile.crocodile import Crocodile
+from typeclasses.changelingguild.reptile.alligator import Alligator
+from typeclasses.changelingguild.reptile.anaconda import Anaconda
+from typeclasses.changelingguild.reptile.komodo_dragon import KomodoDragon
+from typeclasses.changelingguild.mammal.rat import Rat
+from typeclasses.changelingguild.mammal.cat import Cat
+from typeclasses.changelingguild.mammal.lynx import Lynx
+from typeclasses.changelingguild.mammal.fox import Fox
+from typeclasses.changelingguild.mammal.badger import Badger
+from typeclasses.changelingguild.mammal.wolverine import Wolverine
+from typeclasses.changelingguild.mammal.wolf import Wolf
+from typeclasses.changelingguild.mammal.black_bear import BlackBear
+from typeclasses.changelingguild.mammal.grizzly_bear import GrizzlyBear
+from typeclasses.changelingguild.mammal.elephant import Elephant
+from typeclasses.changelingguild.mammal.cheetah import Cheetah
+from typeclasses.changelingguild.mammal.leopard import Leopard
+from typeclasses.changelingguild.mammal.jaguar import Jaguar
+from typeclasses.changelingguild.mammal.tiger import Tiger
+from typeclasses.changelingguild.mammal.lion import Lion
+from typeclasses.changelingguild.avian.hummingbird import Hummingbird
+from typeclasses.changelingguild.avian.finch import Finch
+from typeclasses.changelingguild.avian.sparrow import Sparrow
+from typeclasses.changelingguild.avian.swallow import Swallow
+from typeclasses.changelingguild.avian.crow import Crow
+from typeclasses.changelingguild.avian.raven import Raven
+from typeclasses.changelingguild.avian.crane import Crane
+from typeclasses.changelingguild.avian.kestrel import Kestrel
+from typeclasses.changelingguild.avian.owl import Owl
+from typeclasses.changelingguild.avian.osprey import Osprey
+from typeclasses.changelingguild.avian.falcon import Falcon
+from typeclasses.changelingguild.avian.hawk import Hawk
+from typeclasses.changelingguild.avian.condor import Condor
+from typeclasses.changelingguild.avian.ostrich import Ostrich
+from typeclasses.changelingguild.avian.eagle import Eagle
+
+FORM_CLASSES = {
+    "ChangelingAttack": ChangelingAttack,
+    "Slime": Slime,
+    "Human": Human,
+    "Anole": Anole,
+    "Teiid": Teiid,
+    "Gecko": Gecko,
+    "Skink": Skink,
+    "Iguana": Iguana,
+    "Boa": Boa,
+    "Viper": Viper,
+    "Caiman": Caiman,
+    "Cobra": Cobra,
+    "Gila Monster": GilaMonster,
+    "Python": Python,
+    "Crocodile": Crocodile,
+    "Alligator": Alligator,
+    "Anaconda": Anaconda,
+    "Komodo Dragon": KomodoDragon,
+    "Rat": Rat,
+    "Cat": Cat,
+    "Lynx": Lynx,
+    "Fox": Fox,
+    "Badger": Badger,
+    "Wolverine": Wolverine,
+    "Wolf": Wolf,
+    "Black Bear": BlackBear,
+    "Grizzly Bear": GrizzlyBear,
+    "Elephant": Elephant,
+    "Cheetah": Cheetah,
+    "Leopard": Leopard,
+    "Jaguar": Jaguar,
+    "Tiger": Tiger,
+    "Lion": Lion,
+    "Hummingbird": Hummingbird,
+    "Finch": Finch,
+    "Sparrow": Sparrow,
+    "Swallow": Swallow,
+    "Crow": Crow,
+    "Raven": Raven,
+    "Crane": Crane,
+    "Kestrel": Kestrel,
+    "Owl": Owl,
+    "Osprey": Osprey,
+    "Falcon": Falcon,
+    "Hawk": Hawk,
+    "Condor": Condor,
+    "Ostrich": Ostrich,
+    "Eagle": Eagle,
+}
+
+SKILLS_COST = [
+    0,
+    1800,
+    9016,
+    25297,
+    54353,
+    99978,
+    166074,
+    256675,
+    375971,
+    528332,
+    718332,
+    950773,
+    1230709,
+    1563470,
+    1954686,
+    2410311,
+    2936647,
+    3540368,
+    4228544,
+    5008665,
+    5888665,
+    6876946,
+    7982402,
+    9214443,
+    10583019,
+    12098644,
+]
+
+GUILD_LEVEL_COST_DICT = {
+    2: 300,
+    3: 400,
+    4: 648,
+    5: 951,
+    6: 1529,
+    7: 2409,
+    8: 3330,
+    9: 4645,
+    10: 6000,
+    11: 7500,
+    12: 10000,
+    13: 12900,
+    14: 16000,
+    15: 22500,
+    16: 32000,
+    17: 47000,
+    18: 67000,
+    19: 90000,
+    20: 120000,
+    21: 160000,
+    22: 220000,
+    23: 295000,
+    24: 445000,
+    25: 675000,
+    26: 950000,
+    27: 1300000,
+    28: 1900000,
+    29: 2900000,
+    30: 4200000,
+    31: 4200000000000,
+}
+
+SKILL_RANKS = {
+    0: "Very poor",
+    1: "Poor",
+    2: "Below average",
+    3: "Average",
+    4: "Above average",
+    5: "Moderate",
+    6: "Good",
+    7: "Very good",
+    8: "High",
+    9: "Very high",
+    10: "Excellent",
+    12: "Exceptional",
+    14: "Masterful",
+    16: "Supreme",
+    17: "God-like",
+}
+
+AVIAN_FORMS = {
+    30: "eagle",
+    28: "ostrich",
+    26: "condor",
+    24: "hawk",
+    22: "falcon",
+    20: "osprey",
+    18: "owl",
+    16: "kestrel",
+    14: "crane",
+    12: "raven",
+    10: "crow",
+    8: "swallow",
+    6: "sparrow",
+    4: "finch",
+    2: "hummingbird",
+}
+
+MAMMAL_FORMS = {
+    30: "lion",
+    28: "tiger",
+    26: "jaguar",
+    24: "leopard",
+    22: "cheetah",
+    20: "elephant",
+    18: "grizzly bear",
+    16: "black bear",
+    14: "wolf",
+    12: "wolverine",
+    10: "badger",
+    8: "fox",
+    6: "lynx",
+    4: "cat",
+    2: "rat",
+}
+
+REPTILE_FORMS = {
+    30: "komodo dragon",
+    28: "anaconda",
+    26: "alligator",
+    24: "crocodile",
+    22: "python",
+    20: "gila monster",
+    18: "cobra",
+    16: "caiman",
+    14: "viper",
+    12: "boa",
+    10: "iguana",
+    8: "skink",
+    6: "gecko",
+    4: "teiid",
+    2: "anole",
+}
+
+TITLES = [
+    "Novice Shapeshifter",
+    "Apprentice Morph",
+    "Form Weaver",
+    "Skinchanger",
+    "Mimic",
+    "Doppelganger",
+    "Illusionist",
+    "Chameleon",
+    "Metamorph",
+    "Shape Adept",
+    "Transmuter",
+    "Form Master",
+    "Morphing Savant",
+    "Shapeshifter",
+    "Expert Changeling",
+    "Master of Disguise",
+    "Form Manipulator",
+    "Shapeshifting Virtuoso",
+    "Transfiguration Expert",
+    "Changeling Elite",
+    "Form Architect",
+    "Shapeshifting Maestro",
+    "Transmutation Master",
+    "Changeling Supreme",
+    "Form Grandmaster",
+    "Shapeshift Overlord",
+    "Transfiguration Sage",
+    "Quantum Morph",
+    "Nanform Shifter",
+    "Eternal Shapeshifter",
+    "Galatic Form Overlord",
+]

@@ -26,8 +26,11 @@ class CombatScript(Script):
         """
         Returns a list of lists, where the inner lists are all members of combat teams
         """
+
         if not self.ndb.teams:
+            print(f"getting teams {self.db.teams}")
             if teams := self.db.teams:
+                print(f"teams {teams}")
                 self.ndb.teams = teams.deserialize()
         return self.ndb.teams
 
@@ -36,7 +39,9 @@ class CombatScript(Script):
         """
         Returns a list of all combatants, regardless of alliance.
         """
+
         a, b = self.teams
+        print(f"getting fighters {a + b}")
         return a + b
 
     @property
@@ -44,19 +49,25 @@ class CombatScript(Script):
         """
         Returns a list of all active combatants, regardless of alliance.
         """
+        print("getting active")
         return [
             obj
             for obj in self.fighters
-            if not any(obj.tags.has(["unconscious", "dead", "defeated"]))
+            if not any(
+                hasattr(obj, "tags")
+                and obj.tags.has(["unconscious", "dead", "defeated"])
+            )
         ]
 
     def at_script_creation(self):
+        print("script created")
         self.db.teams = [[], []]
 
     def get_team(self, combatant):
         """
         Gets the index of the team containing combatant, or None if combatant is not in this combat
         """
+        print(f"getting team for {combatant}")
         for i, team in enumerate(self.teams):
             if combatant in team:
                 return i
@@ -69,16 +80,20 @@ class CombatScript(Script):
         Returns:
             True if combatant is successfully in the combat instance, False if not
         """
+        print(f"adding {combatant} with {ally} to fight {enemy} combat")
         if combatant in self.fighters:
             # already in combat here
+            print("already in combat")
             return True
 
         # if neither ally nor enemy are given, they're not actually fighting anyone
         if not (ally or enemy):
+            print("no ally or enemy")
             return False
 
         # if ally is given, find ally's team
         if ally and (team := self.get_team(ally)):
+            print(f"ally team {team}")
             # add combatant to ally's team
             self.db.teams[team].append(combatant)
             # reset the cache
@@ -86,7 +101,9 @@ class CombatScript(Script):
             return True
 
         # if enemy is given, find enemy's team
+        print(f"enemy team 1 enemy: {enemy} and enemy team: {self.get_team(enemy)}")
         if enemy and (team := self.get_team(enemy)):
+            print(f"enemy team 2 {team}")
             # since there are only 2 teams, subtracting 1 from the team index will flip to the other team
             team -= 1
 
@@ -98,13 +115,16 @@ class CombatScript(Script):
 
         # if we got here, then no one provided was in combat already
         # we can only work with this if this is a clean combat instance
-        if enemy and not self.fighters:
+        print("no valid teams: {ally} {enemy} {combatant}")
+        if enemy and combatant:
+            print("force adding fighters")
             # set up new 1v1 teams
             self.db.teams = [[combatant], [enemy]]
             # reset the cache
             del self.ndb.teams
             return True
 
+        print("no valid teams")
         # at this point, there are no valid ways to add
         return False
 
@@ -115,6 +135,7 @@ class CombatScript(Script):
         Returns:
             True if combatant is successfully out of combat, False if not
         """
+        print(f"removing {combatant} from combat")
         # get the combatant's team
         team = self.get_team(combatant)
         if team is None:
@@ -142,6 +163,7 @@ class CombatScript(Script):
 
         If one side is victorious, message the remaining members and delete ourself.
         """
+        print("checking victory")
         if not (active_fighters := self.active):
             # everyone lost or is gone
             self.delete()
@@ -183,6 +205,7 @@ def get_or_create_combat_script(location):
     Returns:
         script (CombatScript): The combat script attached to the given location.
     """
+    print("getting or creating combat script")
     if not (combat_script := location.scripts.get("combat")):
         # there's no combat instance; start one
         location.scripts.add(CombatScript, key="combat")

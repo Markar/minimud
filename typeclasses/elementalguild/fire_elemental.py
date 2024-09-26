@@ -55,7 +55,6 @@ class FireElemental(Elemental):
         self.db.fire_form = False
         self.db.lava_form = False
 
-        self.at_wield(FireAttack)
         tickerhandler.add(
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
         )

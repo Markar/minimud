@@ -31,3 +31,32 @@ class Corpse(DefaultObject):
             )
             self.delete()
         return
+
+
+class Capsule(DefaultObject):
+    """
+    A generator to spawn corpses of mobs
+
+    """
+
+    def at_object_creation(self):
+        """
+        This function is called (once) when object is created.
+
+        """
+        self.db.desc = "a glowing capsule, it looks like it could be eaten"
+        self.db.power = 0
+
+        delay(60 * 10, self.decay)
+
+    def decay(self):
+        """
+        This function is called when the corpse decays.
+
+        """
+        if self:
+            self.location.msg_contents(
+                f"The {self.key} loses power and fades away.", from_obj=self
+            )
+            self.delete()
+        return

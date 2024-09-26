@@ -55,7 +55,6 @@ class WaterElemental(Elemental):
         self.db.aqua_shield = False
         self.db.ice_shield = {"hits": 0}
 
-        self.at_wield(WaterAttack)
         tickerhandler.add(
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
         )

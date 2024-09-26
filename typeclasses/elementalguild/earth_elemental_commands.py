@@ -15,6 +15,7 @@ class PowerCommand(Command):
         caller.cooldowns.add("global_cooldown", 2)
 
 
+# region Burnout
 class CmdBurnout(PowerCommand):
     """
     This powerful ability allows the earth elemental to channel energy from all elemental forces, enhancing their physical abilities and combat prowess. While active, the elemental's attacks become more potent, and their movements more fluid and precise. The elemental's power is greatly increased while burnout is active, but the strain of maintaining this heightened state of power can be overwhelming, and the elemental must be cautious not to overextend themselves.
@@ -60,6 +61,7 @@ class CmdBurnout(PowerCommand):
 
 
 # Defensive powers
+# region Stone Skin
 class CmdStoneSkin(PowerCommand):
     """
     Stone skin increases the earth elemental's defense by
@@ -97,6 +99,7 @@ class CmdStoneSkin(PowerCommand):
             caller.location.msg_contents(deactivateMsg, from_obj=caller)
 
 
+# region Earth Form
 class CmdEarthForm(PowerCommand):
     """
     The earth elemental can transform their body into a denser form of rock,
@@ -133,6 +136,7 @@ class CmdEarthForm(PowerCommand):
             caller.location.msg_contents(deactivateMsg, from_obj=caller)
 
 
+# region Mountain Stance
 class CmdMountainStance(PowerCommand):
     """
     The earth elemental can take a defensive stance, increasing their
@@ -176,6 +180,7 @@ class CmdMountainStance(PowerCommand):
         caller.db.hpmax = 50 + caller.traits.con.value * caller.db.con_increase_amount
 
 
+# region Earthshaker Stance
 class CmdEarthshakerStance(PowerCommand):
     """
     The Earthshaker Stance is an aggressive combat stance that allows the elemental to channel the raw power of the earth into devastating attacks. While in this stance, the elemental's movements become more forceful and deliberate, each strike carrying the weight of the earth itself. This stance enhances the elemental's offensive capabilities, increasing the damage dealt to enemies but at the cost of reduced defense.
@@ -216,6 +221,7 @@ class CmdEarthshakerStance(PowerCommand):
             caller.location.msg_contents(activateMsg, from_obj=caller)
 
 
+# region Earth Shield
 class CmdEarthShield(PowerCommand):
     """
     The earth elemental can create a shield of stone to protect themselves
@@ -259,6 +265,7 @@ class CmdEarthShield(PowerCommand):
             caller.location.msg_contents(activateMsg, from_obj=caller)
 
 
+# region Terran Restoration
 class CmdTerranRestoration(PowerCommand):
     """
     The earth elemental can rebuild their body to restore health,
@@ -317,6 +324,7 @@ class CmdTerranRestoration(PowerCommand):
         caller.location.msg_contents(msg, from_obj=caller)
 
 
+# region Earthen Renewal
 class CmdEarthenRenewal(PowerCommand):
     """
     Earthen Renewal is a powerful regenerative ability harnessed by earth elementals. This skill taps into the primal energies of the earth, allowing the elemental to restore its vitality and fortitude over time. When activated, the elemental draws strength from the ground beneath it, channeling the life-giving essence of the earth to heal wounds and replenish its energy reserves. The process is gradual but potent, providing a steady flow of rejuvenation that scales with the elemental's mastery of the skill and its connection to the earth.
@@ -388,6 +396,7 @@ class CmdEarthenRenewal(PowerCommand):
 
 
 # Offensive powers
+# region Tremor
 class CmdTremor(PowerCommand):
     """
     The earth elemental can cause the ground to shake, dealing damage to all
@@ -452,6 +461,7 @@ class CmdTremor(PowerCommand):
         target.at_damage(caller, damage, "blunt", "tremor")
 
 
+# region Quicksand
 class CmdQuickSand(PowerCommand):
     """
     The earth elemental can create a pool of quicksand beneath their enemies,
@@ -516,6 +526,7 @@ class CmdQuickSand(PowerCommand):
         target.at_damage(caller, damage, "blunt", "quicksand")
 
 
+# region Rock Throw
 class CmdRockThrow(PowerCommand):
     """
     The earth elemental can throw rocks at enemies in the room, dealing
@@ -526,15 +537,19 @@ class CmdRockThrow(PowerCommand):
     """
 
     key = "rock throw"
+    aliases = ["rt"]
     help_category = "earth elemental"
     guild_level = 2
     cost = 5
 
-    def _calculate_damage(self, stone_mastery, strength, guild_level):
+    def _calculate_damage(self):
         base_value = 5
         stone_mastery_weight = 0.6
         strength_weight = 0.5
         guild_level_weight = 1
+        stone_mastery = self.caller.db.skills.get("stone mastery", 1)
+        strength = self.caller.traits.str.value
+        guild_level = self.caller.db.guild_level
 
         damage = (
             base_value
@@ -572,8 +587,7 @@ class CmdRockThrow(PowerCommand):
         caller.adjust_fp(-self.cost)
         caller.cooldowns.add("rock throw", 4)
         caller.cooldowns.add("global_cooldown", 2)
-        skill_rank = caller.db.skills.get("stone mastery", 1) * 10
-        damage = self._calculate_damage(skill_rank, caller.traits.str.value, glvl)
+        damage = self._calculate_damage()
 
         target.at_damage(caller, damage, "blunt", "rock_throw")
 

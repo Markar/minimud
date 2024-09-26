@@ -43,12 +43,9 @@ class GilaMonster(ChangelingAttack):
 
     def at_attack(self, wielder, target, **kwargs):
 
-        self.energy_cost = 3
-        self.speed = 3
-
         wielder.db.ep -= self.energy_cost
-        target.at_damage(wielder, self._calculate_damage(wielder), "edged", "bite")
-        target.at_damage(wielder, self._calculate_damage(wielder), "blunt", "tail")
+        target.at_damage(wielder, self._calculate_bite_damage(wielder), "edged", "bite")
+        target.at_damage(wielder, self._calculate_tail_damage(wielder), "blunt", "tail")
 
         wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
         wielder.cooldowns.add("attack", self.speed)

@@ -57,7 +57,6 @@ class EarthElemental(Elemental):
         self.db.mountain_stance = False
         self.db.earthen_renewal = {"duration": 0, "rate": 0}
         self.db.burnout = {"active": False, "count": 0, "max": 0, "duration": 0}
-        self.at_wield(EarthAttack)
         tickerhandler.add(
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
         )
