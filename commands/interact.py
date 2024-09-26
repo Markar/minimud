@@ -64,8 +64,8 @@ class CmdEat(Command):
 
         power = obj.attributes.get("power", 0)
         if power > 0:
-            self.caller.db.fp += power
-            self.caller.db.hp += power
+            self.caller.adjust_hp(power)
+            self.caller.adjust_fp(power)
             self.caller.location.msg_contents(
                 f"{self.caller} eats {obj} and looks more powerful."
             )

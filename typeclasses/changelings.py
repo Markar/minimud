@@ -9,6 +9,7 @@ from typeclasses.characters import PlayerCharacter
 
 from typeclasses.changelingguild.attack_emotes import AttackEmotes
 from typeclasses.changelingguild.changeling_constants_and_helpers import FORM_CLASSES
+from typeclasses.utils import geHealthStatus
 
 
 class Changelings(PlayerCharacter):
@@ -263,8 +264,9 @@ class Changelings(PlayerCharacter):
         else:
             to_me = msgs[10]
 
-        to_me = f"{to_me} ({dam})"
+        to_me = f"{to_me}"
         self.location.msg_contents(to_me, from_obj=self)
+        print(f"to_me: {to_me} ({dam})")
 
         return to_me
 
@@ -336,7 +338,6 @@ class Changelings(PlayerCharacter):
 
         # apply energy control reduction
         ec_active = getattr(self.db, "ec", {}).get("active", False)
-        ec_duration = getattr(self.db, "ec", {}).get("duration", 0)
         ed_active = getattr(self.db, "ed", {}).get("active", False)
 
         if ec_active and damage_type in ["edged", "blunt"]:
@@ -358,7 +359,7 @@ class Changelings(PlayerCharacter):
 
         self.db.hp -= max(damage, 0)
         # self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
-        attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
+        # attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
         # The NPC's attack, emoting to the room
         # a scrawny gnoll tears into changeling at_damage Markar with brutal force! -18
         attacker.get_npc_attack_emote(self, damage, self.get_display_name(self))
@@ -411,11 +412,15 @@ class Changelings(PlayerCharacter):
         chunks.append(
             f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g Form: |G{self.db.form} |gEngulfs: |G{self.db.engulfs}/{self.db.max_engulfs} |Y{ecVis} |Y {edVis} |Y{regrowthVis}"
         )
-        print(f"looker != self {looker} and self {self}")
+
         if looker != self:
-            chunks.append(
-                f"|gE: |G{looker.get_display_name(self, **kwargs)} ({looker.db.hp})"
-            )
+            chunks.append(f"|gE: |G{looker.get_display_name(self, **kwargs)}")
+            hpPct = looker.db.hp / looker.db.hpmax
+            status = geHealthStatus(self, hpPct)
+            chunks.append(f"|gH: |G{status}")
+            if self.key == "Markar":
+                chunks.append(f"{looker.db.hp} / {looker.db.hpmax}")
+            # append mob's health status ({looker.db.hp})
 
         # get all the current status flags for this character
         if status_tags := self.tags.get(category="status", return_list=True):

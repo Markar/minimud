@@ -411,17 +411,17 @@ class Character(ObjectParent, ClothedCharacter):
         tn = display_name
 
         return [
-            f"{color}{self}{color} swings and misses, hitting nothing but air. {dam}",
-            f"{color}{self}{color}'s hit causes minor bruises on {tn}{color} {dam}.",
-            f"{color}{self}{color}'s hit causes {tn}{color} to bleed slightly. {dam}",
-            f"{color}{self}{color} $conj(strike) {tn}{color} with a powerful blow! {dam}",
-            f"{color}{self}{color}'s hit causes {tn}{color} to bleed profusely. {dam}",
-            f"{color}{self}{color}'s hit cracks {tn}{color}'s bones! {dam}",
-            f"{color}{self}{color} $conj(pummel) {tn}{color} with relentless force! {dam}",
-            f"{color}{self}{color} $conj(smash) {tn}{color}'s limbs! {dam}",
-            f"{color}{self}{color} $conj(crush) {tn}{color} like a bug! {dam}",
-            f"{color}{self}{color} $conj(hit) {tn}{color} so hard that blood spatters around the room! {dam}",
-            f"{color}{self}{color} $conj(tear) into {tn}{color} with brutal force! {dam}",
+            f"{color}{self}{color} swings and misses, hitting nothing but air.",
+            f"{color}{self}{color}'s hit causes minor bruises on {tn}{color}",
+            f"{color}{self}{color}'s hit causes {tn}{color} to bleed slightly.",
+            f"{color}{self}{color} $conj(strike) {tn}{color} with a powerful blow!",
+            f"{color}{self}{color}'s hit causes {tn}{color} to bleed profusely.",
+            f"{color}{self}{color}'s hit cracks {tn}{color}'s bones!",
+            f"{color}{self}{color} $conj(pummel) {tn}{color} with relentless force!",
+            f"{color}{self}{color} $conj(smash) {tn}{color}'s limbs!",
+            f"{color}{self}{color} $conj(crush) {tn}{color} like a bug!",
+            f"{color}{self}{color} $conj(hit) {tn}{color} so hard that blood spatters around the room!",
+            f"{color}{self}{color} $conj(tear) into {tn}{color} with brutal force!",
         ]
 
     def get_npc_attack_emote(self, target, dam, display_name):
@@ -455,7 +455,7 @@ class Character(ObjectParent, ClothedCharacter):
             to_me = msgs[10]
 
         self.location.msg_contents(to_me, from_obj=self)
-
+        print(f"NPC to_me {self} {to_me} {dam} get_npc_attack_emote")
         return to_me
 
     def adjust_hp(self, amount):
@@ -515,6 +515,7 @@ class PlayerCharacter(Character):
             "energy_cost": 1,
         }
         self.db.best_kill = {"name": "none", "level": 0, "xp": 0}
+        self.db.weight = {"current": 0, "max": 50}
 
         # initialize hands
         self.db._wielded = {"left": None, "right": None}
@@ -597,8 +598,9 @@ class PlayerCharacter(Character):
         else:
             to_me = msgs[10]
 
-        to_me = f"{to_me} ({dam})"
+        to_me = f"{to_me}"
         self.location.msg_contents(to_me, from_obj=self)
+        print(f"PC to_me {to_me} {dam} get_player_attack_hit_message")
 
         return to_me
 
@@ -824,21 +826,21 @@ class NPC(Character):
     def randomize_stats(self):
         level = self.db.level
         xp = self.db.exp_reward
-        hits = self.db.hits
+        hits = self.db.natural_weapon["hits"]
         print(f"level {level} xp {xp} hits {hits}")
 
         # get transformed stats
         stats = SetNPCStats(self, level, xp, hits)
-        damage = stats.damage
-        hpmax = stats.hpmax
-        xp = stats.xp
-        hits = stats.hits
+        # damage = stats.damage
+        # hpmax = stats.hpmax
+        # xp = stats.xp
+        # hits = stats.hits
 
         # randomize transformed stats
-        self.db.level = randint(level - 2, level + 2)
-        self.db.exp_reward = int(uniform(xp * 0.8, xp * 1.2))
-        self.db.damage = int(uniform(damage * 0.8, damage * 1.2))
-        self.db.hpmax = int(uniform(hpmax * 0.8, hpmax * 1.2))
+        # self.db.level = randint(level - 2, level + 2)
+        # self.db.exp_reward = int(uniform(xp * 0.8, xp * 1.2))
+        # self.db.damage = int(uniform(damage * 0.8, damage * 1.2))
+        # self.db.hpmax = int(uniform(hpmax * 0.8, hpmax * 1.2))
 
     def at_respawn(self):
         self.use_heal()

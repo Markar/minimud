@@ -3,10 +3,9 @@ from evennia import CmdSet, search_tag
 from evennia.utils import iter_to_str
 from evennia.utils.evtable import EvTable
 from evennia import TICKER_HANDLER as tickerhandler
-from typeclasses.utils import get_article
+from typeclasses.utils import get_article, GUILD_LEVEL_COST_DICT
 from typeclasses.changelingguild.changeling_constants_and_helpers import (
     AVIAN_FORMS,
-    GUILD_LEVEL_COST_DICT,
     MAMMAL_FORMS,
     REPTILE_FORMS,
     SKILLS_COST,

@@ -7,10 +7,9 @@ from evennia.utils import delay
 
 from typeclasses.cybercorpsguild.cyber_constants_and_helpers import (
     SKILLS_COST,
-    SKILL_RANKS,
-    GUILD_LEVEL_COST_DICT,
     TITLES,
 )
+from typeclasses.utils import GUILD_LEVEL_COST_DICT, SKILL_RANKS
 
 
 class PowerCommand(Command):

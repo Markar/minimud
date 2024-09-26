@@ -234,10 +234,7 @@ class CmdStatSheet(Command):
             best_kill = caller.db.best_kill or "None"
             best_kill_name = best_kill.get("name", "None")
             best_kill_level = best_kill.get("level", 0)
-            best_kill_exp = best_kill.get("xp", 0)
-            self.msg(
-                f" |GBest Kill: {best_kill_name} (lvl {best_kill_level}) for {best_kill_exp} exp\n"
-            )
+            self.msg(f" |GBest Kill: {best_kill_name}, Level {best_kill_level}\n")
 
         # display the primary stats
         strcost = int(STAT_COST_DICT[caller.traits.str.base + 1])
@@ -340,6 +337,9 @@ class CmdAdvance(Command):
         caller.db.exp -= cost
         caller.db.level += 1
         caller.db.stat_points += 5
+        caller.db.weight.max = 50 + caller.db.level * 2 + caller.db.str * 3
+        # 50 + 20 * 2 + 20 * 3 = 50 + 40 + 60 = 150
+        # 50 + 30 * 2 + 40 * 3 = 50 + 60 + 120 = 230
         self.msg(f"You grow more powerful ({caller.db.level})")
 
     def set_max_hp(self):

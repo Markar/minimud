@@ -6,14 +6,13 @@ from evennia import TICKER_HANDLER as tickerhandler
 from evennia import logger
 
 from .command import Command
+from typeclasses.utils import GUILD_LEVEL_COST_DICT, SKILL_RANKS
 from typeclasses.elementalguild.earth_elemental_commands import EarthElementalCmdSet
 from typeclasses.elementalguild.air_elemental_commands import AirElementalCmdSet
 from typeclasses.elementalguild.fire_elemental_commands import FireElementalCmdSet
 from typeclasses.elementalguild.water_elemental_commands import WaterElementalCmdSet
 from typeclasses.elementalguild.constants_and_helpers import (
     SKILLS_COST,
-    SKILL_RANKS,
-    GUILD_LEVEL_COST_DICT,
     WATER_TITLES,
     FIRE_TITLES,
     AIR_TITLES,
