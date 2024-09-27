@@ -158,6 +158,23 @@ class CmdJoinElementals(Command):
                 clean_attributes=False,
             )
             caller.cmdset.add(EarthElementalCmdSet, persistent=True)
+
+            try:
+                tickerhandler.remove(
+                    interval=6,
+                    callback=caller.at_tick,
+                    idstring=f"{caller}-regen",
+                    persistent=True,
+                )
+                tickerhandler.remove(
+                    interval=60 * 5,
+                    callback=caller.at_docwagon_tick,
+                    idstring=f"{caller}-superpower",
+                    persistent=True,
+                )
+            except ValueError:
+                print(f"tickerhandler.remove failed")
+
         else:
             caller.msg(f"|rYou are already in a guild")
 
@@ -195,6 +212,22 @@ class CmdLeaveElementals(Command):
             del caller.db.cyclone_armor
             del caller.db.storm_form
             del caller.db.air_form
+
+            try:
+                tickerhandler.remove(
+                    interval=6,
+                    callback=caller.at_tick,
+                    idstring=f"{caller}-regen",
+                    persistent=True,
+                )
+                tickerhandler.remove(
+                    interval=60 * 5,
+                    callback=caller.at_engulf_tick,
+                    idstring=f"{caller}-superpower",
+                    persistent=True,
+                )
+            except ValueError:
+                print(f"tickerhandler.remove failed")
 
             caller.msg(f"|rYou leave the Elementals guild")
         else:

@@ -257,6 +257,7 @@ class CmdPowers(Command):
         caller.msg(str(table))
 
 
+# region Reaction
 class CmdReaction(Command):
     """
     Set the elemental's reaction to a dropping below a certain health threshold.
@@ -481,6 +482,7 @@ class CmdGuildStatSheet(Command):
 
         doc_count = caller.db.docwagon["count"]
         doc_max = caller.db.docwagon["max"]
+        platelet_factory = getattr(caller.db, "platelet_factory", False)
 
         table = EvTable(f"|c{caller}", f"|c{title}", border="table")
         table.add_row(f"|GGuild Level", my_glvl)
@@ -490,7 +492,12 @@ class CmdGuildStatSheet(Command):
         table.add_row(f"|GMelee Weapon", melee_weapon)
         table.add_row(f"|GRanged Weapon", ranged_weapon)
         table.add_row(f"|GDocWagon Revives", f"{doc_count} / {doc_max}")
-        table.add_row(f"|GNano Reinforced Skeleton", caller.db.nano_reinforced_skeleton)
+        table.add_row(
+            f"|GNano Reinforced Skeleton",
+            getattr(caller.db, "nano_reinforced_skeleton", False),
+        )
+        table.add_row(f"|GAdaptive Armor", getattr(caller.db, "adaptive_armor", False))
+        table.add_row(f"|GPlatelet Factory", platelet_factory)
 
         caller.msg(str(table))
 

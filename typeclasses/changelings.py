@@ -99,9 +99,10 @@ class Changelings(PlayerCharacter):
         self.db.engulfs = self.db.max_engulfs
 
     def at_tick(self):
+        self.msg("changeling at_tick")
         glvl = self.db.guild_level
         ep = self.db.ep
-        regen_skill = self.db.skills["regeneration"]
+        regen_skill = getattr(self.db, "skills", {}).get("regeneration", 1)
 
         hp = self.db.hp
         hpmax = self.db.hpmax

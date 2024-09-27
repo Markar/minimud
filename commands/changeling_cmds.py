@@ -719,6 +719,22 @@ class CmdJoinChangelings(Command):
         if caller.db.guild == "adventurer":
             caller.msg(f"|rYou join the Changeling guild")
             caller.swap_typeclass("typeclasses.changelings.Changelings")
+
+            try:
+                tickerhandler.remove(
+                    interval=6,
+                    callback=caller.at_tick,
+                    idstring=f"{caller}-regen",
+                    persistent=True,
+                )
+                tickerhandler.remove(
+                    interval=60 * 5,
+                    callback=caller.at_docwagon_tick,
+                    idstring=f"{caller}-superpower",
+                    persistent=True,
+                )
+            except ValueError:
+                print(f"tickerhandler.remove failed")
         else:
             caller.msg(f"|rYou are already in a guild")
 

@@ -104,8 +104,18 @@ DWARVEN_RINGMAIL_TUNIC = {
     "fireac": 8,
     "coldac": 8,
     "magicac": 8,
-    "value": 500,
+    "value": 1000,
     "clothing_type": "chestguard",
+    "type": "medium",
+}
+SHINY_BRASS_SHIELD = {
+    "typeclass": "typeclasses.objects.ClothingObject",
+    "key": "shiny brass shield",
+    "desc": "A shiny brass shield.",
+    "armor": 10,
+    "magicac": 10,
+    "value": 800,
+    "clothing_type": "shield",
     "type": "medium",
 }
 
@@ -478,6 +488,7 @@ CYBER_CHESTGUARD = {
     "armor": 6,
     "value": 750,
     "clothing_type": "chestguard",
+    "type": "medium",
 }
 
 CYBER_LEG_GUARDS = {
@@ -487,6 +498,7 @@ CYBER_LEG_GUARDS = {
     "armor": 3,
     "value": 500,
     "clothing_type": "legguard",
+    "type": "medium",
 }
 
 CYBER_BOOTS = {
@@ -496,4 +508,5 @@ CYBER_BOOTS = {
     "armor": 2,
     "value": 400,
     "clothing_type": "footwear",
+    "type": "medium",
 }

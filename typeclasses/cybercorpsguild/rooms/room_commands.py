@@ -3,10 +3,35 @@ from evennia.utils.evtable import EvTable
 from commands.command import Command
 from typeclasses.cybercorpsguild.cybercorps_commands import CybercorpsCmdSet
 from typeclasses.cybercorpsguild.cybercorps_wares import WaresObjects
+from evennia import TICKER_HANDLER as tickerhandler
 
 # from commands.shops import ShopCmdSet
 # from evennia.utils import create
 # from typeclasses.scripts import RestockScript
+
+ImplantObjects = [
+    {
+        "name": "Adaptive Armor",
+        "skill": "cybernetic_enhancements",
+        "skill_req": 1,
+        "cost": 1,
+        "rank": 1,
+    },
+    {
+        "name": "Adrenaline Boost",
+        "skill": "biotech research",
+        "skill_req": 1,
+        "cost": 1,
+        "rank": 1,
+    },
+    {
+        "name": "Platelet Factory",
+        "skill": "biotech research",
+        "skill_req": 2,
+        "cost": 100,
+        "rank": 8,
+    },
+]
 
 
 class CmdJoinCybercorps(Command):
@@ -24,7 +49,24 @@ class CmdJoinCybercorps(Command):
                 "typeclasses.cybercorps.Cybercorps",
                 clean_attributes=False,
             )
+
             caller.cmdset.add(CybercorpsCmdSet, persistent=True)
+
+            try:
+                tickerhandler.remove(
+                    interval=6,
+                    callback=caller.at_pc_tick,
+                    idstring=f"{caller}-regen",
+                    persistent=True,
+                )
+                tickerhandler.remove(
+                    interval=60 * 5,
+                    callback=caller.at_superpower_tick,
+                    idstring=f"{caller}-superpower",
+                    persistent=True,
+                )
+            except ValueError:
+                print(f"tickerhandler.remove failed")
         else:
             caller.msg(f"|rYou are already in a guild")
 
@@ -50,14 +92,29 @@ class CmdLeaveCybercorps(Command):
         del caller.db.adaptive_armor
         del caller.db.nano_reinforced_skeleton
         del caller.db.nrs_amount
+        try:
+            tickerhandler.remove(
+                interval=6,
+                callback=caller.at_tick,
+                idstring=f"{caller}-regen",
+                persistent=True,
+            )
+            tickerhandler.remove(
+                interval=60 * 5,
+                callback=caller.at_docwagon_tick,
+                idstring=f"{caller}-superpower",
+                persistent=True,
+            )
+        except ValueError:
+            print(f"tickerhandler.remove failed")
 
         return
 
     def func(self):
         caller = self.caller
         if caller.db.guild == "cybercorps":
-            caller.swap_typeclass("typeclasses.characters.PlayerCharacter")
             self.strip()
+            caller.swap_typeclass("typeclasses.characters.PlayerCharacter")
             caller.msg(f"|rYou leave the Cybercorps Mega Corporation")
         else:
             caller.msg(f"|rYou are already an adventurer")
@@ -95,6 +152,93 @@ class CmdListWares(Command):
                 )
 
         caller.msg(str(table))
+
+
+class CmdListImplants(Command):
+    """
+    List implants available for purchase from the Cybercorps Mega Corporation
+    """
+
+    key = "list"
+
+    def func(self):
+        caller = self.caller
+        table = EvTable(
+            f"|wImplant", f"|wSkill", f"|wRank", f"|wCost", f"|wLevel", border="table"
+        )
+        for implant in ImplantObjects:
+            table.add_row(
+                f"|Y{implant['name']}",
+                f"|Y{implant['skill']}",
+                f"|Y{implant['skill_req']}",
+                f"|Y{implant['cost']}",
+                f"|Y{implant['rank']}",
+            )
+
+        caller.msg(str(table))
+
+
+class CmdBuyImplant(Command):
+    """
+    Buy implant from the Cybercorps Mega Corporation
+    """
+
+    key = "buy"
+
+    def func(self):
+        caller = self.caller
+        implant = self.args.strip().lower()
+        owned_implants = getattr(caller.db, "implants", [])
+
+        if caller.db.guild != "cybercorps":
+            caller.msg(
+                f"|rYou need to be part of the Cybercorps Mega Corporation to buy implants."
+            )
+            return
+
+        if not implant:
+            caller.msg(f"|rUsage: buy <implant>")
+            return
+
+        if implant in owned_implants:
+            caller.msg(f"|rYou already have the {implant}.")
+            return
+
+        for obj in ImplantObjects:
+            if obj["name"].lower() == implant:
+                skill_req = obj["skill_req"]
+                skill = obj["skill"]
+                name = obj["name"]
+                rank = obj["rank"]
+                cost = obj["cost"]
+
+                if caller.db.guild_level < obj["rank"]:
+                    caller.msg(
+                        f"|rYou need to be guild level {rank} to buy the {name}."
+                    )
+                    return
+
+                if caller.db.skills.get(obj["skill"], 0) < obj["skill_req"]:
+                    caller.msg(
+                        f"|rYou need to have at least {skill_req} ranks in {skill} to buy the {name}."
+                    )
+                    return
+
+                if caller.db.coins < obj["cost"]:
+                    caller.msg(
+                        f"|rYou need {cost - caller.db.coins} more coins to buy the {name}."
+                    )
+                    return
+
+                caller.db.implants.append(name.lower())
+                caller.db.coins -= cost
+                caller.msg(
+                    f"|gYou buy the {name} from the Cybercorps Mega Corporation."
+                )
+                return
+
+        caller.msg(f"|rYou can't buy the {name}.")
+        return
 
 
 class CmdBuyWares(Command):
@@ -161,6 +305,16 @@ class CybercorpsWaresCmdSet(CmdSet):
 
         self.add(CmdBuyWares)
         self.add(CmdListWares)
+
+
+class CybercorpsImplantsCmdSet(CmdSet):
+    key = "Cybercorps Implants CmdSet"
+
+    def at_cmdset_creation(self):
+        super().at_cmdset_creation()
+
+        self.add(CmdBuyImplant)
+        self.add(CmdListImplants)
 
 
 # class CyberShop(RoomParent, DefaultRoom):

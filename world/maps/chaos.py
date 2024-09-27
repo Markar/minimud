@@ -41,3 +41,10 @@ chessboard
 enter
 #
 @open leave = chaos#4
+
+@tel (8,2,crushbone)
+#
+@dig/teleport Trainer's Hill;crushbone#1 : typeclasses.rooms.OrcTrainer = up;u,down;d
+#
+@desc |YAs you climb the hill, you see a large, open area at the top. The ground is covered in patches of grass and wildflowers, and the air is filled with the sound of birdsong. At the center of the hilltop, a large, flat rock serves as a natural platform, overlooking the surrounding landscape. From this vantage point, you can see the entire training grounds, with its various obstacles and training areas.
+#

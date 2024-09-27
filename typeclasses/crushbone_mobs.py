@@ -184,6 +184,31 @@ ORC_TASKMASTER = {
     "exp_reward": 5500,
     "can_attack": True,
 }
+ORC_TRAINER = {
+    "typeclass": "typeclasses.characters.NPC",
+    "key": "Orc Trainer",
+    "aliases": ["orc", "trainer"],
+    "desc": "The orc trainer is a master of combat. He's been training orcs for years and is a formidable opponent.",
+    "gender": "male",
+    "react_as": "aggressive",
+    "armor": 10,
+    "name_color": "r",
+    "level": 13,
+    "hp": 11562,
+    "hpmax": 11562,
+    "str": 10,
+    "natural_weapon": {
+        "name": "legendary warhammer",
+        "damage_type": "blunt",
+        "damage": 30,
+        "speed": 5,
+        "energy_cost": 0,
+    },
+    "exp_reward": 11562,
+    "drops": lambda: uniform(0, 1) < 0.1 and ["SHINY_BRASS_SHIELD"],
+    "can_attack": True,
+}
+
 ORC_WARLORD = {
     "typeclass": "typeclasses.characters.NPC",
     "key": "an orc warlord",

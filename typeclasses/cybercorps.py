@@ -66,6 +66,8 @@ class Cybercorps(PlayerCharacter):
         # list of owned wares
         self.db.wares = ["hand razors"]
         self.db.docwagon = {"count": 0, "max": 0}
+        self.db.implants = []
+        self.db.platelet_factory_active = False
 
         tickerhandler.add(
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
@@ -95,13 +97,23 @@ class Cybercorps(PlayerCharacter):
         base_fp_regen = self.db.fpregen
         biotech_research = self.db.skills.get("biotech research", 1)
         energy_solutions = self.db.skills.get("energy solutions", 1)
+        implants = getattr(self.db, "implants", False)
+        platelet_factory_active = (
+            implants.get("platelet factory", False)
+            if isinstance(implants, dict)
+            else False
+        )
 
         bonus_hp = 0
         bonus_fp = 0
         bonus_ep = 0
 
-        bonus_hp += int(uniform(biotech_research, biotech_research + 1))  # 0-2
         bonus_ep += int(uniform(energy_solutions * 0.2, energy_solutions * 0.3))  # 0-3
+
+        if platelet_factory_active:
+            bonus_hp += biotech_research
+            bonus_ep -= biotech_research / 2
+
         total_hp_regen = base_regen + int(bonus_hp)
         total_fp_regen = base_fp_regen + int(bonus_fp)
         total_ep_regen = base_ep_regen + int(bonus_ep)
@@ -201,15 +213,22 @@ class Cybercorps(PlayerCharacter):
             return
         self.attack(target, weapon)
 
+    def get_combat_display_status(self, looker, **kwargs):
+        # This is a wrapper for the get_display_status method that adds a cooldown
+        # to prevent spamming the status display due to calling attack every second.
+
+        if not self.cooldowns.ready("combat_display_status"):
+            return
+        print("getting combat  display status")
+        self.get_display_status(looker, **kwargs)
+        self.cooldowns.add("combat_display_status", 3)
+
     def get_display_status(self, looker, **kwargs):
         """
         Returns a quick view of the current status of this character
         """
-        if not self.cooldowns.ready("display_status"):
-            return
-
-        self.cooldowns.add("display_status", 3)
         chunks = []
+        print("getting display status")
 
         # add resource levels
         hp = int(self.db.hp)
@@ -220,14 +239,19 @@ class Cybercorps(PlayerCharacter):
         epmax = int(self.db.epmax)
         docwagon_count = self.db.docwagon["count"]
         docwagon_max = self.db.docwagon["max"]
+        adaptive_armor = getattr(self.db, "adaptive_armor", False)
+        platelet_factory_active = getattr(self.db, "platelet_factory_active", False)
 
         chunks.append(
             f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g"
         )
         if docwagon_max:
             chunks.append(f"|gDocWagon: |G{docwagon_count}/{docwagon_max}|g")
+        if adaptive_armor:
+            chunks.append(f"|gAA")
+        if platelet_factory_active:
+            chunks.append(f"|gPF")
 
-        print(f"CYBER looker != self {looker} and self {self}")
         if looker != self:
             chunks.append(
                 f"|gE: |G{looker.get_display_name(self, **kwargs)} ({looker.db.hp})"
@@ -247,11 +271,7 @@ class Cybercorps(PlayerCharacter):
             all_cooldowns = [f"{c[0]} ({c[1]}s)" for c in all_cooldowns if c[1]]
             if all_cooldowns:
                 chunks.append(f"Cooldowns: {iter_to_str(all_cooldowns, endsep=',')}")
-        # chunks.append(f"\n")
-        # glue together the chunks and return
-        status = " - ".join(chunks)
-        self.msg(prompt=status)
-        return status
+        return " - ".join(chunks)
 
     # region Attack
     def attack(self, target, weapon, **kwargs):
@@ -285,7 +305,7 @@ class Cybercorps(PlayerCharacter):
         if ranged_weapon:
             ranged_weapon.at_attack(self, target)
 
-        status = self.get_display_status(target)
+        status = self.get_combat_display_status(target)
 
         # check if we have auto-attack in settings
         if self.account and (settings := self.account.db.settings):
@@ -312,6 +332,17 @@ class Cybercorps(PlayerCharacter):
         percentage_reduction = 0
         flat_reduction = 0
         flat_reduction_cap = 0
+
+        if self.db.guild_level < 5:
+            flat_reduction_cap = 5
+        elif self.db.guild_level < 10:
+            flat_reduction_cap = 15
+        elif self.db.guild_level < 15:
+            flat_reduction_cap = 30
+        elif self.db.guild_level < 20:
+            flat_reduction_cap = 60
+        elif self.db.guild_level < 25:
+            flat_reduction_cap = 150
 
         # Flat damage reduction - 50 con = 5 reduction, glvl 30 = 1.5 reduction
         flat_reduction = con * 0.1 + glvl * 0.05
@@ -349,16 +380,6 @@ class Cybercorps(PlayerCharacter):
         #     self.msg(f"|cYour earth shield blocks a lot of damage!|n")
 
         # Apply randomized flat reduction
-        if self.db.level < 5:
-            flat_reduction_cap = 2
-        elif self.db.level < 10:
-            flat_reduction_cap = 4
-        elif self.db.level < 15:
-            flat_reduction_cap = 6
-        elif self.db.level < 20:
-            flat_reduction_cap = 12
-        elif self.db.level < 25:
-            flat_reduction_cap = 20
 
         # Apply (worn) defense reduction
         armor = self.defense(damage_type)
@@ -404,24 +425,23 @@ class Cybercorps(PlayerCharacter):
                 combat = self.location.scripts.get("combat")[0]
                 combat.remove_combatant(self)
 
+    def can_wear(self, item):
+        """
+        Check if the character can wear an item
+        """
+        armor = getattr(item.db, "armor", False)
+        type = getattr(item.db, "type", False)
+        allowed_types = ["light", "medium", "heavy"]
 
-def can_wear(self, item):
-    """
-    Check if the character can wear an item
-    """
-    armor = getattr(item.db, "armor", False)
-    type = getattr(item.db, "type", False)
-    allowed_types = ["light", "medium", "heavy"]
+        if not item:
+            return False
 
-    if not item:
-        return False
+        if not item.db.clothing_type:
+            self.msg(f"{item} is not wearable.")
+            return False
 
-    if not item.db.clothing_type:
-        self.msg(f"{item} is not wearable.")
-        return False
+        if armor and type not in allowed_types:
+            self.msg(f"You can't wear that kind of armor.")
+            return False
 
-    if armor and type not in allowed_types:
-        self.msg(f"You can't wear that kind of armor.")
-        return False
-
-    return True
+        return True

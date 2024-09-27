@@ -2,6 +2,7 @@ from evennia import CmdSet
 from evennia.utils.evtable import EvTable
 from commands.command import Command
 from typeclasses.warriorsguild.warrior_commands import WarriorCmdSet
+from evennia import TICKER_HANDLER as tickerhandler
 
 # from commands.shops import ShopCmdSet
 # from evennia.utils import create
@@ -24,6 +25,21 @@ class CmdJoinWarriors(Command):
                 clean_attributes=False,
             )
             caller.cmdset.add(WarriorCmdSet, persistent=True)
+            try:
+                tickerhandler.remove(
+                    interval=6,
+                    callback=caller.at_pc_tick,
+                    idstring=f"{caller}-regen",
+                    persistent=True,
+                )
+                tickerhandler.remove(
+                    interval=60 * 5,
+                    callback=caller.at_superpower_tick,
+                    idstring=f"{caller}-superpower",
+                    persistent=True,
+                )
+            except ValueError:
+                print(f"tickerhandler.remove failed")
         else:
             caller.msg(f"|rYou are already in a guild")
 

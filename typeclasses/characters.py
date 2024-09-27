@@ -1,4 +1,5 @@
 from random import randint, uniform, uniform
+from evennia import TICKER_HANDLER as tickerhandler
 from evennia.prototypes import spawner, prototypes
 from evennia.prototypes.spawner import spawn
 from string import punctuation
@@ -516,6 +517,18 @@ class PlayerCharacter(Character):
         }
         self.db.best_kill = {"name": "none", "level": 0, "xp": 0}
         self.db.weight = {"current": 0, "max": 50}
+        tickerhandler.add(
+            interval=6,
+            callback=self.at_pc_tick,
+            idstring=f"{self}-regen",
+            persistent=True,
+        )
+        tickerhandler.add(
+            interval=60 * 5,
+            callback=self.at_superpower_tick,
+            idstring=f"{self}-superpower",
+            persistent=True,
+        )
 
         # initialize hands
         self.db._wielded = {"left": None, "right": None}
@@ -764,6 +777,20 @@ class PlayerCharacter(Character):
         self.db.hp = self.db.hpmax
         self.move_to(self.home)
         self.msg(prompt=self.get_display_status(self))
+
+    def at_superpower_tick(self):
+        self.msg(f"|gYour health and energy have been restored!|n")
+        self.db.hp = self.db.hpmax
+        self.db.ep = self.db.epmax
+
+    def at_pc_tick(self):
+        base_regen = 1
+        base_ep_regen = 1
+        base_fp_regen = 1
+
+        self.adjust_hp(base_regen)
+        self.adjust_fp(base_ep_regen)
+        self.adjust_ep(base_fp_regen)
 
 
 # region NPC

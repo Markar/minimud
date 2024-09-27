@@ -263,7 +263,7 @@ class TacticalShotgun(CybercorpsAttack):
             return 0
 
         stat_bonus = str * 0.25 + dex * 0.25
-        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
+        dmg = 30 + glvl + stat_bonus + self.rank * (glvl / 10)
 
         # divide the damage by the number of pellets and increase the total damage
         damage = int(uniform(dmg * 0.5, dmg) * 0.36)
@@ -434,9 +434,9 @@ class LaserPistol(CybercorpsAttack):
             return 0
 
         stat_bonus = str * 0.25 + dex * 0.5
-        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
+        dmg = glvl + stat_bonus + self.rank * (glvl / 10)
 
-        damage = int(uniform(dmg * 0.5, dmg) * 0.55)
+        damage = 10 + int(uniform(dmg * 0.5, dmg) * 0.55)
         return damage
 
     def at_attack(self, wielder, target, **kwargs):
@@ -1036,7 +1036,7 @@ class ShockwaveHammer(CybercorpsAttack):
         stat_bonus = str * 0.5
         dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
 
-        damage = int(uniform(self.rank, dmg))
+        damage = 10 + int(uniform(self.rank, dmg))
         return damage
 
     def at_attack(self, wielder, target, **kwargs):

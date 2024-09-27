@@ -14,7 +14,7 @@ class Raven(ChangelingAttack):
     speed = 3
     energy_cost = 3
     power = 8
-    toughess = 9
+    toughness = 9
     dodge = 9
 
     def _calculate_bite_damage(self, wielder):
