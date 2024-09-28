@@ -365,6 +365,7 @@ class Cybercorps(PlayerCharacter):
             adaptive_armor_reduction = int(
                 con * 0.1 + glvl * 0.1 + cybernetic_enhancements
             )
+            percentage_reduction += cybernetic_enhancements / 100
             flat_reduction += adaptive_armor_reduction
             self.db.ep -= 1
 

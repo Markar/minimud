@@ -7,12 +7,11 @@ from typeclasses.elementalguild.attack_emotes import AttackEmotes
 from typeclasses.utils import PowerCommand
 
 
-def checkAdrenalineBoost(self, wielder, target, attack):
+def checkAdrenalineBoost(self, wielder):
     duration = wielder.db.adrenaline_boost["duration"]
     slowdown = 5
 
     if duration > 0:
-        target.at_damage(wielder, attack[0], attack[1], attack[2])
         wielder.adjust_ep(-20)
         wielder.db.adrenaline_boost["duration"] -= 1
         if duration == 1:
@@ -22,7 +21,7 @@ def checkAdrenalineBoost(self, wielder, target, attack):
         else:
             return -1
 
-    return 0
+    return -1
 
 
 # region Guild Level Weapons
@@ -64,13 +63,14 @@ class HandRazors(CybercorpsAttack):
             speed = self.speed
             wielder.db.ep -= self.energy_cost
 
-            dmg = self._calculate_melee_damage(wielder)
-            slowdown = checkAdrenalineBoost(
-                self, wielder, target, [dmg, "edged", "hand_razors"]
-            )
+            slowdown = checkAdrenalineBoost(self, wielder)
             if slowdown > 0:
                 speed = slowdown
+            if slowdown == -1:
+                dmg = self._calculate_melee_damage(wielder)
+                target.at_damage(wielder, dmg, "edged", "hand_razors")
 
+            dmg = self._calculate_melee_damage(wielder)
             target.at_damage(wielder, dmg, "edged", "hand_razors")
             wielder.cooldowns.add("hand_razors", speed)
 
@@ -119,14 +119,15 @@ class ShockHand(CybercorpsAttack):
 
         speed = self.speed
 
-        slowdown = checkAdrenalineBoost(
-            wielder, target, (dmg, "lightning", "shock_hand")
-        )
+        slowdown = checkAdrenalineBoost(self, wielder)
         if slowdown > 0:
             speed = slowdown
+        if slowdown == -1:
+            dmg = self._calculate_melee_damage(wielder)
+            target.at_damage(wielder, dmg, "lightning", "shock_hand")
 
         dmg = self._calculate_melee_damage(wielder)
-        target.at_damage(wielder, dmg, "electric", "shock_hand")
+        target.at_damage(wielder, dmg, "lightning", "shock_hand")
         wielder.cooldowns.add("shock_hand", speed)
 
 
@@ -164,6 +165,7 @@ class StealthBlade(CybercorpsAttack):
 
     def at_attack(self, wielder, target, **kwargs):
         super().at_attack(wielder, target, **kwargs)
+        speed = self.speed
 
         if not wielder.cooldowns.ready("stealth_blade"):
             return
@@ -172,13 +174,12 @@ class StealthBlade(CybercorpsAttack):
             wielder.msg("You can only maintain your hand razors.")
             return
 
-        speed = self.speed
-
-        slowdown = checkAdrenalineBoost(
-            wielder, target, (dmg, "edged", "stealth_blade")
-        )
+        slowdown = checkAdrenalineBoost(self, wielder)
         if slowdown > 0:
             speed = slowdown
+        if slowdown == -1:
+            dmg = self._calculate_melee_damage(wielder)
+            target.at_damage(wielder, dmg, "edged", "stealth_blade")
 
         dmg = self._calculate_melee_damage(wielder)
         target.at_damage(wielder, dmg, "edged", "stealth_blade")
@@ -221,14 +222,22 @@ class NanoBlade(CybercorpsAttack):
 
     def at_attack(self, wielder, target, **kwargs):
         super().at_attack(wielder, target, **kwargs)
+        speed = self.speed
 
         if not wielder.cooldowns.ready("nanoblade"):
             return
+
         if not wielder.db.ep >= self.energy_cost:
             wielder.msg("You can only maintain your hand razors.")
             return
 
-        speed = self.speed
+        slowdown = checkAdrenalineBoost(wielder, target, [dmg, "edged", "nanoblade"])
+        if slowdown > 0:
+            speed = slowdown
+        if slowdown == -1:
+            dmg = self._calculate_melee_damage(wielder)
+            target.at_damage(wielder, dmg, "edged", "nanoblade")
+
         dmg = self._calculate_melee_damage(wielder)
         target.at_damage(wielder, dmg, "edged", "nanoblade")
         wielder.cooldowns.add("nanoblade", speed)
@@ -268,12 +277,195 @@ class EnergySword(CybercorpsAttack):
 
     def at_attack(self, wielder, target, **kwargs):
         super().at_attack(wielder, target, **kwargs)
+        speed = self.speed
+
         if not wielder.cooldowns.ready("energy_sword"):
             return
 
+        if not wielder.db.ep >= self.energy_cost:
+            wielder.msg("You can only maintain your hand razors.")
+            return
+
+        slowdown = checkAdrenalineBoost(
+            wielder, target, [dmg, "energy", "energy_sword"]
+        )
+        if slowdown > 0:
+            speed = slowdown
+        if slowdown == -1:
+            dmg = self._calculate_melee_damage(wielder)
+            target.at_damage(wielder, dmg, "energy", "energy_sword")
+
         dmg = self._calculate_melee_damage(wielder)
         target.at_damage(wielder, dmg, "energy", "energy_sword")
-        wielder.cooldowns.add("energy_sword", self.speed)
+        wielder.cooldowns.add("energy_sword", speed)
+
+
+# region Graviton Hammer
+class GravitonHammer(CybercorpsAttack):
+    """
+    The graviton hammer is a heavy weapon that uses gravitational forces to
+    crush enemies with immense power. It is often used in military operations
+    for its ability to take out armored vehicles and fortified positions.
+    """
+
+    speed = 6
+    energy_cost = 5
+    name = "graviton hammer"
+    skill = "heavy weapons"
+    skill_req = 7
+    rank = 30
+    cost = 4
+    short = "A heavy weapon that uses gravitational forces to crush enemies."
+    type = "melee"
+
+    def _calculate_melee_damage(self, wielder):
+        glvl = wielder.db.guild_level
+        str = wielder.traits.str.value
+
+        stat_bonus = str * 0.6
+        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
+
+        damage = int(uniform(self.rank, dmg))
+        return damage
+
+    def at_attack(self, wielder, target, **kwargs):
+        super().at_attack(wielder, target, **kwargs)
+        speed = self.speed
+
+        # Subtract energy and apply damage to target before their defenses
+        if not wielder.cooldowns.ready("graviton_hammer"):
+            return
+
+        if not wielder.db.ep >= self.energy_cost:
+            return
+
+        slowdown = checkAdrenalineBoost(
+            wielder, target, [dmg, "blunt", "graviton_hammer"]
+        )
+        if slowdown > 0:
+            speed = slowdown
+        if slowdown == -1:
+            dmg = self._calculate_melee_damage(wielder)
+            target.at_damage(wielder, dmg, "blunt", "graviton_hammer")
+
+        wielder.db.ep -= self.energy_cost
+
+        if randint(1, 100) < 30:
+            target.at_damage(wielder, dmg * 0.75, "energy", "graviton_hammer_hit")
+
+        dmg = self._calculate_melee_damage(wielder)
+        target.at_damage(wielder, dmg, "blunt", "graviton_hammer")
+        wielder.cooldowns.add("graviton_hammer", speed)
+
+
+# region Chainblade
+class ChainBlade(CybercorpsAttack):
+    """
+    A heavy sword with a motorized chain running along its edge, designed
+    to slice through enemies with ease. It is often used in close-quarters
+    combat for its ability to cut through armor and shields with ease.
+    """
+
+    speed = 6
+    energy_cost = 0
+    name = "chain blade"
+    skill = "heavy weapons"
+    skill_req = 4
+    rank = 24
+    cost = 1
+    short = "A melee weapon with a retractable chain."
+    type = "melee"
+
+    def _calculate_melee_damage(self, wielder):
+        glvl = wielder.db.guild_level
+        str = wielder.traits.str.value
+        dex = wielder.traits.dex.value
+
+        stat_bonus = (str + dex) * 0.33
+        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
+
+        damage = int(uniform(self.rank, dmg) * 0.55)
+        return damage
+
+    def at_attack(self, wielder, target, **kwargs):
+        super().at_attack(wielder, target, **kwargs)
+        speed = self.speed
+
+        if not wielder.cooldowns.ready("chain_blade"):
+            return
+
+        slowdown = checkAdrenalineBoost(self, wielder)
+        if slowdown > 0:
+            speed = slowdown
+        if slowdown == -1:
+            dmg = self._calculate_melee_damage(wielder)
+            target.at_damage(wielder, dmg, "edged", "chain_blade")
+            dmg = self._calculate_melee_damage(wielder)
+            target.at_damage(wielder, dmg, "edged", "chain_blade")
+
+        dmg = self._calculate_melee_damage(wielder)
+        dmg2 = self._calculate_melee_damage(wielder)
+
+        target.at_damage(wielder, dmg, "edged", "chain_blade")
+        target.at_damage(wielder, dmg2, "edged", "chain_blade")
+        wielder.cooldowns.add("chain_blade", speed)
+
+
+# region Shockwave Hammer
+class ShockwaveHammer(CybercorpsAttack):
+    """
+    The shockwave hammer is a heavy weapon that generates shockwaves upon impact,
+    capable of knocking down enemies and destroying structures. It is often used
+    in military operations for its ability to create chaos on the battlefield.
+    """
+
+    speed = 6
+    energy_cost = 5
+    name = "shockwave hammer"
+    skill = "heavy weapons"
+    skill_req = 1
+    rank = 5
+    cost = 4
+    short = "A heavy weapon that generates shockwaves upon impact."
+    type = "melee"
+
+    def _calculate_melee_damage(self, wielder):
+        glvl = wielder.db.guild_level
+        str = wielder.traits.str.value
+
+        stat_bonus = str * 0.5
+        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
+
+        damage = 10 + int(uniform(self.rank, dmg))
+        return damage
+
+    def at_attack(self, wielder, target, **kwargs):
+        super().at_attack(wielder, target, **kwargs)
+        speed = self.speed
+
+        # Subtract energy and apply damage to target before their defenses
+        if not wielder.cooldowns.ready("shockwave_hammer"):
+            return
+        if not wielder.db.ep >= self.energy_cost:
+            return
+
+        wielder.db.ep -= self.energy_cost
+
+        slowdown = checkAdrenalineBoost(
+            self, wielder
+        )
+        if slowdown > 0:
+            speed = slowdown
+        if slowdown == -1:
+            dmg = self._calculate_melee_damage(wielder)
+            target.at_damage(wielder, dmg, "blunt", "shockwave_hammer")
+            
+
+        dmg = self._calculate_melee_damage(wielder)
+        target.at_damage(wielder, dmg, "blunt", "shockwave_hammer")
+        dmg = self._calculate_melee_damage(wielder)
+        target.at_damage(wielder, dmg, "blunt", "shockwave_hammer")
+        wielder.cooldowns.add("shockwave_hammer", speed)
 
 
 # region Tactical Shotgun
@@ -911,95 +1103,6 @@ class FlameThrower(CybercorpsAttack):
         wielder.cooldowns.add("flame_thrower", self.speed)
 
 
-# region Graviton Hammer
-class GravitonHammer(CybercorpsAttack):
-    """
-    The graviton hammer is a heavy weapon that uses gravitational forces to
-    crush enemies with immense power. It is often used in military operations
-    for its ability to take out armored vehicles and fortified positions.
-    """
-
-    speed = 6
-    energy_cost = 5
-    name = "graviton hammer"
-    skill = "heavy weapons"
-    skill_req = 7
-    rank = 30
-    cost = 4
-    short = "A heavy weapon that uses gravitational forces to crush enemies."
-    type = "melee"
-
-    def _calculate_melee_damage(self, wielder):
-        glvl = wielder.db.guild_level
-        str = wielder.traits.str.value
-
-        stat_bonus = str * 0.6
-        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
-
-        damage = int(uniform(self.rank, dmg))
-        return damage
-
-    def at_attack(self, wielder, target, **kwargs):
-        super().at_attack(wielder, target, **kwargs)
-
-        # Subtract energy and apply damage to target before their defenses
-        if not wielder.cooldowns.ready("graviton_hammer"):
-            return
-        if not wielder.db.ep >= self.energy_cost:
-            return
-
-        wielder.db.ep -= self.energy_cost
-
-        if randint(1, 100) < 30:
-            target.at_damage(wielder, dmg * 0.75, "energy", "graviton_hammer_hit")
-
-        dmg = self._calculate_melee_damage(wielder)
-        target.at_damage(wielder, dmg, "blunt", "graviton_hammer")
-        wielder.cooldowns.add("graviton_hammer", self.speed)
-
-
-# region Chainblade
-class ChainBlade(CybercorpsAttack):
-    """
-    A heavy sword with a motorized chain running along its edge, designed
-    to slice through enemies with ease. It is often used in close-quarters
-    combat for its ability to cut through armor and shields with ease.
-    """
-
-    speed = 6
-    energy_cost = 0
-    name = "chain blade"
-    skill = "heavy weapons"
-    skill_req = 4
-    rank = 24
-    cost = 1
-    short = "A melee weapon with a retractable chain."
-    type = "melee"
-
-    def _calculate_melee_damage(self, wielder):
-        glvl = wielder.db.guild_level
-        str = wielder.traits.str.value
-        dex = wielder.traits.dex.value
-
-        stat_bonus = (str + dex) * 0.33
-        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
-
-        damage = int(uniform(self.rank, dmg) * 0.55)
-        return damage
-
-    def at_attack(self, wielder, target, **kwargs):
-        super().at_attack(wielder, target, **kwargs)
-        if not wielder.cooldowns.ready("chain_blade"):
-            return
-
-        dmg = self._calculate_melee_damage(wielder)
-        dmg2 = self._calculate_melee_damage(wielder)
-
-        target.at_damage(wielder, dmg, "edged", "chain_blade")
-        target.at_damage(wielder, dmg2, "edged", "chain_blade")
-        wielder.cooldowns.add("chain_blade", self.speed)
-
-
 # region Vortex AR-9
 class VortexAR9(CybercorpsAttack):
     """
@@ -1053,50 +1156,6 @@ class VortexAR9(CybercorpsAttack):
         target.at_damage(wielder, dmg2, "energy", "vortex_ar9")
         target.at_damage(wielder, dmg3, "fire", "vortex_ar9")
         wielder.cooldowns.add("vortex_ar9", self.speed)
-
-
-# region Shockwave Hammer
-class ShockwaveHammer(CybercorpsAttack):
-    """
-    The shockwave hammer is a heavy weapon that generates shockwaves upon impact,
-    capable of knocking down enemies and destroying structures. It is often used
-    in military operations for its ability to create chaos on the battlefield.
-    """
-
-    speed = 6
-    energy_cost = 5
-    name = "shockwave hammer"
-    skill = "heavy weapons"
-    skill_req = 1
-    rank = 5
-    cost = 4
-    short = "A heavy weapon that generates shockwaves upon impact."
-    type = "melee"
-
-    def _calculate_melee_damage(self, wielder):
-        glvl = wielder.db.guild_level
-        str = wielder.traits.str.value
-
-        stat_bonus = str * 0.5
-        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
-
-        damage = 10 + int(uniform(self.rank, dmg))
-        return damage
-
-    def at_attack(self, wielder, target, **kwargs):
-        super().at_attack(wielder, target, **kwargs)
-
-        # Subtract energy and apply damage to target before their defenses
-        if not wielder.cooldowns.ready("shockwave_hammer"):
-            return
-        if not wielder.db.ep >= self.energy_cost:
-            return
-
-        wielder.db.ep -= self.energy_cost
-
-        dmg = self._calculate_melee_damage(wielder)
-        target.at_damage(wielder, dmg, "blunt", "shockwave_hammer")
-        wielder.cooldowns.add("shockwave_hammer", self.speed)
 
 
 # region Loadout
