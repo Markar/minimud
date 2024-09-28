@@ -66,89 +66,6 @@ class CmdPulseGrenade(PowerCommand):
         return
 
 
-# region Adaptive Armor
-class CmdAdaptiveArmor(PowerCommand):
-    """
-    Adaptive armor is a type of cybernetic enhancement that can change its properties based on the situation. The armor is made of advanced materials that can shift and adapt to different threats, providing protection against physical, energy, and environmental hazards. Adaptive armor is often used by soldiers and security personnel who need versatile protection in combat situations.
-
-    Usage:
-        adaptive armor
-    """
-
-    key = "adaptive armor"
-    help_category = "cybercorps"
-    cost = 50
-    guild_level = 10
-
-    def func(self):
-        caller = self.caller
-        if not caller.db.guild_level >= self.guild_level:
-            caller.msg(f"|CYou don't have access to adapative armor yet.")
-            return
-        if not caller.cooldowns.ready("adaptive_armor"):
-            caller.msg(f"|CYou can't change wares that quickly!")
-            return False
-        if caller.db.ep < self.cost:
-            caller.msg(f"|rYou need more energy to do that.")
-            return
-        if caller.db.adaptive_armor:
-            caller.location.msg_contents(
-                f"|c{caller} deactivates their adaptive armor.", from_obj=caller
-            )
-            caller.db.adaptive_armor = False
-            return
-
-        caller.db.ep -= self.cost
-        caller.cooldowns.add("adaptive_armor", 50)
-        caller.cooldowns.add("global_cooldown", 2)
-        caller.db.adaptive_armor = True
-        caller.location.msg_contents(
-            f"|c{caller} activates their adaptive armor.", from_obj=caller
-        )
-
-
-# region DocWagon
-class CmdDocWagon(PowerCommand):
-    """
-    DocWagon is a premier emergency medical service provider known for its rapid response and high-tech solutions. Founded in 2037, DocWagon has revolutionized the medical services industry with its unique offerings, including:
-
-    Usage:
-        docwagon revive
-
-    """
-
-    key = "docwagon revive"
-    help_category = "cybercorps"
-    cost = 10
-
-    def func(self):
-        caller = self.caller
-        glvl = caller.db.guild_level
-        if not caller.db.docwagon["count"] > 0:
-            caller.msg(f"|CYou are too tired to use this power.")
-            return
-        if not caller.cooldowns.ready("docwagon"):
-            caller.msg(f"|CNot so fast!")
-            return False
-        if caller.db.ep < self.cost:
-            caller.msg(f"|rYou need at least {self.cost} energy to use this power.")
-            return
-        if glvl < 10:
-            caller.msg(f"|CYou need to be guild level 10 to use burnout.")
-            return
-        caller.db.ep -= self.cost
-        caller.cooldowns.add("docwagon", 60)
-        caller.cooldowns.add("global_cooldown", 2)
-        skill_rank = caller.db.skills.get("Security Services", 1)
-
-        self.msg(f"|304A DocWagon medical team arrives to treat you!|n")
-        caller.adjust_hp(caller.db.hpmax)
-        caller.adjust_fp(caller.db.fpmax)
-
-        caller.db.docwagon["count"] -= 1
-        caller.db.docwagon["duration"] = 3 + skill_rank * 2
-
-
 # region Synthetic Conversion
 class CmdSyntheticConversion(Command):
     """
@@ -285,6 +202,7 @@ class CmdReaction(Command):
         caller.msg(f"Reaction set to {args}.")
 
 
+# region Gtrain
 class CmdGTrain(Command):
     """
     Train your guild skills by spending skill experience points. Each rank
@@ -620,6 +538,23 @@ class CmdUpdateChessboard(Command):
         caller.msg("done")
 
 
+class CmdHp(Command):
+    """
+    Display the current and maximum health of the caller.
+
+    Usage:
+        hp
+    """
+
+    key = "hp"
+    help_category = "cybercorps"
+
+    def func(self):
+        caller = self.caller
+
+        caller.msg(caller.get_display_status(caller))
+
+
 # region CmdSet
 class CybercorpsCmdSet(CmdSet):
     key = "Cybercorps CmdSet"
@@ -639,10 +574,8 @@ class CybercorpsCmdSet(CmdSet):
 
         self.add(CmdSyntheticConversion)
         self.add(CmdReaction)
-        self.add(CmdDocWagon)
-
-        self.add(CmdAdaptiveArmor)
         self.add(CmdPulseGrenade)
         self.add(CmdNanoReinforcedSkeleton)
 
         self.add(CmdUpdateChessboard)
+        self.add(CmdHp)

@@ -7,6 +7,24 @@ from typeclasses.elementalguild.attack_emotes import AttackEmotes
 from typeclasses.utils import PowerCommand
 
 
+def checkAdrenalineBoost(self, wielder, target, attack):
+    duration = wielder.db.adrenaline_boost["duration"]
+    slowdown = 5
+
+    if duration > 0:
+        target.at_damage(wielder, attack[0], attack[1], attack[2])
+        wielder.adjust_ep(-20)
+        wielder.db.adrenaline_boost["duration"] -= 1
+        if duration == 1:
+            self.db.adrenaline_boost = {"active": False, "duration": 0}
+            self.msg(f"|CYour adrenaline boost fades, leaving you feeling drained.|n")
+            return slowdown
+        else:
+            return -1
+
+    return 0
+
+
 # region Guild Level Weapons
 class HandRazors(CybercorpsAttack):
     """
@@ -47,6 +65,12 @@ class HandRazors(CybercorpsAttack):
             wielder.db.ep -= self.energy_cost
 
             dmg = self._calculate_melee_damage(wielder)
+            slowdown = checkAdrenalineBoost(
+                self, wielder, target, [dmg, "edged", "hand_razors"]
+            )
+            if slowdown > 0:
+                speed = slowdown
+
             target.at_damage(wielder, dmg, "edged", "hand_razors")
             wielder.cooldowns.add("hand_razors", speed)
 
@@ -85,10 +109,22 @@ class ShockHand(CybercorpsAttack):
 
     def at_attack(self, wielder, target, **kwargs):
         super().at_attack(wielder, target, **kwargs)
+
         if not wielder.cooldowns.ready("shock_hand"):
             return
 
+        if not wielder.db.ep >= self.energy_cost:
+            wielder.msg("You can only maintain your hand razors.")
+            return
+
         speed = self.speed
+
+        slowdown = checkAdrenalineBoost(
+            wielder, target, (dmg, "lightning", "shock_hand")
+        )
+        if slowdown > 0:
+            speed = slowdown
+
         dmg = self._calculate_melee_damage(wielder)
         target.at_damage(wielder, dmg, "electric", "shock_hand")
         wielder.cooldowns.add("shock_hand", speed)
@@ -131,11 +167,19 @@ class StealthBlade(CybercorpsAttack):
 
         if not wielder.cooldowns.ready("stealth_blade"):
             return
+
         if not wielder.db.ep >= self.energy_cost:
             wielder.msg("You can only maintain your hand razors.")
             return
 
         speed = self.speed
+
+        slowdown = checkAdrenalineBoost(
+            wielder, target, (dmg, "edged", "stealth_blade")
+        )
+        if slowdown > 0:
+            speed = slowdown
+
         dmg = self._calculate_melee_damage(wielder)
         target.at_damage(wielder, dmg, "edged", "stealth_blade")
         wielder.cooldowns.add("stealth_blade", speed)

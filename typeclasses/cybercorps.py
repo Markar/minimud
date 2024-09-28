@@ -5,6 +5,9 @@ from typeclasses.characters import PlayerCharacter
 from typeclasses.cybercorpsguild.attack_emotes import AttackEmotes
 from typeclasses.utils import get_article, get_display_name
 from typeclasses.cybercorpsguild.cybercorps_commands import CybercorpsCmdSet
+from typeclasses.cybercorpsguild.cyber_implants import (
+    CybercorpsImplantCmdSet,
+)
 from typeclasses.cybercorpsguild.cybercorps_wares import (
     HandRazors,
 )
@@ -19,6 +22,7 @@ class Cybercorps(PlayerCharacter):
     def at_object_creation(self):
         self.cmdset.add(CybercorpsCmdSet, persistent=True)
         self.cmdset.add(CybercorpsWaresCmdSet, persistent=True)
+        self.cmdset.add(CybercorpsImplantCmdSet, persistent=True)
         super().at_object_creation()
         con_increase_amount = 20
         int_increase_amount = 5
@@ -68,6 +72,7 @@ class Cybercorps(PlayerCharacter):
         self.db.docwagon = {"count": 0, "max": 0}
         self.db.implants = []
         self.db.platelet_factory_active = False
+        self.db.adrenaline_boost = {"active": False, "duration": 0}
 
         tickerhandler.add(
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
@@ -97,6 +102,7 @@ class Cybercorps(PlayerCharacter):
         base_fp_regen = self.db.fpregen
         biotech_research = self.db.skills.get("biotech research", 1)
         energy_solutions = self.db.skills.get("energy solutions", 1)
+        adaptive_armor = getattr(self.db, "adaptive_armor", False)
         implants = getattr(self.db, "implants", False)
         platelet_factory_active = (
             implants.get("platelet factory", False)
@@ -113,6 +119,11 @@ class Cybercorps(PlayerCharacter):
         if platelet_factory_active:
             bonus_hp += biotech_research
             bonus_ep -= biotech_research / 2
+
+        if adaptive_armor and self.db.ep < 6:
+            bonus_ep -= 5
+            self.db.adaptive_armor = False
+            self.msg(f"|CAs your energy runs out, your adaptive armor powers down.|n")
 
         total_hp_regen = base_regen + int(bonus_hp)
         total_fp_regen = base_fp_regen + int(bonus_fp)
@@ -139,10 +150,6 @@ class Cybercorps(PlayerCharacter):
     def speed(self):
         weapon = self.db.natural_weapon
         return weapon.get("speed", 3)
-
-    # def at_wield(self, weapon, **kwargs):
-    #     self.msg(f"You cannot wield weapons.")
-    #     return False
 
     def get_player_attack_hit_message(self, attacker, dam, tn, emote="hand_razors"):
         """
@@ -220,7 +227,8 @@ class Cybercorps(PlayerCharacter):
         if not self.cooldowns.ready("combat_display_status"):
             return
         print("getting combat  display status")
-        self.get_display_status(looker, **kwargs)
+        msg = self.get_display_status(looker, **kwargs)
+        self.msg(msg)
         self.cooldowns.add("combat_display_status", 3)
 
     def get_display_status(self, looker, **kwargs):
@@ -241,6 +249,7 @@ class Cybercorps(PlayerCharacter):
         docwagon_max = self.db.docwagon["max"]
         adaptive_armor = getattr(self.db, "adaptive_armor", False)
         platelet_factory_active = getattr(self.db, "platelet_factory_active", False)
+        adrenaline_boost = getattr(self.db, "adrenaline_boost", {})
 
         chunks.append(
             f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g"
@@ -251,6 +260,8 @@ class Cybercorps(PlayerCharacter):
             chunks.append(f"|gAA")
         if platelet_factory_active:
             chunks.append(f"|gPF")
+        if getattr(adrenaline_boost, "duration", 0) > 0:
+            chunks.append(f"|gAB")
 
         if looker != self:
             chunks.append(
@@ -271,11 +282,12 @@ class Cybercorps(PlayerCharacter):
             all_cooldowns = [f"{c[0]} ({c[1]}s)" for c in all_cooldowns if c[1]]
             if all_cooldowns:
                 chunks.append(f"Cooldowns: {iter_to_str(all_cooldowns, endsep=',')}")
+
         return " - ".join(chunks)
 
     # region Attack
     def attack(self, target, weapon, **kwargs):
-
+        weapon_delay = 1
         if not self.in_combat:
             self.enter_combat(target)
             if target:
@@ -302,6 +314,7 @@ class Cybercorps(PlayerCharacter):
 
         if melee_weapon:
             melee_weapon.at_attack(self, target)
+
         if ranged_weapon:
             ranged_weapon.at_attack(self, target)
 
@@ -311,7 +324,7 @@ class Cybercorps(PlayerCharacter):
         if self.account and (settings := self.account.db.settings):
             if settings.get("auto attack") and (speed := weapon.speed):
                 # queue up next attack; use None for target to reference stored target on execution
-                delay(1, self.attack, None, weapon, persistent=True)
+                delay(weapon_delay, self.attack, None, weapon, persistent=True)
 
     # region At_damage
     def at_damage(self, attacker, damage, damage_type=None):

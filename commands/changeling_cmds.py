@@ -761,6 +761,7 @@ class CmdLeaveChangelings(Command):
             del caller.db.body_control
             del caller.db.regrowth_rate
             del caller.db.regrowth_cost
+            del caller.db.regrowth
             del caller.db.engulfs
             del caller.db.max_engulfs
 

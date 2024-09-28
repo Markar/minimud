@@ -3,35 +3,12 @@ from evennia.utils.evtable import EvTable
 from commands.command import Command
 from typeclasses.cybercorpsguild.cybercorps_commands import CybercorpsCmdSet
 from typeclasses.cybercorpsguild.cybercorps_wares import WaresObjects
+from typeclasses.cybercorpsguild.cyber_implants import ImplantObjects
 from evennia import TICKER_HANDLER as tickerhandler
 
 # from commands.shops import ShopCmdSet
 # from evennia.utils import create
 # from typeclasses.scripts import RestockScript
-
-ImplantObjects = [
-    {
-        "name": "Adaptive Armor",
-        "skill": "cybernetic_enhancements",
-        "skill_req": 1,
-        "cost": 1,
-        "rank": 1,
-    },
-    {
-        "name": "Adrenaline Boost",
-        "skill": "biotech research",
-        "skill_req": 1,
-        "cost": 1,
-        "rank": 1,
-    },
-    {
-        "name": "Platelet Factory",
-        "skill": "biotech research",
-        "skill_req": 2,
-        "cost": 100,
-        "rank": 8,
-    },
-]
 
 
 class CmdJoinCybercorps(Command):
@@ -92,6 +69,8 @@ class CmdLeaveCybercorps(Command):
         del caller.db.adaptive_armor
         del caller.db.nano_reinforced_skeleton
         del caller.db.nrs_amount
+        del caller.db.adrenaline_boost
+
         try:
             tickerhandler.remove(
                 interval=6,
@@ -154,6 +133,7 @@ class CmdListWares(Command):
         caller.msg(str(table))
 
 
+# region list implants
 class CmdListImplants(Command):
     """
     List implants available for purchase from the Cybercorps Mega Corporation
@@ -178,6 +158,7 @@ class CmdListImplants(Command):
         caller.msg(str(table))
 
 
+# region buy implants
 class CmdBuyImplant(Command):
     """
     Buy implant from the Cybercorps Mega Corporation
@@ -241,6 +222,7 @@ class CmdBuyImplant(Command):
         return
 
 
+# region buy wars
 class CmdBuyWares(Command):
     """
     Buy wares from the Cybercorps Mega Corporation

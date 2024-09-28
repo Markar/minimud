@@ -41,7 +41,6 @@ class CombatScript(Script):
         """
 
         a, b = self.teams
-        print(f"getting fighters {a + b}")
         return a + b
 
     @property
