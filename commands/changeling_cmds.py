@@ -3,7 +3,7 @@ from evennia import CmdSet, search_tag
 from evennia.utils import iter_to_str
 from evennia.utils.evtable import EvTable
 from evennia import TICKER_HANDLER as tickerhandler
-from typeclasses.utils import get_article, GUILD_LEVEL_COST_DICT
+from typeclasses.utils import get_article, get_glvl_cost
 from typeclasses.changelingguild.changeling_constants_and_helpers import (
     AVIAN_FORMS,
     MAMMAL_FORMS,
@@ -247,7 +247,7 @@ class CmdEngulf(Command):
         if caller.db.engulfs < 1:
             caller.msg(f"|rYou do not have the strength to engulf at this time.\n")
             return
-        if hp > hpmax or fp > fpmax:
+        if hp > hpmax:
             caller.msg(f"|rYou may not engulf a creature at this time.\n")
             return
 
@@ -274,7 +274,7 @@ class CmdEngulf(Command):
         power = math.ceil(caller.db.hpmax * (9 + caller.db.guild_level / 7) / 10)
         fpower = math.ceil(caller.db.fpmax * (9 + caller.db.guild_level / 7) / 10)
         caller.db.hp += power
-        caller.db.fp += fpower
+        caller.db.fp = fpower
         caller.adjust_ep(-self.cost)
         caller.db.engulfs -= 1
         caller.cooldowns.add("engulf", 5)
@@ -445,7 +445,8 @@ class CmdGAdvance(Command):
     def _adv_level(self):
         print(f"adv level {self} and caller: {self.caller}")
         caller = self.caller
-        cost = GUILD_LEVEL_COST_DICT.get(caller.db.guild_level + 1, 0)
+        glvl = getattr(caller.db, "guild_level", 1)
+        cost = get_glvl_cost(glvl + 1)
 
         if caller.db.gxp < cost:
             self.msg(f"|wYou need {cost - caller.db.gxp} more experience to advance.")
@@ -628,7 +629,7 @@ class CmdGuildStatSheet(Command):
         gxp = caller.db.gxp or 0
         skill_gxp = caller.db.skill_gxp or 0
         form = caller.db.form or "none"
-        gxp_needed = GUILD_LEVEL_COST_DICT[my_glvl + 1]
+        gxp_needed = get_glvl_cost(my_glvl + 1)
         ec = getattr(caller.db, "ec", {}).get("active", False)
         ed = caller.db.energy_dissipation or "none"
         engulfs = caller.db.engulfs or 0
@@ -658,8 +659,12 @@ class CmdGuildStatSheet(Command):
 
         table = EvTable(f"|c{caller} {title} ({alignment})", border="table")
         table.add_row(f"|GGuild Level: {my_glvl}")
-        table.add_row(f"|GGXP: {gxp} / {gxp_needed}")
-        table.add_row(f"|GSkill GXP: {skill_gxp}")
+        if my_glvl == 40:
+            table.add_row(f"|GGuild XP: {gxp_needed}")
+        else:
+            table.add_row(f"|GGuild XP: {gxp} / {gxp_needed}")
+
+        table.add_row(f"|GSkill XP: {skill_gxp}")
         table.add_row(f"|GEngulfs: {engulfs} / {engulfMax}")
         table.add_row(f"|GForm: {form}")
         table.add_row(f"|GEnergy Control: {ecActive}")
@@ -719,22 +724,6 @@ class CmdJoinChangelings(Command):
         if caller.db.guild == "adventurer":
             caller.msg(f"|rYou join the Changeling guild")
             caller.swap_typeclass("typeclasses.changelings.Changelings")
-
-            try:
-                tickerhandler.remove(
-                    interval=6,
-                    callback=caller.at_tick,
-                    idstring=f"{caller}-regen",
-                    persistent=True,
-                )
-                tickerhandler.remove(
-                    interval=60 * 5,
-                    callback=caller.at_docwagon_tick,
-                    idstring=f"{caller}-superpower",
-                    persistent=True,
-                )
-            except ValueError:
-                print(f"tickerhandler.remove failed")
         else:
             caller.msg(f"|rYou are already in a guild")
 
@@ -892,6 +881,7 @@ class CmdDrain(Command):
                     "desc": f"|YA glowing capsule. It looks heavy, and full of nutrients.|n",
                     "location": caller.location,
                     "power": power,
+                    "weight": 10,
                 }
 
                 capsule = spawner.spawn(capsule)
@@ -1029,9 +1019,34 @@ class CmdTest(Command):
         caller = self.caller
         caller.msg("test")
 
-        tagged = search_tag(key="player", category="type")
-        for x in tagged:
-            x.db.best_kill = {"name": "none", "level": 0, "xp": 0}
+        # tagged = search_tag(key="player", category="type")
+        # for x in tagged:
+        #     x.db.best_kill = {"name": "none", "level": 0, "xp": 0}
+
+        try:
+            tags = caller.tags.has("player", "status")
+            # tickerhandler.clear()
+            # tickerhandler.remove(
+            #     interval=6,
+            #     callback=caller.at_tick,
+            #     idstring=f"{caller}-regen",
+            #     persistent=True,
+            # )
+
+            # tickerhandler.remove(
+            #     interval=60 * 5,
+            #     callback=caller.at_engulf_tick,
+            #     idstring=f"{caller}-superpower",
+            #     persistent=True,
+            # )
+            # tickerhandler.remove(
+            #     interval=60 * 5,
+            #     callback=caller.at_pc_tick,
+            #     idstring=f"{caller}-regen",
+            #     persistent=True,
+            # )
+        except ValueError:
+            print(f"tickerhandler.remove failed")
 
         caller.msg("done")
 

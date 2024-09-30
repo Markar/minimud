@@ -517,18 +517,18 @@ class PlayerCharacter(Character):
         }
         self.db.best_kill = {"name": "none", "level": 0, "xp": 0}
         self.db.weight = {"current": 0, "max": 50}
-        tickerhandler.add(
-            interval=6,
-            callback=self.at_pc_tick,
-            idstring=f"{self}-regen",
-            persistent=True,
-        )
-        tickerhandler.add(
-            interval=60 * 5,
-            callback=self.at_superpower_tick,
-            idstring=f"{self}-superpower",
-            persistent=True,
-        )
+        # tickerhandler.add(
+        #     interval=6,
+        #     callback=self.at_pc_tick,
+        #     idstring=f"{self}-regen",
+        #     persistent=True,
+        # )
+        # tickerhandler.add(
+        #     interval=60 * 5,
+        #     callback=self.at_superpower_tick,
+        #     idstring=f"{self}-superpower",
+        #     persistent=True,
+        # )
 
         # initialize hands
         self.db._wielded = {"left": None, "right": None}
@@ -922,7 +922,7 @@ class NPC(Character):
                     objs = spawn(*list(self.db.drops))
                     for obj in objs:
                         obj.move_to(self.location)
-                self.move_to(None, False, None, True, True, True, "teleport")
+                self.move_to(None, True, None, True, True, True, "teleport")
                 delay(360, self.at_respawn, persistent=True)
                 return
         # change target to the attacker

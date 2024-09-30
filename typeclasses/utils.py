@@ -122,6 +122,13 @@ class PowerCommand(Command):
         caller.cooldowns.add("global_cooldown", 2)
 
 
+def get_glvl_cost(glvl):
+    if glvl > 40:
+        return "Max level reached."
+    else:
+        return GUILD_LEVEL_COST_DICT[glvl]
+
+
 GUILD_LEVEL_COST_DICT = {
     2: 297,  # Total: 297
     3: 413,  # Total: 710

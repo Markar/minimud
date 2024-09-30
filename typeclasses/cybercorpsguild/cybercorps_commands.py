@@ -9,7 +9,7 @@ from typeclasses.cybercorpsguild.cyber_constants_and_helpers import (
     SKILLS_COST,
     TITLES,
 )
-from typeclasses.utils import GUILD_LEVEL_COST_DICT, SKILL_RANKS
+from typeclasses.utils import get_glvl_cost, SKILL_RANKS
 
 
 class PowerCommand(Command):
@@ -338,7 +338,7 @@ class CmdGAdvance(Command):
 
     def _adv_level(self):
         caller = self.caller
-        cost = GUILD_LEVEL_COST_DICT.get(caller.db.guild_level + 1, 0)
+        cost = get_glvl_cost.get(caller.db.guild_level + 1, 0)
 
         if caller.db.gxp < cost:
             self.msg(f"|wYou need {cost - caller.db.gxp} more experience to advance.")
@@ -389,7 +389,7 @@ class CmdGuildStatSheet(Command):
         my_glvl = caller.db.guild_level or 1
         gxp = caller.db.gxp or 0
         skill_gxp = caller.db.skill_gxp or 0
-        gxp_needed = GUILD_LEVEL_COST_DICT[my_glvl + 1]
+        gxp_needed = get_glvl_cost[my_glvl + 1]
         reaction = caller.db.reaction_percentage or 50
         melee_weapon = "None"
         if caller.db.melee_weapon:
@@ -467,13 +467,18 @@ class CmdSkills(Command):
 class CmdTest(Command):
     key = "test"
 
+    from evennia import TICKER_HANDLER as tickerhandler
+
     # from typeclasses.elementalguild.earth_elemental_commands import EarthElementalCmdSet
     # from typeclasses.elementalguild.fire_elemental_commands import FireElementalCmdSet
-    from typeclasses.cybercorpsguild.cybercorps_wares import CybercorpsWaresCmdSet
 
     def func(self):
         caller = self.caller
         caller.msg("test")
+        # from typeclasses.cybercorpsguild.cybercorps_wares import CybercorpsWaresCmdSet
+        # from typeclasses.cybercorpsguild.cyber_implants import CybercorpsImplantCmdSet
+
+        self.tickerhandler.clear()
         # from commands.shops import ShopCmdSet
         # del caller.db.docwagon
         # del caller.db.skills
@@ -481,7 +486,9 @@ class CmdTest(Command):
         # del caller.db.strategy
         # del caller.db.wares
 
-        caller.cmdset.add(CybercorpsCmdSet, permanent=True)
+        caller.cmdset.remove(CybercorpsCmdSet)
+        # caller.cmdset.remove(CybercorpsWaresCmdSet)
+        # caller.cmdset.remove(CybercorpsImplantCmdSet)
         # caller.cmdset.delete(EarthElementalCmdSet)
         # caller.cmdset.delete(EarthElementalCmdSet)
         # caller.cmdset.delete(CybercorpsCmdSet)

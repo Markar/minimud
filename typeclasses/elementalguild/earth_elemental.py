@@ -81,7 +81,7 @@ class EarthElemental(Elemental):
         chunks.append(
             f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g"
         )
-        if self.db.burnout["count"] > 0:
+        if self.db.burnout["max"] > 0:
             chunks.append(f"|YBurnout: |G{burnout_count}/{burnout_max}|n")
         if self.db.burnout["active"]:
             chunks.append(f"|YB")
@@ -96,9 +96,10 @@ class EarthElemental(Elemental):
 
         print(f"looker != self {looker} and self {self}")
         if looker != self:
-            chunks.append(
-                f"|gE: |G{looker.get_display_name(self, **kwargs)} ({looker.db.hp})"
-            )
+            chunks.append(f"|gE: |G{looker.get_display_name(self, **kwargs)}")
+
+        # if self.key == "Markar":
+        #     chunks.append(f"{looker.db.hp} / {looker.db.hpmax}")
 
         # get all the current status flags for this character
         if status_tags := self.tags.get(category="status", return_list=True):

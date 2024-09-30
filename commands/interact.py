@@ -94,9 +94,17 @@ class CmdGetAll(CmdGet):
     help_category = "general"
 
     def func(self):
+        caller = self.caller
         arg = self.args.strip().lower()
+        current_weight = caller.db.weight
+        max_weight = caller.db.max_weight
         if arg == "all":
             for obj in self.caller.location.contents_get(content_type="object"):
+                caller.msg(f"Getting {obj} and weight: {obj.db.weight}")
+                if not current_weight + obj.db.weight <= max_weight:
+                    caller.msg("You can't carry that much.")
+                    continue
+
                 if not obj.access(self.caller, "get"):
                     if obj.db.get_err_msg:
                         self.msg(obj.db.get_err_msg)
@@ -105,10 +113,17 @@ class CmdGetAll(CmdGet):
                         self.msg("You can't get that.")
                         continue
                 else:
-                    self.caller.msg(f"Getting {obj}")
+                    caller.msg(f"Getting {obj}")
+                    # caller.db.weight += obj.db.weight
                     obj.move_to(self.caller, quiet=True)
             return
         else:
+            for obj in self.caller.location.contents_get(content_type="object"):
+                if obj.key.lower() == arg:
+                    if not current_weight + obj.db.weight <= max_weight:
+                        caller.msg("You can't carry that much.")
+                        return
+            # caller.db.weight += obj.db.weight
             super().func()
 
 

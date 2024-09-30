@@ -28,22 +28,6 @@ class CmdJoinCybercorps(Command):
             )
 
             caller.cmdset.add(CybercorpsCmdSet, persistent=True)
-
-            try:
-                tickerhandler.remove(
-                    interval=6,
-                    callback=caller.at_pc_tick,
-                    idstring=f"{caller}-regen",
-                    persistent=True,
-                )
-                tickerhandler.remove(
-                    interval=60 * 5,
-                    callback=caller.at_superpower_tick,
-                    idstring=f"{caller}-superpower",
-                    persistent=True,
-                )
-            except ValueError:
-                print(f"tickerhandler.remove failed")
         else:
             caller.msg(f"|rYou are already in a guild")
 
@@ -59,6 +43,10 @@ class CmdLeaveCybercorps(Command):
     def strip(self):
         caller = self.caller
         caller.cmdset.delete(CybercorpsCmdSet)
+        caller.cmdset.delete(CybercorpsWaresCmdSet)
+        caller.cmdset.delete(CybercorpsImplantsCmdSet)
+        caller.cmdset.delete(CybercorpsWaresCmdSet)
+        caller.cmdset.delete(CybercorpsImplantsCmdSet)
         del caller.db.docwagon
         del caller.db.skills
         del caller.db.guild_level
@@ -70,6 +58,8 @@ class CmdLeaveCybercorps(Command):
         del caller.db.nano_reinforced_skeleton
         del caller.db.nrs_amount
         del caller.db.adrenaline_boost
+        del caller.db.implants
+        del caller.db.platelet_factory_active
 
         try:
             tickerhandler.remove(

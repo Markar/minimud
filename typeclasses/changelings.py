@@ -98,8 +98,10 @@ class Changelings(PlayerCharacter):
         self.msg(f"|gYour body ripples and shakes as energy flows into you")
         self.db.engulfs = self.db.max_engulfs
 
+    def at_docwagon_tick(self):
+        return
+
     def at_tick(self):
-        self.msg("changeling at_tick")
         glvl = self.db.guild_level
         ep = self.db.ep
         regen_skill = getattr(self.db, "skills", {}).get("regeneration", 1)
@@ -265,7 +267,11 @@ class Changelings(PlayerCharacter):
         else:
             to_me = msgs[10]
 
-        to_me = f"{to_me}"
+        if self.key == "Markar":
+            to_me = f"{to_me} {dam}"
+        else:
+            to_me = f"{to_me}"
+
         self.location.msg_contents(to_me, from_obj=self)
         print(f"to_me: {to_me} ({dam})")
 

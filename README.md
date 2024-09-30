@@ -17,7 +17,12 @@ py here.scripts.get('combat').delete()
 # Bomb all in limbo
 py _ = [obj.delete() for obj in self.search("#2").contents]
 
-evennia xyzgrid add world.maps.newbie_land
+# Add maps
+evennia xyzgrid add world.maps.mystical_forest
+evennia xyzgrid add world.maps.chessboard
+evennia xyzgrid add world.maps.training_grounds
+evennia xyzgrid add world.maps.crushbone
+evennia xyzgrid add world.maps.youtube
 evennia xyzgrid 
 
 Set an attribute on a room in game

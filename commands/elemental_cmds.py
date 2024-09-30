@@ -6,7 +6,7 @@ from evennia import TICKER_HANDLER as tickerhandler
 from evennia import logger
 
 from .command import Command
-from typeclasses.utils import GUILD_LEVEL_COST_DICT, SKILL_RANKS
+from typeclasses.utils import get_glvl_cost, SKILL_RANKS
 from typeclasses.elementalguild.earth_elemental_commands import EarthElementalCmdSet
 from typeclasses.elementalguild.air_elemental_commands import AirElementalCmdSet
 from typeclasses.elementalguild.fire_elemental_commands import FireElementalCmdSet
@@ -39,7 +39,7 @@ class CmdGAdvance(Command):
 
     def _adv_level(self):
         caller = self.caller
-        cost = GUILD_LEVEL_COST_DICT[caller.db.guild_level + 1]
+        cost = get_glvl_cost(caller.db.guild_level + 1)
         titles = EARTH_TITLES
         if caller.db.subguild == "water":
             titles = WATER_TITLES
@@ -93,7 +93,7 @@ class CmdGuildStatSheet(Command):
         gxp = caller.db.gxp or 0
         skill_gxp = caller.db.skill_gxp or 0
         form = caller.db.subguild or "adventurer"
-        gxp_needed = GUILD_LEVEL_COST_DICT[my_glvl + 1]
+        gxp_needed = get_glvl_cost(my_glvl + 1)
         reaction = caller.db.reaction_percentage or 50
         burnout_count = caller.db.burnout["count"]
         burnout_max = caller.db.burnout["max"]
@@ -159,22 +159,6 @@ class CmdJoinElementals(Command):
             )
             caller.cmdset.add(EarthElementalCmdSet, persistent=True)
 
-            try:
-                tickerhandler.remove(
-                    interval=6,
-                    callback=caller.at_tick,
-                    idstring=f"{caller}-regen",
-                    persistent=True,
-                )
-                tickerhandler.remove(
-                    interval=60 * 5,
-                    callback=caller.at_docwagon_tick,
-                    idstring=f"{caller}-superpower",
-                    persistent=True,
-                )
-            except ValueError:
-                print(f"tickerhandler.remove failed")
-
         else:
             caller.msg(f"|rYou are already in a guild")
 
@@ -189,7 +173,7 @@ class CmdLeaveElementals(Command):
     def func(self):
         caller = self.caller
         if caller.db.guild == "elemental":
-            caller.swap_typeclass("typeclasses.characters.PlayerCharacter")
+
             caller.cmdset.delete(ElementalCmdSet)
             caller.cmdset.delete(EarthElementalCmdSet)
             caller.cmdset.delete(FireElementalCmdSet)
@@ -208,6 +192,7 @@ class CmdLeaveElementals(Command):
             del caller.db.burnout
             del caller.db.water_form
             del caller.db.aqua_form
+            del caller.db.aqua_shield
             del caller.db.ice_shield
             del caller.db.cyclone_armor
             del caller.db.storm_form
@@ -222,13 +207,14 @@ class CmdLeaveElementals(Command):
                 )
                 tickerhandler.remove(
                     interval=60 * 5,
-                    callback=caller.at_engulf_tick,
+                    callback=caller.at_burnout_tick,
                     idstring=f"{caller}-superpower",
                     persistent=True,
                 )
             except ValueError:
                 print(f"tickerhandler.remove failed")
 
+            caller.swap_typeclass("typeclasses.characters.PlayerCharacter")
             caller.msg(f"|rYou leave the Elementals guild")
         else:
             caller.msg(f"|rYou are already an adventurer")
@@ -337,9 +323,12 @@ class CmdKickstart(Command):
 class CmdTest(Command):
     key = "test"
 
+    from evennia import TICKER_HANDLER as tickerhandler
+
     def func(self):
         caller = self.caller
         caller.msg("test")
+        self.tickerhandler.clear()
         # caller.cmdset.delete(ElementalCmdSet)
         # caller.cmdset.delete(ElementalCmdSet)
         # caller.cmdset.delete(ElementalCmdSet)
@@ -406,6 +395,23 @@ class CmdBig(Command):
         self.execute_cmd("gadvance")
 
 
+class CmdHp(Command):
+    """
+    Display the current and maximum health of the caller.
+
+    Usage:
+        hp
+    """
+
+    key = "hp"
+    help_category = "changeling"
+
+    def func(self):
+        caller = self.caller
+
+        caller.msg(caller.get_display_status(caller))
+
+
 class ElementalCmdSet(CmdSet):
     key = "Elemental CmdSet"
 
@@ -420,3 +426,4 @@ class ElementalCmdSet(CmdSet):
         self.add(CmdTest)
         self.add(CmdBig)
         self.add(CmdKickstart)
+        self.add(CmdHp)

@@ -59,7 +59,7 @@ class AttackEmotes:
                 f"{color}$You() knock {tn}{color}'s organs into unnatural positions with a vicious swat!",
                 f"{color}$You() knock a bone out of {tn}{color}'s body with a horrendous <CRUNCH>!",
                 f"{color}$You() smash down on a joint and swat an appendage off of {tn}{color}'s body!!",
-                f"{color}$You() smash into {tn}{color}'s head with a vicious blow that nearly knocks {tn}{color} unconscious!!",
+                f"{color}$You() smash into {tn}{color}'s head with a vicious blow that nearly knocks them{color} unconscious!!",
                 f"{color}$You() swat at {tn}{color}, <CRUSHING> {tn}{color} with a MASSIVE blow!!!",
             ]
         if emote == "wing":
@@ -80,10 +80,10 @@ class AttackEmotes:
             return [
                 f"{color}$You() swish your tail through the air, but it catches nothing.",
                 f"{color}$You() nick {tn}{color} with your tail.",
-                f"{color}$You() thud into {tn}{color}, knocking the wind out of {tn}{color}.",
+                f"{color}$You() thud into {tn}{color}, knocking the wind out of them{color}.",
                 f"{color}$You() cause {tn}{color} to fall back in pain.",
-                f"{color}$You() knock {tn}{color} off {tn}{color}'s feet!",
-                f"{color}$You() strike {tn}{color} so hard that {tn}{color} belches up blood!",
+                f"{color}$You() knock {tn}{color} off their{color}'s feet!",
+                f"{color}$You() strike {tn}{color} so hard that they {color} belch up blood!",
                 f"{color}{tn}{color}'s body makes a sickening <CRUNCH> as your tail slams into {tn}{color}.",
                 f"{color}{tn}{color} nearly implodes as your tail crushes {tn}{color} like a wine glass.",
                 f"{color}With a <THUNDEROUS CLAP>, your tail rearranges the atoms in {tn}{color}'s body.",
@@ -154,11 +154,11 @@ class AttackEmotes:
                 f"{color}{tn}{color} {color}holds {tn}{color}'s head and cowers in pain.",
                 f"{color}{tn}{color} {color}screams in agony trying to fight off the pain.",
                 f"{color}{tn}{color}{color}'s limbs fall limp for a second as {tn}{color}'s brain ceases to function.",
-                f"{color}$Blood oozes slowly from {tn}{color}'s nose and ears.",
+                f"{color}Blood oozes slowly from {tn}{color}'s nose and ears.",
                 f"{color}{tn}{color}{color}'s body explodes in a spasm of uncontrolled activity as {tn}{color}'s brain malfunctions.",
-                f"{color}$Skull fragments and blood ooze from {tn}{color}'s ears.",
-                f"{color}$Blood shoots out of {tn}{color}'s ears, followed by bits of brain matter!",
-                f"{color}$Blood and brain matter fly everywhere as {tn}{color}'s head EXPLODES!!",
+                f"{color}Skull fragments and blood ooze from {tn}{color}'s ears.",
+                f"{color}Blood shoots out of {tn}{color}'s ears, followed by bits of brain matter!",
+                f"{color}Blood and brain matter fly everywhere as {tn}{color}'s head EXPLODES!!",
             ]
         if emote == "hoof":
             return [
