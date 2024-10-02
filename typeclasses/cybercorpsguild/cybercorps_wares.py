@@ -6,22 +6,21 @@ from typeclasses.cybercorpsguild.cybercorps_attack import CybercorpsAttack
 from typeclasses.elementalguild.attack_emotes import AttackEmotes
 from typeclasses.utils import PowerCommand
 
+slowdown = 5
+
 
 def checkAdrenalineBoost(self, wielder):
     duration = wielder.db.adrenaline_boost["duration"]
-    slowdown = 5
 
-    if duration > 0:
+    if duration == True:
         wielder.adjust_ep(-20)
         wielder.db.adrenaline_boost["duration"] -= 1
         if duration == 1:
             self.db.adrenaline_boost = {"active": False, "duration": 0}
             self.msg(f"|CYour adrenaline boost fades, leaving you feeling drained.|n")
-            return slowdown
-        else:
-            return -1
+            return False
 
-    return -1
+    return None
 
 
 # region Guild Level Weapons
@@ -49,7 +48,7 @@ class HandRazors(CybercorpsAttack):
         dex = wielder.traits.dex.value
 
         stat_bonus = (str + dex) * 0.20
-        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
+        dmg = 3 + glvl + stat_bonus + self.rank * (glvl / 10)
 
         damage = int(uniform(dmg * 0.5, dmg))
         return damage
@@ -61,14 +60,15 @@ class HandRazors(CybercorpsAttack):
         # Subtract energy and apply damage to target before their defenses
         if wielder.db.strategy == "melee":
             speed = self.speed
-            wielder.db.ep -= self.energy_cost
+            wielder.adjust_ep(-self.energy_cost)
 
-            slowdown = checkAdrenalineBoost(self, wielder)
-            if slowdown > 0:
-                speed = slowdown
-            if slowdown == -1:
+            boost = checkAdrenalineBoost(self, wielder)
+
+            if boost:
                 dmg = self._calculate_melee_damage(wielder)
                 target.at_damage(wielder, dmg, "edged", "hand_razors")
+            if boost == None:
+                speed = slowdown
 
             dmg = self._calculate_melee_damage(wielder)
             target.at_damage(wielder, dmg, "edged", "hand_razors")
@@ -119,12 +119,13 @@ class ShockHand(CybercorpsAttack):
 
         speed = self.speed
 
-        slowdown = checkAdrenalineBoost(self, wielder)
-        if slowdown > 0:
-            speed = slowdown
-        if slowdown == -1:
+        boost = checkAdrenalineBoost(self, wielder)
+
+        if boost:
             dmg = self._calculate_melee_damage(wielder)
             target.at_damage(wielder, dmg, "lightning", "shock_hand")
+        if boost == None:
+            speed = slowdown
 
         dmg = self._calculate_melee_damage(wielder)
         target.at_damage(wielder, dmg, "lightning", "shock_hand")
@@ -174,12 +175,13 @@ class StealthBlade(CybercorpsAttack):
             wielder.msg("You can only maintain your hand razors.")
             return
 
-        slowdown = checkAdrenalineBoost(self, wielder)
-        if slowdown > 0:
-            speed = slowdown
-        if slowdown == -1:
+        boost = checkAdrenalineBoost(self, wielder)
+
+        if boost:
             dmg = self._calculate_melee_damage(wielder)
             target.at_damage(wielder, dmg, "edged", "stealth_blade")
+        if boost == None:
+            speed = slowdown
 
         dmg = self._calculate_melee_damage(wielder)
         target.at_damage(wielder, dmg, "edged", "stealth_blade")
@@ -231,12 +233,13 @@ class NanoBlade(CybercorpsAttack):
             wielder.msg("You can only maintain your hand razors.")
             return
 
-        slowdown = checkAdrenalineBoost(wielder, target, [dmg, "edged", "nanoblade"])
-        if slowdown > 0:
-            speed = slowdown
-        if slowdown == -1:
+        boost = checkAdrenalineBoost(self, wielder)
+
+        if boost:
             dmg = self._calculate_melee_damage(wielder)
             target.at_damage(wielder, dmg, "edged", "nanoblade")
+        if boost == None:
+            speed = slowdown
 
         dmg = self._calculate_melee_damage(wielder)
         target.at_damage(wielder, dmg, "edged", "nanoblade")
@@ -286,14 +289,13 @@ class EnergySword(CybercorpsAttack):
             wielder.msg("You can only maintain your hand razors.")
             return
 
-        slowdown = checkAdrenalineBoost(
-            wielder, target, [dmg, "energy", "energy_sword"]
-        )
-        if slowdown > 0:
-            speed = slowdown
-        if slowdown == -1:
+        boost = checkAdrenalineBoost(self, wielder)
+
+        if boost:
             dmg = self._calculate_melee_damage(wielder)
             target.at_damage(wielder, dmg, "energy", "energy_sword")
+        if boost == None:
+            speed = slowdown
 
         dmg = self._calculate_melee_damage(wielder)
         target.at_damage(wielder, dmg, "energy", "energy_sword")
@@ -339,14 +341,13 @@ class GravitonHammer(CybercorpsAttack):
         if not wielder.db.ep >= self.energy_cost:
             return
 
-        slowdown = checkAdrenalineBoost(
-            wielder, target, [dmg, "blunt", "graviton_hammer"]
-        )
-        if slowdown > 0:
-            speed = slowdown
-        if slowdown == -1:
+        boost = checkAdrenalineBoost(self, wielder)
+
+        if boost:
             dmg = self._calculate_melee_damage(wielder)
             target.at_damage(wielder, dmg, "blunt", "graviton_hammer")
+        if boost == None:
+            speed = slowdown
 
         wielder.db.ep -= self.energy_cost
 
@@ -394,14 +395,15 @@ class ChainBlade(CybercorpsAttack):
         if not wielder.cooldowns.ready("chain_blade"):
             return
 
-        slowdown = checkAdrenalineBoost(self, wielder)
-        if slowdown > 0:
+        boost = checkAdrenalineBoost(self, wielder)
+
+        if boost:
+            dmg = self._calculate_melee_damage(wielder)
+            target.at_damage(wielder, dmg, "edged", "chain_blade")
+            dmg = self._calculate_melee_damage(wielder)
+            target.at_damage(wielder, dmg, "edged", "chain_blade")
+        if boost == None:
             speed = slowdown
-        if slowdown == -1:
-            dmg = self._calculate_melee_damage(wielder)
-            target.at_damage(wielder, dmg, "edged", "chain_blade")
-            dmg = self._calculate_melee_damage(wielder)
-            target.at_damage(wielder, dmg, "edged", "chain_blade")
 
         dmg = self._calculate_melee_damage(wielder)
         dmg2 = self._calculate_melee_damage(wielder)
@@ -423,8 +425,8 @@ class ShockwaveHammer(CybercorpsAttack):
     energy_cost = 5
     name = "shockwave hammer"
     skill = "heavy weapons"
-    skill_req = 1
-    rank = 5
+    skill_req = 2
+    rank = 14
     cost = 4
     short = "A heavy weapon that generates shockwaves upon impact."
     type = "melee"
@@ -451,15 +453,13 @@ class ShockwaveHammer(CybercorpsAttack):
 
         wielder.db.ep -= self.energy_cost
 
-        slowdown = checkAdrenalineBoost(
-            self, wielder
-        )
-        if slowdown > 0:
-            speed = slowdown
-        if slowdown == -1:
+        boost = checkAdrenalineBoost(self, wielder)
+
+        if boost:
             dmg = self._calculate_melee_damage(wielder)
             target.at_damage(wielder, dmg, "blunt", "shockwave_hammer")
-            
+        if boost == None:
+            speed = slowdown
 
         dmg = self._calculate_melee_damage(wielder)
         target.at_damage(wielder, dmg, "blunt", "shockwave_hammer")
@@ -500,9 +500,10 @@ class TacticalShotgun(CybercorpsAttack):
 
         stat_bonus = str * 0.25 + dex * 0.25
         dmg = 30 + glvl + stat_bonus + self.rank * (glvl / 10)
+        dmg = int(uniform(dmg * 0.5, dmg) * 0.36)
 
         # divide the damage by the number of pellets and increase the total damage
-        damage = int(uniform(dmg * 0.5, dmg) * 0.36)
+        damage = 2 + dmg
         return damage
 
     def at_attack(self, wielder, target, **kwargs):
@@ -665,11 +666,11 @@ class LaserPistol(CybercorpsAttack):
         str = wielder.traits.str.value
         dex = wielder.traits.dex.value
 
-        miss_rate = 50 - (glvl * 0.5) - (dex * 0.25)
+        miss_rate = 75 - (glvl * 0.5) - (dex * 0.25)
         if randint(1, 100) < miss_rate:
             return 0
 
-        stat_bonus = str * 0.25 + dex * 0.5
+        stat_bonus = str * 0.25 + dex * 0.25
         dmg = glvl + stat_bonus + self.rank * (glvl / 10)
 
         damage = 10 + int(uniform(dmg * 0.5, dmg) * 0.55)
@@ -1046,7 +1047,7 @@ class RocketLauncher(CybercorpsAttack):
 
         dmg = self._calculate_ranged_damage(wielder)
         if randint(1, 100) < 30:
-            target.at_damage(wielder, dmg * 1.25, "fire", "rocket_launcher_hit")
+            target.at_damage(wielder, int(dmg * 1.25), "fire", "rocket_launcher_hit")
             return
         target.at_damage(wielder, dmg, "fire", "rocket_launcher")
         wielder.cooldowns.add("rocket_launcher", self.speed)
@@ -1065,7 +1066,7 @@ class FlameThrower(CybercorpsAttack):
     energy_cost = 5
     name = "flamethrower"
     skill = "heavy weapons"
-    skill_req = 2
+    skill_req = 1
     rank = 8
     cost = 3
     short = "A close-range weapon that projects a stream of fire."
@@ -1077,9 +1078,9 @@ class FlameThrower(CybercorpsAttack):
         dex = wielder.traits.dex.value
 
         stat_bonus = (str + dex) * 0.25
-        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
+        dmg = 20 + glvl + stat_bonus + self.rank * (glvl / 10)
 
-        damage = int(uniform(dmg * 0.5, dmg) * 0.35)
+        damage = 2 + int(uniform(dmg * 0.5, dmg) * 0.35)
         return damage
 
     def at_attack(self, wielder, target, **kwargs):

@@ -33,6 +33,10 @@ class CmdJoinCybercorps(Command):
 
 
 # region Leave Cybercorps
+from typeclasses.cybercorpsguild.cybercorps_wares import CybercorpsWaresCmdSet
+from typeclasses.cybercorpsguild.cyber_implants import CybercorpsImplantCmdSet
+
+
 class CmdLeaveCybercorps(Command):
     """
     Leave the Cybercorps Mega Corporation
@@ -44,9 +48,7 @@ class CmdLeaveCybercorps(Command):
         caller = self.caller
         caller.cmdset.delete(CybercorpsCmdSet)
         caller.cmdset.delete(CybercorpsWaresCmdSet)
-        caller.cmdset.delete(CybercorpsImplantsCmdSet)
-        caller.cmdset.delete(CybercorpsWaresCmdSet)
-        caller.cmdset.delete(CybercorpsImplantsCmdSet)
+        caller.cmdset.delete(CybercorpsImplantCmdSet)
         del caller.db.docwagon
         del caller.db.skills
         del caller.db.guild_level
@@ -86,7 +88,7 @@ class CmdLeaveCybercorps(Command):
             caller.swap_typeclass("typeclasses.characters.PlayerCharacter")
             caller.msg(f"|rYou leave the Cybercorps Mega Corporation")
         else:
-            caller.msg(f"|rYou are already an adventurer")
+            caller.msg(f"|rYou are not part of the Cybercorps Mega Corporation.")
 
 
 # region List Wares
@@ -102,8 +104,14 @@ class CmdListWares(Command):
         table = EvTable(
             f"|wWares", f"|wSkill", f"|wRank", f"|wCost", f"|wLevel", border="table"
         )
+
         for ware in WaresObjects.values():
-            if ware.name in caller.db.wares:
+
+            if (
+                caller.db.wares
+                and ware.name in caller.db.wares
+                and caller.db.guild == "cybercorps"
+            ):
                 table.add_row(
                     f"|Y{ware.name}",
                     f"|Y{ware.skill}",
@@ -223,6 +231,7 @@ class CmdBuyWares(Command):
     def func(self):
         caller = self.caller
         ware = self.args.strip().lower()
+        coins = getattr(caller.db, "coins", 0)
 
         if caller.db.guild != "cybercorps":
             caller.msg(
@@ -252,7 +261,7 @@ class CmdBuyWares(Command):
                     )
                     return
 
-                if caller.db.coins < ware.cost:
+                if coins < ware.cost:
                     caller.msg(
                         f"|rYou need {ware.cost - caller.db.coins} more coins to buy the {ware.name}."
                     )
@@ -269,7 +278,7 @@ class CmdBuyWares(Command):
         return
 
 
-class CybercorpsWaresCmdSet(CmdSet):
+class CybercorpsWaresRoomCmdSet(CmdSet):
     key = "Cybercorps Wares CmdSet"
 
     def at_cmdset_creation(self):
@@ -279,7 +288,7 @@ class CybercorpsWaresCmdSet(CmdSet):
         self.add(CmdListWares)
 
 
-class CybercorpsImplantsCmdSet(CmdSet):
+class CybercorpsImplantsRoomCmdSet(CmdSet):
     key = "Cybercorps Implants CmdSet"
 
     def at_cmdset_creation(self):

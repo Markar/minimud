@@ -78,6 +78,43 @@ class CmdEat(Command):
         obj.delete()
 
 
+class CmdDropAll(CmdGet):
+    """
+    Get an object from the room or from another object.
+
+    Usage:
+        drop <obj> or drop all
+
+    Example:
+        drop apple, drop all
+    """
+
+    key = "drop"
+    aliases = "drop"
+    help_category = "general"
+
+    def func(self):
+        caller = self.caller
+        arg = self.args.strip().lower()
+
+        if not arg:
+            caller.msg("Drop what?")
+            return
+
+        if arg == "all":
+            objs = caller.contents
+
+            if not objs:
+                return
+
+            for obj in objs:
+                if obj.move_to(caller.location, quiet=True, move_type="drop"):
+                    caller.msg(f"Dropped {obj}.")
+                    obj.at_drop(caller)
+
+            super().func()
+
+
 class CmdGetAll(CmdGet):
     """
     Get an object from the room or from another object.
@@ -96,14 +133,9 @@ class CmdGetAll(CmdGet):
     def func(self):
         caller = self.caller
         arg = self.args.strip().lower()
-        current_weight = caller.db.weight
-        max_weight = caller.db.max_weight
+
         if arg == "all":
             for obj in self.caller.location.contents_get(content_type="object"):
-                caller.msg(f"Getting {obj} and weight: {obj.db.weight}")
-                if not current_weight + obj.db.weight <= max_weight:
-                    caller.msg("You can't carry that much.")
-                    continue
 
                 if not obj.access(self.caller, "get"):
                     if obj.db.get_err_msg:
@@ -116,14 +148,7 @@ class CmdGetAll(CmdGet):
                     caller.msg(f"Getting {obj}")
                     # caller.db.weight += obj.db.weight
                     obj.move_to(self.caller, quiet=True)
-            return
-        else:
-            for obj in self.caller.location.contents_get(content_type="object"):
-                if obj.key.lower() == arg:
-                    if not current_weight + obj.db.weight <= max_weight:
-                        caller.msg("You can't carry that much.")
-                        return
-            # caller.db.weight += obj.db.weight
+
             super().func()
 
 
@@ -134,3 +159,4 @@ class InteractCmdSet(CmdSet):
         super().at_cmdset_creation()
         self.add(CmdEat)
         self.add(CmdGetAll)
+        self.add(CmdDropAll)

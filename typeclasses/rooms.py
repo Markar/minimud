@@ -23,8 +23,8 @@ from commands.changeling_cmds import CmdLeaveChangelings
 from typeclasses.cybercorpsguild.rooms.room_commands import (
     CmdJoinCybercorps,
     CmdLeaveCybercorps,
-    CybercorpsWaresCmdSet,
-    CybercorpsImplantsCmdSet,
+    CybercorpsWaresRoomCmdSet,
+    CybercorpsImplantsRoomCmdSet,
 )
 from typeclasses.warriorsguild.rooms.room_commands import (
     CmdJoinWarriors,
@@ -319,14 +319,14 @@ class CybercorpsGuildJoinRoom(Room):
 class CybercorpsWaresRoom(Room):
     def at_object_creation(self):
         print(f"at obj creation, self {self}")
-        self.cmdset.add_default(CybercorpsWaresCmdSet)
+        self.cmdset.add_default(CybercorpsWaresRoomCmdSet)
         # @desc |YAs you step into the CyberCorps Wares Shop, the atmosphere shifts to one of sleek sophistication and cutting-edge technology. The shop is a marvel of modern design, with walls lined with polished metal and illuminated by soft, ambient lighting that highlights the high-tech merchandise on display.|/|/The entrance is flanked by two holographic displays, welcoming you with animated advertisements showcasing the latest in cybernetic enhancements and advanced weaponry. The floor is a seamless expanse of dark, reflective material that seems to absorb sound, creating a hushed, almost reverent atmosphere.|/|/To your left, a series of glass cases house an array of cybernetic implants, each one more advanced than the last. From neural interfaces that enhance cognitive functions to biomechanical limbs that offer superhuman strength, the selection is both impressive and intimidating. Each item is accompanied by a holographic information panel, detailing its specifications and potential applications.|/|/On the right, a wall of weaponry catches your eye. Sleek plasma rifles, compact laser pistols, and formidable gauss cannons are displayed with meticulous care. The weapons are mounted on illuminated racks, each one casting a soft glow that accentuates their lethal beauty. Interactive displays allow you to examine the weapons in detail, providing information on their capabilities and customization options.|/|/In the center of the shop, a circular counter staffed by impeccably dressed androids offers personalized assistance. Their synthetic voices are calm and precise, ready to answer any questions and guide you through the purchasing process. Behind the counter, a large screen displays real-time data feeds and promotional videos, showcasing the latest innovations from CyberCorps.|/|/The back of the shop features a private consultation area, where clients can discuss their needs and receive expert advice on the best enhancements and equipment for their specific requirements. Comfortable seating and a serene ambiance make this area a welcome respite from the high-tech hustle of the main shop floor.|/|/Throughout the shop, the air is filled with a subtle hum of advanced machinery and the faint scent of ozone, a reminder of the powerful technology that surrounds you. The overall effect is one of awe and excitement, a testament to the cutting-edge advancements that CyberCorps has to offer. This is not just a shop; it is a gateway to a future where the line between human and machine is increasingly blurred.
 
 
 class CybercorpsImplantRoom(Room):
     def at_object_creation(self):
         print(f"at obj creation, self {self}")
-        self.cmdset.add_default(CybercorpsImplantsCmdSet)
+        self.cmdset.add_default(CybercorpsImplantsRoomCmdSet)
 
 
 class CybercorpsShop(Room):
@@ -341,6 +341,9 @@ class CybercorpsShop(Room):
         super().at_object_creation()
 
         # add the shopping commands to the room
+        self.cmdset.delete(ShopCmdSet)
+        self.cmdset.delete(ShopCmdSet)
+        self.cmdset.delete(ShopCmdSet)
         self.cmdset.add(ShopCmdSet, persistent=True)
         # create an invisible, inaccessible storage object
         self.db.storage = create.object(

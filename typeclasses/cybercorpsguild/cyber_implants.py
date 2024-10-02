@@ -9,7 +9,7 @@ ImplantObjects = [
         "skill": "cybernetic enhancements",
         "skill_req": 1,
         "cost": 1,
-        "rank": 10,
+        "rank": 6,
     },
     {
         "name": "Adrenaline Boost",
@@ -40,7 +40,7 @@ class CmdAdaptiveArmor(PowerCommand):
     key = "adaptive armor"
     help_category = "cybercorps"
     cost = 50
-    guild_level = 10
+    guild_level = 6
 
     def func(self):
         caller = self.caller
@@ -55,8 +55,11 @@ class CmdAdaptiveArmor(PowerCommand):
             return
         if caller.db.adaptive_armor:
             caller.location.msg_contents(
-                f"|c{caller} deactivates their adaptive armor.", from_obj=caller
+                f"|c{caller} deactivates their adaptive armor.",
+                from_obj=caller,
+                exclude=caller,
             )
+            caller.msg(f"|cYou deactivate your adaptive armor.")
             caller.db.adaptive_armor = False
             return
 
@@ -64,8 +67,11 @@ class CmdAdaptiveArmor(PowerCommand):
         caller.cooldowns.add("global_cooldown", 2)
         caller.db.adaptive_armor = True
         caller.db.ep -= self.cost
+        caller.msg(f"|cYou activate your adaptive armor.")
         caller.location.msg_contents(
-            f"|c{caller} activates their adaptive armor.", from_obj=caller
+            f"|c{caller} activates their adaptive armor.",
+            from_obj=caller,
+            exclude=caller,
         )
 
 
@@ -95,8 +101,8 @@ class CmdDocWagon(PowerCommand):
         if caller.db.ep < self.cost:
             caller.msg(f"|rYou need at least {self.cost} energy to use this power.")
             return
-        if glvl < 10:
-            caller.msg(f"|CYou need to be guild level 10 to use burnout.")
+        if glvl < 7:
+            caller.msg(f"|CYou need to be guild level 7 to call a docwagon.")
             return
         caller.db.ep -= self.cost
         caller.cooldowns.add("docwagon", 60)
@@ -117,10 +123,11 @@ class CmdPlateletFactory(Command):
     Activate your platelet factory, increasing your health regeneration rate.
 
     Usage:
-        pulse grenade
+        platelet factory
     """
 
-    key = "platelet factory "
+    key = "platelet factory"
+    aliases = ["platelet", "factory", "pf"]
     help_category = "cybercorps"
     cost = 50
     guild_level = 4
@@ -132,7 +139,7 @@ class CmdPlateletFactory(Command):
         implants = getattr(caller.db, "implants", {})
         active = getattr(caller.db, "platelet_factory_active", False)
 
-        if not implants.get("platelet factory", False):
+        if not "platelet factory" in implants:
             caller.msg(f"|CYou don't have a platelet factory implanted yet.")
             return
         if active:
@@ -140,7 +147,7 @@ class CmdPlateletFactory(Command):
             caller.msg(f"|cYou feel your platelet production slowing down.")
         else:
             setattr(caller.db, "platelet_factory_active", True)
-            self.msg(f"|cYour feel your platelet production flooding your system.")
+            self.msg(f"|cYour feel platelets flooding your system.")
             caller.db.ep -= self.cost
 
         return
@@ -148,8 +155,16 @@ class CmdPlateletFactory(Command):
 
 # region Adrenaline Boost
 class CmdAdrenalineBoost(PowerCommand):
+    """
+    Sends a surge of adrenaline through your system, increasing your speed and reflexes for a short time.
+
+    Usage:
+        adrenaline boost, boost, ab
+
+    """
+
     key = "adrenaline boost"
-    aliases = ["boost"]
+    aliases = ["boost", "ab"]
     cost = 50
     guild_level = 10
     skill = "biotech research"

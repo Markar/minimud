@@ -5,6 +5,7 @@ from commands.elemental_cmds import ElementalCmdSet
 from typeclasses.elementalguild.earth_elemental_attack import EarthAttack
 from typeclasses.elementals import Elemental
 from typeclasses.elementalguild.attack_emotes import AttackEmotes
+from typeclasses.utils import geHealthStatus
 import math
 
 
@@ -85,6 +86,8 @@ class EarthElemental(Elemental):
             chunks.append(f"|YBurnout: |G{burnout_count}/{burnout_max}|n")
         if self.db.burnout["active"]:
             chunks.append(f"|YB")
+        if self.db.stone_skin:
+            chunks.append(f"|YSS")
         if self.db.earth_shield and self.db.earth_shield["hits"] > 0:
             chunks.append(f"|YES")
         if self.db.earth_form:
@@ -94,12 +97,13 @@ class EarthElemental(Elemental):
         if self.db.earthen_renewal and self.db.earthen_renewal["duration"] > 0:
             chunks.append(f"|YER")
 
-        print(f"looker != self {looker} and self {self}")
         if looker != self:
             chunks.append(f"|gE: |G{looker.get_display_name(self, **kwargs)}")
-
-        # if self.key == "Markar":
-        #     chunks.append(f"{looker.db.hp} / {looker.db.hpmax}")
+            hpPct = looker.db.hp / looker.db.hpmax
+            status = geHealthStatus(self, hpPct)
+            chunks.append(f"|gH: |G{status}")
+            if self.key == "Markar":
+                chunks.append(f"{looker.db.hp} / {looker.db.hpmax}")
 
         # get all the current status flags for this character
         if status_tags := self.tags.get(category="status", return_list=True):
@@ -141,14 +145,14 @@ class EarthElemental(Elemental):
                 rate = self.db.earthen_renewal["rate"]
                 bonus_fp += uniform(rate / 2, rate + 1)
                 if self.db.earthen_renewal["duration"] == 1:
-                    deactivateMsg = f"|C$Your() body stops glowing as you release the regenerative energy."
+                    deactivateMsg = f"|CYour() body stops glowing as you release the regenerative energy."
                     self.location.msg_contents(deactivateMsg, from_obj=self)
                 self.db.earthen_renewal["duration"] -= 1
 
         if self.db.burnout["active"]:
             if self.db.burnout["duration"] == 1:
                 self.db.burnout["active"] = False
-                deactivateMsg = f"|C$The flames around you flicker and die out, leaving you feeling drained."
+                deactivateMsg = f"|CThe flames around you flicker and die out, leaving you feeling drained."
                 self.location.msg_contents(deactivateMsg, from_obj=self)
             self.db.burnout["duration"] -= 1
 
@@ -270,7 +274,7 @@ class EarthElemental(Elemental):
             flat_reduction += stone_mastery + earth_resonance
 
             if self.db.earth_shield["hits"] == 1:
-                deactivateMsg = f"|C$Your() form loses its shimmer as the protective shield of stone dissipates."
+                deactivateMsg = f"|CYour form loses its shimmer as the protective shield of stone dissipates."
                 self.location.msg_contents(deactivateMsg, from_obj=self)
 
             self.db.earth_shield["hits"] -= 1
@@ -287,9 +291,25 @@ class EarthElemental(Elemental):
 
         # apply mineral_fortification after defense if it's enabled
         if damage_type in ("blunt", "edged") and self.db.stone_skin:
-            stone_skin_absorbed = uniform(mineral_fort / 3, mineral_fort)
-            damage -= stone_skin_absorbed
+
+            stone_skin_absorbed = (
+                (mineral_fort * 3)
+                + uniform(0, glvl / 2)
+                + uniform(0, 30)
+                + (self.traits.con.value * 0.20)
+            )
+
+            damage -= int(stone_skin_absorbed)
             self.msg(f"|cYour stone skin blocks some damage!")
+            self.adjust_ep(-1)
+        else:
+            stone_skin_absorbed = int(
+                (mineral_fort * 3)
+                + uniform(0, glvl / 2)
+                + uniform(0, 30)
+                + (self.traits.con.value * 0.20) / 2
+            )
+            self.adjust_ep(-1)
 
         # randomize damage
         damage = uniform(damage / 2, damage)
@@ -301,8 +321,6 @@ class EarthElemental(Elemental):
         damage = max(damage, 0)
         # Apply the damage to the character
         self.db.hp -= damage
-        self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
-        attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
 
         # Get the attack emote
         attacker.get_npc_attack_emote(self, damage, self.get_display_name(self))

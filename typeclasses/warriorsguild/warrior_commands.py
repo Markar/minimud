@@ -213,7 +213,7 @@ class CmdGAdvance(Command):
 
     def _adv_level(self):
         caller = self.caller
-        cost = get_glvl_cost.get(caller.db.guild_level + 1, 0)
+        cost = get_glvl_cost(caller.db.guild_level + 1)
 
         if caller.db.gxp < cost:
             self.msg(f"|wYou need {cost - caller.db.gxp} more experience to advance.")
@@ -247,7 +247,7 @@ class CmdGuildStatSheet(Command):
         my_glvl = caller.db.guild_level or 1
         gxp = caller.db.gxp or 0
         skill_gxp = caller.db.skill_gxp or 0
-        gxp_needed = get_glvl_cost[my_glvl + 1]
+        gxp_needed = get_glvl_cost(my_glvl + 1)
         reaction = caller.db.reaction_percentage or 50
         melee_weapon = "None"
         if caller.db.melee_weapon:

@@ -774,7 +774,7 @@ class CmdLeaveChangelings(Command):
             caller.swap_typeclass("typeclasses.characters.PlayerCharacter")
             caller.msg(f"|rYou leave the Changeling guild")
         else:
-            caller.msg(f"|rYou are already an adventurer")
+            caller.msg(f"|rYou are not a Changeling.")
 
 
 # region Kickstart

@@ -55,7 +55,7 @@ class CmdGAdvance(Command):
             title = titles[caller.db.guild_level]
             caller.db.gxp -= cost
             caller.db.guild_level += 1
-            caller.db.epmax += 10
+            caller.db.epmax += 20
             caller.db.title = title
             self.msg(f"|rYou become {title} ({caller.db.guild_level}).")
 
@@ -217,7 +217,7 @@ class CmdLeaveElementals(Command):
             caller.swap_typeclass("typeclasses.characters.PlayerCharacter")
             caller.msg(f"|rYou leave the Elementals guild")
         else:
-            caller.msg(f"|rYou are already an adventurer")
+            caller.msg(f"|rYou are not an Elemental")
 
 
 class CmdChooseForm(Command):

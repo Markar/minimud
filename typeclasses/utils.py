@@ -49,26 +49,23 @@ def SetNPCStats(self, level, xp, hits):
         hpmax += 50
     elif xp > 200 and xp < 501:
         damage += 5
-        hpmax += 50
     elif xp > 500 and xp < 1001:
         damage += 6
-        hpmax += 50
     elif xp >= 800:
         damage += 7
-        hpmax += 50
 
     if level < 30 and level > 24:
         damage = damage * 0.5
-        exp_reward = exp_reward * 1.3
+        exp_reward = exp_reward * 1.35
     elif level < 25 and level > 19:
         damage = damage * 0.65
-        exp_reward = exp_reward * 1.15
+        exp_reward = exp_reward * 1.25
     elif level < 20 and level > 14:
         damage = damage * 0.75
-        exp_reward = exp_reward
+        exp_reward = exp_reward * 1.15
     elif level < 15 and level > 9:
         damage = damage * 0.85
-        exp_reward = exp_reward * 0.8
+        exp_reward = exp_reward
     elif level < 10 and level > 4:
         damage = damage * 0.9
         exp_reward = exp_reward * 0.6

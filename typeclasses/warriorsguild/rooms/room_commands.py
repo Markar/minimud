@@ -67,7 +67,7 @@ class CmdLeaveWarriors(Command):
             self.strip()
             caller.msg(f"|rYou leave the Warriors guild")
         else:
-            caller.msg(f"|rYou are already an adventurer")
+            caller.msg(f"|rYou are not in the Warriors guild")
 
 
 # region List Wares

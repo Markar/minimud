@@ -33,7 +33,7 @@ class CmdPulseGrenade(PowerCommand):
     key = "pulse grenade"
     help_category = "cybercorps"
     cost = 10
-    guild_level = 5
+    guild_level = 12
 
     def func(self):
         caller = self.caller
@@ -62,6 +62,64 @@ class CmdPulseGrenade(PowerCommand):
                 # obj.db.stunned = True
                 # obj.db.stunned_duration = 3 + skill_rank
                 # delay(, persistent=True)
+
+        return
+
+
+# region First Aid
+class CmdFirstAid(PowerCommand):
+    """
+    Perform first aid on yourself or another character.
+
+    Usage:
+        first aid
+    """
+
+    key = "first aid"
+    aliases = ["fa", "aid"]
+    help_category = "cybercorps"
+    cost = 5
+    ep_cost = 20
+    guild_level = 5
+
+    def func(self):
+        caller = self.caller
+        hp = caller.db.hp
+        hpmax = caller.db.hpmax
+        percent = hp / hpmax * 100
+        if caller.db.combat_target:
+            caller.msg(f"|CYou can't do that while in combat.")
+            return
+        if percent >= 50:
+            caller.msg(f"|CYou don't need first aid.")
+            return
+        if not caller.db.guild_level >= self.guild_level:
+            caller.msg(f"|CYou don't have access to first aid yet.")
+            return
+        if not caller.cooldowns.ready("first_aid"):
+            caller.msg(f"|CNot so fast!")
+            return False
+        if caller.db.ep < self.cost:
+            caller.msg(f"|rYou need more energy to do that.")
+            return
+
+        caller.cooldowns.add("first_aid", 4)
+        caller.cooldowns.add("global_cooldown", 2)
+        skill_rank = caller.db.skills.get("Security Services", 1)
+
+        # self.msg(f"|cYou perform first aid on yourself or another character.")
+        caller.location.msg_contents(f"|c{caller} performs first aid on themselves.")
+
+        amount = 10 + skill_rank * 2
+        caller.adjust_hp(amount)
+        caller.adjust_fp(-self.cost)
+        caller.adjust_ep(-self.ep_cost)
+        caller.msg(caller.get_display_status(caller))
+        # for obj in caller.location.contents:
+        #     if obj.db.hp:
+        #         obj.db.hp += 10 + skill_rank * 2
+        #         if obj.db.hp > obj.db.hpmax:
+        #             obj.db.hp = obj.db.hpmax
 
         return
 
@@ -166,9 +224,10 @@ class CmdPowers(Command):
         table.add_row(f"|GSynthetic Conversion", 1, 0)
         table.add_row(f"|GLoadout", 1, 0)
         table.add_row(f"|GLoadout Remove", 1, 0)
-        table.add_row(f"|GAdaptive Armor", 10, "25 Energy")
+        table.add_row(f"|GFirst Aid", 5, "5 Energy")
         table.add_row(f"|GDocWagon Revive", 7, "10 Energy")
-        table.add_row(f"|GPulse Grenade", 5, "10 Energy")
+        table.add_row(f"|GAdaptive Armor", 10, "25 Energy")
+        table.add_row(f"|GPulse Grenade", 12, "10 Energy")
         table.add_row(f"|GNano Reinforced Skeleton", 20, "75 Energy")
 
         caller.msg(str(table))
@@ -338,7 +397,7 @@ class CmdGAdvance(Command):
 
     def _adv_level(self):
         caller = self.caller
-        cost = get_glvl_cost.get(caller.db.guild_level + 1, 0)
+        cost = get_glvl_cost(caller.db.guild_level + 1)
 
         if caller.db.gxp < cost:
             self.msg(f"|wYou need {cost - caller.db.gxp} more experience to advance.")
@@ -389,7 +448,7 @@ class CmdGuildStatSheet(Command):
         my_glvl = caller.db.guild_level or 1
         gxp = caller.db.gxp or 0
         skill_gxp = caller.db.skill_gxp or 0
-        gxp_needed = get_glvl_cost[my_glvl + 1]
+        gxp_needed = get_glvl_cost(my_glvl + 1)
         reaction = caller.db.reaction_percentage or 50
         melee_weapon = "None"
         if caller.db.melee_weapon:
@@ -583,6 +642,7 @@ class CybercorpsCmdSet(CmdSet):
         self.add(CmdReaction)
         self.add(CmdPulseGrenade)
         self.add(CmdNanoReinforcedSkeleton)
+        self.add(CmdFirstAid)
 
         self.add(CmdUpdateChessboard)
         self.add(CmdHp)

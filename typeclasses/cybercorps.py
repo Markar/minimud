@@ -104,11 +104,7 @@ class Cybercorps(PlayerCharacter):
         energy_solutions = self.db.skills.get("energy solutions", 1)
         adaptive_armor = getattr(self.db, "adaptive_armor", False)
         implants = getattr(self.db, "implants", False)
-        platelet_factory_active = (
-            implants.get("platelet factory", False)
-            if isinstance(implants, dict)
-            else False
-        )
+        platelet_factory_active = getattr(self.db, "platelet_factory_active", False)
 
         bonus_hp = 0
         bonus_fp = 0
@@ -117,8 +113,7 @@ class Cybercorps(PlayerCharacter):
         bonus_ep += int(uniform(energy_solutions * 0.2, energy_solutions * 0.3))  # 0-3
 
         if platelet_factory_active:
-            bonus_hp += biotech_research
-            bonus_ep -= biotech_research / 2
+            bonus_hp += 1 + biotech_research
 
         if adaptive_armor and self.db.ep < 6:
             bonus_ep -= 5

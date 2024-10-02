@@ -1,4 +1,4 @@
-from random import uniform
+from random import uniform, randint
 from typeclasses.elementalguild.elemental_attack import ElementalAttack
 
 
@@ -35,15 +35,25 @@ class EarthAttack(ElementalAttack):
             dmg += 65
 
         damage = int(uniform(dmg / 2, dmg))
+        if wielder.db.burnout["active"]:
+            damage += wielder.db.guild_level
         return damage
 
     def at_attack(self, wielder, target, **kwargs):
         super().at_attack(wielder, target, **kwargs)
+        speed = 3
 
         # Subtract energy and apply damage to target before their defenses
         if wielder.db.strategy == "melee":
-            speed = 3
-            wielder.db.ep -= self.energy_cost
+            if wielder.db.burnout["active"]:
+                if randint(1, 100) <= 25:
+                    dmg = self._calculate_melee_damage(wielder)
+                    target.at_damage(wielder, dmg, "blunt", "earth_elemental_melee")
+                    wielder.msg(f"|rThe energy makes your attacks faster.|n")
+                wielder.adjust_ep(-2)
+                wielder.adjust_fp(2)
+            else:
+                wielder.db.ep -= self.energy_cost
 
             dmg = self._calculate_melee_damage(wielder)
             target.at_damage(wielder, dmg, "blunt", "earth_elemental_melee")

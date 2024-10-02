@@ -17,7 +17,7 @@ from .objects import ObjectParent
 from typeclasses.general_attack_emotes import AttackEmotes
 from typeclasses.utils import SetNPCStats
 
-_IMMOBILE = ("sitting", "lying down", "unconscious")
+_IMMOBILE = ("sitting", "lying down", "unconscious", "meditating")
 _MAX_CAPACITY = 10
 
 # LOOK INTO RESTORING THESE STATUSES
@@ -517,6 +517,7 @@ class PlayerCharacter(Character):
         }
         self.db.best_kill = {"name": "none", "level": 0, "xp": 0}
         self.db.weight = {"current": 0, "max": 50}
+        self.db.coins = 0
         # tickerhandler.add(
         #     interval=6,
         #     callback=self.at_pc_tick,
