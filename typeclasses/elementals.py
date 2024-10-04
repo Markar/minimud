@@ -25,6 +25,7 @@ class Elemental(PlayerCharacter):
             con_increase_amount * (self.traits.con.value + self.db.con_bonus)
         )
         self.db.fpmax = 50 + (int_increase_amount * self.traits.int.value)
+        self.db.epmax = 120
 
         self.db.guild_level = 1
         self.db.gxp = 0

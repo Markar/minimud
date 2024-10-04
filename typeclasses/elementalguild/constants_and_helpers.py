@@ -101,7 +101,13 @@ EARTH_TITLES = [
     "the Earth Architect",
     "the Rock Sculptor",
     "the Ground Shaper",
+    "the Stonecrafter",
+    "the Creator of Mountains",
+    "the Emerald Deity",
+    "the Rock God",
+    "the Crystal Entity",
 ]
+
 FIRE_TITLES = [
     "Novice of the Flickering Flames",
     "Apprentice of the Smoldering Embers",

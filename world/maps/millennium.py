@@ -367,14 +367,14 @@ open north;n,south;s = town#08
 #
 @dig/teleport Hall of Echoes;town#50 : typeclasses.rooms.Room = south;s,north;n
 #
-@desc |YThe Hall of Echoes is a grand, echoing chamber filled with statues and holograms of legendary warriors from the guild's history. The floor is made of polished stone, reflecting the light from flickering torches and glowing runes. The air is filled with a sense of reverence and history, as if the very walls are whispering tales of past glories. At the far end of the hall, a massive door leads to the inner sanctum of the Warriors Guild, guarded by a pair of imposing sentinels.
+@desc |YThe Hall of Echoes is a grand, echoing chamber filled with statues and holograms of legendary knights from the guild's history. The floor is made of polished stone, reflecting the light from flickering torches and glowing runes. The air is filled with a sense of reverence and history, as if the very walls are whispering tales of past glories. At the far end of the hall, a massive door leads to the inner sanctum of the Knights Guild, guarded by a pair of imposing sentinels.
 #
 
 @tel town#50
 #
-@dig/teleport The Warrior Guild Hall;town#51 : typeclasses.rooms.WarriorGuildJoinRoom = south;s,north;n
+@dig/teleport Grand Hall of the Knights' Order;town#51 : typeclasses.rooms.KnightGuildJoinRoom = south;s,north;n
 #
-@desc |YAs you step into the grand hall of the Warriors Guild, you are immediately enveloped by an aura of strength and camaraderie. The room is vast, with high ceilings adorned with banners depicting the guild's emblem: a crossed sword and shield. The walls are lined with suits of armor and weapons, each one a testament to the martial prowess of the guild's members.|/|/At the center of the hall stands a large, circular platform made of polished stone. Surrounding the platform are four towering statues, each representing a different warrior archetype. The knight is a figure clad in gleaming plate armor, wielding a massive sword and shield. The berserker is a fierce, muscular warrior, brandishing a massive axe and roaring in battle. The archer is a lithe, agile figure, drawing back a bow with deadly precision. The mage is a cloaked figure, surrounded by crackling energy and arcane symbols.|/|/The air is filled with the sound of clashing weapons and the shouts of sparring warriors. As you approach the platform, a sense of anticipation and excitement builds within you. This is the place where you will take your first steps towards mastering the art of combat and joining the ranks of the Warriors Guild.
+@desc |YAs you step into the grand hall of the Knights, you are immediately enveloped by an aura of honor and valor. The room is vast, with high ceilings adorned with banners depicting the order's emblem: a crossed sword and shield. The walls are lined with suits of armor and weapons, each one a testament to the chivalric prowess of the knights.|/|/At the center of the hall stands a large, circular platform made of polished stone. Surrounding the platform are four towering statues, each representing a different knightly archetype. The Paladin is a figure clad in gleaming plate armor, wielding a massive sword and shield. The Shadow Knight is a fierce, muscular warrior, brandishing a massive mace and roaring in battle. |/|/The air is filled with the sound of clashing weapons and the shouts of sparring knights.
 
 
 @tel town#42
@@ -382,3 +382,17 @@ open north;n,south;s = town#08
 @dig/teleport Cybercorps Implantation Chamber;town#52 : typeclasses.rooms.CybercorpsImplantRoom = south;s,north;n
 #
 @desc |YThe Cybercorp Implantation Chamber is a sleek, high-tech facility bathed in a cool, neon blue glow. The walls are lined with holographic displays showcasing the latest in cybernetic enhancements, from ocular implants to neural interfaces. The air hums with the soft buzz of advanced machinery and the occasional spark of a laser scalpel.|/|/Transparent cases along the walls exhibit a variety of cybernetic limbs, eyes, and other enhancements, each one labeled with its specifications and price.|/|/State-of-the-art pods where the actual implantation takes place. Each pod is equipped with robotic arms, sterilization fields, and monitoring systems to ensure a safe and precise procedure.
+
+#
+@tel town#51
+#
+@dig/teleport Grand Hall of Mithaniel Marr;town#53 : typeclasses.rooms.PaladinGuildJoinRoom = west;w,east;e
+#
+@desc |YAs you step into the grand hall of Mithaniel Marr, you are immediately enveloped by an aura of divine light and righteousness. The room is vast, with high ceilings adorned with banners depicting the order's emblem: a radiant sunburst behind a crossed sword and shield. The walls are lined with suits of gleaming armor and holy relics, each one a testament to the sacred duty and valor of the paladins.|/|/At the center of the hall stands a large, circular platform made of polished marble. The air is filled with the sound of fervent prayers and the clash of training weapons. As you approach the platform, a sense of reverence and purpose fills you.
+#
+
+#
+@tel town#51
+@dig/teleport Grand Hall of Innoruuk;town#54 : typeclasses.rooms.ShadowKnightGuildJoinRoom = east;e,west;w
+
+@desc |YAs you step into the grand hall of Innoruuk, you are immediately enveloped by an aura of dark power and malevolence. The room is vast, with high ceilings adorned with banners depicting the order's emblem: a sinister skull behind crossed swords. The walls are lined with suits of dark armor and cursed relics, each one a testament to the ruthless strength and cunning of the shadow knights.|/|/At the center of the hall stands a large, circular platform made of obsidian. The air is filled with the sound of ominous chants and the clash of training weapons. As you approach the platform, a sense of dread and determination fills you. This is the place where you will take your first steps towards mastering the dark arts of Innoruuk.

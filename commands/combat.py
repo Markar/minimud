@@ -12,19 +12,10 @@ from typeclasses.gear import BareHand
 class CmdAttack(Command):
     """
     Attack an enemy with your equipped weapon.
-
-    Usage:
-        attack <enemy> [with <weapon>]
-
-    Example:
-        attack wolf
-        attack bear with sword
-        attack bear w sword
-        attack bear w/sword
     """
 
     key = "attack"
-    aliases = ("att", "hit", "shoot")
+    aliases = ("att", "hit", "kill")
     help_category = "combat"
 
     def parse(self):
@@ -32,18 +23,8 @@ class CmdAttack(Command):
         Parse for optional weapon
         """
         self.args = self.args.strip()
-
-        # split on variations of "with"
-        if " with " in self.args:
-            self.target, self.weapon = self.args.split(" with ", maxsplit=1)
-        elif " w " in self.args:
-            self.target, self.weapon = self.args.split(" w ", maxsplit=1)
-        elif " w/" in self.args:
-            self.target, self.weapon = self.args.split(" w/", maxsplit=1)
-        else:
-            # no splitters, it's all target
-            self.target = self.args
-            self.weapon = None
+        self.target = self.args
+        self.weapon = None
 
     def func(self):
         location = self.caller.location
@@ -55,14 +36,6 @@ class CmdAttack(Command):
             self.msg("Attack what?")
             return
 
-        # if we specified a weapon, find it first
-        # if self.weapon:
-        #     weapon = self.caller.search(self.weapon)
-        #     if not weapon:
-        #         # no valid match
-        #         return
-        # else:
-        #     # grab whatever we're wielding
         if wielded := self.caller.wielding:
             self.msg(f"You are wielding {iter_to_str(wielded)}.")
             weapon = wielded[0]

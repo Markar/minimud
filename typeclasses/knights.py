@@ -1,4 +1,4 @@
-from random import randint, uniform, uniform
+from random import randint, uniform, uniform, choice
 from evennia.prototypes import spawner, prototypes
 from string import punctuation
 from evennia import AttributeProperty
@@ -11,23 +11,23 @@ from evennia.contrib.game_systems.clothing.clothing import (
     get_worn_clothes,
 )
 import math
-from commands.changeling_cmds import ChangelingCmdSet
 from typeclasses.characters import PlayerCharacter
+from typeclasses.knightguild.knight_commands import KnightCmdSet
+from typeclasses.knightguild.attack_emotes import AttackEmotes
+from typeclasses.knightguild.knight_attack import KnightAttack
+from typeclasses.gear import BareHand
 
-from typeclasses.warriorsguild.attack_emotes import AttackEmotes
-from typeclasses.warriorsguild.warrior_attack import WarriorAttack
 
-
-class Warrior(PlayerCharacter):
+class Knight(PlayerCharacter):
     """
     The base typeclass for non-player characters, implementing behavioral AI.
     """
 
     def at_object_creation(self):
-        self.cmdset.add(ChangelingCmdSet, persistent=True)
+        self.cmdset.add(KnightCmdSet, persistent=True)
         super().at_object_creation()
-        con_increase_amount = 20
-        int_increase_amount = 7
+        con_increase_amount = 16
+        int_increase_amount = 12
         self.db.con_increase_amount = con_increase_amount
         self.db.int_increase_amount = int_increase_amount
         self.db.hpmax = 50 + (con_increase_amount * self.traits.con.value)
@@ -36,26 +36,34 @@ class Warrior(PlayerCharacter):
         self.db.guild_level = 1
         self.db.gxp = 0
         self.db.skill_gxp = 0
-        self.db.title = "the novice warrior"
+        self.db.title = "the Novice Squire"
 
         self.db.natural_weapon = {
             "name": "punch",
             "damage_type": "blunt",
-            "damage": 3,
-            "speed": 2,
+            "damage": 8,
+            "speed": 3,
             "energy_cost": 1,
         }
-        self.db.guild = "warrior"
-        self.db.subguild = "none"
+        self.db.guild = "knight"
+        self.db.subguild = None
         self.db._wielded = {"left": None, "right": None}
         self.db.hpregen = 1
         self.db.fpregen = 1
         self.db.epregen = 1
-        self.db.form = "Human"
 
-        self.db.engulfs = 0
-        self.db.max_engulfs = 0
-        self.db.skills = {}
+        self.db.skills = {
+            "bash": 1,
+            "bind wounds": 1,
+            "defense": 1,
+            "dodge": 1,
+            "double attack": 1,
+            "offense": 1,
+            "parry": 1,
+            "riposte": 1,
+            # "disarm": 1,
+            # "taunt": 1,
+        }
         tickerhandler.add(
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
         )
@@ -92,11 +100,63 @@ class Warrior(PlayerCharacter):
         weapon = self.db.natural_weapon
         return weapon.get("speed", 3)
 
+    def at_pre_attack(self, wielder, **kwargs):
+        """
+        Validate that this is usable - has ammo, etc.
+        """
+        self.msg("at_pre_attack MeleeWeapon")
+        # make sure wielder has enough strength left
+        if wielder.db.ep < self.attributes.get("energy_cost", 0):
+            wielder.msg("You are too tired to use this.")
+            return False
+        # can't attack if on cooldown
+        if not wielder.cooldowns.ready("attack"):
+            wielder.msg("You can't attack again yet.")
+            return False
+        # this can only be used if it's being wielded
+        if self not in wielder.wielding:
+            wielder.msg(
+                f"You must be wielding your {self.get_display_name(wielder)} to attack with it."
+            )
+            return False
+        else:
+            return True
+
     """
-    This kicks off the auto attack of the form, which is weapon.at_attack
-    The weapon is the form class, which is a subclass of ChangelingAttack
-    and has the at_attack method. 
+    This kicks off the auto attack of the weapon, which is weapon.at_attack
     """
+
+    def at_attack(self, wielder, target, weapon, **kwargs):
+        """
+        Use this weapon in an attack against a target.
+        """
+        speed = weapon.speed
+        self.msg(f"at_attack PaladinWeapon {speed} {weapon}")
+        # get the weapon's damage bonus
+        damage = weapon.db.dmg
+        # pick a random option from our possible damage types
+        damage_type = None
+        if damage_types := weapon.tags.get(category="damage_type", return_list=True):
+            print(f"melee at_attack: {choice(damage_types)}")
+            damage_type = choice(damage_types)
+
+        # does this require skill to use?
+        if skill := weapon.tags.get(category="skill_class"):
+            # use the skill
+            result = wielder.use_skill(skill, speed=weapon.speed)
+            # apply the weapon damage as a modifier
+            damage = damage * result
+            damage = math.ceil(uniform(damage / 2, damage))
+        # if no skill required, we are just using our unmodified damage value
+
+        # subtract the energy required to use this
+        wielder.db.ep -= weapon.attributes.get("energy_cost", 0)
+
+        # the attack succeeded! apply the damage
+        target.at_damage(wielder, damage, damage_type)
+
+        wielder.msg(f"[ Cooldown: {speed} seconds ]")
+        wielder.cooldowns.add("attack", speed)
 
     def attack(self, target, weapon, **kwargs):
 
@@ -129,7 +189,7 @@ class Warrior(PlayerCharacter):
             self.msg("You don't see your target.")
             return
 
-        weapon.at_attack(self, target)
+        self.at_attack(self, target, weapon)
 
         status = self.get_display_status(target)
         self.msg(prompt=status)
@@ -142,9 +202,9 @@ class Warrior(PlayerCharacter):
 
     def get_player_attack_hit_message(self, attacker, dam, tn, emote="general_weapon"):
         """
-        Get the hit message based on the damage dealt. This is the changeling's
-        version of the method, defaulting to bite but should be overridden by
-        subguilds.
+        Get the hit message based on the damage dealt. This is the knight's
+        version of the method, defaulting to general_weapon but should be overridden by
+        weapons.
 
         ex:
             f"{color}$pron(Your) bite causes {tn}{color} to bleed slightly.",
@@ -186,16 +246,19 @@ class Warrior(PlayerCharacter):
         # apply dodge
         glvl = self.db.guild_level
         dodge = 10
+        parry = 10
+        riposte = 10
         damage_reduction = 0
-
-        dodge = self.traits.dex.value / 5 + dodge * glvl / 12
-        if dodge > 90:
-            dodge = 90
 
         ran = randint(1, 100)
         if ran <= dodge:
             self.msg(f"|cYou dodge the attack!")
             attacker.msg(f"{self.get_display_name(attacker)} dodges your attack!")
+            return
+        ran = randint(1, 100)
+        if ran <= parry:
+            self.msg(f"|cYou parry the attack!")
+            attacker.msg(f"{self.get_display_name(attacker)} parries your attack!")
             return
 
         damage -= math.ceil(damage_reduction)
@@ -242,7 +305,7 @@ class Warrior(PlayerCharacter):
         chunks.append(
             f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}"
         )
-        print(f"looker != self {looker} and self {self}")
+
         if looker != self:
             chunks.append(
                 f"|gE: |G{looker.get_display_name(self, **kwargs)} ({looker.db.hp})"
@@ -274,11 +337,11 @@ class Warrior(PlayerCharacter):
         if weapons := self.wielding:
             weapon = weapons[0]
         else:
-            weapon = self
+            weapon = BareHand()
 
         if target is not None:
             self.at_emote(
-                "changeling $conj(charges) at {target}!", mapping={"target": target}
+                "knight $conj(charges) at {target}!", mapping={"target": target}
             )
         location = self.location
 
@@ -288,25 +351,33 @@ class Warrior(PlayerCharacter):
 
             location.scripts.add(CombatScript, key="combat")
             combat_script = location.scripts.get("combat")
+
         combat_script = combat_script[0]
         self.db.combat_target = target
+
         # adding a combatant to combat just returns True if they're already there, so this is safe
         if not combat_script.add_combatant(self, enemy=target):
             return
+
         self.attack(target, weapon)
 
     def can_wear(self, item):
         """
         Check if the character can wear an item
         """
-        self.msg(f"can_wear: {item}")
-        type = getattr(item, "type", False)
+        armor = getattr(item.db, "armor", False)
+        type = getattr(item.db, "type", False)
+        allowed_types = ["light", "medium", "heavy"]
 
         if not item:
             return False
 
-        if not type or item.type != "clothing":
-            self.msg(f"{item} is not clothing, or is too heavy for you to use.")
+        if not item.db.clothing_type:
+            self.msg(f"{item} is not wearable.")
+            return False
+
+        if armor and type not in allowed_types:
+            self.msg(f"You can't wear that kind of armor.")
             return False
 
         return True

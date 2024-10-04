@@ -1,6 +1,6 @@
-class WarriorAttack:
+class KnightAttack:
     """
-    All warrior attacks inherit from this one
+    All knight attacks inherit from this one
     """
 
     skill = "edged"

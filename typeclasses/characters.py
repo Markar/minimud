@@ -6,6 +6,7 @@ from string import punctuation
 from evennia import AttributeProperty
 from evennia.utils import lazy_property, iter_to_str, delay, logger
 from evennia.contrib.rpg.traits import TraitHandler
+from evennia.contrib.rpg.buffs import BuffHandler
 from evennia.contrib.game_systems.clothing.clothing import (
     ClothedCharacter,
     get_worn_clothes,
@@ -17,7 +18,7 @@ from .objects import ObjectParent
 from typeclasses.general_attack_emotes import AttackEmotes
 from typeclasses.utils import SetNPCStats
 
-_IMMOBILE = ("sitting", "lying down", "unconscious", "meditating")
+_IMMOBILE = ("sitting", "lying down", "unconscious", "meditating", "binding wounds")
 _MAX_CAPACITY = 10
 
 # LOOK INTO RESTORING THESE STATUSES
@@ -66,6 +67,10 @@ class Character(ObjectParent, ClothedCharacter):
     def traits(self):
         # this adds the handler as .traits
         return TraitHandler(self)
+
+    @lazy_property
+    def buffs(self) -> BuffHandler:
+        return BuffHandler(self)
 
     @lazy_property
     def cooldowns(self):

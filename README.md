@@ -73,7 +73,7 @@ for x in all:
 
  pits.locks.add("call:false(); control:perm(Developer); delete:id(9) or perm(Admin);drop:holds(); edit:pid(9) or perm(Admin); examine:perm(Builder); get:false(); puppet:id(4270) or pid(9) or perm(Developer) or pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin); tell:perm(Admin); view:all()")
 
-qf.locks.add("call:false(); control:perm(Developer); delete:id(10) or perm(Admin);drop:holds(); edit:pid(10) or perm(Admin); examine:perm(Builder); get:false(); puppet:id(4270) or pid(10) or perm(Developer) or pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin); tell:perm(Admin); view:all()")
+bark.locks.add("call:false(); control:perm(Developer); delete:id(10) or perm(Admin);drop:holds(); edit:pid(10) or perm(Admin); examine:perm(Builder); get:false(); puppet:id(4270) or pid(10) or perm(Developer) or pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin); tell:perm(Admin); view:all()")
 
 ### SEARCH BY TAG
   hasPlayerTags = caller.tags.has("player", "status")

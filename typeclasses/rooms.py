@@ -26,10 +26,6 @@ from typeclasses.cybercorpsguild.rooms.room_commands import (
     CybercorpsWaresRoomCmdSet,
     CybercorpsImplantsRoomCmdSet,
 )
-from typeclasses.warriorsguild.rooms.room_commands import (
-    CmdJoinWarriors,
-    CmdLeaveWarriors,
-)
 
 
 class RoomParent(ObjectParent):
@@ -199,6 +195,7 @@ class NexusBazaar(Room):
         """
         super().at_object_creation()
 
+        self.cmdset.remove(ShopCmdSet)
         # add the shopping commands to the room
         self.cmdset.add(ShopCmdSet, persistent=True)
         # create an invisible, inaccessible storage object
@@ -279,19 +276,13 @@ class ChangelingGuildJoinRoom(Room):
         # "
 
 
-class WarriorRoomCmdSet(CmdSet):
-    key = "warrior_room"
-    priority = 1
-
-    def at_cmdset_creation(self):
-        self.add(CmdJoinWarriors())
-        self.add(CmdLeaveWarriors())
+from typeclasses.knightguild.rooms.room_commands import KnightsRoomCmdSet
 
 
-class WarriorGuildJoinRoom(Room):
+class KnightGuildJoinRoom(Room):
     def at_object_creation(self):
         print(f"at obj creation, self {self}")
-        self.cmdset.add_default(WarriorRoomCmdSet)
+        self.cmdset.add_default(KnightsRoomCmdSet)
         # self.desc = f"
         # As you step into the grand hall of the Warriors Guild, you are immediately enveloped by an aura of strength and camaraderie. The room is vast, with high ceilings adorned with banners depicting the guild’s emblem: a crossed sword and shield. The walls are lined with suits of armor and weapons, each one a testament to the martial prowess of the guild’s members.
 
@@ -299,6 +290,24 @@ class WarriorGuildJoinRoom(Room):
 
         # The air is filled with the sound of clashing weapons and the shouts of sparring warriors. As you approach the platform, a sense of anticipation and excitement builds within you. This is the place where you will take your first steps towards mastering the art of combat and joining the ranks of the Warriors Guild.
         # "
+
+
+from typeclasses.knightguild.rooms.room_commands import PaladinRoomCmdSet
+
+
+class PaladinGuildJoinRoom(Room):
+    def at_object_creation(self):
+        print(f"at obj creation, self {self}")
+        self.cmdset.add_default(PaladinRoomCmdSet)
+
+
+from typeclasses.knightguild.rooms.room_commands import ShadowKnightRoomCmdSet
+
+
+class ShadowKnightGuildJoinRoom(Room):
+    def at_object_creation(self):
+        print(f"at obj creation, self {self}")
+        self.cmdset.add_default(ShadowKnightRoomCmdSet)
 
 
 class CybercorpsRoomCmdSet(CmdSet):
