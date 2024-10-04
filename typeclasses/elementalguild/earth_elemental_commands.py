@@ -4,6 +4,8 @@ from evennia import CmdSet
 from evennia.utils.evtable import EvTable
 from commands.command import Command
 from typeclasses.elementalguild.constants_and_helpers import SKILLS_COST
+from evennia.utils import delay
+from evennia.contrib.rpg.buffs import BaseBuff
 
 
 class PowerCommand(Command):
@@ -15,9 +17,12 @@ class PowerCommand(Command):
         caller.cooldowns.add("global_cooldown", 2)
 
 
+# region Burnout
 class CmdBurnout(PowerCommand):
     """
     This powerful ability allows the earth elemental to channel energy from all elemental forces, enhancing their physical abilities and combat prowess. While active, the elemental's attacks become more potent, and their movements more fluid and precise. The elemental's power is greatly increased while burnout is active, but the strain of maintaining this heightened state of power can be overwhelming, and the elemental must be cautious not to overextend themselves.
+
+    The duration is boosted by the elemental harmony skill, and the energy cost is based on the elemental's level of mastery.
 
     Usage:
         burnout
@@ -60,11 +65,14 @@ class CmdBurnout(PowerCommand):
 
 
 # Defensive powers
+# region Stone Skin
 class CmdStoneSkin(PowerCommand):
     """
     Stone skin increases the earth elemental's defense by
     increasing their resistance to physical damage. The amount of damage
-    reduced is based on the elemental's skill rank.
+    reduced is based on the elemental's skill rank. This spell uses mineral
+    fortification and constitution to determine the amount of damage reduced.
+
 
     Usage:
         stone skin
@@ -79,7 +87,7 @@ class CmdStoneSkin(PowerCommand):
     def func(self):
         caller = self.caller
         glvl = caller.db.guild_level
-        if glvl < 5:
+        if glvl < 7:
             caller.msg(f"|CYou need to be guild level 5 to use stone skin.")
             return
         if caller.db.ep < self.cost:
@@ -89,19 +97,21 @@ class CmdStoneSkin(PowerCommand):
             caller.db.stone_skin = True
             caller.db.ep -= self.cost
             caller.cooldowns.add("global_cooldown", 2)
-            activateMsg = f"|C$Your() body hardens, rocky plates forming a protective barrier that absorbs and deflects incoming attacks."
+            activateMsg = f"|CYour body hardens, rocky plates forming a protective barrier that absorbs and deflects incoming attacks."
             caller.location.msg_contents(activateMsg, from_obj=caller)
         else:
             caller.db.stone_skin = False
-            deactivateMsg = f"|C$Your() body softens, the rocky plates that once protected $pron(you) now dissipating."
+            deactivateMsg = f"|CYour body softens, the rocky plates that once protected $pron(you) now dissipating."
             caller.location.msg_contents(deactivateMsg, from_obj=caller)
 
 
+# region Earth Form
 class CmdEarthForm(PowerCommand):
     """
     The earth elemental can transform their body into a denser form of rock,
     increasing their defense and resistance to damage. The amount of damage
-    reduced is based on the elemental's skill rank.
+    reduced is based on the elemental's skill rank. Uses: stone mastery, guild
+    level, constitution, rock solid defense, and stone mastery.
 
     Usage:
         earth form
@@ -133,6 +143,7 @@ class CmdEarthForm(PowerCommand):
             caller.location.msg_contents(deactivateMsg, from_obj=caller)
 
 
+# region Mountain Stance
 class CmdMountainStance(PowerCommand):
     """
     The earth elemental can take a defensive stance, increasing their
@@ -176,6 +187,7 @@ class CmdMountainStance(PowerCommand):
         caller.db.hpmax = 50 + caller.traits.con.value * caller.db.con_increase_amount
 
 
+# region Earthshaker Stance
 class CmdEarthshakerStance(PowerCommand):
     """
     The Earthshaker Stance is an aggressive combat stance that allows the elemental to channel the raw power of the earth into devastating attacks. While in this stance, the elemental's movements become more forceful and deliberate, each strike carrying the weight of the earth itself. This stance enhances the elemental's offensive capabilities, increasing the damage dealt to enemies but at the cost of reduced defense.
@@ -216,6 +228,7 @@ class CmdEarthshakerStance(PowerCommand):
             caller.location.msg_contents(activateMsg, from_obj=caller)
 
 
+# region Earth Shield
 class CmdEarthShield(PowerCommand):
     """
     The earth elemental can create a shield of stone to protect themselves
@@ -259,6 +272,7 @@ class CmdEarthShield(PowerCommand):
             caller.location.msg_contents(activateMsg, from_obj=caller)
 
 
+# region Terran Restoration
 class CmdTerranRestoration(PowerCommand):
     """
     The earth elemental can rebuild their body to restore health,
@@ -272,7 +286,7 @@ class CmdTerranRestoration(PowerCommand):
     key = "terran restoration"
     aliases = ["tr", "restore"]
     help_category = "earth elemental"
-    guild_level = 4
+    guild_level = 2
 
     def func(self):
         caller = self.caller
@@ -296,7 +310,7 @@ class CmdTerranRestoration(PowerCommand):
 
         to_heal = math.floor(10 + glvl + strength / 2 + wis / 2)
         to_heal = randint(int(to_heal / 2), to_heal)
-        cost = to_heal
+        cost = to_heal - wis / 2
 
         if fp < cost:
             self.msg(f"|rYou can't seem to focus on restoring your form.")
@@ -312,14 +326,16 @@ class CmdTerranRestoration(PowerCommand):
             caller.db.fp -= cost
 
         caller.cooldowns.add("global_cooldown", 2)
-        self.msg(f"You restore {hp_amount or 0} health for {cost or 0} focus")
         msg = f"|M$pron(Your) rocky exterior begins to shift and mend. Cracks seal themselves as stones and minerals realign, drawn from the surrounding ground."
         caller.location.msg_contents(msg, from_obj=caller)
 
 
+# region Earthen Renewal
 class CmdEarthenRenewal(PowerCommand):
     """
     Earthen Renewal is a powerful regenerative ability harnessed by earth elementals. This skill taps into the primal energies of the earth, allowing the elemental to restore its vitality and fortitude over time. When activated, the elemental draws strength from the ground beneath it, channeling the life-giving essence of the earth to heal wounds and replenish its energy reserves. The process is gradual but potent, providing a steady flow of rejuvenation that scales with the elemental's mastery of the skill and its connection to the earth.
+
+    Uses: earth resonance, earthen regeneration, wisdom, guild level
     """
 
     key = "earthen renewal"
@@ -357,6 +373,9 @@ class CmdEarthenRenewal(PowerCommand):
         if not caller.cooldowns.ready("earthen_renewal"):
             caller.msg(f"|CNot so fast!")
             return False
+        if not caller.cooldowns.ready("global_cooldown"):
+            caller.msg(f"|CNot so fast!")
+            return False
         if not caller.db.earthen_renewal:
             caller.db.earthen_renewal = {"duration": 0, "rate": 0}
         if caller.db.earthen_renewal["duration"] > 0:
@@ -388,11 +407,14 @@ class CmdEarthenRenewal(PowerCommand):
 
 
 # Offensive powers
+# region Tremor
 class CmdTremor(PowerCommand):
     """
     The earth elemental can cause the ground to shake, dealing damage to all
     enemies in the room. The amount of damage dealt is based on the elemental's
     skill rank.
+
+    Uses: geological insight, strength, guild level
 
     Usage:
         tremor
@@ -452,6 +474,7 @@ class CmdTremor(PowerCommand):
         target.at_damage(caller, damage, "blunt", "tremor")
 
 
+# region Quicksand
 class CmdQuickSand(PowerCommand):
     """
     The earth elemental can create a pool of quicksand beneath their enemies,
@@ -460,15 +483,18 @@ class CmdQuickSand(PowerCommand):
 
     Usage:
         quicksand
+        qs
+        sand
     """
 
     key = "quicksand"
+    aliases = ["qs", "sand"]
     help_category = "earth elemental"
     guild_level = 6
     cost = 10
 
     def _calculate_damage(self, earth_resonance, strength, guild_level):
-        base_value = 50
+        base_value = 30
         earth_resonance_weight = 0.6
         strength_weight = 0.3
         guild_level_weight = 0.1
@@ -479,9 +505,6 @@ class CmdQuickSand(PowerCommand):
             + (strength * strength_weight)
             + (guild_level * guild_level_weight)
         )
-
-        # Ensure damage is within the range of 100 to 300
-        damage = max(100, min(damage, 300))
 
         # Adding some randomness to the damage
         damage = int(uniform(damage * 0.6, damage * 1.1))
@@ -512,10 +535,10 @@ class CmdQuickSand(PowerCommand):
         skill_rank = caller.db.skills.get("earth resonance", 1) * 10
 
         damage = self._calculate_damage(skill_rank, caller.traits.str.value, glvl)
-        self.msg(f"|gDamage: {damage}")
         target.at_damage(caller, damage, "blunt", "quicksand")
 
 
+# region Rock Throw
 class CmdRockThrow(PowerCommand):
     """
     The earth elemental can throw rocks at enemies in the room, dealing
@@ -526,15 +549,19 @@ class CmdRockThrow(PowerCommand):
     """
 
     key = "rock throw"
+    aliases = ["rt"]
     help_category = "earth elemental"
-    guild_level = 2
+    guild_level = 4
     cost = 5
 
-    def _calculate_damage(self, stone_mastery, strength, guild_level):
+    def _calculate_damage(self):
         base_value = 5
         stone_mastery_weight = 0.6
         strength_weight = 0.5
         guild_level_weight = 1
+        stone_mastery = self.caller.db.skills.get("stone mastery", 1)
+        strength = self.caller.traits.str.value
+        guild_level = self.caller.db.guild_level
 
         damage = (
             base_value
@@ -572,12 +599,12 @@ class CmdRockThrow(PowerCommand):
         caller.adjust_fp(-self.cost)
         caller.cooldowns.add("rock throw", 4)
         caller.cooldowns.add("global_cooldown", 2)
-        skill_rank = caller.db.skills.get("stone mastery", 1) * 10
-        damage = self._calculate_damage(skill_rank, caller.traits.str.value, glvl)
+        damage = self._calculate_damage()
 
         target.at_damage(caller, damage, "blunt", "rock_throw")
 
 
+# region Earthquake
 class CmdEarthquake(PowerCommand):
     """
     The earth elemental can cause the ground to shake, causing damage to all
@@ -589,15 +616,17 @@ class CmdEarthquake(PowerCommand):
     """
 
     key = "earthquake"
+    aliases = ["eq", "quake"]
     help_category = "earth elemental"
     guild_level = 20
-    cost = 50
+    cost = 30
 
     def _calculate_damage(self, seismic_awareness, strength, guild_level):
         base_value = 50
-        seismic_awareness_weight = 0.6
-        strength_weight = 0.3
-        guild_level_weight = 0.1
+        seismic_awareness_weight = 15
+        strength_weight = 0.75
+        guild_level_weight = 1.5
+        # 50 + 80 + 25 + 30
 
         damage = (
             base_value
@@ -610,7 +639,7 @@ class CmdEarthquake(PowerCommand):
         damage = max(100, min(damage, 300))
 
         # Adding some randomness to the damage
-        damage = int(uniform(damage * 0.6, damage * 1.1))
+        damage = int(uniform(damage * 0.7, damage))
 
         return damage
 
@@ -635,38 +664,189 @@ class CmdEarthquake(PowerCommand):
         caller.adjust_fp(-self.cost)
         caller.cooldowns.add("earthquake", 4)
         caller.cooldowns.add("global_cooldown", 2)
-        skill_rank = caller.db.skills.get("seismic awareness", 1) * 10
+        skill_rank = caller.db.skills.get("seismic awareness", 1)
 
         damage = self._calculate_damage(skill_rank, caller.traits.str.value, glvl)
-        self.msg(f"|gDamage: {damage}")
         target.at_damage(caller, damage, "blunt", "earthquake")
 
 
-class CmdAssimilate(Command):
+class CmdEnervate(PowerCommand):
     """
-    Assimilate the corpse of an enemy to restore energy
+    Enervate is a powerful ability that allows the earth elemental to drain the energy from their enemies, weakening them and restoring the elemental's own energy reserves. The elemental can siphon the energy from a single target, reducing their combat effectiveness and replenishing their own strength. The amount of energy drained is based on your elemental harmony rank and the target's level of vitality.
     """
 
-    key = "assimilate"
-    aliases = ["asm"]
+    key = "enervate"
     help_category = "earth elemental"
+    guild_level = 16
+    aliases = ["en"]
+    fp_cost = 25
 
     def func(self):
-        if not self.args:
-            caller = self.caller
-            if corpse := caller.location.search("corpse-1"):
-                base_power = corpse.db.power
-                skill_rank = caller.db.skills.get("assimilate", 0)
+        caller = self.caller
+        target = caller.db.combat_target
+        if not target:
+            caller.msg("You must be in combat to use this power.")
+            return
+        if not caller.cooldowns.ready("enervate"):
+            caller.msg(f"|CNot so fast!")
+            return False
+        if caller.db.guild_level < self.guild_level:
+            caller.msg(f"|rYou must be at least {self.guild_level} to use this power.")
+            return
+        if caller.db.fp < self.fp_cost:
+            caller.msg(f"|rYou need at least {self.fp_cost} focus to use this power.")
+            return
+        caller.cooldowns.add("enervate", 60)
+        caller.cooldowns.add("global_cooldown", 2)
+        caller.adjust_fp(-self.fp_cost)
+        skill_rank = caller.db.skills.get("energy drain", 1)
+        vitality = target.db.level
+        energy_drained = randint(vitality, vitality * 2) + skill_rank * 10
+        caller.adjust_ep(energy_drained)
+        target.msg(f"|r$You feel your energy being drained by {caller}.")
+        caller.msg(f"|gYou drain energy from {target}, restoring your own strength.")
+        caller.location.msg_contents(
+            f"|r$You() drains energy from {target}.", from_obj=caller
+        )
 
-                # Calculate the power with the skill rank multiplier
-                power = base_power * (1 + (skill_rank * 0.1))
 
-                caller.adjust_ep(power)
-                corpse.delete()
-                assimilate_msg = f"|M$pron(Your) form glows faintly as it assimilates the energy from the consumed corpse, strengthening $pron(your) rocky exterior."
-                caller.location.msg_contents(assimilate_msg, from_obj=caller)
-            else:
-                caller.msg("Assimilate what?")
+def _calculate_meditation_restoration(self):
+    """
+    Calculate the amount of focus and energy restored during meditation.
+    """
+    caller = self
+    wisdom = caller.traits.wis.value
+    skill_rank = caller.db.skills.get("earth resonance", 1)
+
+    fp_restored = 5 + randint(1, skill_rank)
+    ep_restored = 5 + int(uniform(3, wisdom * 0.5)) + skill_rank * 3
+    caller.msg(f"|GYou regain {fp_restored} focus points and {ep_restored} energy.")
+
+    caller.adjust_fp(fp_restored)
+    caller.adjust_ep(ep_restored)
+    caller.msg(caller.get_display_status(caller))
+
+
+# region Meditate
+class CmdMeditate(PowerCommand):
+    """
+    Meditate allows the earth elemental to focus their energy and regain focus points. The elemental can enter a meditative state, drawing on the power of the earth to replenish their energy reserves. The amount of focus restored is based on the elemental's skill in earth resonance and wisdom.
+    """
+
+    key = "meditate"
+    aliases = ["med"]
+    help_category = "earth elemental"
+    guild_level = 1
+    cost = 10
+
+    def _end_meditation(self, caller):
+        caller.tags.remove("meditating", category="status")
+        caller.msg(
+            f"|gYou feel refreshed and invigorated, the energy of the earth flowing through you."
+        )
+        caller.location.msg_contents(
+            f"|C$You() open $pron(your) eyes and rise from $pron(your) meditative state, looking refreshed and invigorated.",
+            from_obj=caller,
+        )
+        _calculate_meditation_restoration(self)
+
+    def func(self):
+        super().func()
+        caller = self.caller
+        args = self.args.strip()
+        glvl = caller.db.guild_level
+
+        if caller.db.fp == caller.db.fpmax and caller.db.ep == caller.db.epmax:
+            caller.msg(f"|gYou are already at full energy.")
+            return
+
+        if caller.db.combat_target:
+            caller.msg(f"|rYou can't meditate while in combat.")
+            return
+
+        if glvl < self.guild_level:
+            self.msg(
+                f"|rYou must be at least guild level {self.guild_level} to use this power."
+            )
+            return
+
+        if not caller.cooldowns.ready("meditate"):
+            caller.msg(f"|CYou can't meditate again yet.")
+            return False
+
+        if caller.db.fp < self.cost:
+            caller.msg(f"|rYou need at least {self.cost} focus to use this power.")
+            return
+
+        caller.tags.add("meditating", category="status")
+        caller.cooldowns.add("global_cooldown", 6)
+        caller.cooldowns.add("meditate", 6)
+
+        caller.msg(f"|gYou enter a meditative state, drawing energy from the earth.")
+        caller.location.msg_contents(
+            f"|C$You() close your eyes and begins to meditate, drawing energy from the earth.",
+            from_obj=caller,
+        )
+        if args == "full":
+            caller.buffs.add(MeditateBuff)
+        else:
+            delay(5, self._end_meditation, caller)
+
+
+class MeditateBuff(BaseBuff):
+    """
+    A buff that restores focus points to the caller over time.
+    """
+
+    duration = 60
+    tickrate = 5
+    type = "meditate"
+    key = "meditate"
+
+    def at_tick(self, initial, **kwargs):
+        _calculate_meditation_restoration(self.owner)
+
+        if (
+            self.owner.db.ep == self.owner.db.epmax
+            and self.owner.db.fp == self.owner.db.fpmax
+        ):
+            self.duration = 0
+            self.owner.msg(f"|gYou stand up, feeling refreshed and invigorated.")
+            self.owner.tags.remove("meditating", category="status")
+            return
+
+        if self.ticknum == 12:
+            self.owner.msg(f"|gYou stand up, feeling refreshed and invigorated.")
+            self.owner.tags.remove("meditating", category="status")
+            return
+
+
+# region Assimilate
+# class CmdAssimilate(Command):
+#     """
+#     Assimilate the corpse of an enemy to restore energy
+#     """
+
+#     key = "assimilate"
+#     aliases = ["asm"]
+#     help_category = "earth elemental"
+
+#     def func(self):
+#         if not self.args:
+#             caller = self.caller
+#             if corpse := caller.location.search("corpse-1"):
+#                 base_power = corpse.db.power
+#                 skill_rank = caller.db.skills.get("assimilate", 0)
+
+#                 # Calculate the power with the skill rank multiplier
+#                 power = base_power * (1 + (skill_rank * 0.1))
+
+#                 caller.adjust_ep(power)
+#                 corpse.delete()
+#                 assimilate_msg = f"|M$pron(Your) form glows faintly as it assimilates the energy from the consumed corpse, strengthening $pron(your) rocky exterior."
+#                 caller.location.msg_contents(assimilate_msg, from_obj=caller)
+#             else:
+#                 caller.msg("Assimilate what?")
 
 
 # Other powers
@@ -686,16 +866,17 @@ class CmdPowers(Command):
         caller = self.caller
 
         table = EvTable(f"|cPower", f"|cRank", f"|cCost", border="table")
-        table.add_row(f"|GAssimilate", 1, 0)
         table.add_row(f"|GReaction", 1, 0)
-        table.add_row(f"|GRock Throw", 2, "5 Focus")
-        table.add_row(f"|GTerran Restoration", 4, "varies")
+        table.add_row(f"|GMeditate", 1, 0)
+        table.add_row(f"|GTerran Restoration", 2, "varies")
+        table.add_row(f"|GRock Throw", 4, "5 Focus")
         table.add_row(f"|GQuicksand", 6, "10 Focus")
         table.add_row(f"|GStone Skin", 7, "25 Energy")
         table.add_row(f"|GEarthen Renewal", 9, "50 Energy")
         table.add_row(f"|GBurnout", 7, "10 Energy")
         table.add_row(f"|GTremor", 12, "20 Focus")
         table.add_row(f"|GEarth Shield", 14, "50 Energy")
+        table.add_row(f"|GEnervate", 16, "25 Focus")
         table.add_row(f"|GEarthquake", 20, "50 Focus")
         table.add_row(f"|GEarth Form", 24, "50 Energy")
         table.add_row(f"|GMountain Stance", 28, "75 Energy")
@@ -778,6 +959,8 @@ class CmdGTrain(Command):
             return
 
         setattr(caller.db, "skill_gxp", skill_gxp - cost)
+        if skill == "elemental harmony":
+            caller.db.epmax += 25
         caller.db.skills[skill] += 1
         caller.msg(f"|yYou grow more experienced in {skill}")
 
@@ -813,7 +996,7 @@ class CmdGhelp(Command):
         if skill == "stone mastery":
             caller.msg(
                 "|cStone Mastery|n\n\n"
-                "Increases the elemental's control over stone, enhancing the effectiveness of all earth-based abilities.\n\n"
+                "Increases the elemental's control over stone, enhancing the effectiveness of all stone-based abilities.\n\n"
             )
             return
         if skill == "earth resonance":
@@ -846,7 +1029,7 @@ class CmdGhelp(Command):
         if skill == "rock solid defense":
             caller.msg(
                 "|cRock Solid Defense|n\n\n"
-                "Strengthens the elemental's defensive capabilities, making it harder for enemies to penetrate their defenses.\n\n"
+                "Strengthens the elemental's defensive capabilities, making it harder for enemies to penetrate their defenses. This skill provides benefits earth form, and provides a passive benefit. \n\n"
                 "Usage:\n"
                 "    rock solid defense\n"
                 "    rsd\n"
@@ -861,11 +1044,7 @@ class CmdGhelp(Command):
         if skill == "earthen regeneration":
             caller.msg(
                 "|cTerran Restoration|n\n\n"
-                "Improves the elemental's natural healing abilities, allowing for faster recovery from injuries.\n\n"
-                "Usage:\n"
-                "    terran restoration\n"
-                "    tr\n"
-                "    restore\n"
+                "Improves the elemental's natural healing abilities, allowing for faster recovery from mental exhaustion. This skill also directly impacts the efficacy of earthen renewal.\n\n"
             )
             return
         if skill == "assimilation":
@@ -881,15 +1060,26 @@ class CmdGhelp(Command):
         caller.msg(f"|rNo help found for {skill}.")
 
 
+from typeclasses.cybercorpsguild.cybercorps_commands import CybercorpsCmdSet
+from typeclasses.cybercorpsguild.cybercorps_wares import CybercorpsWaresCmdSet
+from typeclasses.cybercorpsguild.cyber_implants import CybercorpsImplantCmdSet
+
+
 class Test(Command):
     key = "test2"
 
     def func(self):
+        caller = self.caller
         self.msg("Test command")
-        cost = self.caller.db.skills["mineral fortification"] + 1
-        self.msg(f"|gCost: {cost}")
-        cost = SKILLS_COST[cost]
-        self.msg(f"|gCost2: {cost}")
+        # cost = self.caller.db.skills["mineral fortification"] + 1
+        # self.msg(f"|gCost: {cost}")
+        # cost = SKILLS_COST[cost]
+        # self.msg(f"|gCost2: {cost}")
+
+        caller.cmdset.delete(CybercorpsCmdSet)
+        caller.cmdset.delete(CybercorpsWaresCmdSet)
+        caller.cmdset.delete(CybercorpsImplantCmdSet)
+        self.msg("DONE")
 
 
 class EarthElementalCmdSet(CmdSet):
@@ -898,10 +1088,12 @@ class EarthElementalCmdSet(CmdSet):
     def at_cmdset_creation(self):
         super().at_cmdset_creation()
 
-        self.add(CmdAssimilate)
+        # self.add(CmdAssimilate)
         self.add(CmdTerranRestoration)
         self.add(CmdEarthShield)
         self.add(CmdStoneSkin)
+        self.add(CmdEnervate)
+        self.add(CmdMeditate)
         self.add(CmdPowers)
         self.add(CmdReaction)
         self.add(CmdGTrain)

@@ -6,6 +6,22 @@ from typeclasses.cybercorpsguild.cybercorps_attack import CybercorpsAttack
 from typeclasses.elementalguild.attack_emotes import AttackEmotes
 from typeclasses.utils import PowerCommand
 
+slowdown = 5
+
+
+def checkAdrenalineBoost(self, wielder):
+    duration = wielder.db.adrenaline_boost["duration"]
+
+    if duration == True:
+        wielder.adjust_ep(-20)
+        wielder.db.adrenaline_boost["duration"] -= 1
+        if duration == 1:
+            self.db.adrenaline_boost = {"active": False, "duration": 0}
+            self.msg(f"|CYour adrenaline boost fades, leaving you feeling drained.|n")
+            return False
+
+    return None
+
 
 # region Guild Level Weapons
 class HandRazors(CybercorpsAttack):
@@ -16,12 +32,12 @@ class HandRazors(CybercorpsAttack):
     stealthy characters who need to be able to quickly dispatch their foes.
     """
 
-    speed = 3
+    speed = 4
     energy_cost = 0
     name = "hand razors"
     cost = 0
     rank = 1
-    skill = "standard"
+    skill = "standard weapons"
     skill_req = 1
     short = "A pair of retractable hand razors."
     type = "melee"
@@ -32,7 +48,7 @@ class HandRazors(CybercorpsAttack):
         dex = wielder.traits.dex.value
 
         stat_bonus = (str + dex) * 0.20
-        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
+        dmg = 3 + glvl + stat_bonus + self.rank * (glvl / 10)
 
         damage = int(uniform(dmg * 0.5, dmg))
         return damage
@@ -43,8 +59,16 @@ class HandRazors(CybercorpsAttack):
             return
         # Subtract energy and apply damage to target before their defenses
         if wielder.db.strategy == "melee":
-            speed = 3
-            wielder.db.ep -= self.energy_cost
+            speed = self.speed
+            wielder.adjust_ep(-self.energy_cost)
+
+            boost = checkAdrenalineBoost(self, wielder)
+
+            if boost:
+                dmg = self._calculate_melee_damage(wielder)
+                target.at_damage(wielder, dmg, "edged", "hand_razors")
+            if boost == None:
+                speed = slowdown
 
             dmg = self._calculate_melee_damage(wielder)
             target.at_damage(wielder, dmg, "edged", "hand_razors")
@@ -62,10 +86,10 @@ class ShockHand(CybercorpsAttack):
     kill them outright.
     """
 
-    speed = 3
+    speed = 4
     energy_cost = 0
     name = "shock hand"
-    skill = "energy"
+    skill = "energy weapons"
     skill_req = 2
     rank = 5
     cost = 5
@@ -85,12 +109,27 @@ class ShockHand(CybercorpsAttack):
 
     def at_attack(self, wielder, target, **kwargs):
         super().at_attack(wielder, target, **kwargs)
+
         if not wielder.cooldowns.ready("shock_hand"):
             return
 
+        if not wielder.db.ep >= self.energy_cost:
+            wielder.msg("You can only maintain your hand razors.")
+            return
+
+        speed = self.speed
+
+        boost = checkAdrenalineBoost(self, wielder)
+
+        if boost:
+            dmg = self._calculate_melee_damage(wielder)
+            target.at_damage(wielder, dmg, "lightning", "shock_hand")
+        if boost == None:
+            speed = slowdown
+
         dmg = self._calculate_melee_damage(wielder)
-        target.at_damage(wielder, dmg, "electric", "shock_hand")
-        wielder.cooldowns.add("shock_hand", self.speed)
+        target.at_damage(wielder, dmg, "lightning", "shock_hand")
+        wielder.cooldowns.add("shock_hand", speed)
 
 
 # region Stealth Blade
@@ -104,10 +143,10 @@ class StealthBlade(CybercorpsAttack):
     who need to eliminate targets quietly and efficiently.
     """
 
-    speed = 3
+    speed = 4
     energy_cost = 0
     name = "stealth blade"
-    skill = "standard"
+    skill = "standard weapons"
     skill_req = 4
     cost = 10
     rank = 22
@@ -127,16 +166,26 @@ class StealthBlade(CybercorpsAttack):
 
     def at_attack(self, wielder, target, **kwargs):
         super().at_attack(wielder, target, **kwargs)
+        speed = self.speed
 
         if not wielder.cooldowns.ready("stealth_blade"):
             return
+
         if not wielder.db.ep >= self.energy_cost:
             wielder.msg("You can only maintain your hand razors.")
             return
 
+        boost = checkAdrenalineBoost(self, wielder)
+
+        if boost:
+            dmg = self._calculate_melee_damage(wielder)
+            target.at_damage(wielder, dmg, "edged", "stealth_blade")
+        if boost == None:
+            speed = slowdown
+
         dmg = self._calculate_melee_damage(wielder)
         target.at_damage(wielder, dmg, "edged", "stealth_blade")
-        wielder.cooldowns.add("stealth_blade", self.speed)
+        wielder.cooldowns.add("stealth_blade", speed)
 
 
 # region NanoBlade
@@ -155,7 +204,7 @@ class NanoBlade(CybercorpsAttack):
     speed = 4
     energy_cost = 0
     name = "nanoblade"
-    skill = "standard"
+    skill = "standard weapons"
     skill_req = 6
     cost = 5
     rank = 28
@@ -175,16 +224,26 @@ class NanoBlade(CybercorpsAttack):
 
     def at_attack(self, wielder, target, **kwargs):
         super().at_attack(wielder, target, **kwargs)
+        speed = self.speed
 
         if not wielder.cooldowns.ready("nanoblade"):
             return
+
         if not wielder.db.ep >= self.energy_cost:
             wielder.msg("You can only maintain your hand razors.")
             return
 
+        boost = checkAdrenalineBoost(self, wielder)
+
+        if boost:
+            dmg = self._calculate_melee_damage(wielder)
+            target.at_damage(wielder, dmg, "edged", "nanoblade")
+        if boost == None:
+            speed = slowdown
+
         dmg = self._calculate_melee_damage(wielder)
         target.at_damage(wielder, dmg, "edged", "nanoblade")
-        wielder.cooldowns.add("nanoblade", self.speed)
+        wielder.cooldowns.add("nanoblade", speed)
 
 
 # region Energy Sword
@@ -201,7 +260,7 @@ class EnergySword(CybercorpsAttack):
     speed = 3
     energy_cost = 0
     name = "energy sword"
-    skill = "energy"
+    skill = "energy weapons"
     skill_req = 3
     rank = 13
     cost = 20
@@ -221,12 +280,192 @@ class EnergySword(CybercorpsAttack):
 
     def at_attack(self, wielder, target, **kwargs):
         super().at_attack(wielder, target, **kwargs)
+        speed = self.speed
+
         if not wielder.cooldowns.ready("energy_sword"):
             return
 
+        if not wielder.db.ep >= self.energy_cost:
+            wielder.msg("You can only maintain your hand razors.")
+            return
+
+        boost = checkAdrenalineBoost(self, wielder)
+
+        if boost:
+            dmg = self._calculate_melee_damage(wielder)
+            target.at_damage(wielder, dmg, "energy", "energy_sword")
+        if boost == None:
+            speed = slowdown
+
         dmg = self._calculate_melee_damage(wielder)
         target.at_damage(wielder, dmg, "energy", "energy_sword")
-        wielder.cooldowns.add("energy_sword", self.speed)
+        wielder.cooldowns.add("energy_sword", speed)
+
+
+# region Graviton Hammer
+class GravitonHammer(CybercorpsAttack):
+    """
+    The graviton hammer is a heavy weapon that uses gravitational forces to
+    crush enemies with immense power. It is often used in military operations
+    for its ability to take out armored vehicles and fortified positions.
+    """
+
+    speed = 6
+    energy_cost = 5
+    name = "graviton hammer"
+    skill = "heavy weapons"
+    skill_req = 7
+    rank = 30
+    cost = 4
+    short = "A heavy weapon that uses gravitational forces to crush enemies."
+    type = "melee"
+
+    def _calculate_melee_damage(self, wielder):
+        glvl = wielder.db.guild_level
+        str = wielder.traits.str.value
+
+        stat_bonus = str * 0.6
+        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
+
+        damage = int(uniform(self.rank, dmg))
+        return damage
+
+    def at_attack(self, wielder, target, **kwargs):
+        super().at_attack(wielder, target, **kwargs)
+        speed = self.speed
+
+        # Subtract energy and apply damage to target before their defenses
+        if not wielder.cooldowns.ready("graviton_hammer"):
+            return
+
+        if not wielder.db.ep >= self.energy_cost:
+            return
+
+        boost = checkAdrenalineBoost(self, wielder)
+
+        if boost:
+            dmg = self._calculate_melee_damage(wielder)
+            target.at_damage(wielder, dmg, "blunt", "graviton_hammer")
+        if boost == None:
+            speed = slowdown
+
+        wielder.db.ep -= self.energy_cost
+
+        if randint(1, 100) < 30:
+            target.at_damage(wielder, dmg * 0.75, "energy", "graviton_hammer_hit")
+
+        dmg = self._calculate_melee_damage(wielder)
+        target.at_damage(wielder, dmg, "blunt", "graviton_hammer")
+        wielder.cooldowns.add("graviton_hammer", speed)
+
+
+# region Chainblade
+class ChainBlade(CybercorpsAttack):
+    """
+    A heavy sword with a motorized chain running along its edge, designed
+    to slice through enemies with ease. It is often used in close-quarters
+    combat for its ability to cut through armor and shields with ease.
+    """
+
+    speed = 6
+    energy_cost = 0
+    name = "chain blade"
+    skill = "heavy weapons"
+    skill_req = 4
+    rank = 24
+    cost = 1
+    short = "A melee weapon with a retractable chain."
+    type = "melee"
+
+    def _calculate_melee_damage(self, wielder):
+        glvl = wielder.db.guild_level
+        str = wielder.traits.str.value
+        dex = wielder.traits.dex.value
+
+        stat_bonus = (str + dex) * 0.33
+        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
+
+        damage = int(uniform(self.rank, dmg) * 0.55)
+        return damage
+
+    def at_attack(self, wielder, target, **kwargs):
+        super().at_attack(wielder, target, **kwargs)
+        speed = self.speed
+
+        if not wielder.cooldowns.ready("chain_blade"):
+            return
+
+        boost = checkAdrenalineBoost(self, wielder)
+
+        if boost:
+            dmg = self._calculate_melee_damage(wielder)
+            target.at_damage(wielder, dmg, "edged", "chain_blade")
+            dmg = self._calculate_melee_damage(wielder)
+            target.at_damage(wielder, dmg, "edged", "chain_blade")
+        if boost == None:
+            speed = slowdown
+
+        dmg = self._calculate_melee_damage(wielder)
+        dmg2 = self._calculate_melee_damage(wielder)
+
+        target.at_damage(wielder, dmg, "edged", "chain_blade")
+        target.at_damage(wielder, dmg2, "edged", "chain_blade")
+        wielder.cooldowns.add("chain_blade", speed)
+
+
+# region Shockwave Hammer
+class ShockwaveHammer(CybercorpsAttack):
+    """
+    The shockwave hammer is a heavy weapon that generates shockwaves upon impact,
+    capable of knocking down enemies and destroying structures. It is often used
+    in military operations for its ability to create chaos on the battlefield.
+    """
+
+    speed = 6
+    energy_cost = 5
+    name = "shockwave hammer"
+    skill = "heavy weapons"
+    skill_req = 2
+    rank = 14
+    cost = 4
+    short = "A heavy weapon that generates shockwaves upon impact."
+    type = "melee"
+
+    def _calculate_melee_damage(self, wielder):
+        glvl = wielder.db.guild_level
+        str = wielder.traits.str.value
+
+        stat_bonus = str * 0.5
+        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
+
+        damage = 10 + int(uniform(self.rank, dmg))
+        return damage
+
+    def at_attack(self, wielder, target, **kwargs):
+        super().at_attack(wielder, target, **kwargs)
+        speed = self.speed
+
+        # Subtract energy and apply damage to target before their defenses
+        if not wielder.cooldowns.ready("shockwave_hammer"):
+            return
+        if not wielder.db.ep >= self.energy_cost:
+            return
+
+        wielder.db.ep -= self.energy_cost
+
+        boost = checkAdrenalineBoost(self, wielder)
+
+        if boost:
+            dmg = self._calculate_melee_damage(wielder)
+            target.at_damage(wielder, dmg, "blunt", "shockwave_hammer")
+        if boost == None:
+            speed = slowdown
+
+        dmg = self._calculate_melee_damage(wielder)
+        target.at_damage(wielder, dmg, "blunt", "shockwave_hammer")
+        dmg = self._calculate_melee_damage(wielder)
+        target.at_damage(wielder, dmg, "blunt", "shockwave_hammer")
+        wielder.cooldowns.add("shockwave_hammer", speed)
 
 
 # region Tactical Shotgun
@@ -244,7 +483,7 @@ class TacticalShotgun(CybercorpsAttack):
     speed = 6
     energy_cost = 1
     name = "tactical shotgun"
-    skill = "standard"
+    skill = "standard weapons"
     skill_req = 2
     cost = 5
     rank = 11
@@ -260,10 +499,11 @@ class TacticalShotgun(CybercorpsAttack):
             return 0
 
         stat_bonus = str * 0.25 + dex * 0.25
-        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
+        dmg = 30 + glvl + stat_bonus + self.rank * (glvl / 10)
+        dmg = int(uniform(dmg * 0.5, dmg) * 0.36)
 
         # divide the damage by the number of pellets and increase the total damage
-        damage = int(uniform(dmg * 0.5, dmg) * 0.36)
+        damage = 2 + dmg
         return damage
 
     def at_attack(self, wielder, target, **kwargs):
@@ -301,7 +541,7 @@ class SmartGun(CybercorpsAttack):
     speed = 3
     energy_cost = 1
     name = "smart gun"
-    skill = "standard"
+    skill = "standard weapons"
     skill_req = 5
     rank = 25
     cost = 1
@@ -358,7 +598,7 @@ class RailPistol(CybercorpsAttack):
     speed = 3
     energy_cost = 1
     name = "rail pistol"
-    skill = "standard"
+    skill = "standard weapons"
     skill_req = 3
     rank = 20
     cost = 2
@@ -392,7 +632,9 @@ class RailPistol(CybercorpsAttack):
         wielder.db.ep -= self.energy_cost
 
         dmg = self._calculate_ranged_damage(wielder)
+        dmg2 = self._calculate_ranged_damage(wielder)
         target.at_damage(wielder, dmg, "edged", "rail_pistol")
+        target.at_damage(wielder, dmg2, "edged", "rail_pistol")
         wielder.cooldowns.add("rail_pistol", self.speed)
 
 
@@ -412,7 +654,7 @@ class LaserPistol(CybercorpsAttack):
     speed = 3
     energy_cost = 1
     name = "laser pistol"
-    skill = "energy"
+    skill = "energy weapons"
     skill_req = 1
     rank = 3
     cost = 1
@@ -424,14 +666,14 @@ class LaserPistol(CybercorpsAttack):
         str = wielder.traits.str.value
         dex = wielder.traits.dex.value
 
-        miss_rate = 50 - (glvl * 0.5) - (dex * 0.25)
+        miss_rate = 75 - (glvl * 0.5) - (dex * 0.25)
         if randint(1, 100) < miss_rate:
             return 0
 
-        stat_bonus = str * 0.25 + dex * 0.5
-        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
+        stat_bonus = str * 0.25 + dex * 0.25
+        dmg = glvl + stat_bonus + self.rank * (glvl / 10)
 
-        damage = int(uniform(dmg * 0.5, dmg) * 0.55)
+        damage = 10 + int(uniform(dmg * 0.5, dmg) * 0.55)
         return damage
 
     def at_attack(self, wielder, target, **kwargs):
@@ -444,10 +686,8 @@ class LaserPistol(CybercorpsAttack):
             return
 
         wielder.db.ep -= self.energy_cost
-        wielder.msg("You fire your laser pistol.")
         dmg = self._calculate_ranged_damage(wielder)
         dmg2 = self._calculate_ranged_damage(wielder)
-        wielder.msg(f"You deal {dmg} damage to {target}.")
         target.at_damage(wielder, dmg, "energy", "laser_pistol")
         target.at_damage(wielder, dmg2, "energy", "laser_pistol")
         wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
@@ -468,7 +708,7 @@ class PhotonBlaster(CybercorpsAttack):
     speed = 3
     energy_cost = 3
     name = "photon blaster"
-    skill = "energy"
+    skill = "energy weapons"
     skill_req = 4
     rank = 21
     cost = 2
@@ -486,9 +726,7 @@ class PhotonBlaster(CybercorpsAttack):
         stat_bonus = (str + dex) * 0.33
         dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
 
-        wielder.msg(f"Photon Blaster: {dmg}")
         damage = int(uniform(dmg * 0.5, dmg) * 0.55)
-        wielder.msg(f"Photon Blaster: {damage}")
         return damage
 
     def at_attack(self, wielder, target, **kwargs):
@@ -503,7 +741,6 @@ class PhotonBlaster(CybercorpsAttack):
 
         dmg = self._calculate_ranged_damage(wielder)
         dmg2 = self._calculate_ranged_damage(wielder)
-        wielder.msg(f"You deal {dmg} and {dmg2} damage to {target}.")
 
         target.at_damage(wielder, dmg, "energy", "photon_blaster")
         target.at_damage(wielder, dmg2, "energy", "photon_blaster")
@@ -521,10 +758,10 @@ class PlasmaCannon(CybercorpsAttack):
     vehicles with ease.
     """
 
-    speed = 10
-    energy_cost = 5
+    speed = 6
+    energy_cost = 25
     name = "plasma cannon"
-    skill = "heavy"
+    skill = "heavy weapons"
     skill_req = 6
     rank = 29
     cost = 3
@@ -533,12 +770,16 @@ class PlasmaCannon(CybercorpsAttack):
 
     def _calculate_ranged_damage(self, wielder):
         glvl = wielder.db.guild_level
-        str = wielder.traits.str.value
+        dex = wielder.traits.dex.value
+
+        miss_rate = 25 - (glvl * 0.5) - (dex * 0.25)
+        if randint(1, 100) < miss_rate:
+            return 0
 
         stat_bonus = str
         dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
 
-        damage = int(uniform(dmg * 0.5, dmg))
+        damage = int(uniform(dmg * 0.9, dmg * 1.25))
         return damage
 
     def at_attack(self, wielder, target, **kwargs):
@@ -567,10 +808,10 @@ class GaussCannon(CybercorpsAttack):
     devastating blows that can cleave through multiple enemies in a single strike.
     """
 
-    speed = 8
-    energy_cost = 5
+    speed = 6
+    energy_cost = 25
     name = "gauss cannon"
-    skill = "heavy"
+    skill = "heavy weapons"
     skill_req = 5
     rank = 27
     cost = 5
@@ -589,7 +830,7 @@ class GaussCannon(CybercorpsAttack):
         stat_bonus = (str + dex) * 0.33
         dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
 
-        damage = int(uniform(dmg * 0.5, dmg))
+        damage = int(uniform(dmg * 0.9, dmg * 1.25))
         return damage
 
     def at_attack(self, wielder, target, **kwargs):
@@ -619,10 +860,10 @@ class PulseRifle(CybercorpsAttack):
     weapon for a variety of combat situations.
     """
 
-    speed = 5
-    energy_cost = 3
+    speed = 3
+    energy_cost = 6
     name = "pulse rifle"
-    skill = "energy"
+    skill = "energy weapons"
     skill_req = 6
     rank = 26
     cost = 3
@@ -669,15 +910,13 @@ class PlasmaRifle(CybercorpsAttack):
     The plasma rifle is a high-energy weapon that fires superheated plasma
     bolts, capable of melting through most materials. The plasma rifle is
     often used by elite soldiers and special forces operatives who need a
-    weapon that can penetrate armor and shields with ease. The plasma rifle
-    is capable of delivering devastating blows that can cleave through multiple
-    enemies in a single strike.
+    weapon that can penetrate armor and shields with ease.
     """
 
-    speed = 5
-    energy_cost = 3
+    speed = 6
+    energy_cost = 25
     name = "plasma rifle"
-    skill = "energy"
+    skill = "energy weapons"
     skill_req = 5
     rank = 23
     cost = 4
@@ -696,7 +935,7 @@ class PlasmaRifle(CybercorpsAttack):
         stat_bonus = (str + dex) * 0.33
         dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
 
-        damage = int(uniform(dmg * 0.5, dmg))
+        damage = int(uniform(dmg * 0.9, dmg * 1.25) * 0.35)
         return damage
 
     def at_attack(self, wielder, target, **kwargs):
@@ -730,10 +969,10 @@ class LaserSniperRifle(CybercorpsAttack):
     making it an ideal weapon for long-range combat.
     """
 
-    speed = 6
-    energy_cost = 10
+    speed = 9
+    energy_cost = 30
     name = "laser sniper rifle"
-    skill = "energy"
+    skill = "energy weapons"
     skill_req = 7
     rank = 30
     cost = 6
@@ -747,7 +986,7 @@ class LaserSniperRifle(CybercorpsAttack):
         stat_bonus = dex
         dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
 
-        damage = int(uniform(dmg * 0.5, dmg))
+        damage = int(uniform(dmg * 1, dmg * 1.5))
         return damage
 
     def at_attack(self, wielder, target, **kwargs):
@@ -775,13 +1014,13 @@ class RocketLauncher(CybercorpsAttack):
     fortified positions.
     """
 
-    speed = 12
+    speed = 6
     energy_cost = 8
     name = "rocket launcher"
-    skill = "heavy"
+    skill = "heavy weapons"
     skill_req = 3
     rank = 17
-    cost = 5
+    cost = 15
     short = "A heavy weapon that fires explosive projectiles."
     type = "ranged"
 
@@ -807,6 +1046,9 @@ class RocketLauncher(CybercorpsAttack):
         wielder.db.ep -= self.energy_cost
 
         dmg = self._calculate_ranged_damage(wielder)
+        if randint(1, 100) < 30:
+            target.at_damage(wielder, int(dmg * 1.25), "fire", "rocket_launcher_hit")
+            return
         target.at_damage(wielder, dmg, "fire", "rocket_launcher")
         wielder.cooldowns.add("rocket_launcher", self.speed)
 
@@ -823,8 +1065,8 @@ class FlameThrower(CybercorpsAttack):
     speed = 6
     energy_cost = 5
     name = "flamethrower"
-    skill = "heavy"
-    skill_req = 2
+    skill = "heavy weapons"
+    skill_req = 1
     rank = 8
     cost = 3
     short = "A close-range weapon that projects a stream of fire."
@@ -833,11 +1075,12 @@ class FlameThrower(CybercorpsAttack):
     def _calculate_ranged_damage(self, wielder):
         glvl = wielder.db.guild_level
         str = wielder.traits.str.value
+        dex = wielder.traits.dex.value
 
-        stat_bonus = str * 0.5
-        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
+        stat_bonus = (str + dex) * 0.25
+        dmg = 20 + glvl + stat_bonus + self.rank * (glvl / 10)
 
-        damage = int(uniform(dmg * 0.5, dmg))
+        damage = 2 + int(uniform(dmg * 0.5, dmg) * 0.35)
         return damage
 
     def at_attack(self, wielder, target, **kwargs):
@@ -852,91 +1095,13 @@ class FlameThrower(CybercorpsAttack):
         wielder.db.ep -= self.energy_cost
 
         dmg = self._calculate_ranged_damage(wielder)
+        dmg2 = self._calculate_ranged_damage(wielder)
+        dmg3 = self._calculate_ranged_damage(wielder)
+
         target.at_damage(wielder, dmg, "fire", "flame_thrower")
+        target.at_damage(wielder, dmg2, "fire", "flame_thrower")
+        target.at_damage(wielder, dmg3, "fire", "flame_thrower")
         wielder.cooldowns.add("flame_thrower", self.speed)
-
-
-# region Graviton Hammer
-class GravitonHammer(CybercorpsAttack):
-    """
-    The graviton hammer is a heavy weapon that uses gravitational forces to
-    crush enemies with immense power. It is often used in military operations
-    for its ability to take out armored vehicles and fortified positions.
-    """
-
-    speed = 8
-    energy_cost = 5
-    name = "graviton hammer"
-    skill = "heavy"
-    skill_req = 7
-    rank = 30
-    cost = 4
-    short = "A heavy weapon that uses gravitational forces to crush enemies."
-    type = "melee"
-
-    def _calculate_melee_damage(self, wielder):
-        glvl = wielder.db.guild_level
-        str = wielder.traits.str.value
-
-        stat_bonus = str * 0.5
-        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
-
-        damage = int(uniform(self.rank, dmg))
-        return damage
-
-    def at_attack(self, wielder, target, **kwargs):
-        super().at_attack(wielder, target, **kwargs)
-
-        # Subtract energy and apply damage to target before their defenses
-        if not wielder.cooldowns.ready("graviton_hammer"):
-            return
-        if not wielder.db.ep >= self.energy_cost:
-            return
-
-        wielder.db.ep -= self.energy_cost
-
-        dmg = self._calculate_melee_damage(wielder)
-        target.at_damage(wielder, dmg, "blunt", "graviton_hammer")
-        wielder.cooldowns.add("graviton_hammer", self.speed)
-
-
-# region Chainblade
-class ChainBlade(CybercorpsAttack):
-    """
-    A heavy sword with a motorized chain running along its edge, designed
-    to slice through enemies with ease. It is often used in close-quarters
-    combat for its ability to cut through armor and shields with ease.
-    """
-
-    speed = 3
-    energy_cost = 0
-    name = "chain blade"
-    skill = "heavy"
-    skill_req = 4
-    rank = 24
-    cost = 1
-    short = "A melee weapon with a retractable chain."
-    type = "melee"
-
-    def _calculate_melee_damage(self, wielder):
-        glvl = wielder.db.guild_level
-        str = wielder.traits.str.value
-        dex = wielder.traits.dex.value
-
-        stat_bonus = (str + dex) * 0.33
-        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
-
-        damage = int(uniform(self.rank, dmg))
-        return damage
-
-    def at_attack(self, wielder, target, **kwargs):
-        super().at_attack(wielder, target, **kwargs)
-        if not wielder.cooldowns.ready("chain_blade"):
-            return
-
-        dmg = self._calculate_melee_damage(wielder)
-        target.at_damage(wielder, dmg, "edged", "chain_blade")
-        wielder.cooldowns.add("chain_blade", self.speed)
 
 
 # region Vortex AR-9
@@ -949,9 +1114,9 @@ class VortexAR9(CybercorpsAttack):
     """
 
     speed = 3
-    energy_cost = 1
+    energy_cost = 10
     name = "vortex ar9"
-    skill = "standard"
+    skill = "standard weapons"
     skill_req = 7
     rank = 15
     cost = 3
@@ -971,7 +1136,7 @@ class VortexAR9(CybercorpsAttack):
         stat_bonus = (str + dex) * 0.33
         dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
 
-        damage = int(uniform(dmg * 0.5, dmg) * 0.55)
+        damage = int(uniform(dmg * 0.5, dmg) * 0.4)
         return damage
 
     def at_attack(self, wielder, target, **kwargs):
@@ -987,53 +1152,11 @@ class VortexAR9(CybercorpsAttack):
 
         dmg = self._calculate_ranged_damage(wielder)
         dmg2 = self._calculate_ranged_damage(wielder)
-        target.at_damage(wielder, dmg, "energy", "vortex_ar9")
+        dmg3 = self._calculate_ranged_damage(wielder)
+        target.at_damage(wielder, dmg, "edged", "vortex_ar9")
         target.at_damage(wielder, dmg2, "energy", "vortex_ar9")
+        target.at_damage(wielder, dmg3, "fire", "vortex_ar9")
         wielder.cooldowns.add("vortex_ar9", self.speed)
-
-
-# region Shockwave Hammer
-class ShockwaveHammer(CybercorpsAttack):
-    """
-    The shockwave hammer is a heavy weapon that generates shockwaves upon impact,
-    capable of knocking down enemies and destroying structures. It is often used
-    in military operations for its ability to create chaos on the battlefield.
-    """
-
-    speed = 8
-    energy_cost = 5
-    name = "shockwave hammer"
-    skill = "heavy"
-    skill_req = 1
-    rank = 5
-    cost = 4
-    short = "A heavy weapon that generates shockwaves upon impact."
-    type = "melee"
-
-    def _calculate_melee_damage(self, wielder):
-        glvl = wielder.db.guild_level
-        str = wielder.traits.str.value
-
-        stat_bonus = str * 0.5
-        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
-
-        damage = int(uniform(self.rank, dmg))
-        return damage
-
-    def at_attack(self, wielder, target, **kwargs):
-        super().at_attack(wielder, target, **kwargs)
-
-        # Subtract energy and apply damage to target before their defenses
-        if not wielder.cooldowns.ready("shockwave_hammer"):
-            return
-        if not wielder.db.ep >= self.energy_cost:
-            return
-
-        wielder.db.ep -= self.energy_cost
-
-        dmg = self._calculate_melee_damage(wielder)
-        target.at_damage(wielder, dmg, "blunt", "shockwave_hammer")
-        wielder.cooldowns.add("shockwave_hammer", self.speed)
 
 
 # region Loadout
@@ -1222,6 +1345,7 @@ WaresObjects = {
     "laser sniper rifle": LaserSniperRifle(),
     "graviton hammer": GravitonHammer(),
     "vortex ar9": VortexAR9(),
+    "shockwave hammer": ShockwaveHammer(),
 }
 
 

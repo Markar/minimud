@@ -3,6 +3,7 @@ from evennia import CmdSet
 from evennia.utils import iter_to_str
 from evennia.utils.evtable import EvTable
 from typeclasses.scripts import get_or_create_combat_script
+from evennia.contrib.game_systems.clothing.clothing import CmdWear
 
 from .command import Command
 from typeclasses.gear import BareHand
@@ -11,19 +12,10 @@ from typeclasses.gear import BareHand
 class CmdAttack(Command):
     """
     Attack an enemy with your equipped weapon.
-
-    Usage:
-        attack <enemy> [with <weapon>]
-
-    Example:
-        attack wolf
-        attack bear with sword
-        attack bear w sword
-        attack bear w/sword
     """
 
     key = "attack"
-    aliases = ("att", "hit", "shoot")
+    aliases = ("att", "hit", "kill")
     help_category = "combat"
 
     def parse(self):
@@ -31,18 +23,8 @@ class CmdAttack(Command):
         Parse for optional weapon
         """
         self.args = self.args.strip()
-
-        # split on variations of "with"
-        if " with " in self.args:
-            self.target, self.weapon = self.args.split(" with ", maxsplit=1)
-        elif " w " in self.args:
-            self.target, self.weapon = self.args.split(" w ", maxsplit=1)
-        elif " w/" in self.args:
-            self.target, self.weapon = self.args.split(" w/", maxsplit=1)
-        else:
-            # no splitters, it's all target
-            self.target = self.args
-            self.weapon = None
+        self.target = self.args
+        self.weapon = None
 
     def func(self):
         location = self.caller.location
@@ -54,15 +36,8 @@ class CmdAttack(Command):
             self.msg("Attack what?")
             return
 
-        # if we specified a weapon, find it first
-        # if self.weapon:
-        #     weapon = self.caller.search(self.weapon)
-        #     if not weapon:
-        #         # no valid match
-        #         return
-        # else:
-        #     # grab whatever we're wielding
         if wielded := self.caller.wielding:
+            self.msg(f"You are wielding {iter_to_str(wielded)}.")
             weapon = wielded[0]
         else:
             # use our bare hands if we aren't wielding anything
@@ -278,6 +253,34 @@ class CmdHeal(Command):
         caller.use_heal()
 
 
+class CmdWearNew(CmdWear):
+    """
+    Wear an item of clothing
+
+    Usage:
+        wear <item>
+    """
+
+    key = "wear"
+    help_category = "combat"
+
+    def func(self):
+        caller = self.caller
+        item = caller.search(self.args)
+
+        if not item:
+            return
+
+        if not item.db.clothing_type:
+            self.msg("You can't wear that.")
+            return
+
+        if not caller.can_wear(item):
+            return
+
+        super().func()
+
+
 # class CmdFireball(Command):
 #     """
 #     Casts a fireball
@@ -392,3 +395,4 @@ class CombatCmdSet(CmdSet):
         self.add(CmdStatus)
         # self.add(CmdFireball)
         self.add(CmdHeal)
+        self.add(CmdWearNew)

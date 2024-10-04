@@ -3,6 +3,8 @@ from evennia.utils.evtable import EvTable
 from commands.command import Command
 from typeclasses.cybercorpsguild.cybercorps_commands import CybercorpsCmdSet
 from typeclasses.cybercorpsguild.cybercorps_wares import WaresObjects
+from typeclasses.cybercorpsguild.cyber_implants import ImplantObjects
+from evennia import TICKER_HANDLER as tickerhandler
 
 # from commands.shops import ShopCmdSet
 # from evennia.utils import create
@@ -24,9 +26,15 @@ class CmdJoinCybercorps(Command):
                 "typeclasses.cybercorps.Cybercorps",
                 clean_attributes=False,
             )
+
             caller.cmdset.add(CybercorpsCmdSet, persistent=True)
         else:
             caller.msg(f"|rYou are already in a guild")
+
+
+# region Leave Cybercorps
+from typeclasses.cybercorpsguild.cybercorps_wares import CybercorpsWaresCmdSet
+from typeclasses.cybercorpsguild.cyber_implants import CybercorpsImplantCmdSet
 
 
 class CmdLeaveCybercorps(Command):
@@ -39,24 +47,51 @@ class CmdLeaveCybercorps(Command):
     def strip(self):
         caller = self.caller
         caller.cmdset.delete(CybercorpsCmdSet)
+        caller.cmdset.delete(CybercorpsWaresCmdSet)
+        caller.cmdset.delete(CybercorpsImplantCmdSet)
         del caller.db.docwagon
         del caller.db.skills
         del caller.db.guild_level
         del caller.db.strategy
         del caller.db.wares
+        del caller.db.melee_weapon
+        del caller.db.ranged_weapon
+        del caller.db.adaptive_armor
+        del caller.db.nano_reinforced_skeleton
+        del caller.db.nrs_amount
+        del caller.db.adrenaline_boost
+        del caller.db.implants
+        del caller.db.platelet_factory_active
+
+        try:
+            tickerhandler.remove(
+                interval=6,
+                callback=caller.at_tick,
+                idstring=f"{caller}-regen",
+                persistent=True,
+            )
+            tickerhandler.remove(
+                interval=60 * 5,
+                callback=caller.at_docwagon_tick,
+                idstring=f"{caller}-superpower",
+                persistent=True,
+            )
+        except ValueError:
+            print(f"tickerhandler.remove failed")
 
         return
 
     def func(self):
         caller = self.caller
         if caller.db.guild == "cybercorps":
-            caller.swap_typeclass("typeclasses.characters.PlayerCharacter")
             self.strip()
+            caller.swap_typeclass("typeclasses.characters.PlayerCharacter")
             caller.msg(f"|rYou leave the Cybercorps Mega Corporation")
         else:
-            caller.msg(f"|rYou are already an adventurer")
+            caller.msg(f"|rYou are not part of the Cybercorps Mega Corporation.")
 
 
+# region List Wares
 class CmdListWares(Command):
     """
     List wares available for purchase from the Cybercorps Mega Corporation
@@ -69,8 +104,14 @@ class CmdListWares(Command):
         table = EvTable(
             f"|wWares", f"|wSkill", f"|wRank", f"|wCost", f"|wLevel", border="table"
         )
+
         for ware in WaresObjects.values():
-            if ware.name in caller.db.wares:
+
+            if (
+                caller.db.wares
+                and ware.name in caller.db.wares
+                and caller.db.guild == "cybercorps"
+            ):
                 table.add_row(
                     f"|Y{ware.name}",
                     f"|Y{ware.skill}",
@@ -90,6 +131,96 @@ class CmdListWares(Command):
         caller.msg(str(table))
 
 
+# region list implants
+class CmdListImplants(Command):
+    """
+    List implants available for purchase from the Cybercorps Mega Corporation
+    """
+
+    key = "list"
+
+    def func(self):
+        caller = self.caller
+        table = EvTable(
+            f"|wImplant", f"|wSkill", f"|wRank", f"|wCost", f"|wLevel", border="table"
+        )
+        for implant in ImplantObjects:
+            table.add_row(
+                f"|Y{implant['name']}",
+                f"|Y{implant['skill']}",
+                f"|Y{implant['skill_req']}",
+                f"|Y{implant['cost']}",
+                f"|Y{implant['rank']}",
+            )
+
+        caller.msg(str(table))
+
+
+# region buy implants
+class CmdBuyImplant(Command):
+    """
+    Buy implant from the Cybercorps Mega Corporation
+    """
+
+    key = "buy"
+
+    def func(self):
+        caller = self.caller
+        implant = self.args.strip().lower()
+        owned_implants = getattr(caller.db, "implants", [])
+
+        if caller.db.guild != "cybercorps":
+            caller.msg(
+                f"|rYou need to be part of the Cybercorps Mega Corporation to buy implants."
+            )
+            return
+
+        if not implant:
+            caller.msg(f"|rUsage: buy <implant>")
+            return
+
+        if implant in owned_implants:
+            caller.msg(f"|rYou already have the {implant}.")
+            return
+
+        for obj in ImplantObjects:
+            if obj["name"].lower() == implant:
+                skill_req = obj["skill_req"]
+                skill = obj["skill"]
+                name = obj["name"]
+                rank = obj["rank"]
+                cost = obj["cost"]
+
+                if caller.db.guild_level < obj["rank"]:
+                    caller.msg(
+                        f"|rYou need to be guild level {rank} to buy the {name}."
+                    )
+                    return
+
+                if caller.db.skills.get(obj["skill"], 0) < obj["skill_req"]:
+                    caller.msg(
+                        f"|rYou need to have at least {skill_req} ranks in {skill} to buy the {name}."
+                    )
+                    return
+
+                if caller.db.coins < obj["cost"]:
+                    caller.msg(
+                        f"|rYou need {cost - caller.db.coins} more coins to buy the {name}."
+                    )
+                    return
+
+                caller.db.implants.append(name.lower())
+                caller.db.coins -= cost
+                caller.msg(
+                    f"|gYou buy the {name} from the Cybercorps Mega Corporation."
+                )
+                return
+
+        caller.msg(f"|rYou can't buy the {name}.")
+        return
+
+
+# region buy wars
 class CmdBuyWares(Command):
     """
     Buy wares from the Cybercorps Mega Corporation
@@ -100,6 +231,7 @@ class CmdBuyWares(Command):
     def func(self):
         caller = self.caller
         ware = self.args.strip().lower()
+        coins = getattr(caller.db, "coins", 0)
 
         if caller.db.guild != "cybercorps":
             caller.msg(
@@ -129,7 +261,7 @@ class CmdBuyWares(Command):
                     )
                     return
 
-                if caller.db.coins < ware.cost:
+                if coins < ware.cost:
                     caller.msg(
                         f"|rYou need {ware.cost - caller.db.coins} more coins to buy the {ware.name}."
                     )
@@ -146,7 +278,7 @@ class CmdBuyWares(Command):
         return
 
 
-class CybercorpsWaresCmdSet(CmdSet):
+class CybercorpsWaresRoomCmdSet(CmdSet):
     key = "Cybercorps Wares CmdSet"
 
     def at_cmdset_creation(self):
@@ -154,6 +286,16 @@ class CybercorpsWaresCmdSet(CmdSet):
 
         self.add(CmdBuyWares)
         self.add(CmdListWares)
+
+
+class CybercorpsImplantsRoomCmdSet(CmdSet):
+    key = "Cybercorps Implants CmdSet"
+
+    def at_cmdset_creation(self):
+        super().at_cmdset_creation()
+
+        self.add(CmdBuyImplant)
+        self.add(CmdListImplants)
 
 
 # class CyberShop(RoomParent, DefaultRoom):

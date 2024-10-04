@@ -11,7 +11,7 @@
 #
 @desc |GThe room is dominated by a life-size chessboard, each square large enough to accommodate a full-grown person. On the black and white tiles, gnolls and skeletons clash in a fierce battle. The gnolls, with their hyena-like features and crude armor, snarl and swing their weapons with savage intensity. Opposing them, skeletal warriors, their bones clattering with each movement, wield rusted swords and shields. The air is thick with the sounds of combat, and the eerie glow of torches casts flickering shadows across the scene, making the battle seem almost otherworldly.
 #
-@open chessboard = (1,1,chessboard)
+@open chessboard,leave = (1,1,chessboard)
 #
 chessboard
 #
@@ -24,8 +24,27 @@ chessboard
 #
 @desc |GThe room is dominated by a life-size chessboard, each square large enough to accommodate a full-grown person. On the black and white tiles, gnolls and skeletons clash in a fierce battle. The gnolls, with their hyena-like features and crude armor, snarl and swing their weapons with savage intensity. Opposing them, skeletal warriors, their bones clattering with each movement, wield rusted swords and shields. The air is thick with the sounds of combat, and the eerie glow of torches casts flickering shadows across the scene, making the battle seem almost otherworldly.
 #
-@open enter = (1,1,training_grounds)
+@open enter,leave = (1,1,training_grounds)
+#
+
+
+
+
+
+#
+@dig/teleport An entrance to Crushbone;chaos#4 : typeclasses.rooms.Room = north;n,south;s
+#
+@desc |GThe entrance Crushbone Keep
+#
+@open enter = (1,1,crushbone)
 #
 enter
 #
-@open leave = chaos#3
+@open leave = chaos#4
+
+@tel (8,2,crushbone)
+#
+@dig/teleport Trainer's Hill;crushbone#1 : typeclasses.rooms.OrcTrainer = up;u,down;d
+#
+@desc |YAs you climb the hill, you see a large, open area at the top. The ground is covered in patches of grass and wildflowers, and the air is filled with the sound of birdsong. At the center of the hilltop, a large, flat rock serves as a natural platform, overlooking the surrounding landscape. From this vantage point, you can see the entire training grounds, with its various obstacles and training areas.
+#

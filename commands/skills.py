@@ -104,6 +104,25 @@ STAT_COST_DICT = {
     79: int(206576129 * 1.1),
     80: int(228060742 * 1.1),
     81: int(252166816 * 1.1),
+    82: int(279307498 * 1.1),
+    83: int(309956248 * 1.1),
+    84: int(344659999 * 1.1),
+    85: int(384047777 * 1.1),
+    86: int(428835308 * 1.1),
+    87: int(479840342 * 1.1),
+    88: int(537988158 * 1.1),
+    89: int(604200175 * 1.1),
+    90: int(679488084 * 1.1),
+    91: int(765954892 * 1.1),
+    92: int(865274381 * 1.1),
+    93: int(979067819 * 1.1),
+    94: int(1109300000 * 1.1),
+    95: int(1250000000 * 1.1),
+    96: int(1400000000 * 1.1),
+    97: int(1560000000 * 1.1),
+    98: int(1730000000 * 1.1),
+    99: int(1910000000 * 1.1),
+    100: int(2010000000 * 1.1),
 }
 # self.msg(sum(STAT_COST_DICT.values()))
 # 2,936,390,438
@@ -160,6 +179,35 @@ LEVEL_COST_DICT = {
     49: 50019600,
     50: 54338000,
     51: 58856600,
+    52: 63575400,
+    53: 68494400,
+    54: 73613600,
+    55: 78933000,
+    56: 84452600,
+    57: 90172400,
+    58: 96092400,
+    59: 102612600,
+    60: 109332800,
+    61: 116154000,
+    62: 123076200,
+    63: 130099400,
+    64: 137223600,
+    65: 144448800,
+    66: 151775000,
+    67: 159202200,
+    68: 166730400,
+    69: 174359600,
+    70: 182089800,
+    71: 189921000,
+    72: 197853200,
+    73: 205886400,
+    74: 214020600,
+    75: 222255800,
+    76: 230592000,
+    77: 239029200,
+    78: 247567400,
+    79: 256206600,
+    80: 264946800,
 }
 # 56,579,101
 # 565,791,017
@@ -175,7 +223,8 @@ class CmdStatSheet(Command):
 
     def func(self):
         caller = self.caller
-        levelcost = int(LEVEL_COST_DICT[caller.db.level + 1])
+        next_level = caller.db.level + 1
+        levelcost = int(LEVEL_COST_DICT.get(next_level, 0))
         self.msg(f" |g{caller} {caller.db.title} ({caller.db.alignment})")
         self.msg(f" |GLevel {caller.db.level or 0}, {levelcost} xp to next level")
         self.msg(f" |GEXP: {caller.db.exp or 0}")
@@ -185,10 +234,7 @@ class CmdStatSheet(Command):
             best_kill = caller.db.best_kill or "None"
             best_kill_name = best_kill.get("name", "None")
             best_kill_level = best_kill.get("level", 0)
-            best_kill_exp = best_kill.get("xp", 0)
-            self.msg(
-                f" |GBest Kill: {best_kill_name} (lvl {best_kill_level}) for {best_kill_exp} exp\n"
-            )
+            self.msg(f" |GBest Kill: {best_kill_name}, Level {best_kill_level}\n")
 
         # display the primary stats
         strcost = int(STAT_COST_DICT[caller.traits.str.base + 1])
@@ -291,6 +337,9 @@ class CmdAdvance(Command):
         caller.db.exp -= cost
         caller.db.level += 1
         caller.db.stat_points += 5
+        caller.db.weight.max = 50 + caller.db.level * 2 + caller.db.str * 3
+        # 50 + 20 * 2 + 20 * 3 = 50 + 40 + 60 = 150
+        # 50 + 30 * 2 + 40 * 3 = 50 + 60 + 120 = 230
         self.msg(f"You grow more powerful ({caller.db.level})")
 
     def set_max_hp(self):
@@ -347,7 +396,6 @@ class CmdAdvance(Command):
                 self.set_max_fp()
                 caller.msg(f"|rYou grow more powerful ({caller.db.level})")
             else:
-                self.msg(f"stat: {stat}")
                 caller = self.caller
                 if not (caller.db.stat_points > 0):
                     print(f"caller stat points: {caller.db.stat_points}")
@@ -367,12 +415,8 @@ class CmdAdvance(Command):
                 caller.traits.get(stat).base = current_stat + 1
 
                 if stat == "con":
-                    self.msg(f"con increase amount: {caller.db.con_increase_amount}")
-                    self.msg(f"con value: {caller.traits.con.value}")
                     self.set_max_hp()
                 if stat == "int":
-                    self.msg(f"int increase amount: {caller.db.int_increase_amount}")
-                    self.msg(f"int value: {caller.traits.int.value}")
                     self.set_max_fp()
 
                 self.msg(f"|rYou advance your {stat} to {current_stat + 1}.")

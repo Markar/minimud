@@ -17,13 +17,13 @@ class Firebeetle(XYGridRoom):
 class MossSnake(XYGridRoom):
     def at_object_creation(self):
         super().at_object_creation()
-        SpawnMob(self, 50, 1, 1, "MOSS_SNAKE", "mystical_forest")
+        SpawnMob(self, 60, 1, 1, "MOSS_SNAKE", "mystical_forest")
 
 
 class GoblinScout(XYGridRoom):
     def at_object_creation(self):
         super().at_object_creation()
-        SpawnMob(self, 230, 2, 1, "GOBLIN_SCOUT", "mystical_forest")
+        SpawnMob(self, 130, 2, 1, "GOBLIN_SCOUT", "mystical_forest")
 
 
 class DecayingSkeleton(XYGridRoom):

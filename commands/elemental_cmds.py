@@ -6,14 +6,13 @@ from evennia import TICKER_HANDLER as tickerhandler
 from evennia import logger
 
 from .command import Command
+from typeclasses.utils import get_glvl_cost, SKILL_RANKS
 from typeclasses.elementalguild.earth_elemental_commands import EarthElementalCmdSet
 from typeclasses.elementalguild.air_elemental_commands import AirElementalCmdSet
 from typeclasses.elementalguild.fire_elemental_commands import FireElementalCmdSet
 from typeclasses.elementalguild.water_elemental_commands import WaterElementalCmdSet
 from typeclasses.elementalguild.constants_and_helpers import (
     SKILLS_COST,
-    SKILL_RANKS,
-    GUILD_LEVEL_COST_DICT,
     WATER_TITLES,
     FIRE_TITLES,
     AIR_TITLES,
@@ -40,7 +39,7 @@ class CmdGAdvance(Command):
 
     def _adv_level(self):
         caller = self.caller
-        cost = GUILD_LEVEL_COST_DICT[caller.db.guild_level + 1]
+        cost = get_glvl_cost(caller.db.guild_level + 1)
         titles = EARTH_TITLES
         if caller.db.subguild == "water":
             titles = WATER_TITLES
@@ -53,11 +52,12 @@ class CmdGAdvance(Command):
             self.msg(f"|wYou need {cost - caller.db.gxp} more experience to advance.")
             return
         else:
+            title = titles[caller.db.guild_level]
             caller.db.gxp -= cost
             caller.db.guild_level += 1
-            caller.db.epmax += 10
-            caller.db.title = titles[caller.db.guild_level]
-            self.msg(f"|rYou grow more powerful.")
+            caller.db.epmax += 20
+            caller.db.title = title
+            self.msg(f"|rYou become {title} ({caller.db.guild_level}).")
 
         if caller.db.guild_level >= 30:
             caller.db.burnout["max"] = 4
@@ -71,7 +71,6 @@ class CmdGAdvance(Command):
     def func(self):
         caller = self.caller
         caller.msg(f"|G{caller}")
-        print(f"in advance function")
 
         self._adv_level()
         print(f"after _adv_level {caller.db.gxp}")
@@ -94,7 +93,7 @@ class CmdGuildStatSheet(Command):
         gxp = caller.db.gxp or 0
         skill_gxp = caller.db.skill_gxp or 0
         form = caller.db.subguild or "adventurer"
-        gxp_needed = GUILD_LEVEL_COST_DICT[my_glvl + 1]
+        gxp_needed = get_glvl_cost(my_glvl + 1)
         reaction = caller.db.reaction_percentage or 50
         burnout_count = caller.db.burnout["count"]
         burnout_max = caller.db.burnout["max"]
@@ -159,6 +158,7 @@ class CmdJoinElementals(Command):
                 clean_attributes=False,
             )
             caller.cmdset.add(EarthElementalCmdSet, persistent=True)
+
         else:
             caller.msg(f"|rYou are already in a guild")
 
@@ -173,11 +173,51 @@ class CmdLeaveElementals(Command):
     def func(self):
         caller = self.caller
         if caller.db.guild == "elemental":
-            caller.swap_typeclass("typeclasses.characters.PlayerCharacter")
+
             caller.cmdset.delete(ElementalCmdSet)
+            caller.cmdset.delete(EarthElementalCmdSet)
+            caller.cmdset.delete(FireElementalCmdSet)
+            caller.cmdset.delete(WaterElementalCmdSet)
+            caller.cmdset.delete(AirElementalCmdSet)
+            del caller.db.earth_form
+            del caller.db.earth_shield
+            del caller.db.earthen_renewal
+            del caller.db.stone_skin
+            del caller.db.mountain_stance
+            del caller.db.subguild
+            del caller.db.skills
+            del caller.db.fire_form
+            del caller.db.lava_form
+            del caller.db.heat_wave
+            del caller.db.burnout
+            del caller.db.water_form
+            del caller.db.aqua_form
+            del caller.db.aqua_shield
+            del caller.db.ice_shield
+            del caller.db.cyclone_armor
+            del caller.db.storm_form
+            del caller.db.air_form
+
+            try:
+                tickerhandler.remove(
+                    interval=6,
+                    callback=caller.at_tick,
+                    idstring=f"{caller}-regen",
+                    persistent=True,
+                )
+                tickerhandler.remove(
+                    interval=60 * 5,
+                    callback=caller.at_burnout_tick,
+                    idstring=f"{caller}-superpower",
+                    persistent=True,
+                )
+            except ValueError:
+                print(f"tickerhandler.remove failed")
+
+            caller.swap_typeclass("typeclasses.characters.PlayerCharacter")
             caller.msg(f"|rYou leave the Elementals guild")
         else:
-            caller.msg(f"|rYou are already an adventurer")
+            caller.msg(f"|rYou are not an Elemental")
 
 
 class CmdChooseForm(Command):
@@ -283,9 +323,12 @@ class CmdKickstart(Command):
 class CmdTest(Command):
     key = "test"
 
+    from evennia import TICKER_HANDLER as tickerhandler
+
     def func(self):
         caller = self.caller
         caller.msg("test")
+        self.tickerhandler.clear()
         # caller.cmdset.delete(ElementalCmdSet)
         # caller.cmdset.delete(ElementalCmdSet)
         # caller.cmdset.delete(ElementalCmdSet)
@@ -352,6 +395,23 @@ class CmdBig(Command):
         self.execute_cmd("gadvance")
 
 
+class CmdHp(Command):
+    """
+    Display the current and maximum health of the caller.
+
+    Usage:
+        hp
+    """
+
+    key = "hp"
+    help_category = "changeling"
+
+    def func(self):
+        caller = self.caller
+
+        caller.msg(caller.get_display_status(caller))
+
+
 class ElementalCmdSet(CmdSet):
     key = "Elemental CmdSet"
 
@@ -366,3 +426,4 @@ class ElementalCmdSet(CmdSet):
         self.add(CmdTest)
         self.add(CmdBig)
         self.add(CmdKickstart)
+        self.add(CmdHp)

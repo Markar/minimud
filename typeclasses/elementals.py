@@ -25,6 +25,7 @@ class Elemental(PlayerCharacter):
             con_increase_amount * (self.traits.con.value + self.db.con_bonus)
         )
         self.db.fpmax = 50 + (int_increase_amount * self.traits.int.value)
+        self.db.epmax = 120
 
         self.db.guild_level = 1
         self.db.gxp = 0
@@ -167,7 +168,11 @@ class Elemental(PlayerCharacter):
         else:
             to_me = msgs[10]
 
-        to_me = f"{to_me} ({dam})"
+        to_me = f"{to_me}"
+
+        if self.key == "Markar":
+            to_me += f"({dam})"
+
         self.location.msg_contents(to_me, from_obj=self)
 
         return to_me
@@ -197,3 +202,24 @@ class Elemental(PlayerCharacter):
         if not combat_script.add_combatant(self, enemy=target):
             return
         self.attack(target, weapon)
+
+    def can_wear(self, item):
+        """
+        Check if the character can wear an item
+        """
+        armor = getattr(item.db, "armor", False)
+        type = getattr(item.db, "type", False)
+        allowed_types = ["light"]
+
+        if not item:
+            return False
+
+        if not item.db.clothing_type:
+            self.msg(f"{item} is not wearable.")
+            return False
+
+        if armor and type not in allowed_types:
+            self.msg(f"You can't wear that kind of armor.")
+            return False
+
+        return True

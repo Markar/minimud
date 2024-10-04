@@ -5,6 +5,9 @@ from typeclasses.characters import PlayerCharacter
 from typeclasses.cybercorpsguild.attack_emotes import AttackEmotes
 from typeclasses.utils import get_article, get_display_name
 from typeclasses.cybercorpsguild.cybercorps_commands import CybercorpsCmdSet
+from typeclasses.cybercorpsguild.cyber_implants import (
+    CybercorpsImplantCmdSet,
+)
 from typeclasses.cybercorpsguild.cybercorps_wares import (
     HandRazors,
 )
@@ -19,6 +22,7 @@ class Cybercorps(PlayerCharacter):
     def at_object_creation(self):
         self.cmdset.add(CybercorpsCmdSet, persistent=True)
         self.cmdset.add(CybercorpsWaresCmdSet, persistent=True)
+        self.cmdset.add(CybercorpsImplantCmdSet, persistent=True)
         super().at_object_creation()
         con_increase_amount = 20
         int_increase_amount = 5
@@ -60,14 +64,19 @@ class Cybercorps(PlayerCharacter):
         }
         self.db.melee_weapon = HandRazors()
         self.db.ranged_weapon = None
+        self.db.adaptive_armor = False
+        self.db.nano_reinforced_skeleton = False
+        self.db.nrs_amount = 0
         # list of owned wares
         self.db.wares = ["hand razors"]
+        self.db.docwagon = {"count": 0, "max": 0}
+        self.db.implants = []
+        self.db.platelet_factory_active = False
+        self.db.adrenaline_boost = {"active": False, "duration": 0}
 
         tickerhandler.add(
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
         )
-
-        self.db.docwagon = {"count": 0, "max": 0}
         tickerhandler.add(
             interval=60 * 5,
             callback=self.at_docwagon_tick,
@@ -93,13 +102,24 @@ class Cybercorps(PlayerCharacter):
         base_fp_regen = self.db.fpregen
         biotech_research = self.db.skills.get("biotech research", 1)
         energy_solutions = self.db.skills.get("energy solutions", 1)
+        adaptive_armor = getattr(self.db, "adaptive_armor", False)
+        implants = getattr(self.db, "implants", False)
+        platelet_factory_active = getattr(self.db, "platelet_factory_active", False)
 
         bonus_hp = 0
         bonus_fp = 0
         bonus_ep = 0
 
-        bonus_hp += int(uniform(biotech_research, biotech_research + 1))  # 0-2
         bonus_ep += int(uniform(energy_solutions * 0.2, energy_solutions * 0.3))  # 0-3
+
+        if platelet_factory_active:
+            bonus_hp += 1 + biotech_research
+
+        if adaptive_armor and self.db.ep < 6:
+            bonus_ep -= 5
+            self.db.adaptive_armor = False
+            self.msg(f"|CAs your energy runs out, your adaptive armor powers down.|n")
+
         total_hp_regen = base_regen + int(bonus_hp)
         total_fp_regen = base_fp_regen + int(bonus_fp)
         total_ep_regen = base_ep_regen + int(bonus_ep)
@@ -125,10 +145,6 @@ class Cybercorps(PlayerCharacter):
     def speed(self):
         weapon = self.db.natural_weapon
         return weapon.get("speed", 3)
-
-    # def at_wield(self, weapon, **kwargs):
-    #     self.msg(f"You cannot wield weapons.")
-    #     return False
 
     def get_player_attack_hit_message(self, attacker, dam, tn, emote="hand_razors"):
         """
@@ -199,15 +215,23 @@ class Cybercorps(PlayerCharacter):
             return
         self.attack(target, weapon)
 
+    def get_combat_display_status(self, looker, **kwargs):
+        # This is a wrapper for the get_display_status method that adds a cooldown
+        # to prevent spamming the status display due to calling attack every second.
+
+        if not self.cooldowns.ready("combat_display_status"):
+            return
+        print("getting combat  display status")
+        msg = self.get_display_status(looker, **kwargs)
+        self.msg(msg)
+        self.cooldowns.add("combat_display_status", 3)
+
     def get_display_status(self, looker, **kwargs):
         """
         Returns a quick view of the current status of this character
         """
-        if not self.cooldowns.ready("display_status"):
-            return
-
-        self.cooldowns.add("display_status", 3)
         chunks = []
+        print("getting display status")
 
         # add resource levels
         hp = int(self.db.hp)
@@ -218,14 +242,22 @@ class Cybercorps(PlayerCharacter):
         epmax = int(self.db.epmax)
         docwagon_count = self.db.docwagon["count"]
         docwagon_max = self.db.docwagon["max"]
+        adaptive_armor = getattr(self.db, "adaptive_armor", False)
+        platelet_factory_active = getattr(self.db, "platelet_factory_active", False)
+        adrenaline_boost = getattr(self.db, "adrenaline_boost", {})
 
         chunks.append(
             f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g"
         )
         if docwagon_max:
             chunks.append(f"|gDocWagon: |G{docwagon_count}/{docwagon_max}|g")
+        if adaptive_armor:
+            chunks.append(f"|gAA")
+        if platelet_factory_active:
+            chunks.append(f"|gPF")
+        if getattr(adrenaline_boost, "duration", 0) > 0:
+            chunks.append(f"|gAB")
 
-        print(f"CYBER looker != self {looker} and self {self}")
         if looker != self:
             chunks.append(
                 f"|gE: |G{looker.get_display_name(self, **kwargs)} ({looker.db.hp})"
@@ -245,15 +277,12 @@ class Cybercorps(PlayerCharacter):
             all_cooldowns = [f"{c[0]} ({c[1]}s)" for c in all_cooldowns if c[1]]
             if all_cooldowns:
                 chunks.append(f"Cooldowns: {iter_to_str(all_cooldowns, endsep=',')}")
-        # chunks.append(f"\n")
-        # glue together the chunks and return
-        status = " - ".join(chunks)
-        self.msg(prompt=status)
-        return status
+
+        return " - ".join(chunks)
 
     # region Attack
     def attack(self, target, weapon, **kwargs):
-
+        weapon_delay = 1
         if not self.in_combat:
             self.enter_combat(target)
             if target:
@@ -280,16 +309,17 @@ class Cybercorps(PlayerCharacter):
 
         if melee_weapon:
             melee_weapon.at_attack(self, target)
+
         if ranged_weapon:
             ranged_weapon.at_attack(self, target)
 
-        status = self.get_display_status(target)
+        status = self.get_combat_display_status(target)
 
         # check if we have auto-attack in settings
         if self.account and (settings := self.account.db.settings):
             if settings.get("auto attack") and (speed := weapon.speed):
                 # queue up next attack; use None for target to reference stored target on execution
-                delay(1, self.attack, None, weapon, persistent=True)
+                delay(weapon_delay, self.attack, None, weapon, persistent=True)
 
     # region At_damage
     def at_damage(self, attacker, damage, damage_type=None):
@@ -311,6 +341,17 @@ class Cybercorps(PlayerCharacter):
         flat_reduction = 0
         flat_reduction_cap = 0
 
+        if self.db.guild_level < 5:
+            flat_reduction_cap = 5
+        elif self.db.guild_level < 10:
+            flat_reduction_cap = 15
+        elif self.db.guild_level < 15:
+            flat_reduction_cap = 30
+        elif self.db.guild_level < 20:
+            flat_reduction_cap = 60
+        elif self.db.guild_level < 25:
+            flat_reduction_cap = 150
+
         # Flat damage reduction - 50 con = 5 reduction, glvl 30 = 1.5 reduction
         flat_reduction = con * 0.1 + glvl * 0.05
 
@@ -319,6 +360,7 @@ class Cybercorps(PlayerCharacter):
             adaptive_armor_reduction = int(
                 con * 0.1 + glvl * 0.1 + cybernetic_enhancements
             )
+            percentage_reduction += cybernetic_enhancements / 100
             flat_reduction += adaptive_armor_reduction
             self.db.ep -= 1
 
@@ -347,16 +389,6 @@ class Cybercorps(PlayerCharacter):
         #     self.msg(f"|cYour earth shield blocks a lot of damage!|n")
 
         # Apply randomized flat reduction
-        if self.db.level < 5:
-            flat_reduction_cap = 2
-        elif self.db.level < 10:
-            flat_reduction_cap = 4
-        elif self.db.level < 15:
-            flat_reduction_cap = 6
-        elif self.db.level < 20:
-            flat_reduction_cap = 12
-        elif self.db.level < 25:
-            flat_reduction_cap = 20
 
         # Apply (worn) defense reduction
         armor = self.defense(damage_type)
@@ -388,9 +420,9 @@ class Cybercorps(PlayerCharacter):
         attacker.get_npc_attack_emote(self, damage, self.get_display_name(self))
 
         # Check if the character is below the reaction percentage
-        if hp_percentage < reaction and glvl > 3:
+        if hp_percentage < reaction and self.db.docwagon["count"] > 0:
             self.msg(f"|cYou are below {reaction*100}% health!|n")
-            self.execute_cmd("terran restoration")
+            self.execute_cmd("docwagon revive")
 
         if hp <= 0:
             self.tags.add("unconscious", category="status")
@@ -401,3 +433,24 @@ class Cybercorps(PlayerCharacter):
             if self.in_combat:
                 combat = self.location.scripts.get("combat")[0]
                 combat.remove_combatant(self)
+
+    def can_wear(self, item):
+        """
+        Check if the character can wear an item
+        """
+        armor = getattr(item.db, "armor", False)
+        type = getattr(item.db, "type", False)
+        allowed_types = ["light", "medium", "heavy"]
+
+        if not item:
+            return False
+
+        if not item.db.clothing_type:
+            self.msg(f"{item} is not wearable.")
+            return False
+
+        if armor and type not in allowed_types:
+            self.msg(f"You can't wear that kind of armor.")
+            return False
+
+        return True

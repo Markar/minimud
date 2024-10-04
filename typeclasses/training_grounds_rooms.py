@@ -5,7 +5,7 @@ from typeclasses.utils import SpawnMob
 class NewbieGoblin(XYGridRoom):
     def at_object_creation(self):
         super().at_object_creation()
-        SpawnMob(self, 2800, 5, 1, "NOVICE_GOBLIN", "training_grounds")
+        SpawnMob(self, 2800, 8, 1, "NOVICE_GOBLIN", "training_grounds")
 
 
 class NewbieRogueApprentice(XYGridRoom):
@@ -16,7 +16,7 @@ class NewbieRogueApprentice(XYGridRoom):
 
 class NewbieSkeletalWarrior(XYGridRoom):
     def at_object_creation(self):
-        SpawnMob(self, 4200, 5, 1, "SKELETAL_WARRIOR", "training_grounds")
+        SpawnMob(self, 4200, 10, 1, "SKELETAL_WARRIOR", "training_grounds")
 
 
 class NewbieNoviceMage(XYGridRoom):
@@ -34,10 +34,10 @@ class MalfunctioningRobot(XYGridRoom):
 class CyberSoldier(XYGridRoom):
     def at_object_creation(self):
         super().at_object_creation()
-        SpawnMob(self, 5500, 8, 2, "CYBER_SOLDIER", "training_grounds")
+        SpawnMob(self, 5500, 11, 2, "CYBER_SOLDIER", "training_grounds")
 
 
 class AlienScout(XYGridRoom):
     def at_object_creation(self):
         super().at_object_creation()
-        SpawnMob(self, 4800, 4, 2, "ALIEN_SCOUT", "training_grounds")
+        SpawnMob(self, 4800, 10, 2, "ALIEN_SCOUT", "training_grounds")

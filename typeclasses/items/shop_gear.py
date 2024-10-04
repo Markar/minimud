@@ -51,32 +51,35 @@ IRON_GREATSWORD = {
     "dmg": 60,
 }
 
-IRON_HAUBERK = {
-    "typeclass": "typeclasses.objects.ClothingObject",
-    "key": "iron hauberk",
-    "desc": "A standard iron chainmail tunic.",
-    "armor": 4,
-    "value": 500,
-    "clothing_type": "chestguard",
-}
+# IRON_HAUBERK = {
+#     "typeclass": "typeclasses.objects.ClothingObject",
+#     "key": "iron hauberk",
+#     "desc": "A standard iron chainmail tunic.",
+#     "armor": 4,
+#     "value": 500,
+#     "clothing_type": "chestguard",
+#     "type": "heavy",
+# }
 
-IRON_CHAUSSES = {
-    "typeclass": "typeclasses.objects.ClothingObject",
-    "key": "iron chausses",
-    "desc": "A pair of mail chausses constructed from iron.",
-    "armor": 3,
-    "value": 350,
-    "clothing_type": "legguard",
-}
+# IRON_CHAUSSES = {
+#     "typeclass": "typeclasses.objects.ClothingObject",
+#     "key": "iron chausses",
+#     "desc": "A pair of mail chausses constructed from iron.                                           ",
+#     "armor": 3,
+#     "value": 350,
+#     "clothing_type": "legguard",
+#     "type": "heavy",
+# }
 
-LEATHER_BOOTS = {
-    "typeclass": "typeclasses.objects.ClothingObject",
-    "key": "leather boots",
-    "desc": "A sturdy pair of leather boots.",
-    "armor": 1,
-    "value": 200,
-    "clothing_type": "shoes",
-}
+# LEATHER_BOOTS = {
+#     "typeclass": "typeclasses.objects.ClothingObject",
+#     "key": "leather boots",
+#     "desc": "A sturdy pair of leather boots.",
+#     "armor": 1,
+#     "value": 200,
+#     "clothing_type": "shoes",
+#     "type": "light",
+# }
 
 SMALL_BAG = {
     "typeclass": "typeclasses.gear.WearableContainer",
@@ -113,6 +116,7 @@ CYBER_CHESTGUARD = {
     "armor": 6,
     "value": 750,
     "clothing_type": "chestguard",
+    "type": "medium",
 }
 
 CYBER_LEG_GUARDS = {
@@ -122,6 +126,7 @@ CYBER_LEG_GUARDS = {
     "armor": 3,
     "value": 500,
     "clothing_type": "legguard",
+    "type": "medium",
 }
 
 CYBER_BOOTS = {
@@ -131,4 +136,5 @@ CYBER_BOOTS = {
     "armor": 2,
     "value": 400,
     "clothing_type": "footwear",
+    "type": "medium",
 }

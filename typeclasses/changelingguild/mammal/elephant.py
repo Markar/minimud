@@ -40,9 +40,6 @@ class Elephant(ChangelingAttack):
     def at_attack(self, wielder, target, **kwargs):
         super().at_attack(wielder, target, **kwargs)
 
-        self.energy_cost = 1
-        self.speed = 3
-
         wielder.db.ep -= self.energy_cost
         target.at_damage(wielder, self._calculate_tusk_damage(wielder), "edged", "tusk")
         target.at_damage(wielder, self._calculate_tusk_damage(wielder), "edged", "tusk")

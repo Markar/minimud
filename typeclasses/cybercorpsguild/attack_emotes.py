@@ -207,6 +207,19 @@ class AttackEmotes:
                 f"{color}$You() blast {tn}{color} with your rocket launcher, causing a massive wound.",
                 f"{color}$You() obliterate {tn}{color} with your rocket launcher, causing a catastrophic wound.",
             ]
+        if emote == "rocket_launcher_hit":
+            return [
+                f"{color}$You() fire at {tn}{color} with your rocket launcher, but the rocket goes wide, missing the target.",
+                f"{color}$You() graze {tn}{color} with your rocket launcher, leaving a deep scorch mark.",
+                f"{color}$You() hit {tn}{color} with your rocket launcher, causing significant burns and trauma.",
+                f"{color}$You() fire a rocket at {tn}{color}, engulfing them in a severe blast.",
+                f"{color}$You() hit {tn}{color} with a rocket blast, causing catastrophic destruction.",
+                f"{color}$You() fire a rocket at {tn}{color}, resulting in a fatal impact.",
+                f"{color}$You() blast {tn}{color} with your rocket launcher, causing a mortal wound.",
+                f"{color}$You() obliterate {tn}{color} with your rocket launcher, causing critical damage.",
+                f"{color}$You() fire a rocket at {tn}{color}, causing a massive explosion and devastating damage.",
+            ]
+
         if emote == "rail_pistol":
             return [
                 f"{color}$You() fire at {tn}{color} with your rail pistol, but the shot goes wide.",
@@ -247,6 +260,19 @@ class AttackEmotes:
                 f"{color}$You() shatter {tn}{color} with your graviton hammer, causing a massive wound.",
                 f"{color}$You() obliterate {tn}{color} with your graviton hammer, causing a catastrophic wound.",
             ]
+        if emote == "graviton_hammer_hit":
+            return [
+                f"{color}$You() swing at {tn}{color} with your graviton hammer, but miss, the energy dissipating harmlessly.",
+                f"{color}$You() graze {tn}{color} with your graviton hammer, the energy causing a minor shock.",
+                f"{color}$You() hit {tn}{color} with your graviton hammer, the energy causing a jolt.",
+                f"{color}$You() strike {tn}{color} with your graviton hammer, the energy causing a severe shock.",
+                f"{color}$You() crush {tn}{color} with your graviton hammer, the energy causing a critical shock.",
+                f"{color}$You() smash {tn}{color} with your graviton hammer, the energy causing a mortal shock.",
+                f"{color}$You() pulverize {tn}{color} with your graviton hammer, the energy causing a fatal shock.",
+                f"{color}$You() shatter {tn}{color} with your graviton hammer, the energy causing a massive shock.",
+                f"{color}$You() obliterate {tn}{color} with your graviton hammer, the energy causing a catastrophic shock.",
+            ]
+
         if emote == "vortex_ar9":
             return [
                 f"{color}$You() fire at {tn}{color} with your Vortex AR-9, but the shot misses its mark.",

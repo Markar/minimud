@@ -7,6 +7,7 @@ from typeclasses.elementalguild.constants_and_helpers import SKILLS_COST
 from typeclasses.utils import PowerCommand
 
 
+# region Envelop
 class CmdEnvelop(Command):
     """
     Drain the corpse of an enemy to restore energy
@@ -35,6 +36,7 @@ class CmdEnvelop(Command):
                 caller.msg("Envelop what?")
 
 
+# region Reaction
 class CmdReaction(Command):
     """
     Set the elemental's reaction to a dropping below a certain health threshold.
@@ -62,6 +64,7 @@ class CmdReaction(Command):
         caller.msg(f"Reaction set to {args}.")
 
 
+# region WaterForm
 class CmdWaterForm(PowerCommand):
     """
     The elemental transforms its body into a fluid form, allowing it to move more quickly and easily through the water. The elemental's body shimmers with a watery light as it shifts, becoming more fluid and adaptable. The elemental gains a bonus to its movement speed and agility, allowing it to dodge attacks more easily and strike with greater precision.
@@ -109,6 +112,7 @@ class CmdWaterForm(PowerCommand):
             )
 
 
+# region Aqua Shield
 class CmdAquaShield(PowerCommand):
     """
     The elemental raises its hands, and a shimmering shield of water forms around it, protecting it from harm. The shield absorbs the impact of incoming attacks, reducing the damage the elemental takes. The shield crackles with energy as it absorbs the attack, then dissipates into a fine mist, leaving the elemental unharmed.
@@ -153,6 +157,7 @@ class CmdAquaShield(PowerCommand):
         )
 
 
+# region IceShield
 class CmdIceShield(PowerCommand):
     """
     The elemental raises its hands, and a shimmering shield of ice forms around it, protecting it from harm. The shield absorbs the impact of incoming attacks, reducing the damage the elemental takes. The shield crackles with energy as it absorbs the attack, then dissipates into a fine mist, leaving the elemental unharmed.
@@ -202,6 +207,7 @@ class CmdIceShield(PowerCommand):
         )
 
 
+# region WaterJet
 class CmdWaterJet(PowerCommand):
     """
     A powerful jet of water shoots from the elemental's hands, striking the target with force. The water crashes into the target, dealing damage and knocking them back. The elemental's body shimmers with a watery light as the attack completes, leaving the target drenched and disoriented.
@@ -214,7 +220,7 @@ class CmdWaterJet(PowerCommand):
     aliases = ["waterjet", "wj"]
     help_category = "water elemental"
     guild_level = 3
-    cost = 5
+    cost = 10
 
     def _calculate_damage(self, wave_control, wisdom, guild_level):
         base_value = 5
@@ -230,7 +236,7 @@ class CmdWaterJet(PowerCommand):
         )
 
         # Ensure damage is within the range of 100 to 300
-        damage = max(1, min(damage, 300))
+        damage = max(1, min(damage, 80))
 
         # Adding some randomness to the damage
         damage = int(uniform(damage * 0.6, damage * 1.4))
@@ -278,6 +284,7 @@ class CmdWaterJet(PowerCommand):
         target.at_damage(caller, damage, "blunt", "water_jet")
 
 
+# region IceShard
 class CmdIceShard(PowerCommand):
     """
     The elemental raises its hands, and a shard of ice forms in front of it. The shard flies at the target with incredible speed, dealing damage and freezing them in place. The elemental's body glows with a cold light as the attack completes, leaving the target shivering and vulnerable.
@@ -289,11 +296,11 @@ class CmdIceShard(PowerCommand):
     key = "ice shard"
     aliases = ["iceshard", "is"]
     help_category = "water elemental"
-    guild_level = 1
-    cost = 3
+    guild_level = 15
+    cost = 12
 
     def _calculate_damage(self, wave_control, wisdom, guild_level):
-        base_value = 5
+        base_value = 30
         wave_control_weight = 10
         wisdom_weight = 0.3
         guild_level_weight = 1
@@ -352,10 +359,10 @@ class CmdIceShard(PowerCommand):
         )
 
         damage = self._calculate_damage(skill_rank, caller.traits.str.value, glvl)
-        self.msg(f"|gDamage: {damage}")
         target.at_damage(caller, damage, "water", "tidal_wave")
 
 
+# region Maelstrom
 class CmdMaelstrom(PowerCommand):
     """
     The elemental raises its hands, and a powerful maelstrom forms around it. The maelstrom swirls with incredible speed, drawing in everything around it and dealing damage to all enemies caught in its path. The elemental's body glows with a watery light as the attack completes, leaving the enemies drenched and disoriented.
@@ -443,6 +450,7 @@ class CmdMaelstrom(PowerCommand):
         target.at_damage(caller, damage, "ice", "maelstrom")
 
 
+# region TidalWave
 class CmdTidalWave(PowerCommand):
     """
     The elemental raises its hands, and a massive wave of water forms behind it. The wave crashes down on the target with tremendous force, dealing damage and knocking them back. The elemental's body glows with a watery light as the attack completes, leaving the target drenched and disoriented.
@@ -454,27 +462,28 @@ class CmdTidalWave(PowerCommand):
     key = "tidal wave"
     aliases = ["tidalwave", "tw"]
     help_category = "water elemental"
-    guild_level = 9
-    cost = 9
+    guild_level = 29
+    cost = 40
 
-    def _calculate_damage(self, wave_control, wisdom, guild_level):
-        base_value = 9
+    def _calculate_damage(self, caller):
+        base_value = 10
         wave_control_weight = 9
         wisdom_weight = 0.3
         guild_level_weight = 1
+        wave_control = caller.db.skills.get("wave control", 1)
 
         damage = (
             base_value
             + (wave_control * wave_control_weight)
-            + (wisdom * wisdom_weight)
-            + (guild_level * guild_level_weight)
+            + (self.traits.wis.value * wisdom_weight)
+            + (caller.db.guild_level * guild_level_weight)
         )
 
         # Ensure damage is within the range of 100 to 300
         damage = max(15, min(damage, 300))
 
         # Adding some randomness to the damage
-        damage = int(uniform(damage * 0.6, damage * 1))
+        damage = int(uniform(damage * 0.5, damage * 1.5))
 
         return damage
 
@@ -499,10 +508,6 @@ class CmdTidalWave(PowerCommand):
             target.enter_combat(caller)
             caller.enter_combat(target)
 
-        if caller.db.ep < self.cost:
-            caller.msg(f"|rYou need at least {self.cost} energy to use this power.")
-            return
-
         if caller.db.fp < self.cost:
             caller.msg(f"|rYou need at least {self.cost} focus to use this power.")
             return
@@ -522,12 +527,11 @@ class CmdTidalWave(PowerCommand):
             exclude=[caller, target],
         )
 
-        skill_rank = caller.db.skills.get("wave control", 1)
-        damage = self._calculate_damage(skill_rank, caller.traits.str.value, glvl)
-        self.msg(f"|gDamage: {damage}")
+        damage = self._calculate_damage(caller)
         target.at_damage(caller, damage, "water", "tidal_wave")
 
 
+# region Rejuvenate
 class CmdRejuvenate(PowerCommand):
     """
     Water droplets coalesce from the surrounding moisture, swirling around the elemental in a graceful dance. The droplets merge into streams, flowing over the elemental's body, mending cracks and filling gaps with a soothing, liquid touch. The elemental's form becomes more defined and robust, the water infusing it with renewed strength and vitality. As the healing process completes, the elemental stands rejuvenated, its surface glistening with a fresh, revitalized sheen.
@@ -539,7 +543,9 @@ class CmdRejuvenate(PowerCommand):
     key = "rejuvenate"
     aliases = ["rejuv", "rej"]
     help_category = "water elemental"
-    guild_level = 4
+    guild_level = 18
+    cost = 35
+    base = 50
 
     def func(self):
         caller = self.caller
@@ -555,35 +561,37 @@ class CmdRejuvenate(PowerCommand):
         caller.cooldowns.add("rejuvenate", 4)
 
         wis = caller.traits.wis.value
-        strength = caller.traits.str.value
         hp = caller.db.hp
         hpmax = caller.db.hpmax
         fp = caller.db.fp
-        hp_amount = 0
+        fpmax = caller.db.fpmax
+        cost = self.cost
 
-        to_heal = math.floor(10 + glvl + strength / 2 + wis / 2)
+        to_heal = math.floor(self.base + glvl + wis / 2)
         to_heal = randint(int(to_heal / 2), to_heal)
         to_heal = max(to_heal, 0)
-        cost = to_heal * 0.5
 
-        if caller.db.fp < cost:
+        if caller.db.ep < cost:
             self.msg(f"|rYou can't seem to focus on restoring your form.")
             return
 
         if hp + to_heal > hpmax:
-            hp_amount = hpmax - hp
             caller.adjust_hp(hpmax)
-            caller.adjust_fp(-cost)
         else:
-            hp_amount = hpmax - hp
-            caller.db.hp += max(to_heal, 0)
-            caller.db.fp -= cost
+            caller.adjust_hp(max(to_heal, 0))
 
-        msg = f"|MAs $pron(you) concentrate, $pron(your) body glows with a soft, blue light, and water swirls around you, knitting wounds and restoring vitality. {hp_amount or 0} health restored for {cost or 0} focus."
+        if fp + to_heal > fpmax:
+            caller.adjust_fp(fpmax)
+        else:
+            caller.adjust_fp((to_heal, 0))
+
+        caller.adjust_ep(-cost)
+        msg = f"|MAs $pron(you) concentrate, $pron(your) body glows with a soft, blue light, and water swirls around you, knitting wounds and restoring vitality. {to_heal or 0} health restored for {cost or 0} focus."
 
         caller.location.msg_contents(msg, from_obj=caller)
 
 
+# region HealingWaters
 class CmdHealingWaters(PowerCommand):
     """
     The elemental calls upon the power of the water to heal itself, restoring health and energy. The water flows over the elemental's body, mending wounds and revitalizing its form. The elemental's body glows with a soft, blue light as the healing process completes, leaving it refreshed and invigorated.
@@ -595,7 +603,9 @@ class CmdHealingWaters(PowerCommand):
     key = "healing waters"
     aliases = ["healingwaters", "hw"]
     help_category = "water elemental"
-    guild_level = 1
+    guild_level = 3
+    cost = 10
+    base = 20
 
     def func(self):
         caller = self.caller
@@ -610,41 +620,35 @@ class CmdHealingWaters(PowerCommand):
             return False
         caller.cooldowns.add("healing_waters", 4)
 
-        if caller.db.fp < self.cost:
-            caller.msg(f"|rYou need at least {self.cost} focus to use this power.")
-            return
-
         wis = caller.traits.wis.value
         hp = caller.db.hp
         hpmax = caller.db.hpmax
-        hp_amount = 0
 
-        to_heal = math.floor(10 + glvl + wis / 2)
+        to_heal = math.floor(self.base + glvl + wis / 2)
         to_heal = randint(int(to_heal / 2), to_heal)
         to_heal = max(to_heal, 0)
-        cost = to_heal * 0.5
+        cost = self.cost
 
-        if caller.db.fp < cost:
+        if caller.db.ep < cost:
             self.msg(f"|rYou can't seem to focus on restoring your form.")
             return
 
         if hp + to_heal > hpmax:
-            hp_amount = hpmax - hp
             caller.adjust_hp(hpmax)
-            caller.adjust_fp(-cost)
         else:
-            hp_amount = hpmax - hp
-            caller.db.hp += max(to_heal, 0)
-            caller.db.fp -= cost
+            caller.adjust_hp(max(to_heal, 0))
 
-        msg = f"|MAs $pron(you) concentrate, $pron(your) body glows with a soft, blue light, and water swirls around you, knitting wounds and restoring vitality. {hp_amount or 0} health restored for {cost or 0} focus."
+        caller.adjust_ep(-cost)
+
+        msg = f"|MAs $pron(you) concentrate, $pron(your) body glows with a soft, blue light, and water swirls around you, knitting wounds and restoring vitality. {to_heal or 0} health restored for {cost or 0} focus."
 
         caller.location.msg_contents(msg, from_obj=caller)
 
 
+# region SoothingMist
 class CmdSootingMist(PowerCommand):
     """
-    The elemental calls upon the power of the water to heal itself, restoring health and energy. The water flows over the elemental's body, mending wounds and revitalizing its form. The elemental's body glows with a soft, blue light as the healing process completes, leaving it refreshed and invigorated.
+    Water swirls around the elemental, restoring focus and centering their thoughts. The elemental's body glows with a soft, blue light as the meditative process completes, leaving it refreshed and invigorated.
 
     Usage:
         soothing mist
@@ -653,7 +657,7 @@ class CmdSootingMist(PowerCommand):
     key = "soothing mist"
     aliases = ["soothingmist", "sm"]
     help_category = "water elemental"
-    guild_level = 1
+    guild_level = 5
     cost = 3
 
     def func(self):
@@ -669,38 +673,34 @@ class CmdSootingMist(PowerCommand):
             return False
         caller.cooldowns.add("soothing_mist", 4)
 
-        if caller.db.fp < self.cost:
-            caller.msg(f"|rYou need at least {self.cost} focus to use this power.")
-            return
-
         wis = caller.traits.wis.value
-        hp = caller.db.hp
-        hpmax = caller.db.hpmax
-        hp_amount = 0
+        fp = caller.db.fp
+        fpmax = caller.db.fpmax
+        ep = caller.db.ep
 
         to_heal = math.floor(10 + glvl + wis / 2)
         to_heal = randint(int(to_heal / 2), to_heal)
         to_heal = max(to_heal, 0)
         cost = to_heal * 0.5
 
-        if caller.db.fp < cost:
+        if ep < cost:
             self.msg(f"|rYou can't seem to focus on restoring your form.")
             return
 
-        if hp + to_heal > hpmax:
-            hp_amount = hpmax - hp
-            caller.adjust_hp(hpmax)
-            caller.adjust_fp(-cost)
-        else:
-            hp_amount = hpmax - hp
-            caller.db.hp += max(to_heal, 0)
-            caller.db.fp -= cost
+        if fp + to_heal > fpmax:
+            caller.adjust_fp(fpmax)
 
-        msg = f"|MAs $pron(you) concentrate, $pron(your) body glows with a soft, blue light, and water swirls around you, knitting wounds and restoring vitality. {hp_amount or 0} health restored for {cost or 0} focus."
+        else:
+            caller.adjust_fp(max(to_heal, 0))
+
+        caller.adjust_ep(-cost)
+
+        msg = f"|MAs $pron(you) concentrate, $pron(your) body glows with a soft, blue light, and water swirls around you, restoring your focus. {to_heal or 0} for {cost or 0} energy."
 
         caller.location.msg_contents(msg, from_obj=caller)
 
 
+# region AbyssalRecovery
 class CmdAbyssalRecovery(PowerCommand):
     """
     The elemental calls upon the power of the water to heal itself, restoring health and energy. The water flows over the elemental's body, mending wounds and revitalizing its form. The elemental's body glows with a soft, blue light as the healing process completes, leaving it refreshed and invigorated.
@@ -713,6 +713,8 @@ class CmdAbyssalRecovery(PowerCommand):
     aliases = ["abyssalrecovery", "ar"]
     help_category = "water elemental"
     guild_level = 23
+    cost = 50
+    base = 100
 
     def func(self):
         caller = self.caller
@@ -727,38 +729,32 @@ class CmdAbyssalRecovery(PowerCommand):
             return False
         caller.cooldowns.add("abyssal_recovery", 4)
 
-        if caller.db.fp < self.cost:
-            caller.msg(f"|rYou need at least {self.cost} focus to use this power.")
-            return
-
         wis = caller.traits.wis.value
         hp = caller.db.hp
         hpmax = caller.db.hpmax
-        hp_amount = 0
 
-        to_heal = math.floor(10 + glvl + wis / 2)
+        to_heal = math.floor(self.base + glvl + wis / 2)
         to_heal = randint(int(to_heal / 2), to_heal)
         to_heal = max(to_heal, 0)
         cost = to_heal * 0.5
 
-        if caller.db.fp < cost:
+        if caller.db.ep < cost:
             self.msg(f"|rYou can't seem to focus on restoring your form.")
             return
 
         if hp + to_heal > hpmax:
-            hp_amount = hpmax - hp
             caller.adjust_hp(hpmax)
-            caller.adjust_fp(-cost)
         else:
-            hp_amount = hpmax - hp
             caller.db.hp += max(to_heal, 0)
-            caller.db.fp -= cost
 
-        msg = f"|MAs $pron(you) concentrate, $pron(your) body glows with a soft, blue light, and water swirls around you, knitting wounds and restoring vitality. {hp_amount or 0} health restored for {cost or 0} focus."
+        caller.adjust_ep(-cost)
+
+        msg = f"|MAs $pron(you) concentrate, $pron(your) body glows with a soft, blue light, and water swirls around you, knitting wounds and restoring vitality. {to_heal or 0} health restored for {cost or 0} focus."
 
         caller.location.msg_contents(msg, from_obj=caller)
 
 
+# region Powers
 class CmdPowers(Command):
     """
     List of powers available to the Elemental, their rank, and their cost.
@@ -795,6 +791,7 @@ class CmdPowers(Command):
         caller.msg(str(table))
 
 
+# region GuildTrain
 class CmdGTrain(Command):
     """
     Train your guild skills by spending skill experience points. Each rank
@@ -844,6 +841,23 @@ class CmdGTrain(Command):
         setattr(caller.db, "skill_gxp", skill_gxp - cost)
         caller.db.skills[skill] += 1
         caller.msg(f"|yYou grow more experienced in {skill}")
+
+
+class CmdWaterElementalHp(Command):
+    """
+    Display the current and maximum health of the caller.
+
+    Usage:
+        hp
+    """
+
+    key = "hp"
+    help_category = "water elemental"
+
+    def func(self):
+        caller = self.caller
+
+        caller.msg(caller.get_display_status(caller))
 
 
 class CmdGhelp(Command):
@@ -955,7 +969,9 @@ class WaterElementalCmdSet(CmdSet):
         self.add(CmdWaterJet)
         self.add(CmdMaelstrom)
         self.add(CmdTidalWave)
-        self.add(CmdPowers)
+        self.add(CmdIceShard)
 
+        self.add(CmdPowers)
         self.add(CmdGTrain)
         self.add(CmdGhelp)
+        self.add(CmdWaterElementalHp)

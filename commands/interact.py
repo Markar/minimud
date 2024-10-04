@@ -58,11 +58,61 @@ class CmdEat(Command):
             return
 
         energy = obj.attributes.get("energy", 0)
+        hp = obj.attributes.get("hp", 0)
         self.caller.db.ep += energy
+        self.caller.db.hp += hp
+
+        power = obj.attributes.get("power", 0)
+        if power > 0:
+            self.caller.adjust_hp(power)
+            self.caller.adjust_fp(power)
+            self.caller.location.msg_contents(
+                f"{self.caller} eats {obj} and looks more powerful."
+            )
+            obj.delete()
+            return
+
         self.caller.at_emote(
             f"$conj({self.cmdstring}) the {{target}}.", mapping={"target": obj}
         )
         obj.delete()
+
+
+class CmdDropAll(CmdGet):
+    """
+    Get an object from the room or from another object.
+
+    Usage:
+        drop <obj> or drop all
+
+    Example:
+        drop apple, drop all
+    """
+
+    key = "drop"
+    aliases = "drop"
+    help_category = "general"
+
+    def func(self):
+        caller = self.caller
+        arg = self.args.strip().lower()
+
+        if not arg:
+            caller.msg("Drop what?")
+            return
+
+        if arg == "all":
+            objs = caller.contents
+
+            if not objs:
+                return
+
+            for obj in objs:
+                if obj.move_to(caller.location, quiet=True, move_type="drop"):
+                    caller.msg(f"Dropped {obj}.")
+                    obj.at_drop(caller)
+
+            super().func()
 
 
 class CmdGetAll(CmdGet):
@@ -81,9 +131,12 @@ class CmdGetAll(CmdGet):
     help_category = "general"
 
     def func(self):
+        caller = self.caller
         arg = self.args.strip().lower()
+
         if arg == "all":
             for obj in self.caller.location.contents_get(content_type="object"):
+
                 if not obj.access(self.caller, "get"):
                     if obj.db.get_err_msg:
                         self.msg(obj.db.get_err_msg)
@@ -92,10 +145,10 @@ class CmdGetAll(CmdGet):
                         self.msg("You can't get that.")
                         continue
                 else:
-                    self.caller.msg(f"Getting {obj}")
+                    caller.msg(f"Getting {obj}")
+                    # caller.db.weight += obj.db.weight
                     obj.move_to(self.caller, quiet=True)
-            return
-        else:
+
             super().func()
 
 
@@ -106,3 +159,4 @@ class InteractCmdSet(CmdSet):
         super().at_cmdset_creation()
         self.add(CmdEat)
         self.add(CmdGetAll)
+        self.add(CmdDropAll)

@@ -1,7 +1,7 @@
 #
 @dig/teleport Millennium Square;town#01: typeclasses.rooms.Room = west;w;east;e;north;n;south;s
 #
-@desc |YAs you step into the heart of the town, you're greeted by a mesmerizing blend of the past, present, and future. The central plaza, known as Millennium Square, is a bustling hub of activity. Towering above is a colossal, shimmering obelisk that pulses with an otherworldly energy, its surface etched with ancient runes and futuristic circuitry.|/|/Surrounding the obelisk, the buildings are a chaotic yet harmonious mix of styles. Sleek, metallic skyscrapers with holographic advertisements stand side by side with whimsical, fairy-tale cottages adorned with glowing crystals. The streets are alive with a diverse crowd: humans, elves, cyborgs, and other fantastical beings, all mingling together in a vibrant tapestry of cultures.|/|/Hovering platforms and flying vehicles zip through the air, while below, cobblestone paths wind through lush, enchanted gardens and bustling marketplaces. Street vendors peddle exotic wares, from enchanted artifacts to advanced technological gadgets. The air is filled with the sounds of lively chatter, the hum of machinery, and the occasional burst of magical energy.|/|/In the center of Millennium Square, a swirling vortex serves as a portal to other realms, adding an element of unpredictability to the town. Adventurers and travelers can be seen stepping through, embarking on quests or returning with tales of distant worlds.|/|/The town's chaotic charm is further enhanced by the ever-changing sky, which shifts from a serene blue to a kaleidoscope of colors, reflecting the town's unique blend of sci-fi and fantasy elements. Millennium Square is a place where anything is possible, and every corner holds a new adventure waiting to be discovered.
+@desc |YAs you step into the heart of the town, you're greeted by a mesmerizing blend of the past, present, and future. The central plaza, known as Millennium Square, is a bustling hub of activity. Towering above is a colossal, shimmering obelisk that pulses with an otherworldly energy, its surface etched with ancient runes and futuristic circuitry.|/|/Surrounding the obelisk, the buildings are a chaotic yet harmonious mix of styles. Sleek, metallic skyscrapers with holographic advertisements stand side by side with whimsical, fairy-tale cottages adorned with glowing crystals. The streets are alive with a diverse crowd: humans, elves, cyborgs, and other fantastical beings, all mingling together in a vibrant tapestry of cultures.|/|/Hovering platforms and flying vehicles zip through the air, while below, cobblestone paths wind through lush, enchanted gardens and bustling marketplaces. Street vendors peddle exotic wares, from enchanted artifacts to advanced technological gadgets. The air is filled with the sounds of lively chatter, the hum of machinery, and the occasional burst of magical energy.|/|/In the center of Millennium Square, a swirling vortex serves as a portal to other realms, adding an element of unpredictability to the town. Adventurers and travelers can be seen stepping through, embarking on quests or returning with tales of distant worlds.|/|/The town's chaotic charm is further enhanced by the ever-changing sky, which shifts from a serene blue to a kaleidoscope of colors.
 #
 #
 #
@@ -319,7 +319,7 @@ open north;n,south;s = town#08
 #
 @tel town#41
 #
-@dig/teleport The Cybercorps Mega Corporation;town#42 : typeclasses.rooms.CybercorpsWaresRoom = east;e,west;w
+@dig/teleport Cybercorps Wares Room;town#42 : typeclasses.rooms.CybercorpsWaresRoom = east;e,west;w
 #
 @desc |yAs you step into the CyberCorps Wares Shop, the atmosphere shifts to one of sleek sophistication and cutting-edge technology. The shop is a marvel of modern design, with walls lined with polished metal and illuminated by soft, ambient lighting that highlights the high-tech merchandise on display.|/|/The entrance is flanked by two holographic displays, welcoming you with animated advertisements showcasing the latest in cybernetic enhancements and advanced weaponry. The floor is a seamless expanse of dark, reflective material that seems to absorb sound, creating a hushed, almost reverent atmosphere.|/|/To your left, a series of glass cases house an array of cybernetic implants, each one more advanced than the last. From neural interfaces that enhance cognitive functions to biomechanical limbs that offer superhuman strength, the selection is both impressive and intimidating. Each item is accompanied by a holographic information panel, detailing its specifications and potential applications.|/|/On the right, a wall of weaponry catches your eye. Sleek plasma rifles, compact laser pistols, and formidable gauss cannons are displayed with meticulous care. The weapons are mounted on illuminated racks, each one casting a soft glow that accentuates their lethal beauty. Interactive displays allow you to examine the weapons in detail, providing information on their capabilities and customization options.|/|/In the center of the shop, a circular counter staffed by impeccably dressed androids offers personalized assistance. Their synthetic voices are calm and precise, ready to answer any questions and guide you through the purchasing process. Behind the counter, a large screen displays real-time data feeds and promotional videos, showcasing the latest innovations from CyberCorps.|/|/The back of the shop features a private consultation area, where clients can discuss their needs and receive expert advice on the best enhancements and equipment for their specific requirements. Comfortable seating and a serene ambiance make this area a welcome respite from the high-tech hustle of the main shop floor.|/|/Throughout the shop, the air is filled with a subtle hum of advanced machinery and the faint scent of ozone, a reminder of the powerful technology that surrounds you. The overall effect is one of awe and excitement, a testament to the cutting-edge advancements that CyberCorps has to offer. This is not just a shop; it is a gateway to a future where the line between human and machine is increasingly blurred.
 #
@@ -355,3 +355,44 @@ open north;n,south;s = town#08
 #
 @desc |YStarlit Lane is a picturesque street where the night sky seems to blend seamlessly with the magical lights that line the path. The cobblestones underfoot are embedded with tiny, glowing crystals that twinkle like stars. The air is filled with the soft melodies of a distant bard, creating a sense of wonder and anticipation as you make your way out of the city
 
+#
+@tel town#48
+#
+@dig/teleport Training Grounds;town#49 : typeclasses.rooms.Room = south;s,north;n
+#
+@desc |YThe training grounds are a large open area where aspiring warriors practice their skills. Various training dummies and holographic targets are scattered around, with warriors of all levels honing their techniques. The ground is marked with scuffs and scorch marks from countless training sessions. Instructors shout commands and offer guidance, while the sound of clashing weapons and grunts of effort echo through the space. A large gate at the far end leads to the Warriors Guild, flanked by banners bearing the guild's emblem.
+#
+
+@tel town#49
+#
+@dig/teleport Hall of Echoes;town#50 : typeclasses.rooms.Room = south;s,north;n
+#
+@desc |YThe Hall of Echoes is a grand, echoing chamber filled with statues and holograms of legendary knights from the guild's history. The floor is made of polished stone, reflecting the light from flickering torches and glowing runes. The air is filled with a sense of reverence and history, as if the very walls are whispering tales of past glories. At the far end of the hall, a massive door leads to the inner sanctum of the Knights Guild, guarded by a pair of imposing sentinels.
+#
+
+@tel town#50
+#
+@dig/teleport Grand Hall of the Knights' Order;town#51 : typeclasses.rooms.KnightGuildJoinRoom = south;s,north;n
+#
+@desc |YAs you step into the grand hall of the Knights, you are immediately enveloped by an aura of honor and valor. The room is vast, with high ceilings adorned with banners depicting the order's emblem: a crossed sword and shield. The walls are lined with suits of armor and weapons, each one a testament to the chivalric prowess of the knights.|/|/At the center of the hall stands a large, circular platform made of polished stone. Surrounding the platform are four towering statues, each representing a different knightly archetype. The Paladin is a figure clad in gleaming plate armor, wielding a massive sword and shield. The Shadow Knight is a fierce, muscular warrior, brandishing a massive mace and roaring in battle. |/|/The air is filled with the sound of clashing weapons and the shouts of sparring knights.
+
+
+@tel town#42
+#
+@dig/teleport Cybercorps Implantation Chamber;town#52 : typeclasses.rooms.CybercorpsImplantRoom = south;s,north;n
+#
+@desc |YThe Cybercorp Implantation Chamber is a sleek, high-tech facility bathed in a cool, neon blue glow. The walls are lined with holographic displays showcasing the latest in cybernetic enhancements, from ocular implants to neural interfaces. The air hums with the soft buzz of advanced machinery and the occasional spark of a laser scalpel.|/|/Transparent cases along the walls exhibit a variety of cybernetic limbs, eyes, and other enhancements, each one labeled with its specifications and price.|/|/State-of-the-art pods where the actual implantation takes place. Each pod is equipped with robotic arms, sterilization fields, and monitoring systems to ensure a safe and precise procedure.
+
+#
+@tel town#51
+#
+@dig/teleport Grand Hall of Mithaniel Marr;town#53 : typeclasses.rooms.PaladinGuildJoinRoom = west;w,east;e
+#
+@desc |YAs you step into the grand hall of Mithaniel Marr, you are immediately enveloped by an aura of divine light and righteousness. The room is vast, with high ceilings adorned with banners depicting the order's emblem: a radiant sunburst behind a crossed sword and shield. The walls are lined with suits of gleaming armor and holy relics, each one a testament to the sacred duty and valor of the paladins.|/|/At the center of the hall stands a large, circular platform made of polished marble. The air is filled with the sound of fervent prayers and the clash of training weapons. As you approach the platform, a sense of reverence and purpose fills you.
+#
+
+#
+@tel town#51
+@dig/teleport Grand Hall of Innoruuk;town#54 : typeclasses.rooms.ShadowKnightGuildJoinRoom = east;e,west;w
+
+@desc |YAs you step into the grand hall of Innoruuk, you are immediately enveloped by an aura of dark power and malevolence. The room is vast, with high ceilings adorned with banners depicting the order's emblem: a sinister skull behind crossed swords. The walls are lined with suits of dark armor and cursed relics, each one a testament to the ruthless strength and cunning of the shadow knights.|/|/At the center of the hall stands a large, circular platform made of obsidian. The air is filled with the sound of ominous chants and the clash of training weapons. As you approach the platform, a sense of dread and determination fills you. This is the place where you will take your first steps towards mastering the dark arts of Innoruuk.

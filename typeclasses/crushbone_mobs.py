@@ -1,3 +1,5 @@
+from random import uniform
+
 ORC_PAWN = {
     "typeclass": "typeclasses.characters.NPC",
     "key": "an orc pawn",
@@ -13,7 +15,7 @@ ORC_PAWN = {
     "str": 10,
     "natural_weapon": {
         "name": "rusty sword",
-        "damage_type": "slashing",
+        "damage_type": "edged",
         "damage": 8,
         "speed": 5,
         "energy_cost": 0,
@@ -36,7 +38,7 @@ ORC_CENTURION = {
     "str": 20,
     "natural_weapon": {
         "name": "sharp axe",
-        "damage_type": "slashing",
+        "damage_type": "edged",
         "damage": 15,
         "speed": 5,
         "energy_cost": 0,
@@ -59,7 +61,7 @@ ORC_LEGIONNAIRE = {
     "str": 30,
     "natural_weapon": {
         "name": "heavy mace",
-        "damage_type": "bludgeoning",
+        "damage_type": "blunt",
         "damage": 20,
         "speed": 5,
         "energy_cost": 0,
@@ -82,7 +84,7 @@ ORC_SLAVER = {
     "str": 40,
     "natural_weapon": {
         "name": "whip",
-        "damage_type": "slashing",
+        "damage_type": "edged",
         "damage": 25,
         "speed": 5,
         "energy_cost": 0,
@@ -105,7 +107,7 @@ ORC_ORACLE = {
     "str": 50,
     "natural_weapon": {
         "name": "staff",
-        "damage_type": "bludgeoning",
+        "damage_type": "blunt",
         "damage": 30,
         "speed": 5,
         "energy_cost": 0,
@@ -128,7 +130,7 @@ ORC_EMISSARY = {
     "str": 60,
     "natural_weapon": {
         "name": "ceremonial dagger",
-        "damage_type": "piercing",
+        "damage_type": "edged",
         "damage": 35,
         "speed": 5,
         "energy_cost": 0,
@@ -151,7 +153,7 @@ ORC_ROYAL_GUARD = {
     "str": 70,
     "natural_weapon": {
         "name": "large sword",
-        "damage_type": "slashing",
+        "damage_type": "edged",
         "damage": 40,
         "speed": 5,
         "energy_cost": 0,
@@ -174,7 +176,7 @@ ORC_TASKMASTER = {
     "str": 80,
     "natural_weapon": {
         "name": "spiked club",
-        "damage_type": "bludgeoning",
+        "damage_type": "blunt",
         "damage": 45,
         "speed": 5,
         "energy_cost": 0,
@@ -182,6 +184,31 @@ ORC_TASKMASTER = {
     "exp_reward": 5500,
     "can_attack": True,
 }
+ORC_TRAINER = {
+    "typeclass": "typeclasses.characters.NPC",
+    "key": "Orc Trainer",
+    "aliases": ["orc", "trainer"],
+    "desc": "The orc trainer is a master of combat. He's been training orcs for years and is a formidable opponent.",
+    "gender": "male",
+    "react_as": "aggressive",
+    "armor": 10,
+    "name_color": "r",
+    "level": 13,
+    "hp": 11562,
+    "hpmax": 11562,
+    "str": 10,
+    "natural_weapon": {
+        "name": "legendary warhammer",
+        "damage_type": "blunt",
+        "damage": 30,
+        "speed": 5,
+        "energy_cost": 0,
+    },
+    "exp_reward": 11562,
+    "drops": lambda: uniform(0, 1) < 0.1 and ["SHINY_BRASS_SHIELD"],
+    "can_attack": True,
+}
+
 ORC_WARLORD = {
     "typeclass": "typeclasses.characters.NPC",
     "key": "an orc warlord",
@@ -197,7 +224,7 @@ ORC_WARLORD = {
     "str": 90,
     "natural_weapon": {
         "name": "battle axe",
-        "damage_type": "slashing",
+        "damage_type": "edged",
         "damage": 50,
         "speed": 5,
         "energy_cost": 0,
@@ -220,7 +247,7 @@ ORC_LORD = {
     "str": 100,
     "natural_weapon": {
         "name": "enchanted sword",
-        "damage_type": "slashing",
+        "damage_type": "edged",
         "damage": 55,
         "speed": 5,
         "energy_cost": 0,
@@ -243,11 +270,12 @@ ORC_EMPEROR = {
     "str": 120,
     "natural_weapon": {
         "name": "legendary warhammer",
-        "damage_type": "bludgeoning",
+        "damage_type": "blunt",
         "damage": 70,
         "speed": 5,
         "energy_cost": 0,
     },
     "exp_reward": 15000,
+    "drops": lambda: uniform(0, 1) < 0.1 and ["DWARVEN_RINGMAIL_TUNIC"],
     "can_attack": True,
 }

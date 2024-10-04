@@ -7,11 +7,9 @@ from evennia.utils import delay
 
 from typeclasses.cybercorpsguild.cyber_constants_and_helpers import (
     SKILLS_COST,
-    ENERGY_SOLUTIONS_COST,
-    SKILL_RANKS,
-    GUILD_LEVEL_COST_DICT,
     TITLES,
 )
+from typeclasses.utils import get_glvl_cost, SKILL_RANKS
 
 
 class PowerCommand(Command):
@@ -35,7 +33,7 @@ class CmdPulseGrenade(PowerCommand):
     key = "pulse grenade"
     help_category = "cybercorps"
     cost = 10
-    guild_level = 5
+    guild_level = 12
 
     def func(self):
         caller = self.caller
@@ -68,87 +66,62 @@ class CmdPulseGrenade(PowerCommand):
         return
 
 
-# region Adaptive Armor
-class CmdAdaptiveArmor(PowerCommand):
+# region First Aid
+class CmdFirstAid(PowerCommand):
     """
-    Adaptive armor is a type of cybernetic enhancement that can change its properties based on the situation. The armor is made of advanced materials that can shift and adapt to different threats, providing protection against physical, energy, and environmental hazards. Adaptive armor is often used by soldiers and security personnel who need versatile protection in combat situations.
+    Perform first aid on yourself or another character.
 
     Usage:
-        adaptive armor
+        first aid
     """
 
-    key = "adaptive armor"
+    key = "first aid"
+    aliases = ["fa", "aid"]
     help_category = "cybercorps"
-    cost = 50
-    guild_level = 10
+    cost = 5
+    ep_cost = 20
+    guild_level = 5
 
     def func(self):
         caller = self.caller
-        if not caller.db.guild_level >= self.guild_level:
-            caller.msg(f"|CYou don't have access to adapative armor yet.")
+        hp = caller.db.hp
+        hpmax = caller.db.hpmax
+        percent = hp / hpmax * 100
+        if caller.db.combat_target:
+            caller.msg(f"|CYou can't do that while in combat.")
             return
-        if not caller.cooldowns.ready("adaptive_armor"):
-            caller.msg(f"|CYou can't change wares that quickly!")
+        if percent >= 50:
+            caller.msg(f"|CYou don't need first aid.")
+            return
+        if not caller.db.guild_level >= self.guild_level:
+            caller.msg(f"|CYou don't have access to first aid yet.")
+            return
+        if not caller.cooldowns.ready("first_aid"):
+            caller.msg(f"|CNot so fast!")
             return False
         if caller.db.ep < self.cost:
             caller.msg(f"|rYou need more energy to do that.")
             return
-        if caller.db.adaptive_armor:
-            caller.location.msg_contents(
-                f"|c{caller} deactivates their adaptive armor.", from_obj=caller
-            )
-            caller.db.adaptive_armor = False
-            return
 
-        caller.db.ep -= self.cost
-        caller.cooldowns.add("adaptive_armor", 50)
-        caller.cooldowns.add("global_cooldown", 2)
-        caller.db.adaptive_armor = True
-        caller.location.msg_contents(
-            f"|c{caller} activates their adaptive armor.", from_obj=caller
-        )
-
-
-# region DocWagon
-class CmdDocWagon(PowerCommand):
-    """
-    DocWagon is a premier emergency medical service provider known for its rapid response and high-tech solutions. Founded in 2037, DocWagon has revolutionized the medical services industry with its unique offerings, including:
-
-    Usage:
-        docwagon revive
-
-    """
-
-    key = "docwagon revive"
-    help_category = "cybercorps"
-    cost = 10
-
-    def func(self):
-        caller = self.caller
-        glvl = caller.db.guild_level
-        if not caller.db.docwagon["count"] > 0:
-            caller.msg(f"|CYou are too tired to use this power.")
-            return
-        if not caller.cooldowns.ready("docwagon"):
-            caller.msg(f"|CNot so fast!")
-            return False
-        if caller.db.ep < self.cost:
-            caller.msg(f"|rYou need at least {self.cost} energy to use this power.")
-            return
-        if glvl < 10:
-            caller.msg(f"|CYou need to be guild level 10 to use burnout.")
-            return
-        caller.db.ep -= self.cost
-        caller.cooldowns.add("docwagon", 60)
+        caller.cooldowns.add("first_aid", 4)
         caller.cooldowns.add("global_cooldown", 2)
         skill_rank = caller.db.skills.get("Security Services", 1)
 
-        self.msg(f"|304A DocWagon medical team arrives to treat you!|n")
-        caller.adjust_hp(caller.db.hpmax)
-        caller.adjust_fp(caller.db.fpmax)
+        # self.msg(f"|cYou perform first aid on yourself or another character.")
+        caller.location.msg_contents(f"|c{caller} performs first aid on themselves.")
 
-        caller.db.docwagon["count"] -= 1
-        caller.db.docwagon["duration"] = 3 + skill_rank * 2
+        amount = 10 + skill_rank * 2
+        caller.adjust_hp(amount)
+        caller.adjust_fp(-self.cost)
+        caller.adjust_ep(-self.ep_cost)
+        caller.msg(caller.get_display_status(caller))
+        # for obj in caller.location.contents:
+        #     if obj.db.hp:
+        #         obj.db.hp += 10 + skill_rank * 2
+        #         if obj.db.hp > obj.db.hpmax:
+        #             obj.db.hp = obj.db.hpmax
+
+        return
 
 
 # region Synthetic Conversion
@@ -181,7 +154,57 @@ class CmdSyntheticConversion(Command):
                 caller.msg("Convert what synthetically?")
 
 
-# region Other powers
+# region Nano Reinforced Skeleton
+class CmdNanoReinforcedSkeleton(PowerCommand):
+    """
+    The Nano-Reinforced Endoskeleton is a cutting-edge cybernetic implant that enhances the user’s physical resilience and durability. By integrating advanced nanomaterials into the skeletal structure, this implant significantly boosts constitution, allowing the user to withstand greater physical stress and recover more quickly from injuries.
+    """
+
+    key = "nano reinforced skeleton"
+    aliases = ["nrs", "nano"]
+    help_category = "cybercorps"
+    cost = 75
+
+    # make this command only work in the cybercorps guild
+    def func(self):
+        caller = self.caller
+        glvl = caller.db.guild_level
+        cybernetic_enhancements = caller.db.skills.get("cybernetic enhancements", 1)
+
+        if glvl < 20:
+            caller.msg(
+                f"|CYou need to be guild level 20 to use nano reinforced skeleton."
+            )
+            return
+        if caller.db.ep < self.cost:
+            caller.msg(f"|rYou need at least {self.cost} energy to use this power.")
+            return
+        if caller.db.nano_reinforced_skeleton:
+            caller.msg(f"|CYou already have a nano reinforced skeleton.")
+            return
+        if not caller.cooldowns.ready("nano_reinforced_skeleton"):
+            caller.msg(f"|CYour skeleton can't handle that right now.")
+            return False
+
+        if not caller.db.nano_reinforced_skeleton:
+            caller.db.nano_reinforced_skeleton = True
+            caller.traits.con.mod += cybernetic_enhancements * 3
+            caller.db.nrs_amount = cybernetic_enhancements * 3
+            caller.db.ep -= self.cost
+            caller.cooldowns.add("global_cooldown", 2)
+            caller.cooldowns.add("nano_reinforced_skeleton", 600)
+            activate_msg = f"|CYou install your nano reinforced skeleton."
+            caller.location.msg_contents(activate_msg, from_obj=caller)
+        else:
+            caller.db.nano_reinforced_skeleton = False
+            caller.traits.con.mod -= caller.db.nrs_amount
+            deactivate_msg = f"|CYou uninstall your nano reinforced skeleton."
+            caller.location.msg_contents(deactivate_msg, from_obj=caller)
+
+        caller.db.hpmax = 50 + caller.traits.con.value * caller.db.con_increase_amount
+
+
+# region Powers
 class CmdPowers(Command):
     """
     List of powers available to the Elemental, their rank, and their cost.
@@ -201,12 +224,16 @@ class CmdPowers(Command):
         table.add_row(f"|GSynthetic Conversion", 1, 0)
         table.add_row(f"|GLoadout", 1, 0)
         table.add_row(f"|GLoadout Remove", 1, 0)
-        table.add_row(f"|GAdaptive Armor", 10, "25 Energy")
+        table.add_row(f"|GFirst Aid", 5, "5 Energy")
         table.add_row(f"|GDocWagon Revive", 7, "10 Energy")
+        table.add_row(f"|GAdaptive Armor", 10, "25 Energy")
+        table.add_row(f"|GPulse Grenade", 12, "10 Energy")
+        table.add_row(f"|GNano Reinforced Skeleton", 20, "75 Energy")
 
         caller.msg(str(table))
 
 
+# region Reaction
 class CmdReaction(Command):
     """
     Set the elemental's reaction to a dropping below a certain health threshold.
@@ -234,6 +261,7 @@ class CmdReaction(Command):
         caller.msg(f"Reaction set to {args}.")
 
 
+# region Gtrain
 class CmdGTrain(Command):
     """
     Train your guild skills by spending skill experience points. Each rank
@@ -265,10 +293,6 @@ class CmdGTrain(Command):
         skill_gxp = getattr(caller.db, "skill_gxp", 0)
         cost = caller.db.skills[f"{skill}"]
         cost = SKILLS_COST[cost]
-
-        if skill == "energy solutions":
-            cost = caller.db.skills[f"{skill}"]
-            cost = ENERGY_SOLUTIONS_COST[cost]
 
         if skill_gxp < cost:
             self.msg(f"|wYou need {cost-skill_gxp} more experience to train {skill}.")
@@ -344,6 +368,11 @@ class CmdGhelp(Command):
                 "|cEnergy Solutions|n\n\n"
                 "Energy solutions are technologies and strategies that can help reduce energy consumption, increase energy efficiency, and promote the use of renewable energy sources. Energy solutions can include technologies such as solar panels, wind turbines, and energy-efficient appliances. Energy solutions are essential for addressing climate change and reducing the environmental impact of energy production and consumption."
             )
+        if skill == "nano reinforced skeleton":
+            caller.msg(
+                "|cNano Reinforced Skeleton|n\n\n"
+                "The Nano-Reinforced Endoskeleton is a cutting-edge cybernetic implant that enhances the user's physical resilience and durability. By integrating advanced nanomaterials into the skeletal structure, this implant significantly boosts constitution, allowing the user to withstand greater physical stress and recover more quickly from injuries."
+            )
 
         caller.msg(f"|rNo help found for {skill}.")
 
@@ -368,7 +397,7 @@ class CmdGAdvance(Command):
 
     def _adv_level(self):
         caller = self.caller
-        cost = GUILD_LEVEL_COST_DICT.get(caller.db.guild_level + 1, 0)
+        cost = get_glvl_cost(caller.db.guild_level + 1)
 
         if caller.db.gxp < cost:
             self.msg(f"|wYou need {cost - caller.db.gxp} more experience to advance.")
@@ -419,7 +448,7 @@ class CmdGuildStatSheet(Command):
         my_glvl = caller.db.guild_level or 1
         gxp = caller.db.gxp or 0
         skill_gxp = caller.db.skill_gxp or 0
-        gxp_needed = GUILD_LEVEL_COST_DICT[my_glvl + 1]
+        gxp_needed = get_glvl_cost(my_glvl + 1)
         reaction = caller.db.reaction_percentage or 50
         melee_weapon = "None"
         if caller.db.melee_weapon:
@@ -430,6 +459,7 @@ class CmdGuildStatSheet(Command):
 
         doc_count = caller.db.docwagon["count"]
         doc_max = caller.db.docwagon["max"]
+        platelet_factory = getattr(caller.db, "platelet_factory", False)
 
         table = EvTable(f"|c{caller}", f"|c{title}", border="table")
         table.add_row(f"|GGuild Level", my_glvl)
@@ -439,6 +469,12 @@ class CmdGuildStatSheet(Command):
         table.add_row(f"|GMelee Weapon", melee_weapon)
         table.add_row(f"|GRanged Weapon", ranged_weapon)
         table.add_row(f"|GDocWagon Revives", f"{doc_count} / {doc_max}")
+        table.add_row(
+            f"|GNano Reinforced Skeleton",
+            getattr(caller.db, "nano_reinforced_skeleton", False),
+        )
+        table.add_row(f"|GAdaptive Armor", getattr(caller.db, "adaptive_armor", False))
+        table.add_row(f"|GPlatelet Factory", platelet_factory)
 
         caller.msg(str(table))
 
@@ -449,16 +485,7 @@ class CmdGuildStatSheet(Command):
 
         # Assuming SKILLS_COST is a dictionary that maps ranks to costs
         for skill, rank in skills:
-            if skill == "energy solutions":
-                skill_table.add_row(
-                    f"|G{skill.title()}",
-                    f"{rank}",
-                    f"{int(ENERGY_SOLUTIONS_COST[rank])}",
-                )
-            else:
-                skill_table.add_row(
-                    f"|G{skill.title()}", f"{rank}", f"{SKILLS_COST[rank]}"
-                )
+            skill_table.add_row(f"|G{skill.title()}", f"{rank}", f"{SKILLS_COST[rank]}")
 
         caller.msg(str(skill_table))
 
@@ -490,14 +517,7 @@ class CmdSkills(Command):
 
         table = EvTable(f"|cSkill", f"|cRank", f"|cCost", border="table")
         for skill, rank in caller.db.skills.items():
-            if skill == "energy solutions":
-                table.add_row(
-                    f"|G{skill.title()}",
-                    f"{rank}",
-                    f"{int(ENERGY_SOLUTIONS_COST[rank])}",
-                )
-            else:
-                table.add_row(f"|G{skill.title()}", f"{rank}", f"{SKILLS_COST[rank]}")
+            table.add_row(f"|G{skill.title()}", f"{rank}", f"{SKILLS_COST[rank]}")
 
         caller.msg(str(table))
 
@@ -506,13 +526,18 @@ class CmdSkills(Command):
 class CmdTest(Command):
     key = "test"
 
+    from evennia import TICKER_HANDLER as tickerhandler
+
     # from typeclasses.elementalguild.earth_elemental_commands import EarthElementalCmdSet
     # from typeclasses.elementalguild.fire_elemental_commands import FireElementalCmdSet
-    from typeclasses.cybercorpsguild.cybercorps_wares import CybercorpsWaresCmdSet
 
     def func(self):
         caller = self.caller
         caller.msg("test")
+        # from typeclasses.cybercorpsguild.cybercorps_wares import CybercorpsWaresCmdSet
+        # from typeclasses.cybercorpsguild.cyber_implants import CybercorpsImplantCmdSet
+
+        self.tickerhandler.clear()
         # from commands.shops import ShopCmdSet
         # del caller.db.docwagon
         # del caller.db.skills
@@ -520,7 +545,9 @@ class CmdTest(Command):
         # del caller.db.strategy
         # del caller.db.wares
 
-        caller.cmdset.add(CybercorpsCmdSet, permanent=True)
+        caller.cmdset.remove(CybercorpsCmdSet)
+        # caller.cmdset.remove(CybercorpsWaresCmdSet)
+        # caller.cmdset.remove(CybercorpsImplantCmdSet)
         # caller.cmdset.delete(EarthElementalCmdSet)
         # caller.cmdset.delete(EarthElementalCmdSet)
         # caller.cmdset.delete(CybercorpsCmdSet)
@@ -577,6 +604,23 @@ class CmdUpdateChessboard(Command):
         caller.msg("done")
 
 
+class CmdHp(Command):
+    """
+    Display the current and maximum health of the caller.
+
+    Usage:
+        hp
+    """
+
+    key = "hp"
+    help_category = "cybercorps"
+
+    def func(self):
+        caller = self.caller
+
+        caller.msg(caller.get_display_status(caller))
+
+
 # region CmdSet
 class CybercorpsCmdSet(CmdSet):
     key = "Cybercorps CmdSet"
@@ -596,9 +640,9 @@ class CybercorpsCmdSet(CmdSet):
 
         self.add(CmdSyntheticConversion)
         self.add(CmdReaction)
-        self.add(CmdDocWagon)
-
-        self.add(CmdAdaptiveArmor)
         self.add(CmdPulseGrenade)
+        self.add(CmdNanoReinforcedSkeleton)
+        self.add(CmdFirstAid)
 
         self.add(CmdUpdateChessboard)
+        self.add(CmdHp)

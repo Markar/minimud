@@ -70,18 +70,20 @@ IRON_HAUBERK = {
     "typeclass": "typeclasses.objects.ClothingObject",
     "key": "iron hauberk",
     "desc": "A standard iron chainmail tunic.",
-    "armor": 8,
-    "value": 20,
+    "armor": 4,
+    "value": 250,
     "clothing_type": "chestguard",
+    "type": "heavy",
 }
 
 IRON_CHAUSSES = {
     "typeclass": "typeclasses.objects.ClothingObject",
     "key": "iron chausses",
     "desc": "A pair of mail chausses constructed from iron.",
-    "armor": 8,
-    "value": 20,
+    "armor": 3,
+    "value": 175,
     "clothing_type": "legguard",
+    "type": "heavy",
 }
 
 LEATHER_BOOTS = {
@@ -89,8 +91,32 @@ LEATHER_BOOTS = {
     "key": "leather boots",
     "desc": "A sturdy pair of leather boots.",
     "armor": 1,
-    "value": 5,
+    "value": 100,
     "clothing_type": "shoes",
+    "type": "light",
+}
+
+DWARVEN_RINGMAIL_TUNIC = {
+    "typeclass": "typeclasses.objects.ClothingObject",
+    "key": "Dwarven Ringmail Tunic",
+    "desc": "A ringmail tunic skillfully crafted by dwarves. Noone knows how it ended up in the hands of an orc. It provides extra protection from fire, cold, and magic.",
+    "armor": 12,
+    "fireac": 8,
+    "coldac": 8,
+    "magicac": 8,
+    "value": 1000,
+    "clothing_type": "chestguard",
+    "type": "medium",
+}
+SHINY_BRASS_SHIELD = {
+    "typeclass": "typeclasses.objects.ClothingObject",
+    "key": "shiny brass shield",
+    "desc": "A shiny brass shield.",
+    "armor": 10,
+    "magicac": 10,
+    "value": 800,
+    "clothing_type": "shield",
+    "type": "medium",
 }
 
 SMALL_BAG = {
@@ -462,6 +488,7 @@ CYBER_CHESTGUARD = {
     "armor": 6,
     "value": 750,
     "clothing_type": "chestguard",
+    "type": "medium",
 }
 
 CYBER_LEG_GUARDS = {
@@ -471,6 +498,7 @@ CYBER_LEG_GUARDS = {
     "armor": 3,
     "value": 500,
     "clothing_type": "legguard",
+    "type": "medium",
 }
 
 CYBER_BOOTS = {
@@ -480,4 +508,5 @@ CYBER_BOOTS = {
     "armor": 2,
     "value": 400,
     "clothing_type": "footwear",
+    "type": "medium",
 }

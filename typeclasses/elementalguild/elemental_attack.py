@@ -6,8 +6,8 @@ class ElementalAttack:
     skill = "blunt"
     name = "earth_elemental_melee"
     speed = 3
-    gxp_rate = 5
-    skill_gxp_rate = 5
+    gxp_rate = 20
+    skill_gxp_rate = 20
 
     def at_pre_attack(self, wielder, **kwargs):
         # make sure we have enough strength left

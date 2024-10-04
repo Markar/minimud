@@ -15,8 +15,8 @@ class Viper(ChangelingAttack):
     energy_cost = 3
     speed = 3
     power = 20
-    toughness = 17
-    dodge = 6
+    toughness = 6
+    dodge = 17
 
     def _calculate_damage(self, wielder):
         """
@@ -36,9 +36,6 @@ class Viper(ChangelingAttack):
         The auto attack of Teiid
         """
         super().at_attack(wielder, target, **kwargs)
-
-        self.energy_cost = 1
-        self.speed = 3
 
         wielder.db.ep -= self.energy_cost
         target.at_damage(wielder, self._calculate_damage(wielder), "poison", "bite")

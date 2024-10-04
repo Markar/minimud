@@ -717,7 +717,7 @@ class CmdGhelp(Command):
         if skill == "elemental harmony":
             caller.msg(
                 "|cElemental Harmony|n\n\n"
-                "Enhances the elemental's ability to work in harmony with other elements, boosting the effectiveness of combined elemental attacks.\n\n"
+                "Enhances the elemental's ability to work in harmony with other elements.\n\n"
             )
             return
         caller.msg(f"|rNo help found for {skill}.")
