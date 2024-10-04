@@ -130,33 +130,41 @@ class Knight(PlayerCharacter):
         """
         Use this weapon in an attack against a target.
         """
-        speed = weapon.speed
-        self.msg(f"at_attack PaladinWeapon {speed} {weapon}")
-        # get the weapon's damage bonus
-        damage = weapon.db.dmg
-        # pick a random option from our possible damage types
-        damage_type = None
-        if damage_types := weapon.tags.get(category="damage_type", return_list=True):
-            print(f"melee at_attack: {choice(damage_types)}")
-            damage_type = choice(damage_types)
 
-        # does this require skill to use?
-        if skill := weapon.tags.get(category="skill_class"):
-            # use the skill
-            result = wielder.use_skill(skill, speed=weapon.speed)
-            # apply the weapon damage as a modifier
-            damage = damage * result
-            damage = math.ceil(uniform(damage / 2, damage))
-        # if no skill required, we are just using our unmodified damage value
+        if weapon.name == BareHand().name:
+            BareHand().at_attack(wielder, target)
+            self.msg("BareHand")
+        else:
+            self.msg("Not BareHand")
 
-        # subtract the energy required to use this
-        wielder.db.ep -= weapon.attributes.get("energy_cost", 0)
+            damage = weapon.db.dmg
+            speed = weapon.db.speed
 
-        # the attack succeeded! apply the damage
-        target.at_damage(wielder, damage, damage_type)
+            # pick a random option from our possible damage types
+            damage_type = None
+            if damage_types := weapon.tags.get(
+                category="damage_type", return_list=True
+            ):
+                print(f"melee at_attack: {choice(damage_types)}")
+                damage_type = choice(damage_types)
 
-        wielder.msg(f"[ Cooldown: {speed} seconds ]")
-        wielder.cooldowns.add("attack", speed)
+            # does this require skill to use?
+            if skill := weapon.tags.get(category="skill_class"):
+                # use the skill
+                result = wielder.use_skill(skill, speed=weapon.speed)
+                # apply the weapon damage as a modifier
+                damage = damage * result
+                damage = math.ceil(uniform(damage / 2, damage))
+            # if no skill required, we are just using our unmodified damage value
+
+            # subtract the energy required to use this
+            wielder.db.ep -= weapon.attributes.get("energy_cost", 0)
+
+            # the attack succeeded! apply the damage
+            target.at_damage(wielder, damage, damage_type)
+
+            wielder.msg(f"[ Cooldown: {speed} seconds ]")
+            wielder.cooldowns.add("attack", speed)
 
     def attack(self, target, weapon, **kwargs):
 
@@ -250,6 +258,8 @@ class Knight(PlayerCharacter):
         riposte = 10
         damage_reduction = 0
 
+        self.msg(f"self.armor {self.db.armor}")
+
         ran = randint(1, 100)
         if ran <= dodge:
             self.msg(f"|cYou dodge the attack!")
@@ -264,7 +274,9 @@ class Knight(PlayerCharacter):
         damage -= math.ceil(damage_reduction)
 
         # apply armor damage reduction
-        damage -= self.defense(damage_type)
+        armor = self.defense(damage_type)
+        self.msg(f"armor: {armor}")
+        damage -= armor
 
         self.db.hp -= max(damage, 0)
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")

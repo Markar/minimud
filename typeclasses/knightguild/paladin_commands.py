@@ -332,7 +332,7 @@ class CmdPoison(PowerCommand):
     """
 
     key = "poison"
-    aliases = ["p"]
+    aliases = ["poi"]
     help_category = "paladin"
     guild_level = 1
     cost = 5

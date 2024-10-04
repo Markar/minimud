@@ -1,4 +1,4 @@
-from random import uniform
+from random import uniform, choice
 
 ORC_PAWN = {
     "typeclass": "typeclasses.characters.NPC",
@@ -181,6 +181,7 @@ ORC_TASKMASTER = {
         "speed": 5,
         "energy_cost": 0,
     },
+    "drops": lambda: uniform(0, 1) < 0.1 and ["LEATHER_WHIP"],
     "exp_reward": 5500,
     "can_attack": True,
 }
@@ -277,5 +278,56 @@ ORC_EMPEROR = {
     },
     "exp_reward": 15000,
     "drops": lambda: uniform(0, 1) < 0.1 and ["DWARVEN_RINGMAIL_TUNIC"],
+    "can_attack": True,
+}
+
+LORD_DARISH = {
+    "typeclass": "typeclasses.characters.NPC",
+    "key": "Lord Darish",
+    "aliases": ["orc", "darish", "lord"],
+    "desc": "A powerful orc, here to discuss plans with the emperor.",
+    "gender": "male",
+    "react_as": "aggressive",
+    "armor": 18,
+    "name_color": "r",
+    "level": 18,
+    "hp": 1500,
+    "hpmax": 1500,
+    "str": 120,
+    "natural_weapon": {
+        "name": "dwarven two-handed axe",
+        "damage_type": "edged",
+        "damage": 70,
+        "speed": 5,
+        "energy_cost": 0,
+    },
+    "exp_reward": 15000,
+    "drops": lambda: uniform(0, 1) < 0.1
+    and choice(("DWARVEN_TWO_HANDED_AXE", "DWARVEN_AXE")),
+    "can_attack": True,
+}
+
+AMBASSADOR_DVINN = {
+    "typeclass": "typeclasses.characters.NPC",
+    "key": "Ambassador Dvinn",
+    "aliases": ["dark elf", "dvinn", "ambassador", "elf"],
+    "desc": "A dark elf ambassador, here to negotiate with the orcs.",
+    "gender": "male",
+    "react_as": "aggressive",
+    "armor": 20,
+    "name_color": "b",
+    "level": 20,
+    "hp": 1200,
+    "hpmax": 1200,
+    "str": 80,
+    "natural_weapon": {
+        "name": "dragoon dirk",
+        "damage_type": "edged",
+        "damage": 60,
+        "speed": 5,
+        "energy_cost": 0,
+    },
+    "exp_reward": 20000,
+    "drops": lambda: uniform(0, 1) < 0.1 and ["DRAGOON_DIRK"],
     "can_attack": True,
 }

@@ -145,7 +145,7 @@ class EarthElemental(Elemental):
                 rate = self.db.earthen_renewal["rate"]
                 bonus_fp += uniform(rate / 2, rate + 1)
                 if self.db.earthen_renewal["duration"] == 1:
-                    deactivateMsg = f"|CYour() body stops glowing as you release the regenerative energy."
+                    deactivateMsg = f"|C$Your() body stops glowing as you release the regenerative energy."
                     self.location.msg_contents(deactivateMsg, from_obj=self)
                 self.db.earthen_renewal["duration"] -= 1
 
