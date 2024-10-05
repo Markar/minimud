@@ -3,7 +3,7 @@ from evennia.utils import delay, iter_to_str
 from evennia import TICKER_HANDLER as tickerhandler
 from typeclasses.characters import PlayerCharacter
 from typeclasses.cybercorpsguild.attack_emotes import AttackEmotes
-from typeclasses.utils import get_article, get_display_name
+from typeclasses.utils import get_article, get_display_name, geHealthStatus
 from typeclasses.cybercorpsguild.cybercorps_commands import CybercorpsCmdSet
 from typeclasses.cybercorpsguild.cyber_implants import (
     CybercorpsImplantCmdSet,
@@ -245,6 +245,8 @@ class Cybercorps(PlayerCharacter):
         adaptive_armor = getattr(self.db, "adaptive_armor", False)
         platelet_factory_active = getattr(self.db, "platelet_factory_active", False)
         adrenaline_boost = getattr(self.db, "adrenaline_boost", {})
+        adrenaline_boost_active = adrenaline_boost.get("active", False)
+        nrs = getattr(self.db, "nano_reinforced_skeleton", False)
 
         chunks.append(
             f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g"
@@ -255,13 +257,18 @@ class Cybercorps(PlayerCharacter):
             chunks.append(f"|gAA")
         if platelet_factory_active:
             chunks.append(f"|gPF")
-        if getattr(adrenaline_boost, "duration", 0) > 0:
+        if adrenaline_boost_active:
             chunks.append(f"|gAB")
+        if nrs:
+            chunks.append(f"|gNRS")
 
         if looker != self:
-            chunks.append(
-                f"|gE: |G{looker.get_display_name(self, **kwargs)} ({looker.db.hp})"
-            )
+            chunks.append(f"|gE: |G{looker.get_display_name(self, **kwargs)}")
+            hpPct = looker.db.hp / looker.db.hpmax
+            status = geHealthStatus(self, hpPct)
+            chunks.append(f"|gH: |G{status}")
+            if self.key == "Markar":
+                chunks.append(f"{looker.db.hp} / {looker.db.hpmax}")
 
         # get all the current status flags for this character
         if status_tags := self.tags.get(category="status", return_list=True):
@@ -363,6 +370,9 @@ class Cybercorps(PlayerCharacter):
             percentage_reduction += cybernetic_enhancements / 100
             flat_reduction += adaptive_armor_reduction
             self.db.ep -= 1
+
+        if self.db.nano_reinforced_skeleton:
+            percentage_reduction += 0.02 + cybernetic_enhancements / 200
 
         # Additional flat reduction from mountain stance
         # if self.db.mountain_stance:

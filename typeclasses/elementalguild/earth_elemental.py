@@ -50,7 +50,6 @@ class EarthElemental(Elemental):
             "rock solid defense": 1,
             "elemental harmony": 1,
             "earthen regeneration": 1,
-            "assimilation": 1,
         }
         self.db.stone_skin = False
         self.db.earth_form = False

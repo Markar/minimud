@@ -6,6 +6,7 @@ from commands.command import Command
 from typeclasses.elementalguild.constants_and_helpers import SKILLS_COST
 from evennia.utils import delay
 from evennia.contrib.rpg.buffs import BaseBuff
+from typeclasses.utils import PowerCommand
 
 
 class PowerCommand(Command):
@@ -710,145 +711,6 @@ class CmdEnervate(PowerCommand):
         )
 
 
-def _calculate_meditation_restoration(self):
-    """
-    Calculate the amount of focus and energy restored during meditation.
-    """
-    caller = self
-    wisdom = caller.traits.wis.value
-    skill_rank = caller.db.skills.get("earth resonance", 1)
-
-    fp_restored = 5 + randint(1, skill_rank)
-    ep_restored = 5 + int(uniform(3, wisdom * 0.5)) + skill_rank * 3
-    caller.msg(f"|GYou regain {fp_restored} focus points and {ep_restored} energy.")
-
-    caller.adjust_fp(fp_restored)
-    caller.adjust_ep(ep_restored)
-    caller.msg(caller.get_display_status(caller))
-
-
-# region Meditate
-class CmdMeditate(PowerCommand):
-    """
-    Meditate allows the earth elemental to focus their energy and regain focus points. The elemental can enter a meditative state, drawing on the power of the earth to replenish their energy reserves. The amount of focus restored is based on the elemental's skill in earth resonance and wisdom.
-    """
-
-    key = "meditate"
-    aliases = ["med"]
-    help_category = "earth elemental"
-    guild_level = 1
-    cost = 10
-
-    def _end_meditation(self, caller):
-        caller.tags.remove("meditating", category="status")
-        caller.msg(
-            f"|gYou feel refreshed and invigorated, the energy of the earth flowing through you."
-        )
-        caller.location.msg_contents(
-            f"|C$You() open $pron(your) eyes and rise from $pron(your) meditative state, looking refreshed and invigorated.",
-            from_obj=caller,
-        )
-        _calculate_meditation_restoration(self)
-
-    def func(self):
-        super().func()
-        caller = self.caller
-        args = self.args.strip()
-        glvl = caller.db.guild_level
-
-        if caller.db.fp == caller.db.fpmax and caller.db.ep == caller.db.epmax:
-            caller.msg(f"|gYou are already at full energy.")
-            return
-
-        if caller.db.combat_target:
-            caller.msg(f"|rYou can't meditate while in combat.")
-            return
-
-        if glvl < self.guild_level:
-            self.msg(
-                f"|rYou must be at least guild level {self.guild_level} to use this power."
-            )
-            return
-
-        if not caller.cooldowns.ready("meditate"):
-            caller.msg(f"|CYou can't meditate again yet.")
-            return False
-
-        if caller.db.fp < self.cost:
-            caller.msg(f"|rYou need at least {self.cost} focus to use this power.")
-            return
-
-        caller.tags.add("meditating", category="status")
-        caller.cooldowns.add("global_cooldown", 6)
-        caller.cooldowns.add("meditate", 6)
-
-        caller.msg(f"|gYou enter a meditative state, drawing energy from the earth.")
-        caller.location.msg_contents(
-            f"|C$You() close your eyes and begins to meditate, drawing energy from the earth.",
-            from_obj=caller,
-        )
-        if args == "full":
-            caller.buffs.add(MeditateBuff)
-        else:
-            delay(5, self._end_meditation, caller)
-
-
-class MeditateBuff(BaseBuff):
-    """
-    A buff that restores focus points to the caller over time.
-    """
-
-    duration = 60
-    tickrate = 5
-    type = "meditate"
-    key = "meditate"
-
-    def at_tick(self, initial, **kwargs):
-        _calculate_meditation_restoration(self.owner)
-
-        if (
-            self.owner.db.ep == self.owner.db.epmax
-            and self.owner.db.fp == self.owner.db.fpmax
-        ):
-            self.duration = 0
-            self.owner.msg(f"|gYou stand up, feeling refreshed and invigorated.")
-            self.owner.tags.remove("meditating", category="status")
-            return
-
-        if self.ticknum == 12:
-            self.owner.msg(f"|gYou stand up, feeling refreshed and invigorated.")
-            self.owner.tags.remove("meditating", category="status")
-            return
-
-
-# region Assimilate
-# class CmdAssimilate(Command):
-#     """
-#     Assimilate the corpse of an enemy to restore energy
-#     """
-
-#     key = "assimilate"
-#     aliases = ["asm"]
-#     help_category = "earth elemental"
-
-#     def func(self):
-#         if not self.args:
-#             caller = self.caller
-#             if corpse := caller.location.search("corpse-1"):
-#                 base_power = corpse.db.power
-#                 skill_rank = caller.db.skills.get("assimilate", 0)
-
-#                 # Calculate the power with the skill rank multiplier
-#                 power = base_power * (1 + (skill_rank * 0.1))
-
-#                 caller.adjust_ep(power)
-#                 corpse.delete()
-#                 assimilate_msg = f"|M$pron(Your) form glows faintly as it assimilates the energy from the consumed corpse, strengthening $pron(your) rocky exterior."
-#                 caller.location.msg_contents(assimilate_msg, from_obj=caller)
-#             else:
-#                 caller.msg("Assimilate what?")
-
-
 # Other powers
 class CmdPowers(Command):
     """
@@ -945,7 +807,7 @@ class CmdGTrain(Command):
         cost = SKILLS_COST[cost]
 
         if skill_gxp < cost:
-            self.msg(f"|wYou need {cost-skill_gxp} more experience to train {skill}.")
+            self.msg(f"|wYou need {skill_gxp-cost} more experience to train {skill}.")
             return
 
         confirm = yield (
@@ -1088,12 +950,10 @@ class EarthElementalCmdSet(CmdSet):
     def at_cmdset_creation(self):
         super().at_cmdset_creation()
 
-        # self.add(CmdAssimilate)
         self.add(CmdTerranRestoration)
         self.add(CmdEarthShield)
         self.add(CmdStoneSkin)
         self.add(CmdEnervate)
-        self.add(CmdMeditate)
         self.add(CmdPowers)
         self.add(CmdReaction)
         self.add(CmdGTrain)

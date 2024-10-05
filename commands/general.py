@@ -59,9 +59,117 @@ class CmdHelpGuilds(Command):
         self.caller.msg(table)
 
 
+class CmdAdv50(Command):
+    """
+    Display the available guilds
+    """
+
+    key = "adv50"
+    help_category = "General"
+
+    def func(self):
+        self.caller.db.exp = 500000000000000
+        self.caller.db.gxp = 500000000000000
+        self.caller.db.skill_gxp = 500000000000000
+        self.caller.level = 50
+        self.caller.traits.con.base = 50
+        self.caller.traits.int.base = 50
+        self.caller.traits.str.base = 50
+        self.caller.traits.dex.base = 50
+        self.caller.traits.wis.base = 50
+        self.caller.traits.cha.base = 50
+        self.caller.db.coins = 500000000000000
+        self.caller.db.hp = 1000
+        self.caller.db.fp = 1000
+        self.caller.db.ep = 1000
+        self.caller.db.hpmax = 1000
+        self.caller.db.fpmax = 1000
+        self.caller.db.epmax = 1000
+        self.caller.msg("Level set to 50.")
+
+
+class CmdAdvCyberSkills(Command):
+    """
+    Display the available guilds
+    """
+
+    key = "advcyberskills"
+    help_category = "General"
+
+    def func(self):
+        self.caller.db.skills = {
+            "standard weapons": 10,
+            "energy weapons": 10,
+            "heavy weapons": 10,
+            "cybernetic enhancements": 10,
+            "security services": 10,
+            "biotech research": 10,
+            "energy solutions": 10,
+        }
+        self.caller.msg("Cyber skills set to 50.")
+
+
+class CmdAdvGuild(Command):
+    """
+    Display the available guilds
+    """
+
+    key = "advguild"
+    help_category = "General"
+
+    def func(self):
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+        self.execute_cmd("gadvance")
+
+        self.caller.msg("Guild level set to 50.")
+
+
 class GeneralCmdSet(CmdSet):
     key = "General"
 
     def at_cmdset_creation(self):
         super().at_cmdset_creation()
         self.add(CmdHelpGuilds)
+        self.add(CmdAdv50)
+        self.add(CmdAdvGuild)
+        self.add(CmdAdvCyberSkills)

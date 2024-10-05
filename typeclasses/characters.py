@@ -18,7 +18,7 @@ from .objects import ObjectParent
 from typeclasses.general_attack_emotes import AttackEmotes
 from typeclasses.utils import SetNPCStats
 
-_IMMOBILE = ("sitting", "lying down", "unconscious", "meditating", "binding wounds")
+_IMMOBILE = ("sitting", "lying down", "unconscious", "meditating", "binding wounds", "resupplying")
 _MAX_CAPACITY = 10
 
 # LOOK INTO RESTORING THESE STATUSES

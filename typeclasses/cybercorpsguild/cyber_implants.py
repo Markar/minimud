@@ -2,6 +2,7 @@ from commands.command import Command
 from typeclasses.cybercorpsguild.cybercorps_commands import PowerCommand
 from evennia import CmdSet
 from evennia.utils.evtable import EvTable
+from evennia.utils.utils import delay
 
 ImplantObjects = [
     {
@@ -24,6 +25,13 @@ ImplantObjects = [
         "skill_req": 1,
         "cost": 100,
         "rank": 4,
+    },
+    {
+        "name": "Nano Reinforced Skeleton",
+        "skill": "cybernetic enhancements",
+        "skill_req": 2,
+        "cost": 250,
+        "rank": 20,
     },
 ]
 
@@ -171,6 +179,14 @@ class CmdAdrenalineBoost(PowerCommand):
     skill_req = 2
     help_category = "cybercorps"
 
+    def remove_adrenaline_boost(self):
+        caller = self.caller
+        caller.db.adrenaline_boost = {"active": False, "duration": 0}
+        caller.location.msg_contents(
+            f"|c{caller} looks exhausted as the adrenaline wears off.",
+            from_obj=caller,
+        )
+
     def func(self):
         caller = self.caller
         implants = getattr(caller.db, "implants", {})
@@ -199,14 +215,82 @@ class CmdAdrenalineBoost(PowerCommand):
             return
         else:
             caller.cooldowns.add("global_cooldown", 2)
-            caller.cooldowns.add("adrenaline_boost", 6)
+            caller.cooldowns.add("adrenaline_boost", 80)
             caller.db.adrenaline_boost = {"active": True, "duration": 2 + biotech}
+            delay(30, callback=self.remove_adrenaline_boost)
             caller.adjust_ep(-self.cost)
             caller.location.msg_contents(
                 f"|c{caller} gets a crazed look in his eyes!", from_obj=caller
             )
 
         return
+
+
+# region Nano Reinforced Skeleton
+class CmdNanoReinforcedSkeleton(PowerCommand):
+    """
+    The Nano-Reinforced Endoskeleton is a cutting-edge cybernetic implant that enhances the user’s physical resilience and durability. By integrating advanced nanomaterials into the skeletal structure, this implant significantly boosts constitution, allowing the user to withstand greater physical stress and recover more quickly from injuries.
+    """
+
+    key = "nano reinforced skeleton"
+    aliases = ["nrs", "nano"]
+    help_category = "cybercorps"
+    cost = 75
+    skill = "cybernetic enhancements"
+    skill_req = 2
+    guild_level = 20
+
+    def deactivate_nano_reinforced_skeleton(self):
+        caller = self.caller
+        caller.db.nano_reinforced_skeleton = False
+        caller.traits.con.mod -= caller.db.nrs_amount
+        deactivate_msg = f"|CYou uninstall your nano reinforced skeleton."
+        caller.location.msg_contents(deactivate_msg, from_obj=caller)
+
+    # make this command only work in the cybercorps guild
+    def func(self):
+        caller = self.caller
+        glvl = caller.db.guild_level
+        cybernetic_enhancements = caller.db.skills.get("cybernetic enhancements", 1)
+        implants = getattr(caller.db, "implants", {})
+        hasNrs = "adrenaline boost" in implants
+
+        if not hasNrs:
+            caller.msg(f"|CYou don't have the nano reinforced skeleton implant yet.")
+            return
+
+        if glvl < self.guild_level:
+            caller.msg(
+                f"|CYou need to be guild level 20 to use nano reinforced skeleton."
+            )
+            return
+        if caller.db.ep < self.cost:
+            caller.msg(f"|rYou need at least {self.cost} energy to use this power.")
+            return
+        if caller.db.nano_reinforced_skeleton:
+            caller.msg(f"|CYou already have a nano reinforced skeleton.")
+            return
+        if not caller.cooldowns.ready("nano_reinforced_skeleton"):
+            caller.msg(f"|CYour skeleton can't handle that right now.")
+            return False
+
+        if not caller.db.nano_reinforced_skeleton:
+            caller.db.nano_reinforced_skeleton = True
+            caller.traits.con.mod += cybernetic_enhancements * 3
+            caller.db.nrs_amount = cybernetic_enhancements * 3
+            caller.db.ep -= self.cost
+            caller.cooldowns.add("global_cooldown", 2)
+            caller.cooldowns.add("nano_reinforced_skeleton", 120)
+            activate_msg = f"|CYou install your nano reinforced skeleton."
+            caller.location.msg_contents(activate_msg, from_obj=caller)
+            delay(120, self.deactivate_nano_reinforced_skeleton)
+        else:
+            caller.db.nano_reinforced_skeleton = False
+            caller.traits.con.mod -= caller.db.nrs_amount
+            deactivate_msg = f"|CYou uninstall your nano reinforced skeleton."
+            caller.location.msg_contents(deactivate_msg, from_obj=caller)
+
+        caller.db.hpmax = 50 + caller.traits.con.value * caller.db.con_increase_amount
 
 
 class CmdCyberneticImplants(PowerCommand):
@@ -248,3 +332,4 @@ class CybercorpsImplantCmdSet(CmdSet):
         self.add(CmdCyberneticImplants)
         self.add(CmdAdrenalineBoost)
         self.add(CmdPlateletFactory)
+        self.add(CmdNanoReinforcedSkeleton)

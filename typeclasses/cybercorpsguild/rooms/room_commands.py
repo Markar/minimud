@@ -230,7 +230,7 @@ class CmdBuyWares(Command):
 
     def func(self):
         caller = self.caller
-        ware = self.args.strip().lower()
+        arg = self.args.strip().lower()
         coins = getattr(caller.db, "coins", 0)
 
         if caller.db.guild != "cybercorps":
@@ -238,16 +238,16 @@ class CmdBuyWares(Command):
                 f"|rYou need to be part of the Cybercorps Mega Corporation to buy wares."
             )
             return
-        if not ware:
+        if not arg:
             caller.msg(f"|rUsage: wares buy <ware>")
             return
 
-        if ware in caller.db.wares:
-            caller.msg(f"|rYou already have the {ware}.")
+        if arg in caller.db.wares:
+            caller.msg(f"|rYou already have the {arg}.")
             return
 
         for obj in WaresObjects.values():
-            if obj.name.lower() == ware:
+            if obj.name.lower() == arg:
                 ware = obj
 
                 if caller.db.guild_level < ware.rank:
@@ -274,7 +274,7 @@ class CmdBuyWares(Command):
                 )
                 return
 
-        caller.msg(f"|rYou can't buy the {ware.name}.")
+        caller.msg(f"|rYou can't buy the {arg}.")
         return
 
 
