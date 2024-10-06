@@ -15,7 +15,7 @@ Markiplier = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
+    "level": 8,
     "natural_weapon": {
         "name": "punch",
         "damage_type": "blunt",
@@ -23,7 +23,7 @@ Markiplier = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "exp_reward": 9000,
     "can_attack": True,
 }
 
@@ -38,7 +38,7 @@ PewDiePie = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
+    "level": 8,
     "natural_weapon": {
         "name": "punch",
         "damage_type": "blunt",
@@ -46,7 +46,7 @@ PewDiePie = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "exp_reward": 9500,
     "can_attack": True,
 }
 
@@ -61,7 +61,7 @@ MrBeast = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
+    "level": 8,
     "natural_weapon": {
         "name": "punch",
         "damage_type": "blunt",
@@ -69,7 +69,7 @@ MrBeast = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "exp_reward": 15000,
     "can_attack": True,
 }
 
@@ -84,7 +84,7 @@ Ninja = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
+    "level": 8,
     "natural_weapon": {
         "name": "punch",
         "damage_type": "blunt",
@@ -92,7 +92,7 @@ Ninja = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "exp_reward": 11000,
     "can_attack": True,
 }
 
@@ -107,7 +107,7 @@ MatPat = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
+    "level": 8,
     "natural_weapon": {
         "name": "punch",
         "damage_type": "blunt",
@@ -115,7 +115,7 @@ MatPat = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "exp_reward": 10000,
     "can_attack": True,
 }
 
@@ -130,7 +130,7 @@ Wendigoon = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
+    "level": 8,
     "natural_weapon": {
         "name": "punch",
         "damage_type": "blunt",
@@ -138,7 +138,7 @@ Wendigoon = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "exp_reward": 8000,
     "can_attack": True,
 }
 
@@ -153,7 +153,7 @@ MeiMei = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
+    "level": 8,
     "natural_weapon": {
         "name": "punch",
         "damage_type": "blunt",
@@ -161,7 +161,7 @@ MeiMei = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "exp_reward": 8000,
     "can_attack": True,
 }
 
@@ -176,7 +176,7 @@ Caseoh = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
+    "level": 8,
     "natural_weapon": {
         "name": "punch",
         "damage_type": "blunt",
@@ -184,7 +184,7 @@ Caseoh = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "exp_reward": 10650,
     "can_attack": True,
 }
 
@@ -199,7 +199,7 @@ Jacksepticeye = {
     "armor": 4,
     "name_color": "g",
     "str": 17,
-    "level": lambda: randint(4, 6),
+    "level": 8,
     "natural_weapon": {
         "name": "headbutt",
         "damage_type": "blunt",
@@ -207,7 +207,7 @@ Jacksepticeye = {
         "speed": 4,
         "energy_cost": 2,
     },
-    "exp_reward": 115,
+    "exp_reward": 9000,
     "can_attack": True,
 }
 
@@ -222,7 +222,7 @@ LoganPaul = {
     "armor": 6,
     "name_color": "r",
     "str": 18,
-    "level": lambda: randint(5, 7),
+    "level": 8,
     "natural_weapon": {
         "name": "punch",
         "damage_type": "blunt",
@@ -230,7 +230,7 @@ LoganPaul = {
         "speed": 4,
         "energy_cost": 2,
     },
-    "exp_reward": 130,
+    "exp_reward": 14000,
     "can_attack": True,
 }
 
@@ -245,7 +245,7 @@ BadEmpanada = {
     "armor": 4,
     "name_color": "g",
     "str": 17,
-    "level": lambda: randint(4, 6),
+    "level": 8,
     "natural_weapon": {
         "name": "debate",
         "damage_type": "blunt",
@@ -253,7 +253,7 @@ BadEmpanada = {
         "speed": 4,
         "energy_cost": 2,
     },
-    "exp_reward": 115,
+    "exp_reward": 9000,
     "can_attack": True,
 }
 
@@ -268,7 +268,7 @@ Dream = {
     "armor": 4,
     "name_color": "g",
     "str": 17,
-    "level": lambda: randint(4, 6),
+    "level": 8,
     "natural_weapon": {
         "name": "sword",
         "damage_type": "edged",
@@ -276,6 +276,6 @@ Dream = {
         "speed": 4,
         "energy_cost": 2,
     },
-    "exp_reward": 115,
+    "exp_reward": 12345,
     "can_attack": True,
 }

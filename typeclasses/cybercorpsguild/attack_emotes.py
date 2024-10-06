@@ -146,6 +146,8 @@ class AttackEmotes:
                 f"{color}$You() fire a plasma bolt at {tn}{color}, causing a fatal wound.",
                 f"{color}$You() blast {tn}{color} with your plasma cannon, causing a massive wound.",
                 f"{color}$You() obliterate {tn}{color} with your plasma cannon, causing a catastrophic wound.",
+                f"{color}$You() EVAPORATE {tn}{color} with a plasma bolt.",
+                f"{color}$You() OBLITERATE {tn}{color} with your plasma cannon.",
             ]
         if emote == "gauss_cannon":
             return [
@@ -194,6 +196,9 @@ class AttackEmotes:
                 f"{color}$You() fire a laser bolt at {tn}{color}, causing a fatal wound.",
                 f"{color}$You() blast {tn}{color} with your laser sniper rifle, causing a massive wound.",
                 f"{color}$You() obliterate {tn}{color} with your laser sniper rifle, causing a catastrophic wound.",
+                f"{color}$You() EVAPORATE {tn}{color} with a laser bolt.",
+                f"{color}$You() OBLITERATE {tn}{color} with your laser sniper rifle.",
+                f"{color}$You() DESTROY {tn}{color} with a laser blast.",
             ]
         if emote == "rocket_launcher":
             return [
@@ -284,4 +289,19 @@ class AttackEmotes:
                 f"{color}$You() fire a well-aimed shot at {tn}{color}, causing a critical injury.",
                 f"{color}$You() unload a powerful volley at {tn}{color}, causing devastating damage.",
                 f"{color}$You() decimate {tn}{color} with your Vortex AR-9, causing catastrophic damage.",
+            ]
+
+        if emote == "shockwave_hammer":
+            return [
+                f"{color}$You() swing at {tn}{color} with your shockwave hammer, but miss.",
+                f"{color}$You() graze {tn}{color} with your shockwave hammer.",
+                f"{color}$You() nick {tn}{color} with your shockwave hammer, drawing blood.",
+                f"{color}$You() hit {tn}{color} with your shockwave hammer, causing a wound.",
+                f"{color}$You() carve into {tn}{color} with your shockwave hammer, leaving a gash.",
+                f"{color}$You() strike {tn}{color} with your shockwave hammer, causing a deep wound.",
+                f"{color}$You() crush {tn}{color} with your shockwave hammer, causing a critical wound.",
+                f"{color}$You() smash {tn}{color} with your shockwave hammer, causing a mortal wound.",
+                f"{color}$You() pulverize {tn}{color} with your shockwave hammer, causing a fatal wound.",
+                f"{color}$You() shatter {tn}{color} with your shockwave hammer, causing a massive wound.",
+                f"{color}$You() obliterate {tn}{color} with your shockwave hammer, causing a catastrophic wound.",
             ]

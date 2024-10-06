@@ -63,6 +63,11 @@ WATER_TITLES = [
     "the Depths Divinity",
     "the Oceanic God",
     "the Abyssal Sovereign",
+    "the Lord of the Depths",
+    "the Primordial Ocean God",
+    "the God of the Abyssal Depths",
+    "the Lord of the Oceanic Depths",
+    "the Abyssal Deity of the Seas",
 ]
 
 EARTH_TITLES = [
@@ -143,6 +148,11 @@ FIRE_TITLES = [
     "Eternal Flame Incarnate",
     "Avatar of the Blazing Sun",
     "Primordial Fire God",
+    "Lord of the Eternal Inferno",
+    "Master of the Eternal Flame",
+    "God of the Eternal Fire",
+    "Supreme Deity of the Eternal Flame",
+    "Eternal Flame Incarnate",
 ]
 
 AIR_TITLES = [
@@ -180,4 +190,8 @@ AIR_TITLES = [
     "Eternal Wind Incarnate",
     "Avatar of the Airy Realms",
     "Primordial Sky God",
+    "Lord of the Eternal Winds",
+    "Master of the Celestial Air",
+    "God of the Eternal Sky",
+    "Supreme Deity of the Eternal Wind",
 ]

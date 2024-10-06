@@ -6,6 +6,7 @@ from random import randint, uniform, choice
 
 
 NOVICE_GOBLIN = {
+    "spawn_proto": "NOVICE_GOBLIN",
     "typeclass": "typeclasses.characters.NPC",
     "key": "a novice goblin",
     "aliases": ["goblin"],
@@ -14,7 +15,7 @@ NOVICE_GOBLIN = {
     "react_as": "aggressive",
     "armor": 3,
     "name_color": "g",
-    "level": 5,
+    "level": 8,
     "hp": 80,
     "hpmax": 80,
     "str": 8,
@@ -25,7 +26,7 @@ NOVICE_GOBLIN = {
         "speed": 3,
         "energy_cost": 8,
     },
-    "exp_reward": 10,
+    "exp_reward": 2800,
     "drops": [
         {
             "key": "crude dagger",
@@ -41,6 +42,7 @@ NOVICE_GOBLIN = {
 }
 
 ROGUE_APPRENTICE = {
+    "spawn_proto": "ROGUE_APPRENTICE",
     "typeclass": "typeclasses.characters.NPC",
     "key": "a rogue apprentice",
     "aliases": ["rogue"],
@@ -49,7 +51,7 @@ ROGUE_APPRENTICE = {
     "react_as": "aggressive",
     "armor": 5,
     "name_color": "b",
-    "level": 6,
+    "level": 8,
     "hp": 96,
     "hpmax": 96,
     "str": 12,
@@ -60,7 +62,7 @@ ROGUE_APPRENTICE = {
         "speed": 4,
         "energy_cost": 12,
     },
-    "exp_reward": 20,
+    "exp_reward": 3000,
     "drops": [
         {
             "key": "short sword",
@@ -75,40 +77,8 @@ ROGUE_APPRENTICE = {
     "can_attack": True,
 }
 
-FIRE_BEETLE = {
-    "typeclass": "typeclasses.characters.NPC",
-    "key": "a fire beetle",
-    "aliases": ["beetle"],
-    "desc": "A large beetle with a glowing, fiery shell. It emits a dull orange light.",
-    "gender": "neutral",
-    "react_as": "aggressive",
-    "armor": 7,
-    "name_color": "r",
-    "hp": 120,
-    "hpmax": 120,
-    "str": 15,
-    "natural_weapon": {
-        "name": "fiery mandibles",
-        "damage_type": "fire",
-        "damage": 12,
-        "speed": 3,
-        "energy_cost": 15,
-    },
-    "exp_reward": 25,
-    "drops": [
-        {
-            "key": "fire beetle shell",
-            "aliases": ["shell"],
-            "desc": "The glowing shell of a fire beetle.",
-            "name_color": "r",
-            "power": 15,
-            "value": 15,
-        }
-    ],
-    "can_attack": True,
-}
-
 SKELETAL_WARRIOR = {
+    "spawn_proto": "SKELETAL_WARRIOR",
     "typeclass": "typeclasses.characters.NPC",
     "key": "a skeletal warrior",
     "aliases": ["skeleton"],
@@ -128,7 +98,7 @@ SKELETAL_WARRIOR = {
         "speed": 3,
         "energy_cost": 18,
     },
-    "exp_reward": 30,
+    "exp_reward": 4200,
     "drops": [
         {
             "key": "rusted sword",
@@ -145,6 +115,7 @@ SKELETAL_WARRIOR = {
 }
 
 NOVICE_MAGE = {
+    "spawn_proto": "NOVICE_MAGE",
     "typeclass": "typeclasses.characters.NPC",
     "key": "a novice mage",
     "aliases": ["mage"],
@@ -153,7 +124,7 @@ NOVICE_MAGE = {
     "react_as": "aggressive",
     "armor": 4,
     "name_color": "m",
-    "level": 6,
+    "level": 10,
     "hp": 90,
     "hpmax": 90,
     "str": 10,
@@ -164,7 +135,7 @@ NOVICE_MAGE = {
         "speed": 5,
         "energy_cost": 10,
     },
-    "exp_reward": 15,
+    "exp_reward": 3200,
     "drops": [
         {
             "key": "wooden staff",
@@ -180,75 +151,9 @@ NOVICE_MAGE = {
     "can_attack": True,
 }
 
-ENEMY_7 = {
-    "typeclass": "typeclasses.characters.NPC",
-    "key": "a large rat",
-    "aliases": ["rat"],
-    "desc": "A large, aggressive rat with sharp teeth and a scruffy coat.",
-    "gender": "neutral",
-    "react_as": "aggressive",
-    "armor": 2,
-    "name_color": "g",
-    "hp": 60,
-    "hpmax": 60,
-    "str": 7,
-    "natural_weapon": {
-        "name": "bite",
-        "damage_type": "edged",
-        "damage": 5,
-        "speed": 4,
-        "energy_cost": 7,
-    },
-    "exp_reward": 8,
-    "drops": [
-        {
-            "key": "rat pelt",
-            "aliases": ["pelt"],
-            "desc": "The scruffy pelt of a large rat.",
-            "name_color": "g",
-            "power": 3,
-        }
-    ],
-    "can_attack": True,
-}
-
-
-NOVICE_ARCHER = {
-    "typeclass": "typeclasses.characters.NPC",
-    "key": "a novice archer",
-    "aliases": ["archer"],
-    "desc": "A novice archer practicing their aim with a basic bow.",
-    "gender": "male",
-    "react_as": "aggressive",
-    "armor": 3,
-    "name_color": "y",
-    "hp": 70,
-    "hpmax": 70,
-    "str": 9,
-    "natural_weapon": {
-        "name": "bow",
-        "damage_type": "edged",
-        "damage": 7,
-        "speed": 5,
-        "energy_cost": 9,
-    },
-    "exp_reward": 12,
-    "drops": [
-        {
-            "key": "basic bow",
-            "aliases": ["bow"],
-            "desc": "A basic bow used by novice archers.",
-            "name_color": "w",
-            "power": 7,
-            "dmg": 15,
-            "speed": 5,
-            "value": 20,
-        }
-    ],
-    "can_attack": True,
-}
 
 MALFUNCTIONING_ROBOT = {
+    "spawn_proto": "MALFUNCTIONING_ROBOT",
     "typeclass": "typeclasses.characters.NPC",
     "key": "a malfunctioning robot",
     "aliases": ["robot"],
@@ -257,7 +162,7 @@ MALFUNCTIONING_ROBOT = {
     "react_as": "aggressive",
     "armor": 6,
     "name_color": "y",
-    "level": 6,
+    "level": 10,
     "hp": 100,
     "hpmax": 100,
     "str": 12,
@@ -268,7 +173,7 @@ MALFUNCTIONING_ROBOT = {
         "speed": 3,
         "energy_cost": 12,
     },
-    "exp_reward": 20,
+    "exp_reward": 5000,
     "drops": [
         {
             "key": "robotic component",
@@ -283,6 +188,7 @@ MALFUNCTIONING_ROBOT = {
 }
 
 CYBER_SOLDIER = {
+    "spawn_proto": "CYBER_SOLDIER",
     "typeclass": "typeclasses.characters.NPC",
     "key": "a cybernetic soldier",
     "aliases": ["soldier"],
@@ -291,7 +197,7 @@ CYBER_SOLDIER = {
     "react_as": "aggressive",
     "armor": 10,
     "name_color": "b",
-    "level": 10,
+    "level": 11,
     "hp": 150,
     "hpmax": 150,
     "str": 18,
@@ -302,7 +208,7 @@ CYBER_SOLDIER = {
         "speed": 4,
         "energy_cost": 18,
     },
-    "exp_reward": 35,
+    "exp_reward": 5500,
     "drops": [
         {
             "key": "plasma rifle",
@@ -319,6 +225,7 @@ CYBER_SOLDIER = {
 }
 
 ALIEN_SCOUT = {
+    "spawn_proto": "ALIEN_SCOUT",
     "typeclass": "typeclasses.characters.NPC",
     "key": "an alien scout",
     "aliases": ["alien"],
@@ -327,7 +234,7 @@ ALIEN_SCOUT = {
     "react_as": "aggressive",
     "armor": 8,
     "name_color": "g",
-    "level": 8,
+    "level": 10,
     "hp": 130,
     "hpmax": 130,
     "str": 16,
@@ -338,7 +245,7 @@ ALIEN_SCOUT = {
         "speed": 5,
         "energy_cost": 16,
     },
-    "exp_reward": 30,
+    "exp_reward": 4800,
     "drops": [
         {
             "key": "alien energy core",

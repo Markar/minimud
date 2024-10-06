@@ -4,21 +4,14 @@ from evennia import CmdSet
 from commands.command import Command
 from evennia.utils.evtable import EvTable
 from evennia.utils import delay
+from evennia.contrib.rpg.buffs import BaseBuff
+from typeclasses.utils import PowerCommand
 
 from typeclasses.cybercorpsguild.cyber_constants_and_helpers import (
     SKILLS_COST,
     TITLES,
 )
 from typeclasses.utils import get_glvl_cost, SKILL_RANKS
-
-
-class PowerCommand(Command):
-    def func(self):
-        caller = self.caller
-        if not caller.cooldowns.ready("global_cooldown"):
-            caller.msg(f"|CNot so fast!")
-            return False
-        caller.cooldowns.add("global_cooldown", 2)
 
 
 # region Pulse Grenade
@@ -124,84 +117,117 @@ class CmdFirstAid(PowerCommand):
         return
 
 
-# region Synthetic Conversion
-class CmdSyntheticConversion(Command):
+def _calculate_resupply_restoration(self):
     """
-    A soldier of the Cybercorps can use synthetic conversion to turn the body into synthetic materials that can be repurposed for industrial use.
+    Calculate the amount of focus and energy restored during resupplying.
+    """
+    caller = self
+    intel = caller.traits.int.value
+    dex = caller.traits.dex.value
+    skill_rank = caller.db.skills.get("energy solutions", 1)
+    stat_bonus = int((intel + dex) * 0.5)
+    epmax = caller.db.epmax
+
+    fp_restored = 5 + randint(1, skill_rank)
+    ep_restored = 5 + int(uniform(3, stat_bonus)) + (skill_rank * 3) + (epmax * 0.05)
+    caller.msg(f"|GYou load up some ammunition, grenades, and energy cells.")
+
+    caller.adjust_fp(fp_restored)
+    caller.adjust_ep(ep_restored)
+    caller.msg(caller.get_display_status(caller))
+
+
+# region Resupply
+class CmdResupply(PowerCommand):
+    """
+    Resupply your ammunition, grenades, energy cells, and other consumables.
     """
 
-    key = "synthetic conversion"
-    aliases = ["convert", "synth", "syn"]
+    key = "resupply"
+    aliases = ["resup", "sup"]
     help_category = "cybercorps"
+    guild_level = 1
+    cost = 10
+
+    def _end_resupply(self, caller):
+        caller.tags.remove("resupplying", category="status")
+
+        caller.location.msg_contents(
+            f"|C$You() stand up, locked and loaded.",
+            from_obj=caller,
+        )
+        _calculate_resupply_restoration(self)
 
     def func(self):
-        if not self.args:
-            caller = self.caller
-            if corpse := caller.location.search("corpse-1"):
-                base_power = corpse.db.power
-                skill_rank = caller.db.skills.get("energy solutions", 0)
-
-                # Calculate the power with the skill rank multiplier
-                power = base_power * (1 + (skill_rank * 0.1))
-
-                caller.adjust_ep(power)
-                corpse.delete()
-                self.msg(
-                    f"|CYour command initiates the synthetic conversion process. The body is swiftly broken down and repurposed into valuable materials, leaving no trace behind."
-                )
-
-            else:
-                caller.msg("Convert what synthetically?")
-
-
-# region Nano Reinforced Skeleton
-class CmdNanoReinforcedSkeleton(PowerCommand):
-    """
-    The Nano-Reinforced Endoskeleton is a cutting-edge cybernetic implant that enhances the user’s physical resilience and durability. By integrating advanced nanomaterials into the skeletal structure, this implant significantly boosts constitution, allowing the user to withstand greater physical stress and recover more quickly from injuries.
-    """
-
-    key = "nano reinforced skeleton"
-    aliases = ["nrs", "nano"]
-    help_category = "cybercorps"
-    cost = 75
-
-    # make this command only work in the cybercorps guild
-    def func(self):
+        super().func()
         caller = self.caller
+        args = self.args.strip()
         glvl = caller.db.guild_level
-        cybernetic_enhancements = caller.db.skills.get("cybernetic enhancements", 1)
 
-        if glvl < 20:
-            caller.msg(
-                f"|CYou need to be guild level 20 to use nano reinforced skeleton."
+        if caller.db.ep == caller.db.epmax:
+            caller.msg(f"|gYou are already at fully supplied.")
+            return
+
+        if caller.db.combat_target:
+            caller.msg(f"|rYou can't resupply while in combat.")
+            return
+
+        if glvl < self.guild_level:
+            self.msg(
+                f"|rYou must be at least guild level {self.guild_level} to use this power."
             )
             return
-        if caller.db.ep < self.cost:
-            caller.msg(f"|rYou need at least {self.cost} energy to use this power.")
-            return
-        if caller.db.nano_reinforced_skeleton:
-            caller.msg(f"|CYou already have a nano reinforced skeleton.")
-            return
-        if not caller.cooldowns.ready("nano_reinforced_skeleton"):
-            caller.msg(f"|CYour skeleton can't handle that right now.")
+
+        if not caller.cooldowns.ready("resupply"):
+            caller.msg(f"|CYou can't resupply yet.")
             return False
 
-        if not caller.db.nano_reinforced_skeleton:
-            caller.db.nano_reinforced_skeleton = True
-            caller.traits.con.mod += cybernetic_enhancements * 3
-            caller.db.nrs_amount = cybernetic_enhancements * 3
-            caller.db.ep -= self.cost
-            caller.cooldowns.add("global_cooldown", 2)
-            caller.cooldowns.add("nano_reinforced_skeleton", 600)
-            activate_msg = f"|CYou install your nano reinforced skeleton."
-            caller.location.msg_contents(activate_msg, from_obj=caller)
-        else:
-            caller.db.nano_reinforced_skeleton = False
-            caller.traits.con.mod -= caller.db.nrs_amount
-            deactivate_msg = f"|CYou uninstall your nano reinforced skeleton."
-            caller.location.msg_contents(deactivate_msg, from_obj=caller)
+        if caller.db.fp < self.cost:
+            caller.msg(f"|rYou need at least {self.cost} focus to use this power.")
+            return
 
-        caller.db.hpmax = 50 + caller.traits.con.value * caller.db.con_increase_amount
+        caller.tags.add("resupplying", category="status")
+        caller.cooldowns.add("global_cooldown", 6)
+        caller.cooldowns.add("resupply", 6)
+
+        caller.location.msg_contents(
+            f"|C$You() sits down and start resupplying their ammunition, grenades, and energy cells.",
+            from_obj=caller,
+        )
+        if args == "full":
+            caller.buffs.add(ResupplyBuff)
+        else:
+            delay(5, self._end_resupply, caller)
+
+
+class ResupplyBuff(BaseBuff):
+    """
+    A buff that restores supplies to the user.
+    """
+
+    duration = 60
+    tickrate = 5
+    type = "resupply"
+    key = "resupply"
+
+    def at_tick(self, initial, **kwargs):
+        _calculate_resupply_restoration(self.owner)
+
+        if (
+            self.owner.db.ep == self.owner.db.epmax
+            and self.owner.db.fp == self.owner.db.fpmax
+        ):
+            self.duration = 0
+            self.owner.msg(f"|gYou stand up, locked and loaded.")
+            self.owner.tags.remove("resupplying", category="status")
+            return
+
+        if self.ticknum == 12:
+            self.owner.msg(f"|gYou stand up, locked and loaded.")
+            self.owner.tags.remove("resupplying", category="status")
+            return
+
+
 
 
 # region Powers
@@ -221,7 +247,6 @@ class CmdPowers(Command):
         caller = self.caller
 
         table = EvTable(f"|cPower", f"|cRank", f"|cCost", border="table")
-        table.add_row(f"|GSynthetic Conversion", 1, 0)
         table.add_row(f"|GLoadout", 1, 0)
         table.add_row(f"|GLoadout Remove", 1, 0)
         table.add_row(f"|GFirst Aid", 5, "5 Energy")
@@ -638,11 +663,10 @@ class CybercorpsCmdSet(CmdSet):
         self.add(CmdKickstart)
         self.add(CmdTestRestock)
 
-        self.add(CmdSyntheticConversion)
         self.add(CmdReaction)
         self.add(CmdPulseGrenade)
-        self.add(CmdNanoReinforcedSkeleton)
         self.add(CmdFirstAid)
+        self.add(CmdResupply)
 
         self.add(CmdUpdateChessboard)
         self.add(CmdHp)

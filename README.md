@@ -107,3 +107,9 @@ msg = self.caller.get_npc_attack_emote(self.caller, 4, "fart")
 
 ### SET ROOM KEY
  py setattr(here, "key", "Nexus Road - CyberBank HQ")
+
+
+for room in MobRoom.objects.all_family():
+    room.respawn_mobs()
+    
+ batch_update_objects_with_prototype 

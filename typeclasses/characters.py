@@ -18,7 +18,14 @@ from .objects import ObjectParent
 from typeclasses.general_attack_emotes import AttackEmotes
 from typeclasses.utils import SetNPCStats
 
-_IMMOBILE = ("sitting", "lying down", "unconscious", "meditating", "binding wounds")
+_IMMOBILE = (
+    "sitting",
+    "lying down",
+    "unconscious",
+    "meditating",
+    "binding wounds",
+    "resupplying",
+)
 _MAX_CAPACITY = 10
 
 # LOOK INTO RESTORING THESE STATUSES
@@ -1050,3 +1057,68 @@ class NPC(Character):
         print(f"NPC heals itself {self}")
         self.db.hp = self.db.hpmax
         self.db.ep = self.db.epmax
+
+
+class LinkedNPC(NPC):
+
+    def at_linked_respawn(self):
+        self.use_heal()
+        self.randomize_stats()
+        self.move_to(self.home, False, None, True, True, True, "teleport")
+
+    def at_damage(self, attacker, damage, damage_type=None, emote="general_weapon"):
+        """
+        Apply damage, after taking into account damage resistances.
+        """
+        # apply armor damage reduction
+        damage -= self.defense(damage_type)
+        if damage < 0:
+            damage = 0
+        self.db.hp -= max(damage, 0)
+        self.msg(
+            f"You take {damage} damage from {attacker.get_display_name(self)} NPC."
+        )
+        # this sends the hit_msg FROM the player TO the room with the damage AFTER reduction by npc
+        # this comes from the guild class, where the emotes live
+
+        # this gets the color name of the attacker, so default Cyan
+        # f"{self.get_display_name(attacker)}"
+        attacker.get_player_attack_hit_message(
+            attacker, damage, f"{self.name.title()}", emote
+        )
+
+        if self.db.hp <= 0:
+            self.tags.add("defeated", category="status")
+            attacker.add_best_kill(self)
+            # we've been defeated!
+            if self.location:
+                if combat_script := self.location.scripts.get("combat"):
+                    combat_script = combat_script[0]
+                    if not combat_script.remove_combatant(self):
+                        # something went wrong...
+                        return
+
+                # create loot drops
+                corpse = {
+                    "key": f"|Ya decaying corpse of {self}",
+                    "typeclass": "typeclasses.corpse.Corpse",
+                    "desc": f"|YThe decaying corpse of {self} lies here. It looks heavy, and full of nutrients.|n",
+                    "location": self.location,
+                    "power": self.db.level * 8,
+                    "tags": ["edible"],
+                }
+
+                corpses = spawner.spawn(corpse)
+
+                if self.db.drops:
+                    objs = spawn(*list(self.db.drops))
+                    for obj in objs:
+                        obj.move_to(self.location)
+                self.move_to(None, True, None, True, True, True, "teleport")
+                delay(360, self.at_respawn, persistent=True)
+                return
+        # change target to the attacker
+        if not self.db.combat_target:
+            self.enter_combat(attacker)
+        else:
+            self.db.combat_target = attacker

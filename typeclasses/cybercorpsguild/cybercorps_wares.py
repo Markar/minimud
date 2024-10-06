@@ -10,15 +10,20 @@ slowdown = 5
 
 
 def checkAdrenalineBoost(self, wielder):
-    duration = wielder.db.adrenaline_boost["duration"]
+    duration = wielder.db.adrenaline_boost.get("duration", 0)
 
-    if duration == True:
+    if duration > 0:
         wielder.adjust_ep(-20)
         wielder.db.adrenaline_boost["duration"] -= 1
         if duration == 1:
-            self.db.adrenaline_boost = {"active": False, "duration": 0}
-            self.msg(f"|CYour adrenaline boost fades, leaving you feeling drained.|n")
+            wielder.db.adrenaline_boost = {"active": False, "duration": 0}
+            wielder.msg(
+                f"|CYour adrenaline boost fades, leaving you feeling drained.|n"
+            )
             return False
+        else:
+            wielder.msg(f"|CWith your adrenaline surging, you strike again!|n")
+            return True
 
     return None
 
@@ -102,7 +107,7 @@ class ShockHand(CybercorpsAttack):
         dex = wielder.traits.dex.value
 
         stat_bonus = str * 0.25 + dex * 0.25
-        dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
+        dmg = 10 + glvl * 0.5 + stat_bonus + self.rank * (glvl / 10)
 
         damage = int(uniform(self.rank, dmg))
         return damage
@@ -118,7 +123,6 @@ class ShockHand(CybercorpsAttack):
             return
 
         speed = self.speed
-
         boost = checkAdrenalineBoost(self, wielder)
 
         if boost:
@@ -323,11 +327,13 @@ class GravitonHammer(CybercorpsAttack):
     def _calculate_melee_damage(self, wielder):
         glvl = wielder.db.guild_level
         str = wielder.traits.str.value
+        dex = wielder.traits.dex.value
 
         stat_bonus = str * 0.6
         dmg = 10 + glvl + stat_bonus + self.rank * (glvl / 10)
+        min = 30 + dex
 
-        damage = int(uniform(self.rank, dmg))
+        damage = int(uniform(min, dmg))
         return damage
 
     def at_attack(self, wielder, target, **kwargs):
@@ -352,7 +358,8 @@ class GravitonHammer(CybercorpsAttack):
         wielder.db.ep -= self.energy_cost
 
         if randint(1, 100) < 30:
-            target.at_damage(wielder, dmg * 0.75, "energy", "graviton_hammer_hit")
+            dmg = self._calculate_melee_damage(wielder)
+            target.at_damage(wielder, dmg * 1.25, "energy", "graviton_hammer_hit")
 
         dmg = self._calculate_melee_damage(wielder)
         target.at_damage(wielder, dmg, "blunt", "graviton_hammer")
@@ -771,6 +778,7 @@ class PlasmaCannon(CybercorpsAttack):
     def _calculate_ranged_damage(self, wielder):
         glvl = wielder.db.guild_level
         dex = wielder.traits.dex.value
+        str = wielder.traits.str.value
 
         miss_rate = 25 - (glvl * 0.5) - (dex * 0.25)
         if randint(1, 100) < miss_rate:

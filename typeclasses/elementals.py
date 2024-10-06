@@ -6,6 +6,7 @@ from typeclasses.characters import PlayerCharacter
 from typeclasses.elementalguild.earth_elemental_attack import EarthAttack
 from typeclasses.elementalguild.attack_emotes import AttackEmotes
 from typeclasses.utils import get_article, get_display_name
+from evennia.contrib.rpg.buffs import BaseBuff
 
 
 class Elemental(PlayerCharacter):
@@ -83,7 +84,7 @@ class Elemental(PlayerCharacter):
         """
         Regenerate burnout points.
         """
-        if self.db.guild_level < 10:
+        if self.db.guild_level < 7:
             return
         self.msg(
             f"|cThe flames around you flicker and reignite with renewed vigor, infusing you with a surge of energy!|n"

@@ -112,7 +112,7 @@ class CmdDropAll(CmdGet):
                     caller.msg(f"Dropped {obj}.")
                     obj.at_drop(caller)
 
-            super().func()
+        super().func()
 
 
 class CmdGetAll(CmdGet):
@@ -146,10 +146,9 @@ class CmdGetAll(CmdGet):
                         continue
                 else:
                     caller.msg(f"Getting {obj}")
-                    # caller.db.weight += obj.db.weight
                     obj.move_to(self.caller, quiet=True)
 
-            super().func()
+        super().func()
 
 
 class InteractCmdSet(CmdSet):
