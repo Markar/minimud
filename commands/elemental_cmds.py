@@ -189,7 +189,7 @@ class CmdMeditate(PowerCommand):
 
     key = "meditate"
     aliases = ["med"]
-    help_category = "earth elemental"
+    help_category = "elemental"
     guild_level = 1
     cost = 10
 
