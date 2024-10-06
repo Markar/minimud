@@ -65,7 +65,6 @@ class CmdAdv50(Command):
     """
 
     key = "adv50"
-    help_category = "General"
 
     def func(self):
         self.caller.db.exp = 500000000000000
@@ -94,7 +93,6 @@ class CmdAdvCyberSkills(Command):
     """
 
     key = "advcyberskills"
-    help_category = "General"
 
     def func(self):
         self.caller.db.skills = {
@@ -107,6 +105,27 @@ class CmdAdvCyberSkills(Command):
             "energy solutions": 10,
         }
         self.caller.msg("Cyber skills set to 50.")
+
+
+class CmdAdvFireSkills(Command):
+    """
+    adv fire elemental skills
+    """
+
+    key = "advfireskills"
+
+    def func(self):
+        self.db.skills = {
+            "flame mastery": 10,
+            "inferno resilience": 10,
+            "blazing speed": 10,
+            "pyroclastic surge": 10,
+            "molten armor": 10,
+            "ember infusion": 10,
+            "firestorm control": 10,
+            "elemental synergy": 10,
+        }
+        self.caller.msg("Fire skills set to 50.")
 
 
 class CmdAdvGuild(Command):
@@ -164,6 +183,43 @@ class CmdAdvGuild(Command):
         self.caller.msg("Guild level set to 50.")
 
 
+# from typeclasses.utils import SpawnMob2
+
+
+# class TestSpawn(Command):
+#     """
+#     Display the available guilds
+#     """
+
+#     key = "ts"
+#     help_category = "General"
+
+#     def func(self):
+#         caller = self.caller
+#         SpawnMob2(caller, "BLARGE_RAT")
+#         caller.msg(f"|gSpawned a rat.")
+
+
+from typeclasses.rooms import MobRoom
+
+
+class RespawnMobs(Command):
+    """
+    Respawn all mobs in the room
+    """
+
+    key = "respawnmobs"
+    help_category = "General"
+
+    def func(self):
+        caller = self.caller
+
+        for room in MobRoom.objects.all_family():
+            room.respawn_mobs()
+
+        caller.msg(f"|gRespawned mobs.")
+
+
 class GeneralCmdSet(CmdSet):
     key = "General"
 
@@ -173,3 +229,5 @@ class GeneralCmdSet(CmdSet):
         self.add(CmdAdv50)
         self.add(CmdAdvGuild)
         self.add(CmdAdvCyberSkills)
+        # self.add(TestSpawn)
+        self.add(RespawnMobs)

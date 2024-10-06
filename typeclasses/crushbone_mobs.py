@@ -9,7 +9,7 @@ ORC_PAWN = {
     "react_as": "aggressive",
     "armor": 5,
     "name_color": "g",
-    "level": 5,
+    "level": 8,
     "hp": 100,
     "hpmax": 100,
     "str": 10,
@@ -19,8 +19,9 @@ ORC_PAWN = {
         "damage": 8,
         "speed": 5,
         "energy_cost": 0,
+        "hits": 2,
     },
-    "exp_reward": 2000,
+    "exp_reward": 8000,
     "can_attack": True,
 }
 ORC_CENTURION = {
@@ -32,7 +33,7 @@ ORC_CENTURION = {
     "react_as": "aggressive",
     "armor": 10,
     "name_color": "r",
-    "level": 10,
+    "level": 12,
     "hp": 200,
     "hpmax": 200,
     "str": 20,
@@ -42,8 +43,9 @@ ORC_CENTURION = {
         "damage": 15,
         "speed": 5,
         "energy_cost": 0,
+        "hits": 2,
     },
-    "exp_reward": 2500,
+    "exp_reward": 11750,
     "can_attack": True,
 }
 ORC_LEGIONNAIRE = {
@@ -55,9 +57,7 @@ ORC_LEGIONNAIRE = {
     "react_as": "aggressive",
     "armor": 15,
     "name_color": "r",
-    "level": 15,
-    "hp": 300,
-    "hpmax": 300,
+    "level": 22,
     "str": 30,
     "natural_weapon": {
         "name": "heavy mace",
@@ -65,8 +65,9 @@ ORC_LEGIONNAIRE = {
         "damage": 20,
         "speed": 5,
         "energy_cost": 0,
+        "hits": 3,
     },
-    "exp_reward": 3000,
+    "exp_reward": 22250,
     "can_attack": True,
 }
 ORC_SLAVER = {
@@ -78,7 +79,7 @@ ORC_SLAVER = {
     "react_as": "aggressive",
     "armor": 5,
     "name_color": "r",
-    "level": 20,
+    "level": 16,
     "hp": 400,
     "hpmax": 400,
     "str": 40,
@@ -88,8 +89,9 @@ ORC_SLAVER = {
         "damage": 25,
         "speed": 5,
         "energy_cost": 0,
+        "hits": 2,
     },
-    "exp_reward": 3500,
+    "exp_reward": 16300,
     "can_attack": True,
 }
 ORC_ORACLE = {
@@ -112,7 +114,7 @@ ORC_ORACLE = {
         "speed": 5,
         "energy_cost": 0,
     },
-    "exp_reward": 4000,
+    "exp_reward": 19000,
     "can_attack": True,
 }
 ORC_EMISSARY = {
@@ -134,8 +136,9 @@ ORC_EMISSARY = {
         "damage": 35,
         "speed": 5,
         "energy_cost": 0,
+        "hits": 2,
     },
-    "exp_reward": 4500,
+    "exp_reward": 28150,
     "can_attack": True,
 }
 ORC_ROYAL_GUARD = {
@@ -157,8 +160,9 @@ ORC_ROYAL_GUARD = {
         "damage": 40,
         "speed": 5,
         "energy_cost": 0,
+        "hits": 2,
     },
-    "exp_reward": 5000,
+    "exp_reward": 30820,
     "can_attack": True,
 }
 ORC_TASKMASTER = {
@@ -170,7 +174,7 @@ ORC_TASKMASTER = {
     "react_as": "aggressive",
     "armor": 20,
     "name_color": "r",
-    "level": 40,
+    "level": 16,
     "hp": 800,
     "hpmax": 800,
     "str": 80,
@@ -180,9 +184,10 @@ ORC_TASKMASTER = {
         "damage": 45,
         "speed": 5,
         "energy_cost": 0,
+        "hits": 2,
     },
     "drops": lambda: uniform(0, 1) < 0.1 and ["LEATHER_WHIP"],
-    "exp_reward": 5500,
+    "exp_reward": 16200,
     "can_attack": True,
 }
 ORC_TRAINER = {
@@ -194,7 +199,7 @@ ORC_TRAINER = {
     "react_as": "aggressive",
     "armor": 10,
     "name_color": "r",
-    "level": 13,
+    "level": 21,
     "hp": 11562,
     "hpmax": 11562,
     "str": 10,
@@ -204,8 +209,9 @@ ORC_TRAINER = {
         "damage": 30,
         "speed": 5,
         "energy_cost": 0,
+        "hits": 2,
     },
-    "exp_reward": 11562,
+    "exp_reward": 21562,
     "drops": lambda: uniform(0, 1) < 0.1 and ["SHINY_BRASS_SHIELD"],
     "can_attack": True,
 }
@@ -219,7 +225,7 @@ ORC_WARLORD = {
     "react_as": "aggressive",
     "armor": 35,
     "name_color": "r",
-    "level": 45,
+    "level": 25,
     "hp": 900,
     "hpmax": 900,
     "str": 90,
@@ -229,8 +235,9 @@ ORC_WARLORD = {
         "damage": 50,
         "speed": 5,
         "energy_cost": 0,
+        "hits": 2,
     },
-    "exp_reward": 6000,
+    "exp_reward": 28300,
     "can_attack": True,
 }
 ORC_LORD = {
@@ -242,7 +249,7 @@ ORC_LORD = {
     "react_as": "aggressive",
     "armor": 30,
     "name_color": "r",
-    "level": 50,
+    "level": 28,
     "hp": 1000,
     "hpmax": 1000,
     "str": 100,
@@ -252,8 +259,9 @@ ORC_LORD = {
         "damage": 55,
         "speed": 5,
         "energy_cost": 0,
+        "hits": 2,
     },
-    "exp_reward": 10000,
+    "exp_reward": 28300,
     "can_attack": True,
 }
 ORC_EMPEROR = {
@@ -265,7 +273,7 @@ ORC_EMPEROR = {
     "react_as": "aggressive",
     "armor": 18,
     "name_color": "r",
-    "level": 18,
+    "level": 35,
     "hp": 1500,
     "hpmax": 1500,
     "str": 120,
@@ -275,8 +283,9 @@ ORC_EMPEROR = {
         "damage": 70,
         "speed": 5,
         "energy_cost": 0,
+        "hits": 3,
     },
-    "exp_reward": 15000,
+    "exp_reward": 35000,
     "drops": lambda: uniform(0, 1) < 0.1 and ["DWARVEN_RINGMAIL_TUNIC"],
     "can_attack": True,
 }
@@ -290,7 +299,7 @@ LORD_DARISH = {
     "react_as": "aggressive",
     "armor": 18,
     "name_color": "r",
-    "level": 18,
+    "level": 25,
     "hp": 1500,
     "hpmax": 1500,
     "str": 120,
@@ -300,8 +309,9 @@ LORD_DARISH = {
         "damage": 70,
         "speed": 5,
         "energy_cost": 0,
+        "hits": 2,
     },
-    "exp_reward": 15000,
+    "exp_reward": 25000,
     "drops": lambda: uniform(0, 1) < 0.1
     and choice(("DWARVEN_TWO_HANDED_AXE", "DWARVEN_AXE")),
     "can_attack": True,

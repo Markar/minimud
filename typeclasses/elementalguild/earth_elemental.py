@@ -51,6 +51,7 @@ class EarthElemental(Elemental):
             "elemental harmony": 1,
             "earthen regeneration": 1,
         }
+
         self.db.stone_skin = False
         self.db.earth_form = False
         self.db.earth_shield = {"hits": 0}

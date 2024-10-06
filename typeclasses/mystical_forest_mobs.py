@@ -1,18 +1,21 @@
 """
 Prototypes
 """
+
 from random import randint, uniform, choice
+
 LARGE_RAT = {
+    "spawn_proto": "LARGE_RAT",
     "typeclass": "typeclasses.characters.NPC",
     "key": "a large rat",
     "aliases": ["rat"],
     "tags": ["mystical_forest_mob"],
     "desc": "A large, scruffy rat with sharp teeth and a scraggly coat. It looks hungry and aggressive.",
     "gender": "neutral",
-    "react_as": "aggressive",
+    "react_as": "friendly",
     "armor": 2,
     "name_color": "g",
-    "level": 3,
+    "level": 1,
     "hp": 60,
     "hpmax": 60,
     "str": 7,
@@ -22,20 +25,14 @@ LARGE_RAT = {
         "damage": 5,
         "speed": 4,
         "energy_cost": 7,
-        "hits": 2
+        "hits": 2,
     },
-    "exp_reward": 8,
-    # "drops": [{
-    #     "key": "rat pelt",
-    #     "aliases": ["pelt"],
-    #     "desc": "The scruffy pelt of a giant rat.",
-    #     "name_color": "g",
-    #     "power": 3
-    # }],
+    "exp_reward": 50,
     "can_attack": True,
 }
 
 FIRE_BEETLE = {
+    "spawn_proto": "FIRE_BEETLE",
     "typeclass": "typeclasses.characters.NPC",
     "key": "a fire beetle",
     "aliases": ["beetle"],
@@ -45,7 +42,7 @@ FIRE_BEETLE = {
     "react_as": "",
     "armor": 7,
     "name_color": "r",
-    "level": 6,
+    "level": 2,
     "hp": 120,
     "hpmax": 120,
     "str": 15,
@@ -55,8 +52,9 @@ FIRE_BEETLE = {
         "damage": 12,
         "speed": 3,
         "energy_cost": 15,
+        "hits": 1,
     },
-    "exp_reward": 25,
+    "exp_reward": 150,
     # "drops": [{
     #     "key": "fire beetle shell",
     #     "aliases": ["shell"],
@@ -68,6 +66,7 @@ FIRE_BEETLE = {
 }
 
 GOBLIN_SCOUT = {
+    "spawn_proto": "GOBLIN_SCOUT",
     "typeclass": "typeclasses.characters.NPC",
     "key": "a goblin scout",
     "aliases": ["goblin"],
@@ -77,9 +76,7 @@ GOBLIN_SCOUT = {
     "react_as": "aggressive",
     "armor": 3,
     "name_color": "g",
-    "level": 5,
-    "hp": 80,
-    "hpmax": 80,
+    "level": 2,
     "str": 8,
     "natural_weapon": {
         "name": "dagger",
@@ -88,28 +85,22 @@ GOBLIN_SCOUT = {
         "speed": 3,
         "energy_cost": 8,
     },
-    "exp_reward": 10,
-    # "drops": [{
-    #     "key": "crude dagger",
-    #     "aliases": ["dagger"],
-    #     "desc": "A small, crude dagger used by goblins.",
-    #     "name_color": "g",
-    #     "power": 5
-    # }],
+    "exp_reward": 130,
     "can_attack": True,
 }
 
 MOSS_SNAKE = {
+    "spawn_proto": "MOSS_SNAKE",
     "typeclass": "typeclasses.characters.NPC",
     "key": "a moss snake",
     "aliases": ["snake"],
     "tags": ["mystical_forest_mob"],
     "desc": "A small, slithering snake with dull scales. It looks ready to strike at any moment.",
     "gender": "neutral",
-    "react_as": "aggressive",
+    "react_as": "friendly",
     "armor": 1,
     "name_color": "y",
-    "level": 4,
+    "level": 1,
     "hp": 50,
     "hpmax": 50,
     "str": 6,
@@ -120,7 +111,7 @@ MOSS_SNAKE = {
         "speed": 5,
         "energy_cost": 6,
     },
-    "exp_reward": 7,
+    "exp_reward": 60,
     # "drops": [{
     #     "key": "snake fang",
     #     "aliases": ["fang"],
@@ -132,6 +123,7 @@ MOSS_SNAKE = {
 }
 
 DECAYING_SKELETON = {
+    "spawn_proto": "DECAYING_SKELETON",
     "typeclass": "typeclasses.characters.NPC",
     "key": "a decaying skeleton",
     "aliases": ["skeleton"],
@@ -141,7 +133,7 @@ DECAYING_SKELETON = {
     "react_as": "aggressive",
     "armor": 5,
     "name_color": "w",
-    "level": 3,
+    "level": 2,
     "hp": 100,
     "hpmax": 100,
     "str": 12,
@@ -152,13 +144,16 @@ DECAYING_SKELETON = {
         "speed": 3,
         "energy_cost": 12,
     },
-    "exp_reward": 60,
-    # "drops": [{
-    #     "key": "rusted sword",
-    #     "aliases": ["sword"],
-    #     "desc": "A rusted sword wielded by a decaying skeleton.",
-    #     "name_color": "w",
-    #     "power": 10
-    # }],
+    "exp_reward": 80,
+    "drops": lambda: uniform(0, 1) < 25
+    and [
+        {
+            "key": "rusted sword",
+            "aliases": ["sword"],
+            "desc": "A rusted sword wielded by a decaying skeleton.",
+            "name_color": "w",
+            "power": 10,
+        }
+    ],
     "can_attack": True,
 }

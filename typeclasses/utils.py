@@ -1,6 +1,7 @@
 from evennia.prototypes import spawner
 from random import randint, uniform
 from commands.command import Command
+from evennia import logger
 
 
 def get_display_name(self, looker, **kwargs):
@@ -96,14 +97,31 @@ def SetNPCStats(self, level, xp, hits):
     }
 
 
-def SpawnMob(self, xp, level, hits, name, tag):
+# def SpawnMob(self, xp, level, hits, name, tag):
+#     mobs = spawner.spawn(name)
+#     self.tags.add("room", category=tag)
+
+#     for mob in mobs:
+#         mob.tags.add("mob", category=tag)
+#         mob.location = self
+#         mob.home = self
+
+#         SetNPCStats(mob, level, xp, hits)
+
+#     return mob
+
+
+def SpawnMob(self, name):
+    logger.log_info(f"Spawning mob {name}")
     mobs = spawner.spawn(name)
-    self.tags.add("room", category=tag)
 
     for mob in mobs:
-        mob.tags.add("mob", category=tag)
         mob.location = self
         mob.home = self
+        level = getattr(mob.db, "level", 1)
+        xp = getattr(mob.db, "exp_reward", 1)
+        wep = getattr(mob.db, "natural_weapon", None)
+        hits = wep.get("hits", 1) if wep else 1
 
         SetNPCStats(mob, level, xp, hits)
 

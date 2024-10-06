@@ -32,6 +32,7 @@ class CmdBurnout(PowerCommand):
     key = "burnout"
     help_category = "earth elemental"
     cost = 10
+    guild_level = 7
 
     def func(self):
         caller = self.caller
@@ -45,8 +46,10 @@ class CmdBurnout(PowerCommand):
         if caller.db.ep < self.cost:
             caller.msg(f"|rYou need at least {self.cost} energy to use this power.")
             return
-        if glvl < 10:
-            caller.msg(f"|CYou need to be guild level 10 to use burnout.")
+        if glvl < self.guild_level:
+            caller.msg(
+                f"|CYou need to be guild level {self.guild_level} to use burnout."
+            )
             return
         if caller.db.burnout["active"]:
             caller.msg(f"|CYour power is already surging.")
@@ -54,7 +57,7 @@ class CmdBurnout(PowerCommand):
         caller.db.ep -= self.cost
         caller.cooldowns.add("burnout", 60)
         caller.cooldowns.add("global_cooldown", 2)
-        skill_rank = caller.db.skills.get("elemental harmony", 1)
+        skill_rank = caller.db.skills.get("elemental Synergy", 1)
 
         self.msg(
             f"|cA radiant aura of elemental energy envelops you, your power surging to new heights!|n"
@@ -471,7 +474,8 @@ class CmdTremor(PowerCommand):
 
         skill_rank = caller.db.skills.get("geological insight", 1) * 10
         damage = self._calculate_damage(skill_rank, caller.traits.str.value, glvl)
-        self.msg(f"|gDamage: {damage}")
+        if self.caller.key == "Markar":
+            self.msg(f"|gDamage: {damage}")
         target.at_damage(caller, damage, "blunt", "tremor")
 
 
@@ -832,7 +836,6 @@ class CmdGhelp(Command):
     Help files for the Elemental Guild.
 
     mineral fortification
-    assimilation
     earthen regeneration
     rock solid defense
 
@@ -907,15 +910,6 @@ class CmdGhelp(Command):
             caller.msg(
                 "|cTerran Restoration|n\n\n"
                 "Improves the elemental's natural healing abilities, allowing for faster recovery from mental exhaustion. This skill also directly impacts the efficacy of earthen renewal.\n\n"
-            )
-            return
-        if skill == "assimilation":
-            caller.msg(
-                "|cAssimilation|n\n\n"
-                "Improves the elemental's ability to regain energy from corpses.\n\n"
-                "Usage:\n"
-                "    assimilate\n"
-                "    asm\n"
             )
             return
 

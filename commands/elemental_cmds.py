@@ -473,7 +473,6 @@ class CmdBig(Command):
             "seismic awareness": 10,
             "elemental harmony": 10,
             "earthen regeneration": 10,
-            "assimilation": 10,
         }
         self.execute_cmd("gadvance")
         self.execute_cmd("gadvance")

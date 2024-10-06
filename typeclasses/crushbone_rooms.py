@@ -62,10 +62,11 @@ class OrcTaskmaster(XYGridRoom):
 class OrcTrainer(XYGridRoom):
     def at_object_creation(self):
         super().at_object_creation()
-        if randint(0, 1) > 0.25:
-            SpawnMob(self, 21562, 21, 1, "ORC_TRAINER", "crushbone")
-            return
-        SpawnMob(self, 17200, 17, 2, "ORC_TASKMASTER", "crushbone")
+        SpawnMob(self, 21562, 21, 1, "ORC_TRAINER", "crushbone")
+        # if randint(0, 1) > 0.25:
+        #     SpawnMob(self, 21562, 21, 1, "ORC_TRAINER", "crushbone")
+        #     return
+        # SpawnMob(self, 17200, 17, 2, "ORC_TASKMASTER", "crushbone")
 
 
 class OrcWarlord(XYGridRoom):

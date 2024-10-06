@@ -184,6 +184,27 @@ class XYZShopNTrain(XYGridTrain, XYGridShop):
     pass
 
 
+from typeclasses.utils import SpawnMob
+
+
+class MobRoom(XYGridRoom):
+
+    def respawn_mobs(self):
+        if spawn_proto := self.db.spawn_proto:
+            if not any(
+                obj.tags.get(category="from_prototype") == spawn_proto.lower()
+                for obj in self.contents
+            ):
+                print(
+                    f"Not in room - Spawning {spawn_proto} in {self}, {self.contents}"
+                )
+                SpawnMob(self, spawn_proto)
+            else:
+                print(
+                    f"Already in room - Skip {spawn_proto} in {self}, {self.contents}"
+                )
+
+
 class NexusBazaar(Room):
     """
     A grid-aware room that has built-in shop-related functionality.

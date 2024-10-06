@@ -2,8 +2,6 @@
 Prototypes
 """
 
-from random import randint, uniform, choice
-
 UndeadPawn = {
     "typeclass": "typeclasses.characters.NPC",
     "key": "an undead pawn",
@@ -15,7 +13,6 @@ UndeadPawn = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
     "energyac": 0,
     "natural_weapon": {
         "name": "claws",
@@ -24,7 +21,8 @@ UndeadPawn = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "level": 5,
+    "exp_reward": 800,
     "can_attack": True,
 }
 
@@ -39,7 +37,6 @@ UndeadRook = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
     "energyac": 0,
     "natural_weapon": {
         "name": "claws",
@@ -48,12 +45,12 @@ UndeadRook = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "level": 5,
+    "exp_reward": 1000,
     "can_attack": True,
 }
 
 UndeadBishop = {
-    "typeclass": "typeclasses.characters.NPC",
     "key": "an undead bishop",
     "aliases": ["undead", "bishop"],
     "tags": ["undead", "chessboard"],
@@ -63,7 +60,6 @@ UndeadBishop = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
     "energyac": 0,
     "natural_weapon": {
         "name": "claws",
@@ -72,7 +68,8 @@ UndeadBishop = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "level": 5,
+    "exp_reward": 1050,
     "can_attack": True,
 }
 
@@ -87,7 +84,6 @@ UndeadKnight = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
     "energyac": 0,
     "natural_weapon": {
         "name": "claws",
@@ -96,7 +92,8 @@ UndeadKnight = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "level": 5,
+    "exp_reward": 1100,
     "can_attack": True,
 }
 
@@ -111,7 +108,6 @@ UndeadQueen = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
     "energyac": 0,
     "natural_weapon": {
         "name": "scepter",
@@ -120,7 +116,8 @@ UndeadQueen = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "level": 6,
+    "exp_reward": 1200,
     "can_attack": True,
 }
 
@@ -135,7 +132,6 @@ UndeadKing = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
     "energyac": 0,
     "natural_weapon": {
         "name": "scepter",
@@ -144,7 +140,8 @@ UndeadKing = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "level": 8,
+    "exp_reward": 1200,
     "can_attack": True,
 }
 
@@ -159,7 +156,6 @@ GnomePawn = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
     "natural_weapon": {
         "name": "dagger",
         "damage_type": "edged",
@@ -167,7 +163,8 @@ GnomePawn = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "level": 5,
+    "exp_reward": 800,
     "can_attack": True,
 }
 
@@ -182,7 +179,6 @@ DwarfRook = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
     "natural_weapon": {
         "name": "axe",
         "damage_type": "edged",
@@ -190,7 +186,8 @@ DwarfRook = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "level": 5,
+    "exp_reward": 1000,
     "can_attack": True,
 }
 
@@ -205,7 +202,6 @@ HighElfKnight = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
     "natural_weapon": {
         "name": "axe",
         "damage_type": "edged",
@@ -213,11 +209,12 @@ HighElfKnight = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "level": 5,
+    "exp_reward": 1100,
     "can_attack": True,
 }
 
-WoofElfQueen = {
+WoodElfQueen = {
     "typeclass": "typeclasses.characters.NPC",
     "key": "a wood elf queen",
     "aliases": ["wood elf", "queen"],
@@ -228,7 +225,6 @@ WoofElfQueen = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
     "natural_weapon": {
         "name": "axe",
         "damage_type": "edged",
@@ -236,7 +232,8 @@ WoofElfQueen = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "level": 5,
+    "exp_reward": 1200,
     "can_attack": True,
 }
 
@@ -251,7 +248,6 @@ HighElfKing = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
     "natural_weapon": {
         "name": "axe",
         "damage_type": "edged",
@@ -259,7 +255,8 @@ HighElfKing = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "level": 5,
+    "exp_reward": 1300,
     "can_attack": True,
 }
 
@@ -275,7 +272,6 @@ WoodElfBishop = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
     "natural_weapon": {
         "name": "longsword",
         "damage_type": "edged",
@@ -283,7 +279,8 @@ WoodElfBishop = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "level": 5,
+    "exp_reward": 1050,
     "can_attack": True,
 }
 
@@ -299,7 +296,6 @@ SCRAWNY_GNOLL = {
     "armor": 5,
     "name_color": "r",
     "str": 15,
-    "level": lambda: randint(3, 5),
     "energyac": 0,
     "natural_weapon": {
         "name": "claws",
@@ -308,7 +304,8 @@ SCRAWNY_GNOLL = {
         "speed": 4,
         "energy_cost": 1,
     },
-    "exp_reward": 100,
+    "level": 5,
+    "exp_reward": 600,
     "can_attack": True,
 }
 
@@ -331,41 +328,11 @@ GNOLL_PUP = {
         "speed": 4,
         "energy_cost": 10,
     },
-    "exp_reward": 5,
+    "level": 5,
+    "exp_reward": 400,
     "can_attack": True,
 }
 
-GNOLL_WARLORD = {
-    "typeclass": "typeclasses.characters.NPC",
-    "key": "a gnoll warlord",
-    "aliases": ["gnoll", "warlord"],
-    "desc": "The gnoll warlord stands over six feet tall, clad in spiked armor and wielding a massive battle axe.",
-    "gender": "male",
-    "react_as": "aggressive",
-    "armor": 10,
-    "name_color": "r",
-    "hp": 300,
-    "hpmax": 300,
-    "str": 20,
-    "natural_weapon": {
-        "name": "battle axe",
-        "damage_type": "edged",
-        "damage": 2,
-        "speed": 2,
-        "energy_cost": 15,
-    },
-    "exp_reward": 50,
-    "drops": [
-        {
-            "key": "gnoll warlord's battle axe",
-            "aliases": ["axe"],
-            "desc": "A massive battle axe once wielded by a gnoll warlord.",
-            "name_color": "r",
-            "power": 30,
-        }
-    ],
-    "can_attack": True,
-}
 
 DECAYING_SKELETON = {
     "typeclass": "typeclasses.characters.NPC",
@@ -386,6 +353,7 @@ DECAYING_SKELETON = {
         "speed": 2,
         "energy_cost": 5,
     },
-    "exp_reward": 5,
+    "level": 5,
+    "exp_reward": 400,
     "can_attack": True,
 }

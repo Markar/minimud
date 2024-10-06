@@ -21,7 +21,7 @@
 #
 @desc |YThe path to the training grounds in Millennium's Chaos Realm is a corridor of futuristic chaos. The ground is a metallic alloy, interspersed with glowing energy conduits that pulse with an eerie blue light. Holographic signs flicker, displaying cryptic messages and directions. The air hums with the sound of distant machinery and the occasional zap of an energy weapon. As you move forward, the walls shift and change, displaying scenes of past battles and training sessions. Robotic sentinels patrol the area, their red eyes scanning for any signs of intruders. The atmosphere crackles with a sense of high-tech tension, urging you onward to the advanced training grounds where warriors prepare for intergalactic conflicts.
 #
-@dig/teleport Training Grounds;training_grounds#1 : typeclasses.rooms.Room = enter,leave
+@dig/teleport Training Grounds;training_grounds#1 : typeclasses.rooms.Room = north;n,south;s
 #
 @desc |YYou step into the Training Grounds, a state-of-the-art facility designed to hone the skills of adventurers. The walls are lined with advanced training equipment, from energy-based weapons to magical artifacts, each station offering a unique challenge. |/|/In the center of the room, a large, open space is dedicated to sparring and combat practice. Here, seasoned trainers-both cybernetic warriors and mystical sages-guide newcomers through rigorous drills. The air is filled with the sounds of clashing weapons, bursts of magical energy, and the encouraging shouts of instructors.
 #
