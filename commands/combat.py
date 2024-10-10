@@ -42,7 +42,6 @@ class CmdAttack(Command):
         else:
             # use our bare hands if we aren't wielding anything
             weapon = BareHand()
-            self.msg(f"You are not wielding a weapon. {weapon}")
 
         # find our enemy!
         target = self.caller.search(self.target)

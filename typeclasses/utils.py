@@ -134,7 +134,8 @@ class PowerCommand(Command):
         if not caller.cooldowns.ready("global_cooldown"):
             caller.msg(f"|CNot so fast!")
             return False
-        caller.cooldowns.add("global_cooldown", 2)
+        else:
+            caller.cooldowns.add("global_cooldown", 2)
 
 
 def get_glvl_cost(glvl):

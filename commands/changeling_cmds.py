@@ -723,7 +723,18 @@ class CmdJoinChangelings(Command):
         caller = self.caller
         if caller.db.guild == "adventurer":
             caller.msg(f"|rYou join the Changeling guild")
-            caller.swap_typeclass("typeclasses.changelings.Changelings")
+            # caller.swap_typeclass("typeclasses.changelings.Changelings")
+            caller.swap_typeclass(
+                "typeclasses.changelings.Changelings",
+                clean_attributes=False,
+                run_start_hooks="all",
+                no_default=True,
+                clean_cmdsets=False,
+            )
+            creator_id = caller.db.creator_id
+            self.caller.locks.add(
+                f"call:false(); control:perm(Developer); delete:id({creator_id}) or perm(Admin);drop:holds(); edit:pid({creator_id}) or perm(Admin); examine:perm(Builder); get:false(); puppet:id(4270) or pid({creator_id}) or perm(Developer) or pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin); tell:perm(Admin); view:all()"
+            )
         else:
             caller.msg(f"|rYou are already in a guild")
 

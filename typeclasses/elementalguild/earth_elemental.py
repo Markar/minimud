@@ -51,13 +51,16 @@ class EarthElemental(Elemental):
             "elemental harmony": 1,
             "earthen regeneration": 1,
         }
+        self.db.active_form = None
 
         self.db.stone_skin = False
-        self.db.earth_form = False
         self.db.earth_shield = {"hits": 0}
         self.db.mountain_stance = False
         self.db.earthen_renewal = {"duration": 0, "rate": 0}
         self.db.burnout = {"active": False, "count": 0, "max": 0, "duration": 0}
+        self.db.elemental_fury = {"active": False, "duration": 0}
+        self.db.primordial_essence = {"count": 0, "max": 0}
+
         tickerhandler.add(
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
         )
@@ -76,16 +79,20 @@ class EarthElemental(Elemental):
         fpmax = int(self.db.fpmax)
         ep = int(self.db.ep)
         epmax = int(self.db.epmax)
-        burnout_count = self.db.burnout["count"]
-        burnout_max = self.db.burnout["max"]
+        # burnout_count = self.db.burnout["count"]
+        # burnout_max = self.db.burnout["max"]
+        primordial_energy = self.db.primordial_essence["count"]
+        PE_Max = self.db.primordial_essence["max"]
 
         chunks.append(
-            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g"
+            f"|320Health: |200{hp}/{hpmax}|320 Focus: |015{fp}/{fpmax}|320 Energy: |205{ep}/{epmax}|g"
         )
-        if self.db.burnout["max"] > 0:
-            chunks.append(f"|YBurnout: |G{burnout_count}/{burnout_max}|n")
+        if self.db.guild_level > 6:
+            chunks.append(f"|510Essence: |510{primordial_energy}/{PE_Max}|n")
         if self.db.burnout["active"]:
             chunks.append(f"|YB")
+        if self.db.elemental_fury["active"]:
+            chunks.append(f"|YEF")
         if self.db.stone_skin:
             chunks.append(f"|YSS")
         if self.db.earth_shield and self.db.earth_shield["hits"] > 0:
@@ -155,6 +162,15 @@ class EarthElemental(Elemental):
                 deactivateMsg = f"|CThe flames around you flicker and die out, leaving you feeling drained."
                 self.location.msg_contents(deactivateMsg, from_obj=self)
             self.db.burnout["duration"] -= 1
+
+        if self.db.elemental_fury["active"]:
+            if self.db.elemental_fury["duration"] == 1:
+                self.db.elemental_fury["active"] = False
+                deactivateMsg = (
+                    f"|CThe energy around you dissipates, leaving you feeling drained."
+                )
+                self.location.msg_contents(deactivateMsg, from_obj=self)
+            self.db.elemental_fury["duration"] -= 1
 
         total_fp_regen = base_fp_regen + int(bonus_fp)
         self.adjust_hp(base_regen)
@@ -245,14 +261,14 @@ class EarthElemental(Elemental):
         # Flat damage reduction - 50 con = 5 reduction, glvl 30 = 1.5 reduction
         flat_reduction = con * 0.1 + glvl * 0.05
 
+        # Reduce flat reduction with elemental fury on
+        if self.db.elemental_fury["active"]:
+            flat_reduction -= 30
+
         # Additional flat reduction from earth form
         if self.db.earth_form:
             earth_form_reduction = int(
-                con * 0.1
-                + glvl * 0.1
-                + mineral_fort
-                + rock_solid_defense
-                + stone_mastery
+                +mineral_fort + rock_solid_defense + stone_mastery
             )
             flat_reduction += earth_form_reduction
 

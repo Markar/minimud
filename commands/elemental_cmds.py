@@ -58,16 +58,17 @@ class CmdGAdvance(Command):
             caller.db.guild_level += 1
             caller.db.epmax += 20
             caller.db.title = title
+            caller.db.primordial_essence["max"] = caller.db.guild_level
             self.msg(f"|rYou become {title} ({caller.db.guild_level}).")
 
-        if caller.db.guild_level >= 30:
-            caller.db.burnout["max"] = 4
-        elif caller.db.guild_level >= 21:
-            caller.db.burnout["max"] = 3
-        elif caller.db.guild_level >= 14:
-            caller.db.burnout["max"] = 2
-        elif caller.db.guild_level >= 7:
-            caller.db.burnout["max"] = 1
+        # if caller.db.guild_level >= 30:
+        #     caller.db.primordial_essence = 4
+        # elif caller.db.guild_level >= 21:
+        #     caller.db.primordial_essence = 3
+        # elif caller.db.guild_level >= 14:
+        #     caller.db.primordial_essence = 2
+        # elif caller.db.guild_level >= 7:
+        #     caller.db.primordial_essence = 1
 
     def func(self):
         caller = self.caller
@@ -96,8 +97,10 @@ class CmdGuildStatSheet(Command):
         form = caller.db.subguild or "adventurer"
         gxp_needed = get_glvl_cost(my_glvl + 1)
         reaction = caller.db.reaction_percentage or 50
-        burnout_count = caller.db.burnout["count"]
-        burnout_max = caller.db.burnout["max"]
+        # burnout_count = caller.db.burnout["count"]
+        # burnout_max = caller.db.burnout["max"]
+        primordial_energy = caller.db.primordial_essence["count"] or 0
+        PE_Max = caller.db.primordial_essence["max"] or 0
 
         table = EvTable(f"|c{caller}", f"|c{title}", border="table")
         table.add_row(f"|GGuild Level", my_glvl)
@@ -105,7 +108,7 @@ class CmdGuildStatSheet(Command):
         table.add_row(f"|GSkill GXP", skill_gxp)
         table.add_row(f"|GForm", form.title())
         table.add_row(f"|GReaction", f"{reaction}%")
-        table.add_row(f"|GBurnouts", f"{burnout_count} / {burnout_max}")
+        table.add_row(f"|GPrimordial Essence", f"{primordial_energy} / {PE_Max}")
 
         caller.msg(str(table))
 

@@ -20,6 +20,21 @@ class AttackEmotes:
                 f"{color}$You() $conj(crush) {tn}{color} so hard that dust and debris fly everywhere!!!",
                 f"{color}$You() $conj(shatter) {tn}{color} with $pron(your) immense strength, leaving them in ruins!!!",
             ]
+        if emote == "earth_elemental_melee_fury":
+            return [
+                f"{color}$You() conjure a storm of dirt that blinds {tn}{color} momentarily.",
+                f"{color}$pron(Your) rocky fist now channels elemental energy, causing {tn}{color} to reel from the impact.",
+                f"{color}$pron(Your) stone punch sends shockwaves, leaving {tn}{color} with deep bruises.",
+                f"{color}$You() $conj(slam) into {tn}{color} with the force of an avalanche, leaving a crater!",
+                f"{color}$pron(Your) crushing blow radiates energy, causing {tn}{color} to stagger and bleed profusely.",
+                f"{color}$pron(Your) mighty strike cracks {tn}{color}'s bones and sends shards flying!",
+                f"{color}$You() $conj(pummel) {tn}{color} with chunks of earth, each hit echoing like thunder!",
+                f"{color}$You() $conj(smash) {tn}{color}'s limbs with a boulder, the impact resembling a meteor strike!!",
+                f"{color}$You() $conj(grind) {tn}{color} into the ground like gravel, the earth trembling under the force!!",
+                f"{color}$You() $conj(crush) {tn}{color} so hard that a cloud of dust and debris engulfs the battlefield!!!",
+                f"{color}$You() $conj(shatter) {tn}{color} with $pron(your) immense strength, leaving them in ruins and the air crackling with energy!!!",
+            ]
+
         if emote == "fire_elemental_melee":
             return [
                 f"{color}$You() swipe at {tn}{color} with a fiery claw, leaving scorch marks.",
@@ -103,6 +118,48 @@ class AttackEmotes:
                 f"{color}$You() $conj(suffocate) {tn}{color} with the quicksand!!!",
                 f"{color}$You() $conj(devour) {tn}{color} with the quicksand!!!",
                 f"{color}$You() $conj(obliterate) {tn}{color} with the quicksand!!!",
+            ]
+        if emote == "landslide":
+            return [
+                f"{color}$You() try to create a landslide, but nothing happens.",
+                f"{color}$pron(Your) landslide begins to form around {tn}{color}.",
+                f"{color}$You() $conj(suck) {tn}{color} into the landslide.",
+                f"{color}$pron(Your) landslide pulls {tn}{color} in.",
+                f"{color}$You() $conj(drown) {tn}{color} in the landslide.",
+                f"{color}$pron(Your) landslide engulfs {tn}{color}, trapping them.",
+                f"{color}$You() $conj(submerge) {tn}{color} in the landslide.",
+                f"{color}$You() $conj(entrap) {tn}{color} with the landslide!!!",
+                f"{color}$You() $conj(suffocate) {tn}{color} with the landslide!!!",
+                f"{color}$You() $conj(devour) {tn}{color} with the landslide!!!",
+                f"{color}$You() $conj(obliterate) {tn}{color} with the landslide!!!",
+            ]
+        if emote == "lava_flow":
+            return [
+                f"{color}$You() try to create a lava flow, but nothing happens.",
+                f"{color}$pron(Your) lava flow begins to form around {tn}{color}.",
+                f"{color}$You() $conj(suck) {tn}{color} into the lava flow.",
+                f"{color}$pron(Your) lava flow pulls {tn}{color} in.",
+                f"{color}$You() $conj(drown) {tn}{color} in the lava flow.",
+                f"{color}$pron(Your) lava flow engulfs {tn}{color}, trapping them.",
+                f"{color}$You() $conj(submerge) {tn}{color} in the lava flow.",
+                f"{color}$You() $conj(entrap) {tn}{color} with the lava flow!!!",
+                f"{color}$You() $conj(suffocate) {tn}{color} with the lava flow!!!",
+                f"{color}$You() $conj(devour) {tn}{color} with the lava flow!!!",
+                f"{color}$You() $conj(obliterate) {tn}{color} with the lava flow!!!",
+            ]
+        if emote == "hurl_boulder":
+            return [
+                f"{color}$You() hurl a boulder at {tn}{color}, but it misses.",
+                f"{color}$pron(Your) boulder hits {tn}{color} with a dull thud.",
+                f"{color}$You() $conj(pelt) {tn}{color} with stones.",
+                f"{color}$pron(Your) boulder smashes into {tn}{color}, leaving them bruised.",
+                f"{color}$You() $conj(hurl) a boulder at {tn}{color}, knocking them down.",
+                f"{color}$pron(Your) boulder strikes {tn}{color} with a loud crack!",
+                f"{color}$You() $conj(slam) {tn}{color} with a massive stone!",
+                f"{color}$You() $conj(crush) {tn}{color} with a boulder!!",
+                f"{color}$You() $conj(pummel) {tn}{color} with rocks!!!",
+                f"{color}$You() $conj(smash) {tn}{color} with a massive stone, leaving them in ruins!!!",
+                f"{color}$You() $conj(destroy) {tn}{color} with a massive boulder, leaving them in pieces!!!",
             ]
 
         #### AIR ELEMENTAL ATTACK EMOTES ####

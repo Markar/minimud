@@ -33,7 +33,7 @@ DWARVEN_TWO_HANDED_AXE = {
     "value": 1200,
     "energy_cost": 5,
     "speed": 6,
-    "dmg": 30,  # 30/tick
+    "dmg": 35,  # 30/tick
 }
 DWARVEN_AXE = {
     "typeclass": "typeclasses.gear.MeleeWeapon",

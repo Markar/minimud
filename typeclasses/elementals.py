@@ -53,23 +53,34 @@ class Elemental(PlayerCharacter):
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
         )
         tickerhandler.add(
-            interval=60 * 5,
-            callback=self.at_burnout_tick,
+            interval=60 * 2.5,
+            callback=self.at_essence_tick,
             idstring=f"{self}-superpower",
             persistent=True,
         )
 
     def kickstart(self):
         self.msg("Kickstarting heartbeat")
-        tickerhandler.add(
-            interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
-        )
-        tickerhandler.add(
-            interval=60 * 5,
-            callback=self.at_burnout_tick,
+        tickerhandler.remove(
+            interval=150,
+            callback=self.at_essence_tick,
             idstring=f"{self}-superpower",
             persistent=True,
         )
+
+        tickerhandler.add(
+            interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
+        )
+
+        tickerhandler.add(
+            interval=300,
+            callback=self.at_essence_tick,
+            idstring=f"{self}-superpower",
+            persistent=True,
+        )
+
+    def at_burnout_tick(self):
+        return
 
     def at_tick(self):
         base_regen = self.db.hpregen
@@ -80,47 +91,19 @@ class Elemental(PlayerCharacter):
         self.adjust_fp(base_ep_regen)
         self.adjust_ep(base_fp_regen)
 
-    def at_burnout_tick(self):
+    def at_essence_tick(self):
         """
-        Regenerate burnout points.
+        Regenerate essence points.
         """
-        if self.db.guild_level < 7:
+        glvl = self.db.guild_level
+        if glvl < 7:
             return
         self.msg(
-            f"|cThe flames around you flicker and reignite with renewed vigor, infusing you with a surge of energy!|n"
+            f"|cThe earth beneath you rumbles and shifts, infusing you with a surge of energy!|n"
         )
-        self.db.burnout["count"] = self.db.burnout["max"]
-
-    def use_burnout(self):
-        """
-        Elemental superpower that increases the damage of their attacks.
-        """
-
-        if self.db.guild_level < 10:
-            self.msg("You are not powerful enough to use Burnout.")
-            return
-        if self.db.burnout["active"]:
-            self.msg("Your power is already surging.")
-            return
-        if self.db.burnout["count"] < 1:
-            self.msg("You are too exhausted.")
-            return
-
-        self.msg(
-            f"|cA radiant aura of elemental energy envelops you, your power surging to new heights!|n"
-        )
-
-        self.db.burnout["active"] = True
-        self.db.burnout["count"] -= 1
-        delay(6, self.deactivate_burnout, self)
-
-    def deactivate_burnout(self):
-        """
-        Deactivates the burnout superpower.
-        """
-        caller = self.db.caller
-        self.db.burnout["active"] = False
-        caller.msg(f"|cThe elemental energies dissipate, leaving you exhausted.|n")
+        current = self.db.primordial_essence["count"]
+        max = self.db.primordial_essence["max"]
+        self.db.primordial_essence["count"] = min(current + (glvl * 0.5), max)
 
     # property to mimic weapons
     @property
