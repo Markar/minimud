@@ -293,6 +293,7 @@ class CmdStopMeditating(Command):
 
     def func(self):
         caller = self.caller
+        caller.buffs.remove("meditate")
         if "meditating" in (caller.tags.get(category="status") or []):
             caller.tags.remove("meditating", category="status")
             caller.msg(f"|gYou stand up, feeling refreshed and invigorated.")

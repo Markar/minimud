@@ -204,6 +204,25 @@ from typeclasses.rooms import MobRoom
 from typeclasses.rooms import SpecialMobRoom
 
 
+class RegenerateMobs(Command):
+    """
+    Regenerate all mobs in the room
+    """
+
+    key = "regenmobs"
+
+    def func(self):
+        caller = self.caller
+        if caller.key.lower() != "markar":
+            caller.msg(f"|rYou cannot regenerate specials, {caller.key.lower()}.")
+            return
+
+        for room in MobRoom.objects.all_family():
+            room.regenerate_mobs()
+
+        caller.msg(f"|gRegenerated mobs.")
+
+
 class RespawnMobs(Command):
     """
     Respawn all mobs in the room
@@ -240,6 +259,25 @@ class RespawnSpecials(Command):
             room.respawn_mobs()
 
         caller.msg(f"|gRespawned specials.")
+
+
+class RegenerateSpecials(Command):
+    """
+    Regenerate all special mobs in the room
+    """
+
+    key = "regenspecials"
+
+    def func(self):
+        caller = self.caller
+        if caller.key.lower() != "markar":
+            caller.msg(f"|rYou cannot regenerate specials, {caller.key.lower()}.")
+            return
+
+        for room in SpecialMobRoom.objects.all_family():
+            room.regenerate_mobs()
+
+        caller.msg(f"|gRegenerated specials.")
 
 
 class StartSpecialMobTicker(Command):
@@ -332,6 +370,8 @@ class GeneralCmdSet(CmdSet):
         # self.add(TestSpawn)
         self.add(RespawnMobs)
         self.add(RespawnSpecials)
+        self.add(RegenerateSpecials)
+        self.add(RegenerateMobs)
         self.add(StartSpecialMobTicker)
         self.add(StopSpecialMobTicker)
         self.add(JoinCharacter)

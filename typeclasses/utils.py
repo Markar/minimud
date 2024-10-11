@@ -35,7 +35,7 @@ def geHealthStatus(self, hpPercent):
         return "is near death."
 
 
-def SetNPCStats(self, level, xp, hits):
+def SetRandomizedNPCStats(self, level, xp, hits):
     level = randint(level, level + 2)
     xp = int(uniform(xp, xp * 1.2))
     exp_reward = xp
@@ -111,6 +111,80 @@ def SetNPCStats(self, level, xp, hits):
 #     return mob
 
 
+def SetBaseNPCStats(self, level, xp, hits):
+    # The idea is to call this once at spawn and save the base adjusted stats from the prototype
+    # so that we can adjust them later without losing the original values
+    level = randint(level, level + 2)
+    xp = int(uniform(xp, xp * 1.2))
+    exp_reward = xp
+    hpmax = 100 + int(xp / 5)
+    hpmax = int(uniform(hpmax * 0.9, hpmax * 1.1))
+    damage = 5 + int(xp / 150)
+    hits = hits
+    armor = int(level / 2.5)
+
+    if xp > 80 and xp < 201:
+        damage += 2
+        hpmax += 50
+    elif xp > 200 and xp < 501:
+        damage += 5
+    elif xp > 500 and xp < 1001:
+        damage += 6
+    elif xp >= 800:
+        damage += 7
+
+    if level < 30 and level > 24:
+        damage = damage * 0.5
+        exp_reward = exp_reward * 1.35
+    elif level < 25 and level > 19:
+        damage = damage * 0.65
+        exp_reward = exp_reward * 1.25
+    elif level < 20 and level > 14:
+        damage = damage * 0.75
+        exp_reward = exp_reward * 1.15
+    elif level < 15 and level > 9:
+        damage = damage * 0.85
+        exp_reward = exp_reward
+    elif level < 10 and level > 4:
+        damage = damage * 0.9
+        exp_reward = exp_reward * 0.6
+
+    if hits > 1:
+        damage = damage * (1 + hits * 0.2)  # 20% increase per hit
+        damage = int(
+            damage / hits
+        )  # divide by number of hits, higher total damage but lower per hit
+
+    self.db.hp = hpmax
+    self.db.hpmax = hpmax
+    self.db.exp_reward = xp
+    self.db.level = level
+    self.db.armor = armor
+    self.db.natural_weapon["damage"] = damage
+    self.db.natural_weapon["hits"] = hits
+    self.db.natural_weapon["energy_cost"] = 0
+
+    self.db.base_stats = {
+        "level": level,
+        "xp": xp,
+        "exp_reward": exp_reward,
+        "hpmax": hpmax,
+        "damage": damage,
+        "hits": hits,
+        "armor": armor,
+    }
+
+    return {
+        "level": level,
+        "xp": xp,
+        "exp_reward": exp_reward,
+        "hpmax": hpmax,
+        "damage": damage,
+        "hits": hits,
+        "armor": armor,
+    }
+
+
 def SpawnMob(self, name):
     logger.log_info(f"Spawning mob {name}")
     mobs = spawner.spawn(name)
@@ -123,7 +197,7 @@ def SpawnMob(self, name):
         wep = getattr(mob.db, "natural_weapon", None)
         hits = wep.get("hits", 1) if wep else 1
 
-        SetNPCStats(mob, level, xp, hits)
+        SetBaseNPCStats(mob, level, xp, hits)
 
     return mob
 

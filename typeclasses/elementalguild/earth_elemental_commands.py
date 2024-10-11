@@ -403,7 +403,7 @@ class CmdMudPatch(PowerCommand):
         caller.adjust_hp(20 + caller.db.skills.get("elemental harmony", 1) * 2)
         caller.adjust_ep(-self.cost)
         caller.cooldowns.add("global_cooldown", 2)
-        caller.cooldowns.add("mud_patch", 10)
+        caller.cooldowns.add("mud_patch", 4)
         self.msg(f"|gYou apply a mud patch to your wounds, healing minor injuries.")
         activateMsg = f"|C$Your() form shimmers as a protective patch of mud forms around $pron(your) wounds."
         caller.location.msg_contents(activateMsg, from_obj=caller)
@@ -845,7 +845,7 @@ class CmdHurlBoulder(PowerCommand):
     key = "hurl boulder"
     aliases = ["hb"]
     help_category = "earth elemental"
-    guild_level = 18
+    guild_level = 14
     cost = 30
 
     def _calculate_damage(self, caller):
@@ -853,9 +853,9 @@ class CmdHurlBoulder(PowerCommand):
         strength = caller.traits.str.value
         guild_level = caller.db.guild_level
 
-        base_value = 50
+        base_value = 80
         stone_mastery_weight = 10
-        strength_weight = 1
+        strength_weight = 2
         guild_level_weight = 1
 
         damage = (

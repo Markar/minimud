@@ -52,12 +52,7 @@ class CombatScript(Script):
         return [
             obj
             for obj in self.fighters
-            if not any(
-                [
-                    hasattr(obj, "tags")
-                    and obj.tags.has(["unconscious", "dead", "defeated"])
-                ]
-            )
+            if not any(obj.tags.has(["unconscious", "dead", "defeated"]))
         ]
 
     def at_script_creation(self):
@@ -171,25 +166,34 @@ class CombatScript(Script):
             return
 
         # create a filtered list of only active fighters for each team
+        print("checking victory 2")
         team_a, team_b = [
             [obj for obj in team if obj in active_fighters] for team in self.db.teams
         ]
 
+        print("checking victory 3")
         if team_a and team_b:
             # both teams are still active
             return
 
         # this case shouldn't arise, but as a redundancy, checks if both teams are inactive
         if not team_a and not team_b:
+            print("checking victory 4")
             # everyone lost or is gone
             self.delete()
             return
 
         # only one team is active at this point; message the winners
+        print("victory 5")
         for obj in active_fighters:
             # remove their combat target if they have one
             del obj.db.combat_target
             obj.msg("The fight is over.")
+            # if obj and obj.pk and obj.db and hasattr(obj.db, "combat_target"):
+            #     del obj.db.combat_target
+            #     obj.msg("The fight is over.")
+            # else:
+            #     print(f"com script: obj: {obj} pk: {obj.pk} db: {obj.db}")
 
         # say farewell to the combat script!
         self.delete()
