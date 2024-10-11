@@ -16,7 +16,8 @@ from world.prototypes import MOB_CORPSE, IRON_DAGGER
 import math
 from .objects import ObjectParent
 from typeclasses.general_attack_emotes import AttackEmotes
-from typeclasses.utils import SetNPCStats
+from typeclasses.utils import SetRandomizedNPCStats
+from evennia.contrib.rpg.buffs import BaseBuff
 
 _IMMOBILE = (
     "sitting",
@@ -97,8 +98,10 @@ class Character(ObjectParent, ClothedCharacter):
     def defense(self, damage_type=None):
         """
         Get the total armor defence from equipped items and natural defenses
+
+        This is used by NPCs and adventurers
         """
-        print(f"in defense {self} {damage_type}")
+        # print(f"in defense {self} {damage_type}")
         defense_objs = get_worn_clothes(self) + [self]
         armor = sum([obj.attributes.get("armor", 0) for obj in defense_objs])
         if damage_type:
@@ -118,6 +121,7 @@ class Character(ObjectParent, ClothedCharacter):
         self.traits.add("wis", "Wisdom", trait_type="static", base=1, mod=0)
         self.traits.add("con", "Constitution", trait_type="static", base=1, mod=0)
         self.traits.add("cha", "Charisma", trait_type="static", base=1, mod=0)
+        self.traits.add("speed", "Speed", trait_type="static", base=1, mod=0)
 
         # resource stats
         self.db.hp = 50
@@ -354,7 +358,6 @@ class Character(ObjectParent, ClothedCharacter):
         Returns a quick view of the current status of this character
         """
 
-        print(f"IN CHARACTER get_display_status: {self}")
         chunks = []
         # prefix the status string with the character's name, if it's someone else checking
         # if looker != self:
@@ -807,6 +810,26 @@ class PlayerCharacter(Character):
 
 
 # region NPC
+class NPCHeal(BaseBuff):
+    """
+    A buff that restores health to the owner.
+    """
+
+    duration = 100
+    tickrate = 10
+    stacks = 1
+
+    def at_tick(self, initial, **kwargs):
+        owner = self.owner
+        to_heal = owner.hpmax * 0.1  # 10% of max hp
+        owner.adjust_hp(to_heal)
+        owner.location.msg_contents(f"|G{self.owner.key} looks healthier.|n")
+
+        if self.ticknum == 10:
+            owner.go_home()
+            return
+
+
 class NPC(Character):
     """
     The base typeclass for non-player characters, implementing behavioral AI.
@@ -825,6 +848,9 @@ class NPC(Character):
 
     def at_object_creation(self):
         super().at_object_creation()
+
+    def go_home(self):
+        self.move_to(self.home)
 
     def get_display_name(self, looker, **kwargs):
         """
@@ -852,35 +878,51 @@ class NPC(Character):
         """
         Respond to the departure of a character
         """
-        if chara == self.db.following:
+        target = self.db.following
+        print(f"npc at_character_depart: {chara} and {chara.key} and {chara.name}")
+        if chara and target and chara.name.lower() == self.db.following.name.lower():
             # find an exit that goes the same way
             exits = [
                 x
                 for x in self.location.contents_get(content_type="exit")
-                if x.destination == destination
+                if x.destination == destination and x.destination != "leave"
             ]
             if exits:
                 # use the exit
-                self.execute_cmd(exits[0].name)
+                speed_trait = self.traits.get("speed")
+                speed = speed_trait.value if speed_trait else 0.9
+                target.msg(f"{self} follows you! {speed}")
+                delay(speed, lambda: self.follow_and_attack(target, exits[0].name))
+
+    def follow_and_attack(self, target, exit):
+        """
+        Follow the target and attack
+        """
+        # don't follow outside of a zone
+        if exit == "leave":
+            return
+
+        self.db.following = target
+        if weapons := self.wielding:
+            weapon = weapons[0]
+        else:
+            weapon = self
+
+        self.execute_cmd(exit)
+        self.enter_combat(target)
+        target.enter_combat(self)
+        weapon.at_attack(self, target)
+        target.msg(f"{self} follows and attacks you!")
 
     def randomize_stats(self):
-        level = self.db.level
-        xp = self.db.exp_reward
-        hits = self.db.natural_weapon["hits"]
+        level = self.db.base_stats["level"]
+        xp = self.db.base_stats["xp"]
+        hits = self.db.base_stats["hits"]
         print(f"level {level} xp {xp} hits {hits}")
 
         # get transformed stats
-        stats = SetNPCStats(self, level, xp, hits)
-        # damage = stats.damage
-        # hpmax = stats.hpmax
-        # xp = stats.xp
-        # hits = stats.hits
-
-        # randomize transformed stats
-        # self.db.level = randint(level - 2, level + 2)
-        # self.db.exp_reward = int(uniform(xp * 0.8, xp * 1.2))
-        # self.db.damage = int(uniform(damage * 0.8, damage * 1.2))
-        # self.db.hpmax = int(uniform(hpmax * 0.8, hpmax * 1.2))
+        stats = SetRandomizedNPCStats(self, level, xp, hits)
+        print(f"NPC randomized stats {stats}")
 
     def at_respawn(self):
         self.use_heal()
@@ -968,6 +1010,9 @@ class NPC(Character):
 
         combat_script = combat_script[0]
 
+        if self.tags.has("hunter") and target.tags.has("player", "type"):
+            self.db.following = target
+
         self.db.combat_target = target
         # adding a combatant to combat just returns True if they're already there, so this is safe
         if not combat_script.add_combatant(self, enemy=target):
@@ -985,6 +1030,9 @@ class NPC(Character):
             # make sure there's a stored target
             if not (target := self.db.combat_target):
                 return
+
+        if self.tags.has("hunter") and target.tags.has("player", "type"):
+            self.db.following = target
         # verify that target is still here
         if self.location != target.location:
             return
@@ -998,6 +1046,7 @@ class NPC(Character):
         total_speed = weapon.speed + 1
         if self.db.stunned:
             total_speed += 1
+
         # attack with the weapon
         weapon.at_attack(self, target)
         # queue up next attack; use None for target to reference stored target on execution
@@ -1036,6 +1085,12 @@ class NPC(Character):
         # apply the weapon damage as a modifier to skill
         damage = damage * result
 
+        if self.tags.has("hunter") and target.tags.has("player", "type"):
+            print(
+                f"npc attack hunter: {self} and {target} and {wielder} and {self.db.following}"
+            )
+            self.db.following = target
+
         for _ in range(hits):
             print(f"npc attack in range: {self} and {target} and {weapon}")
             # randomize the damage for each attack
@@ -1057,68 +1112,3 @@ class NPC(Character):
         print(f"NPC heals itself {self}")
         self.db.hp = self.db.hpmax
         self.db.ep = self.db.epmax
-
-
-class LinkedNPC(NPC):
-
-    def at_linked_respawn(self):
-        self.use_heal()
-        self.randomize_stats()
-        self.move_to(self.home, False, None, True, True, True, "teleport")
-
-    def at_damage(self, attacker, damage, damage_type=None, emote="general_weapon"):
-        """
-        Apply damage, after taking into account damage resistances.
-        """
-        # apply armor damage reduction
-        damage -= self.defense(damage_type)
-        if damage < 0:
-            damage = 0
-        self.db.hp -= max(damage, 0)
-        self.msg(
-            f"You take {damage} damage from {attacker.get_display_name(self)} NPC."
-        )
-        # this sends the hit_msg FROM the player TO the room with the damage AFTER reduction by npc
-        # this comes from the guild class, where the emotes live
-
-        # this gets the color name of the attacker, so default Cyan
-        # f"{self.get_display_name(attacker)}"
-        attacker.get_player_attack_hit_message(
-            attacker, damage, f"{self.name.title()}", emote
-        )
-
-        if self.db.hp <= 0:
-            self.tags.add("defeated", category="status")
-            attacker.add_best_kill(self)
-            # we've been defeated!
-            if self.location:
-                if combat_script := self.location.scripts.get("combat"):
-                    combat_script = combat_script[0]
-                    if not combat_script.remove_combatant(self):
-                        # something went wrong...
-                        return
-
-                # create loot drops
-                corpse = {
-                    "key": f"|Ya decaying corpse of {self}",
-                    "typeclass": "typeclasses.corpse.Corpse",
-                    "desc": f"|YThe decaying corpse of {self} lies here. It looks heavy, and full of nutrients.|n",
-                    "location": self.location,
-                    "power": self.db.level * 8,
-                    "tags": ["edible"],
-                }
-
-                corpses = spawner.spawn(corpse)
-
-                if self.db.drops:
-                    objs = spawn(*list(self.db.drops))
-                    for obj in objs:
-                        obj.move_to(self.location)
-                self.move_to(None, True, None, True, True, True, "teleport")
-                delay(360, self.at_respawn, persistent=True)
-                return
-        # change target to the attacker
-        if not self.db.combat_target:
-            self.enter_combat(attacker)
-        else:
-            self.db.combat_target = attacker

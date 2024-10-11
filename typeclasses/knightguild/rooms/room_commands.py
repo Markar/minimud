@@ -21,6 +21,12 @@ class CmdJoinKnights(Command):
             caller.swap_typeclass(
                 "typeclasses.knights.Knight",
                 clean_attributes=False,
+                no_default=True,
+                clean_cmdsets=False,
+            )
+            creator_id = caller.db.creator_id
+            self.caller.locks.add(
+                f"call:false(); control:perm(Developer); delete:id({creator_id}) or perm(Admin);drop:holds(); edit:pid({creator_id}) or perm(Admin); examine:perm(Builder); get:false(); puppet:id(4270) or pid({creator_id}) or perm(Developer) or pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin); tell:perm(Admin); view:all()"
             )
             caller.cmdset.add(KnightCmdSet, persistent=True)
         else:

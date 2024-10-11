@@ -15,6 +15,7 @@ from .scripts import RestockScript
 
 from commands.shops import ShopCmdSet
 from commands.skills import TrainCmdSet
+from random import randint
 
 from commands.elemental_cmds import CmdJoinElementals
 from commands.elemental_cmds import CmdLeaveElementals
@@ -187,7 +188,72 @@ class XYZShopNTrain(XYGridTrain, XYGridShop):
 from typeclasses.utils import SpawnMob
 
 
+class SpecialMobRoom(XYGridRoom):
+    # spawn_proto = [
+    #     {"name": "ORC_TRAINER", "count": 1, "chance": 100, "returnEarly": True},
+    #     {"name": "ORC_CENTURION", "count": 2, "chance": 100},
+    # ]
+
+    def _spawn(self):
+        # This should spawn a random mob from the spawn_proto list, with a chance to spawn each falling back to 100% on the last mob
+        ran = randint(0, 100)
+
+        if any(
+            obj.tags.get(category="from_prototype") == mob["name"].lower()
+            for obj in self.contents
+        ):
+            print(f"Mob {mob['name']} already exists in the room. Skipping spawn.")
+            return
+
+        for mob in self.db.spawn_proto:
+            print(f"Checking for mob {mob}")
+
+            if ran < mob.get("chance", 100):
+                for _ in range(mob["count"]):
+                    print(
+                        f"Spawning {mob['name']} with chance {mob['chance']} and count {mob['count']}"
+                    )
+                    SpawnMob(self, mob["name"])
+                    if mob.get("returnEarly", False):
+                        return
+
+    def _check_for_mobs(self):
+        if spawn_proto := self.db.spawn_proto:
+            print(f"Checking for mobs in {self}, {self.contents} and {spawn_proto}")
+            if not any(
+                obj.tags.get(category="from_prototype") == mob["name"].lower()
+                for mob in spawn_proto
+                for obj in self.contents
+            ):
+                print(
+                    f"Not in room - Spawning {spawn_proto} in {self}, {self.contents}"
+                )
+                self._spawn()
+            else:
+                print(
+                    f"Already in room - Skip {spawn_proto} in {self}, {self.contents}"
+                )
+
+    def regenerate_mobs(self):
+        if spawn_proto := self.db.spawn_proto:
+            for obj in self.contents:
+                if obj.tags.get(category="from_prototype") == spawn_proto.lower():
+                    obj.delete()
+                    print(f"Deleted {obj} in {self}, {self.contents}")
+
+    def respawn_mobs(self):
+
+        self._check_for_mobs()
+
+
 class MobRoom(XYGridRoom):
+
+    def regenerate_mobs(self):
+        if spawn_proto := self.db.spawn_proto:
+            for obj in self.contents:
+                if obj.tags.get(category="from_prototype") == spawn_proto.lower():
+                    obj.delete()
+                    print(f"Deleted {obj} in {self}, {self.contents}")
 
     def respawn_mobs(self):
         if spawn_proto := self.db.spawn_proto:

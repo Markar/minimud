@@ -1,4 +1,4 @@
-from random import uniform
+from random import uniform, randint
 from evennia.utils import delay, iter_to_str
 from evennia import TICKER_HANDLER as tickerhandler
 from commands.elemental_cmds import ElementalCmdSet
@@ -51,13 +51,16 @@ class EarthElemental(Elemental):
             "elemental harmony": 1,
             "earthen regeneration": 1,
         }
+        self.db.active_form = None
 
         self.db.stone_skin = False
-        self.db.earth_form = False
         self.db.earth_shield = {"hits": 0}
         self.db.mountain_stance = False
         self.db.earthen_renewal = {"duration": 0, "rate": 0}
         self.db.burnout = {"active": False, "count": 0, "max": 0, "duration": 0}
+        self.db.elemental_fury = {"active": False, "duration": 0}
+        self.db.primordial_essence = {"count": 0, "max": 0}
+
         tickerhandler.add(
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
         )
@@ -76,22 +79,28 @@ class EarthElemental(Elemental):
         fpmax = int(self.db.fpmax)
         ep = int(self.db.ep)
         epmax = int(self.db.epmax)
-        burnout_count = self.db.burnout["count"]
-        burnout_max = self.db.burnout["max"]
+        # burnout_count = self.db.burnout["count"]
+        # burnout_max = self.db.burnout["max"]
+        primordial_energy = self.db.primordial_essence["count"]
+        PE_Max = self.db.primordial_essence["max"]
 
         chunks.append(
-            f"|gHealth: |G{hp}/{hpmax}|g Focus: |G{fp}/{fpmax}|g Energy: |G{ep}/{epmax}|g"
+            f"|320Health: |400{hp}/{hpmax}|320 Focus: |015{fp}/{fpmax}|320 Energy: |215{ep}/{epmax}|g"
         )
-        if self.db.burnout["max"] > 0:
-            chunks.append(f"|YBurnout: |G{burnout_count}/{burnout_max}|n")
+        if self.db.guild_level > 6:
+            chunks.append(f"|510Essence: |510{primordial_energy}/{PE_Max}|n")
         if self.db.burnout["active"]:
             chunks.append(f"|YB")
+        if self.db.elemental_fury["active"]:
+            chunks.append(f"|YEF")
+
+        if self.db.active_form == "earth":
+            chunks.append(f"|320Earth")
+
         if self.db.stone_skin:
             chunks.append(f"|YSS")
         if self.db.earth_shield and self.db.earth_shield["hits"] > 0:
             chunks.append(f"|YES")
-        if self.db.earth_form:
-            chunks.append(f"|YEF")
         if self.db.mountain_stance:
             chunks.append(f"|YMS")
         if self.db.earthen_renewal and self.db.earthen_renewal["duration"] > 0:
@@ -122,6 +131,22 @@ class EarthElemental(Elemental):
         chunks.append(f"\n")
         # glue together the chunks and return
         return " - ".join(chunks)
+
+    def at_essence_tick(self):
+        """
+        Regenerate essence points.
+        """
+        glvl = self.db.guild_level
+        if glvl < 7:
+            return
+        self.msg(
+            f"|cThe earth beneath you rumbles and shifts, infusing you with a surge of energy!|n"
+        )
+        current = self.db.primordial_essence["count"]
+        max = self.db.primordial_essence["max"]
+        harmony = self.db.skills["elemental harmony"]
+
+        self.db.primordial_essence["count"] = min(current + harmony + (glvl * 0.5), max)
 
     def at_tick(self):
         base_regen = self.db.hpregen
@@ -156,6 +181,15 @@ class EarthElemental(Elemental):
                 self.location.msg_contents(deactivateMsg, from_obj=self)
             self.db.burnout["duration"] -= 1
 
+        if self.db.elemental_fury["active"]:
+            if self.db.elemental_fury["duration"] == 1:
+                self.db.elemental_fury["active"] = False
+                deactivateMsg = (
+                    f"|CThe energy around you dissipates, leaving you feeling drained."
+                )
+                self.location.msg_contents(deactivateMsg, from_obj=self)
+            self.db.elemental_fury["duration"] -= 1
+
         total_fp_regen = base_fp_regen + int(bonus_fp)
         self.adjust_hp(base_regen)
         self.adjust_fp(total_fp_regen)
@@ -184,11 +218,6 @@ class EarthElemental(Elemental):
     def attack(self, target, weapon, **kwargs):
         weapon = EarthAttack()
 
-        if not self.in_combat:
-            self.enter_combat(target)
-            target.enter_combat(self)
-            return
-
         # can't attack if we're fleeing!
         if self.db.fleeing:
             return
@@ -208,6 +237,11 @@ class EarthElemental(Elemental):
 
         if target.location != self.location:
             self.msg("You don't see your target.")
+            return
+
+        if not self.in_combat:
+            self.enter_combat(target)
+            target.enter_combat(self)
             return
 
         weapon.at_attack(self, target)
@@ -238,21 +272,21 @@ class EarthElemental(Elemental):
 
         percentage_reduction = 0
         flat_reduction = 0
-
+        base_damage = damage
         # Apply (worn) defense reduction
         damage -= self.defense(damage_type)
 
         # Flat damage reduction - 50 con = 5 reduction, glvl 30 = 1.5 reduction
         flat_reduction = con * 0.1 + glvl * 0.05
 
+        # Reduce flat reduction with elemental fury on
+        if self.db.elemental_fury["active"]:
+            flat_reduction -= 30
+
         # Additional flat reduction from earth form
-        if self.db.earth_form:
+        if self.db.active_form == "earth":
             earth_form_reduction = int(
-                con * 0.1
-                + glvl * 0.1
-                + mineral_fort
-                + rock_solid_defense
-                + stone_mastery
+                mineral_fort + rock_solid_defense + stone_mastery
             )
             flat_reduction += earth_form_reduction
 
@@ -291,17 +325,14 @@ class EarthElemental(Elemental):
 
         # apply mineral_fortification after defense if it's enabled
         if damage_type in ("blunt", "edged") and self.db.stone_skin:
-
             stone_skin_absorbed = (
                 (mineral_fort * 3)
                 + uniform(0, glvl / 2)
                 + uniform(0, 30)
                 + (self.traits.con.value * 0.20)
             )
-
             damage -= int(stone_skin_absorbed)
-            self.msg(f"|cYour stone skin blocks some damage!")
-            self.adjust_ep(-1)
+            self.adjust_ep(-int(1))
         else:
             stone_skin_absorbed = int(
                 (mineral_fort * 3)
@@ -309,18 +340,20 @@ class EarthElemental(Elemental):
                 + uniform(0, 30)
                 + (self.traits.con.value * 0.20) / 2
             )
-            self.adjust_ep(-1)
+            self.adjust_ep(-int(2))
 
         # randomize damage
         damage = uniform(damage / 2, damage)
 
-        # Make sure damage is an integer, similar to floor rounding
-        damage = int(damage)
+        # Minimum chip damage of 1 or 3% of base damage, 50% of the time
+        min_damage = math.ceil(base_damage * 0.03)
 
-        # Ensure damage doesn't go below zero
+        if damage < min_damage and randint(1, 100) <= 50:
+            damage = max(damage, min_damage)
+
         damage = max(damage, 0)
         # Apply the damage to the character
-        self.db.hp -= damage
+        self.db.hp -= int(damage)
 
         # Get the attack emote
         attacker.get_npc_attack_emote(self, damage, self.get_display_name(self))

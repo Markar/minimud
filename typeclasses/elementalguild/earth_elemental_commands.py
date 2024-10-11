@@ -23,7 +23,7 @@ class CmdBurnout(PowerCommand):
     """
     This powerful ability allows the earth elemental to channel energy from all elemental forces, enhancing their physical abilities and combat prowess. While active, the elemental's attacks become more potent, and their movements more fluid and precise. The elemental's power is greatly increased while burnout is active, but the strain of maintaining this heightened state of power can be overwhelming, and the elemental must be cautious not to overextend themselves.
 
-    The duration is boosted by the elemental harmony skill, and the energy cost is based on the elemental's level of mastery.
+    The duration is boosted by the elemental harmony skill, and the elemental must have a sufficient amount of Primordial Essence to activate Burnout.
 
     Usage:
         burnout
@@ -31,41 +31,102 @@ class CmdBurnout(PowerCommand):
 
     key = "burnout"
     help_category = "earth elemental"
-    cost = 10
+    cost = 7
     guild_level = 7
 
     def func(self):
         caller = self.caller
         glvl = caller.db.guild_level
-        if not caller.db.burnout["count"] > 0:
+        if not caller.db.primordial_essence["count"] > 0:
             caller.msg(f"|CYou are too tired to use this power.")
             return
+        if caller.db.elemental_fury["active"]:
+            caller.msg(f"|CYou can't use Burnout while Elemental Fury is active.")
+            return
+        if caller.db.burnout["active"]:
+            caller.msg(f"|CYour power is already surging.")
+            return
+        if not caller.cooldowns.ready("global_cooldown"):
+            caller.msg(f"|CNot so fast!")
+            return False
         if not caller.cooldowns.ready("burnout"):
             caller.msg(f"|CNot so fast!")
             return False
-        if caller.db.ep < self.cost:
-            caller.msg(f"|rYou need at least {self.cost} energy to use this power.")
+        if caller.db.primordial_essence["count"] < self.cost:
+            caller.msg(
+                f"|rYou need at least {self.cost} primordial essence to use this power."
+            )
             return
         if glvl < self.guild_level:
             caller.msg(
                 f"|CYou need to be guild level {self.guild_level} to use burnout."
             )
             return
-        if caller.db.burnout["active"]:
-            caller.msg(f"|CYour power is already surging.")
-            return
-        caller.db.ep -= self.cost
+
         caller.cooldowns.add("burnout", 60)
         caller.cooldowns.add("global_cooldown", 2)
-        skill_rank = caller.db.skills.get("elemental Synergy", 1)
+        skill_rank = caller.db.skills.get("elemental harmony", 1)
 
         self.msg(
             f"|cA radiant aura of elemental energy envelops you, your power surging to new heights!|n"
         )
 
         caller.db.burnout["active"] = True
-        caller.db.burnout["count"] -= 1
+        caller.db.primordial_essence["count"] -= self.cost
         caller.db.burnout["duration"] = 3 + skill_rank * 2
+
+
+# region Elemental Fury
+class CmdElementalFury(PowerCommand):
+    """
+    This ultimate ability allows the earth elemental to harness the power of the elemental plane, amplifying their physical abilities and combat prowess to a superhuman level. While active, the elemental's attacks become devastatingly powerful, their movements almost instantaneous, and their resilience unmatched. The elemental's power is exponentially increased while Elemental Fury is active, but the strain of maintaining this extreme state of power is immense, requiring careful management to avoid collapse.
+
+    An ancient and rare substance, Primordial Essence is collected from the core of elemental rifts. Consuming Primordial Essence allows the elemental to activate Elemental Fury, but the essence is depleted with each use, requiring careful resource management.
+
+    The duration is significantly extended by the elemental harmony skill, and elemental fury consumes a large amount of Primordial Essence with each use.
+
+    Usage:
+        elemental fury, ef, fury
+    """
+
+    key = "elemental fury"
+    aliases = ["ef", "fury"]
+    help_category = "earth elemental"
+    cost = 12
+    guild_level = 18
+
+    def func(self):
+        caller = self.caller
+        glvl = caller.db.guild_level
+        if not caller.db.primordial_essence["count"] > 1:
+            caller.msg(f"|CYou lack the Primordial Essence to use this power.")
+            return
+        if not caller.cooldowns.ready("elemental_fury"):
+            caller.msg(f"|CElemental fury isn't ready yet.")
+            return False
+        if caller.db.burnout["active"]:
+            caller.msg(f"|CYou can't use Elemental Fury while Burnout is active.")
+            return
+        if glvl < self.guild_level:
+            caller.msg(
+                f"|CYou need to be guild level {self.guild_level} to use Elemental Fury."
+            )
+            return
+        if caller.db.elemental_fury["active"]:
+            caller.msg(f"|CYour power is already surging.")
+            return
+
+        caller.db.primordial_essence["count"] -= self.cost
+        caller.cooldowns.add("elemental_fury", 90)
+        caller.cooldowns.add("global_cooldown", 2)
+        skill_rank = caller.db.skills.get("elemental harmony", 1)
+
+        self.msg(
+            f"|cA radiant aura of elemental energy envelops you, your power surging to new heights!|n"
+        )
+
+        caller.db.elemental_fury["active"] = True
+        caller.db.elemental_fury["duration"] = 5 + skill_rank * 3
 
 
 # Defensive powers
@@ -87,12 +148,21 @@ class CmdStoneSkin(PowerCommand):
     aliases = ["ss"]
     help_category = "earth elemental"
     cost = 25
+    guild_level = 8
 
     def func(self):
         caller = self.caller
         glvl = caller.db.guild_level
-        if glvl < 7:
-            caller.msg(f"|CYou need to be guild level 5 to use stone skin.")
+        if glvl < self.guild_level:
+            caller.msg(
+                f"|CYou need to be guild level {self.guild_level} to use stone skin."
+            )
+            return
+        if not caller.cooldowns.ready("stoneskin"):
+            caller.msg(f"|YStone Skin isn't ready yet.")
+            return False
+        if not caller.cooldowns.ready("global_cooldown"):
+            caller.msg(f"|CNot so fast!")
             return
         if caller.db.ep < self.cost:
             caller.msg(f"|rYou need at least {self.cost} energy to use this power.")
@@ -100,13 +170,15 @@ class CmdStoneSkin(PowerCommand):
         if not caller.db.stone_skin:
             caller.db.stone_skin = True
             caller.db.ep -= self.cost
-            caller.cooldowns.add("global_cooldown", 2)
             activateMsg = f"|CYour body hardens, rocky plates forming a protective barrier that absorbs and deflects incoming attacks."
             caller.location.msg_contents(activateMsg, from_obj=caller)
         else:
             caller.db.stone_skin = False
             deactivateMsg = f"|CYour body softens, the rocky plates that once protected $pron(you) now dissipating."
             caller.location.msg_contents(deactivateMsg, from_obj=caller)
+
+        caller.cooldowns.add("global_cooldown", 2)
+        caller.cooldowns.add("stoneskin", 60)
 
 
 # region Earth Form
@@ -118,31 +190,42 @@ class CmdEarthForm(PowerCommand):
     level, constitution, rock solid defense, and stone mastery.
 
     Usage:
-        earth form
+        earthform
+        earth
     """
 
-    key = "earth form"
-    aliases = ["ef"]
+    key = "earthform"
+    aliases = ["earth"]
     help_category = "earth elemental"
     cost = 50
+    guild_level = 15
 
     def func(self):
         caller = self.caller
         glvl = caller.db.guild_level
-        if glvl < 24:
-            caller.msg(f"|CYou need to be guild level 24 to use earth form.")
+        if not caller.cooldowns.ready("global_cooldown"):
+            caller.msg(f"|CNot so fast!")
+            return
+        if not caller.cooldowns.ready("earth_form"):
+            caller.msg(f"|YEarth Form isn't ready yet.")
+            return False
+        if glvl < self.guild_level:
+            caller.msg(
+                f"|CYou need to be guild level {self.guild_level} to use earth form."
+            )
             return
         if caller.db.ep < self.cost:
             caller.msg(f"|rYou need at least {self.cost} energy to use this power.")
             return
-        if not caller.db.earth_form:
-            caller.db.earth_form = True
+        if caller.db.active_form == None:
+            caller.db.active_form = "earth"
             caller.db.ep -= self.cost
             caller.cooldowns.add("global_cooldown", 2)
+            caller.cooldowns.add("earth_form", 60)
             activateMsg = f"|C$Your() form shifts and hardens, transforming into a denser, more resilient form of rock."
             caller.location.msg_contents(activateMsg, from_obj=caller)
         else:
-            caller.db.earth_form = False
+            caller.db.active_form = None
             deactivateMsg = f"|C$Your() form softens and returns to its normal state."
             caller.location.msg_contents(deactivateMsg, from_obj=caller)
 
@@ -248,16 +331,21 @@ class CmdEarthShield(PowerCommand):
     aliases = ["es"]
     help_category = "earth elemental"
     cost = 50
+    guild_level = 13
 
     def func(self):
         super().func()
         caller = self.caller
         glvl = caller.db.guild_level
-        if glvl < 14:
+
+        if glvl < self.guild_level:
             caller.msg(f"|CYou need to be guild level 14 to use earth shield.")
             return
-        if not caller.cooldowns.ready("earth_shield"):
+        if not caller.cooldowns.ready("global_cooldown"):
             caller.msg(f"|CNot so fast!")
+            return False
+        if not caller.cooldowns.ready("earth_shield"):
+            caller.msg(f"|YEarth Shield isn't ready yet.")
             return False
         if caller.db.ep < self.cost:
             caller.msg(f"|rYou need at least {self.cost} energy to use this power.")
@@ -276,6 +364,51 @@ class CmdEarthShield(PowerCommand):
             caller.location.msg_contents(activateMsg, from_obj=caller)
 
 
+# region Mud Patch
+class CmdMudPatch(PowerCommand):
+    """
+    The earth elemental can apply a mud patch to heal minor injuries. The amount of health restored is based on the elemental's skill rank in elemental harmony.
+
+    Usage:
+        mud patch, patch
+    """
+
+    key = "mud patch"
+    aliases = ["patch"]
+    help_category = "earth elemental"
+    cost = 10
+    guild_level = 2
+
+    def func(self):
+        caller = self.caller
+        glvl = caller.db.guild_level
+
+        if glvl < self.guild_level:
+            self.msg(f"|rYou must be at least {self.guild_level} to use this power.")
+            return
+
+        if not caller.cooldowns.ready("global_cooldown"):
+            caller.msg(f"|CNot so fast!")
+            return False
+        if not caller.cooldowns.ready("mud_patch"):
+            caller.msg(f"|YMud Patch isn't ready yet.")
+            return False
+        if caller.db.hp == caller.db.hpmax:
+            self.msg(f"|rYou are already at full health.")
+            return
+        if caller.db.ep < self.cost:
+            self.msg(f"|rYou need at least {self.cost} energy to use this power.")
+            return
+
+        caller.adjust_hp(20 + caller.db.skills.get("elemental harmony", 1) * 2)
+        caller.adjust_ep(-self.cost)
+        caller.cooldowns.add("global_cooldown", 2)
+        caller.cooldowns.add("mud_patch", 4)
+        self.msg(f"|gYou apply a mud patch to your wounds, healing minor injuries.")
+        activateMsg = f"|C$Your() form shimmers as a protective patch of mud forms around $pron(your) wounds."
+        caller.location.msg_contents(activateMsg, from_obj=caller)
+
+
 # region Terran Restoration
 class CmdTerranRestoration(PowerCommand):
     """
@@ -290,7 +423,8 @@ class CmdTerranRestoration(PowerCommand):
     key = "terran restoration"
     aliases = ["tr", "restore"]
     help_category = "earth elemental"
-    guild_level = 2
+    guild_level = 11
+    cost = 20
 
     def func(self):
         caller = self.caller
@@ -300,36 +434,37 @@ class CmdTerranRestoration(PowerCommand):
             self.msg(f"|rYou must be at least {self.guild_level} to use this power.")
             return
 
-        if not caller.cooldowns.ready("rebuild"):
+        if not caller.cooldowns.ready("global_cooldown"):
             caller.msg(f"|CNot so fast!")
             return False
-        caller.cooldowns.add("rebuild", 4)
+        if not caller.cooldowns.ready("restoration"):
+            caller.msg(f"|CNot so fast!")
+            return False
 
         wis = caller.traits.wis.value
         strength = caller.traits.str.value
+        stat_bonus = strength * 0.25 + wis * 0.5
         hp = caller.db.hp
         hpmax = caller.db.hpmax
         fp = caller.db.fp
-        hp_amount = 0
 
-        to_heal = math.floor(10 + glvl + strength / 2 + wis / 2)
-        to_heal = randint(int(to_heal / 2), to_heal)
-        cost = to_heal - wis / 2
+        to_heal = math.floor(30 + glvl + stat_bonus)
+        to_heal = randint(int(to_heal * 0.75), to_heal)
 
-        if fp < cost:
+        if fp < self.cost:
             self.msg(f"|rYou can't seem to focus on restoring your form.")
             return
 
         if hp + to_heal > hpmax:
-            hp_amount = hpmax - hp
             caller.db.hp = hpmax
-            caller.db.fp -= cost
+            caller.db.fp -= self.cost
         else:
-            hp_amount = hpmax - hp
             caller.db.hp += max(to_heal, 0)
-            caller.db.fp -= cost
+            caller.db.fp -= self.cost
 
         caller.cooldowns.add("global_cooldown", 2)
+        caller.cooldowns.add("restoration", 10)
+
         msg = f"|M$pron(Your) rocky exterior begins to shift and mend. Cracks seal themselves as stones and minerals realign, drawn from the surrounding ground."
         caller.location.msg_contents(msg, from_obj=caller)
 
@@ -375,7 +510,7 @@ class CmdEarthenRenewal(PowerCommand):
         energy_cost = 25 + glvl * 2
 
         if not caller.cooldowns.ready("earthen_renewal"):
-            caller.msg(f"|CNot so fast!")
+            caller.msg(f"|yEarthen renewal isn't ready yet.")
             return False
         if not caller.cooldowns.ready("global_cooldown"):
             caller.msg(f"|CNot so fast!")
@@ -426,8 +561,8 @@ class CmdTremor(PowerCommand):
 
     key = "tremor"
     help_category = "earth elemental"
-    guild_level = 12
-    cost = 20
+    guild_level = 10
+    cost = 25
 
     def _calculate_damage(self, geological_insight, strength, guild_level):
         base_value = 20
@@ -458,8 +593,11 @@ class CmdTremor(PowerCommand):
         if not target:
             caller.msg("You must be in combat to use this power.")
             return
-        if not caller.cooldowns.ready("tremor"):
+        if not caller.cooldowns.ready("global_cooldown"):
             caller.msg(f"|CNot so fast!")
+            return False
+        if not caller.cooldowns.ready("tremor"):
+            caller.msg(f"|YTremor isn't ready yet.")
             return False
         if glvl < self.guild_level:
             self.msg(f"|rYou must be at least {self.guild_level} to use this power.")
@@ -469,14 +607,17 @@ class CmdTremor(PowerCommand):
             return
 
         caller.adjust_fp(-self.cost)
-        caller.cooldowns.add("tremor", 4)
+        caller.cooldowns.add("tremor", 8)
         caller.cooldowns.add("global_cooldown", 2)
 
         skill_rank = caller.db.skills.get("geological insight", 1) * 10
         damage = self._calculate_damage(skill_rank, caller.traits.str.value, glvl)
         if self.caller.key == "Markar":
             self.msg(f"|gDamage: {damage}")
-        target.at_damage(caller, damage, "blunt", "tremor")
+
+        for obj in caller.location.contents:
+            if obj.db.can_attack == True:
+                obj.at_damage(caller, damage, "blunt", "tremor")
 
 
 # region Quicksand
@@ -484,7 +625,8 @@ class CmdQuickSand(PowerCommand):
     """
     The earth elemental can create a pool of quicksand beneath their enemies,
     slowing their movement and dealing damage over time. The amount of damage
-    dealt is based on the elemental's skill rank.
+    dealt is based on the elemental's skill rank in earth resonance, wisdom,
+    and guild level.
 
     Usage:
         quicksand
@@ -498,21 +640,25 @@ class CmdQuickSand(PowerCommand):
     guild_level = 6
     cost = 10
 
-    def _calculate_damage(self, earth_resonance, strength, guild_level):
+    def _calculate_damage(self):
+        earth_resonance = self.caller.db.skills.get("earth resonance", 1)
+        wisdom = self.caller.traits.wis.value
+        glvl = self.caller.db.guild_level
+
         base_value = 30
-        earth_resonance_weight = 0.6
-        strength_weight = 0.3
-        guild_level_weight = 0.1
+        earth_resonance_weight = 10
+        wis_weight = 0.75
+        guild_level_weight = 1
 
         damage = (
             base_value
             + (earth_resonance * earth_resonance_weight)
-            + (strength * strength_weight)
-            + (guild_level * guild_level_weight)
+            + (wisdom * wis_weight)
+            + (glvl * guild_level_weight)
         )
 
         # Adding some randomness to the damage
-        damage = int(uniform(damage * 0.6, damage * 1.1))
+        damage = int(uniform(damage * 0.6, damage * 1))
 
         return damage
 
@@ -524,8 +670,11 @@ class CmdQuickSand(PowerCommand):
         if not target:
             caller.msg("You must be in combat to use this power.")
             return
-        if not caller.cooldowns.ready("quicksand"):
+        if not caller.cooldowns.ready("global_cooldown"):
             caller.msg(f"|CNot so fast!")
+            return False
+        if not caller.cooldowns.ready("quicksand"):
+            caller.msg(f"|YQuicksand isn't ready yet.")
             return False
         if glvl < self.guild_level:
             self.msg(f"|rYou must be at least {self.guild_level} to use this power.")
@@ -535,11 +684,10 @@ class CmdQuickSand(PowerCommand):
             return
 
         caller.adjust_fp(-self.cost)
-        caller.cooldowns.add("quicksand", 4)
+        caller.cooldowns.add("quicksand", 6)
         caller.cooldowns.add("global_cooldown", 2)
-        skill_rank = caller.db.skills.get("earth resonance", 1) * 10
 
-        damage = self._calculate_damage(skill_rank, caller.traits.str.value, glvl)
+        damage = self._calculate_damage()
         target.at_damage(caller, damage, "blunt", "quicksand")
 
 
@@ -591,8 +739,11 @@ class CmdRockThrow(PowerCommand):
         if not target:
             caller.msg("You must be in combat to use this power.")
             return
-        if not caller.cooldowns.ready("rock throw"):
+        if not caller.cooldowns.ready("global_cooldown"):
             caller.msg(f"|CNot so fast!")
+            return False
+        if not caller.cooldowns.ready("rock throw"):
+            caller.msg(f"|YRock Throw isn't ready yet.")
             return False
         if glvl < self.guild_level:
             self.msg(f"|rYou must be at least {self.guild_level} to use this power.")
@@ -607,6 +758,279 @@ class CmdRockThrow(PowerCommand):
         damage = self._calculate_damage()
 
         target.at_damage(caller, damage, "blunt", "rock_throw")
+
+
+# region Landslide
+class CmdLandslide(PowerCommand):
+    """
+    The earth elemental can create a landslide to rush over their target, inflicting massive damage. The amount of damage dealt is based on the elemental's skill in geological insight, seismic awareness, strength, and guild level.
+
+    Usage:
+        landslide
+        lsl
+    """
+
+    key = "landslide"
+    aliases = ["lsl"]
+    help_category = "earth elemental"
+    guild_level = 12
+    cost = 20
+
+    def _calculate_damage(self, caller):
+        geo = caller.db.skills.get("geological insight", 1)
+        seismic = caller.db.skills.get("seismic awareness", 1)
+        strength = caller.traits.str.value
+        guild_level = caller.db.guild_level
+
+        base_value = 40
+        geo_weight = 10
+        seismic_weight = 10
+        strength_weight = 0.6
+        guild_level_weight = 1
+
+        damage = (
+            base_value
+            + (geo * geo_weight)
+            + (seismic * seismic_weight)
+            + (strength * strength_weight)
+            + (guild_level * guild_level_weight)
+        )
+
+        # Ensure damage is within the range of 100 to 300
+        damage = max(100, min(damage, 300))
+
+        # Adding some randomness to the damage
+        damage = int(uniform(damage * 0.6, damage))
+
+        return damage
+
+    def func(self):
+        caller = self.caller
+        glvl = caller.db.guild_level
+        target = caller.db.combat_target
+
+        if not target:
+            caller.msg("You must be in combat to use this power.")
+            return
+        if not caller.cooldowns.ready("global_cooldown"):
+            caller.msg(f"|CNot so fast!")
+            return False
+        if not caller.cooldowns.ready("landslide"):
+            caller.msg(f"|YLandslide isn't ready yet.")
+            return False
+        if glvl < self.guild_level:
+            self.msg(f"|rYou must be at least {self.guild_level} to use this power.")
+            return
+        if caller.db.fp < self.cost:
+            caller.msg(f"|rYou need at least {self.cost} focus to use this power.")
+            return
+
+        caller.adjust_fp(-self.cost)
+        caller.cooldowns.add("landslide", 6)
+        caller.cooldowns.add("global_cooldown", 2)
+
+        damage = self._calculate_damage(caller)
+        target.at_damage(caller, damage, "blunt ", "landslide")
+
+
+class CmdHurlBoulder(PowerCommand):
+    """
+    The earth elemental can hurl a boulder at their target, dealing massive damage. The amount of damage dealt is based on the elemental's skill in stone mastery, strength, and guild level. Hurling a boulder requires a significant amount of focus, and time must pass before the elemental can use this power again.
+
+    Usage:
+        hurl boulder
+        hb
+    """
+
+    key = "hurl boulder"
+    aliases = ["hb"]
+    help_category = "earth elemental"
+    guild_level = 14
+    cost = 30
+
+    def _calculate_damage(self, caller):
+        stone_mastery = caller.db.skills.get("stone mastery", 1)
+        strength = caller.traits.str.value
+        guild_level = caller.db.guild_level
+
+        base_value = 80
+        stone_mastery_weight = 10
+        strength_weight = 2
+        guild_level_weight = 1
+
+        damage = (
+            base_value
+            + (stone_mastery * stone_mastery_weight)
+            + (strength * strength_weight)
+            + (guild_level * guild_level_weight)
+        )
+
+        # Ensure damage is within the range of 100 to 300
+        damage = max(150, min(damage, 300))
+
+        # Adding some randomness to the damage
+        damage = int(uniform(damage * 0.85, damage))
+
+        return damage
+
+    def func(self):
+        caller = self.caller
+        glvl = caller.db.guild_level
+        target = caller.db.combat_target
+
+        if not target:
+            caller.msg("You must be in combat to use this power.")
+            return
+        if not caller.cooldowns.ready("global_cooldown"):
+            caller.msg(f"|CNot so fast!")
+            return False
+        if not caller.cooldowns.ready("hurl_boulder"):
+            caller.msg(f"|YHurl Boulder isn't ready yet.")
+            return False
+        if glvl < self.guild_level:
+            self.msg(f"|rYou must be at least {self.guild_level} to use this power.")
+            return
+        if caller.db.fp < self.cost:
+            caller.msg(f"|rYou need at least {self.cost} focus to use this power.")
+            return
+
+        caller.adjust_fp(-self.cost)
+        caller.cooldowns.add("hurl_boulder", 60)
+        caller.cooldowns.add("global_cooldown", 2)
+
+        damage = self._calculate_damage(caller)
+        target.at_damage(caller, damage, "blunt", "hurl_boulder")
+
+
+# region Lava flow
+class CmdLavaFlow(PowerCommand):
+    """
+    The earth elemental can cause a flow of lava to erupt from the ground, dealing heavy fire damage. The amount of damage dealt is based on the elemental's skill rank.
+
+    Usage:
+        lava flow
+    """
+
+    key = "lava flow"
+    aliases = ["lf"]
+    help_category = "earth elemental"
+    guild_level = 17
+    cost = 40
+
+    def _calculate_damage(self):
+        base_value = 50
+        geological_insight_weight = 4
+        elemental_harmony_weight = 8
+        strength_weight = 0.5
+        wisdom = self.caller.traits.wis.value
+        wisdom_weight = 0.5
+        guild_level_weight = 0.1
+        geological_insight = self.caller.db.skills.get("geological insight", 1)
+        strength = self.caller.traits.str.value
+        guild_level = self.caller.db.guild_level
+        elemental_harmony = self.caller.db.skills.get("elemental harmony", 1)
+
+        damage = (
+            base_value
+            + (geological_insight * geological_insight_weight)
+            + (elemental_harmony * elemental_harmony_weight)
+            + (strength * strength_weight)
+            + (wisdom * wisdom_weight)
+            + (guild_level * guild_level_weight)
+        )
+
+        # Ensure damage is within the range of 100 to 300
+        damage = max(100, min(damage, 300))
+
+        # Adding some randomness to the damage
+        damage = int(uniform(damage * 0.8, damage * 1.1))
+
+        return damage
+
+    def func(self):
+        caller = self.caller
+        glvl = caller.db.guild_level
+        target = caller.db.combat_target
+
+        if not target:
+            caller.msg("You must be in combat to use this power.")
+            return
+        if not caller.cooldowns.ready("global_cooldown"):
+            caller.msg(f"|CNot so fast!")
+            return False
+        if not caller.cooldowns.ready("lava_flow"):
+            caller.msg(f"|YLava Flow isn't ready yet.")
+            return False
+        if glvl < self.guild_level:
+            self.msg(f"|rYou must be at least {self.guild_level} to use this power.")
+            return
+        if caller.db.fp < self.cost:
+            caller.msg(f"|rYou need at least {self.cost} focus to use this power.")
+            return
+
+        caller.adjust_fp(-self.cost)
+        caller.cooldowns.add("lava_flow", 12)
+        caller.cooldowns.add("global_cooldown", 2)
+
+        damage = self._calculate_damage()
+
+        if self.caller.key == "Markar":
+            self.msg(f"|gDamage: {damage}")
+
+        for obj in caller.location.contents:
+            if obj.db.can_attack == True:
+                obj.at_damage(caller, damage, "fire", "lava_flow")
+
+
+class CmdMagmaForm(PowerCommand):
+    """
+    The earth elemental can transform their body into molten magma, increasing their offensive capabilities and dealing fire damage to enemies. The amount of damage dealt is based on the elemental's skill rank.
+
+    Usage:
+        magma form
+    """
+
+    key = "magma form"
+    aliases = ["mf"]
+    help_category = "earth elemental"
+    guild_level = 15
+    cost = 50
+
+    def func(self):
+        caller = self.caller
+        glvl = caller.db.guild_level
+        if glvl < self.guild_level:
+            caller.msg(
+                f"|CYou need to be guild level {self.guild_level} to use magma form."
+            )
+            return
+        if not caller.cooldowns.ready("global_cooldown"):
+            caller.msg(f"|CNot so fast!")
+            return False
+        if not caller.cooldowns.ready("magma_form"):
+            caller.msg(f"|YMagma Form isn't ready yet.")
+            return False
+        if caller.db.ep < self.cost:
+            caller.msg(f"|rYou need at least {self.cost} energy to use this power.")
+            return
+
+        if not caller.db.magma_form:
+            caller.db.magma_form = {"active": True, "duration": 10}
+            caller.db.active_form = "magma"
+            caller.db.ep -= self.cost
+            cooldown = 60
+
+            caller.cooldowns.add("global_cooldown", 2)
+            caller.cooldowns.add("magma_form", cooldown)
+
+            activateMsg = f"|C$Your() form shifts and hardens, transforming into a molten, fiery form."
+            caller.location.msg_contents(activateMsg, from_obj=caller)
+        else:
+            caller.db.magma_form = {"active": False, "duration": 0}
+            deactivateMsg = (
+                f"|C$Your() form cools and solidifies, returning to its normal state."
+            )
+            caller.location.msg_contents(deactivateMsg, from_obj=caller)
 
 
 # region Earthquake
@@ -626,17 +1050,18 @@ class CmdEarthquake(PowerCommand):
     guild_level = 20
     cost = 30
 
-    def _calculate_damage(self, seismic_awareness, strength, guild_level):
+    def _calculate_damage(self, seismic_awareness, guild_level):
         base_value = 50
         seismic_awareness_weight = 15
-        strength_weight = 0.75
+        wisdom_weight = 0.75
+        wisdom = self.caller.traits.wis.value
         guild_level_weight = 1.5
         # 50 + 80 + 25 + 30
 
         damage = (
             base_value
             + (seismic_awareness * seismic_awareness_weight)
-            + (strength * strength_weight)
+            + (wisdom * wisdom_weight)
             + (guild_level * guild_level_weight)
         )
 
@@ -656,8 +1081,11 @@ class CmdEarthquake(PowerCommand):
         if not target:
             caller.msg("You must be in combat to use this power.")
             return
-        if not caller.cooldowns.ready("earthquake"):
+        if not caller.cooldowns.ready("global_cooldown"):
             caller.msg(f"|CNot so fast!")
+            return False
+        if not caller.cooldowns.ready("earthquake"):
+            caller.msg(f"|YEarthquake isn't ready yet.")
             return False
         if glvl < self.guild_level:
             self.msg(f"|rYou must be at least {self.guild_level} to use this power.")
@@ -667,12 +1095,14 @@ class CmdEarthquake(PowerCommand):
             return
 
         caller.adjust_fp(-self.cost)
-        caller.cooldowns.add("earthquake", 4)
+        caller.cooldowns.add("earthquake", 10)
         caller.cooldowns.add("global_cooldown", 2)
         skill_rank = caller.db.skills.get("seismic awareness", 1)
 
         damage = self._calculate_damage(skill_rank, caller.traits.str.value, glvl)
-        target.at_damage(caller, damage, "blunt", "earthquake")
+        for obj in caller.location.contents:
+            if obj.db.can_attack == True:
+                obj.at_damage(caller, damage, "blunt", "earthquake")
 
 
 class CmdEnervate(PowerCommand):
@@ -689,11 +1119,17 @@ class CmdEnervate(PowerCommand):
     def func(self):
         caller = self.caller
         target = caller.db.combat_target
+        skill_rank = caller.db.skills.get("energy drain", 1)
+        vitality = target.db.level
+
         if not target:
             caller.msg("You must be in combat to use this power.")
             return
-        if not caller.cooldowns.ready("enervate"):
+        if not caller.cooldowns.ready("global_cooldown"):
             caller.msg(f"|CNot so fast!")
+            return False
+        if not caller.cooldowns.ready("enervate"):
+            caller.msg(f"|YEnervate isn't ready yet.")
             return False
         if caller.db.guild_level < self.guild_level:
             caller.msg(f"|rYou must be at least {self.guild_level} to use this power.")
@@ -701,13 +1137,15 @@ class CmdEnervate(PowerCommand):
         if caller.db.fp < self.fp_cost:
             caller.msg(f"|rYou need at least {self.fp_cost} focus to use this power.")
             return
+
         caller.cooldowns.add("enervate", 60)
         caller.cooldowns.add("global_cooldown", 2)
-        caller.adjust_fp(-self.fp_cost)
-        skill_rank = caller.db.skills.get("energy drain", 1)
-        vitality = target.db.level
+
         energy_drained = randint(vitality, vitality * 2) + skill_rank * 10
+
+        caller.adjust_fp(-self.fp_cost)
         caller.adjust_ep(energy_drained)
+
         target.msg(f"|r$You feel your energy being drained by {caller}.")
         caller.msg(f"|gYou drain energy from {target}, restoring your own strength.")
         caller.location.msg_contents(
@@ -731,22 +1169,28 @@ class CmdPowers(Command):
     def func(self):
         caller = self.caller
 
-        table = EvTable(f"|cPower", f"|cRank", f"|cCost", border="table")
-        table.add_row(f"|GReaction", 1, 0)
-        table.add_row(f"|GMeditate", 1, 0)
-        table.add_row(f"|GTerran Restoration", 2, "varies")
-        table.add_row(f"|GRock Throw", 4, "5 Focus")
-        table.add_row(f"|GQuicksand", 6, "10 Focus")
-        table.add_row(f"|GStone Skin", 7, "25 Energy")
-        table.add_row(f"|GEarthen Renewal", 9, "50 Energy")
-        table.add_row(f"|GBurnout", 7, "10 Energy")
-        table.add_row(f"|GTremor", 12, "20 Focus")
-        table.add_row(f"|GEarth Shield", 14, "50 Energy")
-        table.add_row(f"|GEnervate", 16, "25 Focus")
-        table.add_row(f"|GEarthquake", 20, "50 Focus")
-        table.add_row(f"|GEarth Form", 24, "50 Energy")
-        table.add_row(f"|GMountain Stance", 28, "75 Energy")
-        table.add_row(f"|GEarthshaker Stance", 30, "75 Energy")
+        table = EvTable(f"|cPower", f"|cRank", f"|cType", f"|cCost", border="table")
+        table.add_row(f"|GReaction", 1, "Utility", 0)
+        table.add_row(f"|GMeditate", 1, "Utility", 0)
+        table.add_row(f"|GMud Patch", 2, "Healing", "10 Focus")
+        table.add_row(f"|GRock Throw", 4, "Direct Damage", "5 Focus")
+        table.add_row(f"|GQuicksand", 6, "Direct Damage", "10 Focus")
+        table.add_row(f"|GBurnout", 7, "Essence", "7 Essence")
+        table.add_row(f"|GStone Skin", 8, "Defensive", "25 Energy")
+        table.add_row(f"|GEarthen Renewal", 9, "Healing", "50 Energy")
+        table.add_row(f"|GTremor", 10, "Area Damage", "25 Focus")
+        table.add_row(f"|GTerran Restoration", 11, "Healing", "20 Focus")
+        table.add_row(f"|GLandslide", 12, "Direct Damage", "20 Focus")
+        table.add_row(f"|GEarth Shield", 13, "Defensive", "50 Energy")
+        table.add_row(f"|GHurl Boulder", 14, "Direct Damage", "35 Focus")
+        table.add_row(f"|GEarth Form", 15, "Form", "50 Energy")
+        table.add_row(f"|GEnervate", 16, "Healing", "25 Focus")
+        table.add_row(f"|GLava Flow", 17, "Area Damage", "30 Energy")
+        table.add_row(f"|GElemental Fury", 18, "Essence", "12 Essence")
+        table.add_row(f"|GEarthquake", 20, "Area Damage", "50 Focus")
+        table.add_row(f"|GMagma Form", 22, "Form", "50 Energy")
+        table.add_row(f"|GMountain Stance", 28, "Stance", "75 Energy")
+        table.add_row(f"|GEarthshaker Stance", 30, "Stance", "75 Energy")
 
         caller.msg(str(table))
 
@@ -902,8 +1346,8 @@ class CmdGhelp(Command):
             return
         if skill == "elemental harmony":
             caller.msg(
-                "|cElemental Harmony|n\n\n"
-                "Enhances the elemental's connection to the earth, allowing for greater control over the environment.\n\n"
+                "Enhances the elemental's connection to the earth, allowing for greater control over the environment. \n\n"
+                "Additionally, this skill allows the elemental to restore more Primordial Essence over time, increasing their ability to use powerful abilities.\n\n"
             )
             return
         if skill == "earthen regeneration":
@@ -961,4 +1405,10 @@ class EarthElementalCmdSet(CmdSet):
         self.add(CmdEarthenRenewal)
         self.add(CmdEarthshakerStance)
         self.add(CmdBurnout)
+        self.add(CmdLandslide)
+        self.add(CmdMagmaForm)
+        self.add(CmdMudPatch)
+        self.add(CmdHurlBoulder)
+        self.add(CmdLavaFlow)
+        self.add(CmdElementalFury)
         self.add(Test)

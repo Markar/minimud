@@ -201,6 +201,26 @@ class CmdAdvGuild(Command):
 
 
 from typeclasses.rooms import MobRoom
+from typeclasses.rooms import SpecialMobRoom
+
+
+class RegenerateMobs(Command):
+    """
+    Regenerate all mobs in the room
+    """
+
+    key = "regenmobs"
+
+    def func(self):
+        caller = self.caller
+        if caller.key.lower() != "markar":
+            caller.msg(f"|rYou cannot regenerate specials, {caller.key.lower()}.")
+            return
+
+        for room in MobRoom.objects.all_family():
+            room.regenerate_mobs()
+
+        caller.msg(f"|gRegenerated mobs.")
 
 
 class RespawnMobs(Command):
@@ -209,15 +229,133 @@ class RespawnMobs(Command):
     """
 
     key = "respawnmobs"
-    help_category = "General"
 
     def func(self):
         caller = self.caller
+        if caller.key.lower() != "markar":
+            caller.msg(f"|rYou cannot respawn specials, {caller.key.lower()}.")
+            return
 
         for room in MobRoom.objects.all_family():
             room.respawn_mobs()
 
         caller.msg(f"|gRespawned mobs.")
+
+
+class RespawnSpecials(Command):
+    """
+    Respawn all mobs in the room
+    """
+
+    key = "respawnspecials"
+
+    def func(self):
+        caller = self.caller
+        if caller.key.lower() != "markar":
+            caller.msg(f"|rYou cannot respawn specials, {caller.key.lower()}.")
+            return
+
+        for room in SpecialMobRoom.objects.all_family():
+            room.respawn_mobs()
+
+        caller.msg(f"|gRespawned specials.")
+
+
+class RegenerateSpecials(Command):
+    """
+    Regenerate all special mobs in the room
+    """
+
+    key = "regenspecials"
+
+    def func(self):
+        caller = self.caller
+        if caller.key.lower() != "markar":
+            caller.msg(f"|rYou cannot regenerate specials, {caller.key.lower()}.")
+            return
+
+        for room in SpecialMobRoom.objects.all_family():
+            room.regenerate_mobs()
+
+        caller.msg(f"|gRegenerated specials.")
+
+
+class StartSpecialMobTicker(Command):
+    """
+    Start the ticker for special mobs
+    """
+
+    key = "startspecialmobticker"
+
+    def func(self):
+        caller = self.caller
+        if caller.key.lower() != "markar":
+            caller.msg(f"|rYou cannot start the ticker, {caller.key.lower()}.")
+            return
+
+        tickerhandler.add(
+            interval=60 * 10,
+            callback=SpecialMobRoom.respawn_mobs,
+            idstring=f"{self}",
+            persistent=True,
+        )
+
+        caller.msg(f"|gStarted special mob ticker.")
+
+
+class StopSpecialMobTicker(Command):
+    """
+    Stop the ticker for special mobs
+    """
+
+    key = "stopspecialmobticker"
+
+    def func(self):
+        caller = self.caller
+        if caller.key.lower() != "markar":
+            caller.msg(f"|rYou cannot stop the ticker, {caller.key.lower()}.")
+            return
+
+        tickerhandler.remove(
+            interval=300,
+            callback=SpecialMobRoom.respawn_mobs,
+            idstring=f"startspecialmobticker-superpower",
+            persistent=True,
+        )
+        caller.msg(f"|gStopped special mob ticker.")
+
+
+class JoinCharacter(Command):
+    key = "joinadv"
+
+    def func(self):
+
+        self.caller.swap_typeclass(
+            "typeclasses.characters.Character",
+            # clean_attributes=False,
+            run_start_hooks=None,
+            # no_default=True,
+            # clean_cmdsets=False,
+        )
+
+        # caller = self.caller
+        # creator_id = caller.db.creator_id
+        # self.caller.locks.add(
+        #     f"call:false(); control:perm(Developer); delete:id({creator_id}) or perm(Admin);drop:holds(); edit:pid({creator_id}) or perm(Admin); examine:perm(Builder); get:false(); puppet:id(4270) or pid({creator_id}) or perm(Developer) or pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin); tell:perm(Admin); view:all()"
+        # )
+
+
+class JoinPlayer(Command):
+    key = "joinplayer"
+
+    def func(self):
+        self.caller.swap_typeclass(
+            "typeclasses.players.Player",
+            clean_attributes=False,
+            run_start_hooks="all",
+            no_default=True,
+            clean_cmdsets=False,
+        )
 
 
 class GeneralCmdSet(CmdSet):
@@ -231,3 +369,10 @@ class GeneralCmdSet(CmdSet):
         self.add(CmdAdvCyberSkills)
         # self.add(TestSpawn)
         self.add(RespawnMobs)
+        self.add(RespawnSpecials)
+        self.add(RegenerateSpecials)
+        self.add(RegenerateMobs)
+        self.add(StartSpecialMobTicker)
+        self.add(StopSpecialMobTicker)
+        self.add(JoinCharacter)
+        self.add(JoinPlayer)

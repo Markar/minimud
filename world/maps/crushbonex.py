@@ -217,8 +217,8 @@ PROTOTYPES = {
         "spawn_proto": "ORC_EMPEROR",
         "typeclass": "typeclasses.rooms.MobRoom",
         "tags": [("crushbone", "zone")],
-        "key": "Emperor's Throne Room",
-        "desc": "|YThe majestic throne room of the orc emperor, adorned with banners and treasures.",
+        "key": "Western wall of the castle",
+        "desc": "|YTall stone walls surround the castle, with high ranking orcs patrolling the area. The sound of clashing weapons can be heard from within.",
     },
     (5, 3): {
         "prototype_parent": "xyz_room",
@@ -230,11 +230,11 @@ PROTOTYPES = {
     },
     (6, 3): {
         "prototype_parent": "xyz_room",
-        "spawn_proto": "ORC_ROYAL_GUARD",
+        "spawn_proto": "ORC_LEGIONNAIRE",
         "typeclass": "typeclasses.rooms.MobRoom",
         "tags": [("crushbone", "zone")],
-        "key": "Royal Guard Post",
-        "desc": "|YA heavily fortified post where the orc royal guards stand watch.",
+        "key": "Legionnaire's Post",
+        "desc": "|YA heavily fortified post where the orc legionnaires stand watch. The castle is more heavily guarded than expected.",
     },
     (7, 3): {
         "prototype_parent": "xyz_room",
@@ -311,11 +311,11 @@ PROTOTYPES = {
     },
     (4, 4): {
         "prototype_parent": "xyz_room",
-        "spawn_proto": "ORC_ORACLE",
+        "spawn_proto": "ORC_LORD",
         "typeclass": "typeclasses.rooms.MobRoom",
         "tags": [("crushbone", "zone")],
-        "key": "Oracle's Chamber",
-        "desc": "|YA mystical chamber where the orc oracle performs rituals and divinations.",
+        "key": "A royal chamber",
+        "desc": "|YA chamber where the orc lords hold council meetings. The room is filled with the sound of orcish laughter and the clinking of goblets.",
     },
     (5, 4): {
         "prototype_parent": "xyz_room",
@@ -512,3 +512,115 @@ XYMAP_DATA = {
     "prototypes": PROTOTYPES,
     # "options": {"map_visual_range": 1},
 }
+
+
+MAP_B = r"""
+                       1
+ + 0 1 2 3 4 5 6 7 8 9 0
+ 
+ 2   #-#-#
+     | | |
+ 1   B-#-#
+     | | |
+ 0   #-#-#
+
+ + 0 1 2 3 4 5 6 7 8 9 0
+                       1
+"""
+PROTOTYPES_MAP2 = {
+    (1, 0): {
+        "prototype_parent": "xyz_room",
+        "spawn_proto": "AMBASSADOR_DVINN",
+        "typeclass": "typeclasses.rooms.MobRoom",
+        "tags": [("chessboard", "zone")],
+        "key": "Ambassador's Quarters",
+        "desc": "|YNear the throne of the orc emperor, the ambassador from the dark elves resides. The room is filled with dark tapestries and strange artifacts.",
+    },
+    (2, 0): {
+        "prototype_parent": "xyz_room",
+        "typeclass": "typeclasses.rooms.MobRoom",
+        "tags": [("chessboard", "zone")],
+        "key": "Castle Crushbone.",
+        "desc": "|YA small alcove in the second floor of castle Crushbone. The walls are lined with tapestries and the floor is covered in a thick red carpet.",
+    },
+    (3, 0): {
+        "prototype_parent": "xyz_room",
+        "spawn_proto": "LORD_DARISH",
+        "typeclass": "typeclasses.rooms.MobRoom",
+        "tags": [("chessboard", "zone")],
+        "key": "Lord Darish's Quarters",
+        "desc": "|YThe quarters of Lord Darish, a powerful orc warrior. He is here to discuss matters of the realm with the orc emperor.",
+    },
+    (1, 1): {
+        "prototype_parent": "xyz_room",
+        "spawn_proto": [
+            {"name": "ORC_EMPEROR", "count": 1, "chance": 15, "returnEarly": True},
+            {"name": "ORC_ORACLE", "count": 1, "chance": 100},
+        ],
+        "typeclass": "typeclasses.rooms.SpecialMobRoom",
+        "tags": [("crushbone", "zone")],
+        "key": "Emperor's Throne Room",
+        "desc": "|YThe majestic throne room of the orc emperor, adorned with banners and treasures. The orc oracle is here, performing a ritual to divine the future of the realm. The emperor sits on his throne, listening intently to the oracle's words.",
+    },
+    (2, 1): {
+        "prototype_parent": "xyz_room",
+        "typeclass": "typeclasses.rooms.MobRoom",
+        "tags": [("chessboard", "zone")],
+        "key": "The Great Hall",
+        "desc": "|YThe great hall of castle Crushbone, where the orc lords gather to discuss matters of the realm. There is a feast laid out on a long table, with goblets of wine and platters of roasted meat.",
+    },
+    (3, 1): {
+        "prototype_parent": "xyz_room",
+        "typeclass": "typeclasses.rooms.MobRoom",
+        "tags": [("chessboard", "zone")],
+        "key": "Above the drawbridge",
+        "desc": "|YOverlooking the orc camp, a window in the castle wall provides a view of the surrounding area. The drawbridge can be seen below, with orc legionnaires patrolling the area.",
+    },
+    (1, 2): {
+        "prototype_parent": "xyz_room",
+        "spawn_proto": "ORC_EMISSARY",
+        "typeclass": "typeclasses.rooms.MobRoom",
+        "tags": [("chessboard", "zone")],
+        "key": "Emissary's Office",
+        "desc": "|YThe office of the orc emissary, where diplomatic matters are handled. The room is filled with maps and scrolls, detailing the orc's alliances and enemies.",
+    },
+    (2, 2): {
+        "prototype_parent": "xyz_room",
+        "spawn_proto": "ORC_ROYAL_GUARD",
+        "typeclass": "typeclasses.rooms.MobRoom",
+        "tags": [("chessboard", "zone")],
+        "key": "Royal Guard Post",
+        "desc": "|YThe royal guard post, where the orc royal guards stand watch. The room is filled with weapons and armor, and the guards are armed to the teeth. They stand at attention, ready to defend the emperor at a moment's notice.",
+    },
+    (3, 2): {
+        "prototype_parent": "xyz_room",
+        "typeclass": "typeclasses.rooms.MobRoom",
+        "tags": [("chessboard", "zone")],
+        "key": "Stairwell to the second floor",
+        "desc": "|YThere is a stairwell leading down to the first floor of the castle. You can hear the sound of orcish voices echoing up from below. Against the west wall is a large tapestry depicting a battle between orcs and humans.",
+    },
+}
+
+
+class MobNode(xymap_legend.MapNode):
+    prototype = {
+        "prototype_parent": "xyz_room",
+        "key": "Inside",
+        "desc": "A mob in Mobland.",
+    }
+
+
+LEGEND = {
+    "B": MobNode,
+}
+
+XYMAP_DATA_MAP2 = {
+    "map": MAP_B,
+    "zcoord": "crushbone_second_level",
+    "prototypes": PROTOTYPES_MAP2,
+    "legend": LEGEND,
+    # "options": {"map_visual_range": 1, "map_mode": "scan"},
+}
+
+
+XYMAP_DATA_LIST = [XYMAP_DATA, XYMAP_DATA_MAP2]

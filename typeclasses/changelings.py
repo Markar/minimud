@@ -98,9 +98,6 @@ class Changelings(PlayerCharacter):
         self.msg(f"|gYour body ripples and shakes as energy flows into you")
         self.db.engulfs = self.db.max_engulfs
 
-    def at_docwagon_tick(self):
-        return
-
     def at_tick(self):
         glvl = self.db.guild_level
         ep = self.db.ep

@@ -61,7 +61,7 @@ class CmdYaulp(PowerCommand):
 
 class YaulpBuff(BaseBuff):
     duration = 24
-    tickrate = 16
+    tickrate = 6
     stacks = 1
 
     def at_apply(self, initial=True, **kwargs):

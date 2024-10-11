@@ -54,8 +54,12 @@ class CmdEmberStrike(PowerCommand):
             self.msg(f"|rYou must be at least {self.guild_level} to use this power.")
             return
 
-        if not caller.cooldowns.ready("ember strike"):
+        if not caller.cooldowns.ready("global_cooldown"):
             caller.msg(f"|CNot so fast!")
+            return False
+
+        if not caller.cooldowns.ready("ember strike"):
+            caller.msg(f"|CEmber strike isn't ready yet.")
             return False
 
         if not target:
@@ -133,8 +137,12 @@ class CmdFirePunch(PowerCommand):
             self.msg(f"|rYou must be at least {self.guild_level} to use this power.")
             return
 
-        if not caller.cooldowns.ready("fire_punch"):
+        if not caller.cooldowns.ready("global_cooldown"):
             caller.msg(f"|CNot so fast!")
+            return False
+
+        if not caller.cooldowns.ready("fire_punch"):
+            caller.msg(f"|CFirepunch isn't ready yet.")
             return False
 
         if not target:
@@ -208,12 +216,16 @@ class CmdFireWhip(PowerCommand):
         glvl = caller.db.guild_level
         target = caller.search(caller.db.combat_target)
 
+        if not caller.cooldowns.ready("global_cooldown"):
+            caller.msg(f"|CNot so fast!")
+            return False
+
         if glvl < self.guild_level:
             self.msg(f"|rYou must be at least {self.guild_level} to use this power.")
             return
 
         if not caller.cooldowns.ready("firewhip"):
-            caller.msg(f"|CNot so fast!")
+            caller.msg(f"|CFirewhip isn't ready yet.")
             return False
 
         if not target:
@@ -290,6 +302,10 @@ class CmdLavaBurst(PowerCommand):
         if glvl < self.guild_level:
             self.msg(f"|rYou must be at least {self.guild_level} to use this power.")
             return
+
+        if not caller.cooldowns.ready("global_cooldown"):
+            caller.msg(f"|CNot so fast!")
+            return False
 
         if not caller.cooldowns.ready("lava_burst"):
             caller.msg(f"|CNot so fast!")
@@ -370,6 +386,10 @@ class CmdFireball(PowerCommand):
             self.msg(f"|rYou must be at least {self.guild_level} to use this power.")
             return
 
+        if not caller.cooldowns.ready("global_cooldown"):
+            caller.msg(f"|CNot so fast!")
+            return False
+
         if not caller.cooldowns.ready("fireball"):
             caller.msg(f"|CNot so fast!")
             return False
@@ -449,6 +469,10 @@ class CmdInferno(PowerCommand):
             self.msg(f"|rYou must be at least {self.guild_level} to use this power.")
             return
 
+        if not caller.cooldowns.ready("global_cooldown"):
+            caller.msg(f"|CNot so fast!")
+            return False
+
         if not caller.cooldowns.ready("inferno"):
             caller.msg(f"|CNot so fast!")
             return False
@@ -484,11 +508,12 @@ class CmdBlazingMaelstrom(PowerCommand):
     The fire elemental can summon a blazing maelstrom, engulfing their enemies in a whirlwind of flames. This devastating ability draws upon the elemental's wisdom and guild level to unleash a torrent of fiery destruction.
 
     Usage:
-        blazing maelstrom <target>
+        blazing maelstrom, bm, mael <target>
+
     """
 
     key = "blazing maelstrom"
-    aliases = ["blazingmaelstrom", "bm"]
+    aliases = ["blazingmaelstrom", "bm", "mael"]
     help_category = "fire elemental"
     guild_level = 24
     cost = 75
@@ -527,8 +552,12 @@ class CmdBlazingMaelstrom(PowerCommand):
         glvl = caller.db.guild_level
         energy_cost = 10
 
-        if not caller.cooldowns.ready("blazing maelstrom"):
+        if not caller.cooldowns.ready("global_cooldown"):
             caller.msg(f"|CNot so fast!")
+            return False
+
+        if not caller.cooldowns.ready("blazing maelstrom"):
+            caller.msg(f"|CBlazing maelstrom isn't ready yet.")
             return False
 
         if glvl < self.guild_level:
@@ -562,9 +591,10 @@ class CmdBlazingMaelstrom(PowerCommand):
         damage1 = self._calculate_damage()
         damage2 = self._calculate_damage()
         damage3 = self._calculate_damage()
-        self.msg(f"|gDamage1: {damage1}")
-        self.msg(f"|gDamage2: {damage2}")
-        self.msg(f"|gDamage3: {damage3}")
+        if caller.key == "Markar":
+            self.msg(f"|gDamage1: {damage1}")
+            self.msg(f"|gDamage2: {damage2}")
+            self.msg(f"|gDamage3: {damage3}")
 
         target.at_damage(caller, damage1, "fire", "blazing_maelstrom")
         target.at_damage(caller, damage2, "fire", "blazing_maelstrom")
@@ -629,8 +659,12 @@ class CmdSunburst(PowerCommand):
             self.msg(f"|rYou must be at least {self.guild_level} to use this power.")
             return
 
-        if not caller.cooldowns.ready("sunburst"):
+        if not caller.cooldowns.ready("global_cooldown"):
             caller.msg(f"|CNot so fast!")
+            return False
+
+        if not caller.cooldowns.ready("sunburst"):
+            caller.msg(f"|CSunburst isn't ready yet.")
             return False
 
         if not target:
@@ -706,6 +740,7 @@ class CmdFlamestrike(PowerCommand):
         return damage
 
     def func(self):
+        super().func()
         caller = self.caller
         glvl = caller.db.guild_level
         target = caller.search(caller.db.combat_target)
@@ -714,8 +749,12 @@ class CmdFlamestrike(PowerCommand):
             self.msg(f"|rYou must be at least {self.guild_level} to use this power.")
             return
 
-        if not caller.cooldowns.ready("flamestrike"):
+        if not caller.cooldowns.ready("global_cooldown"):
             caller.msg(f"|CNot so fast!")
+            return
+
+        if not caller.cooldowns.ready("flamestrike"):
+            caller.msg(f"|CFlamestrike isn't ready yet.")
             return False
 
         if not target:
@@ -730,8 +769,8 @@ class CmdFlamestrike(PowerCommand):
             caller.msg(f"|rYou need at least {self.cost} focus to use this power.")
             return
 
-        caller.cooldowns.add("flamestrike", 60)
         caller.cooldowns.add("global_cooldown", 2)
+        caller.cooldowns.add("flamestrike", 60)
 
         caller.msg(f"|MYou strike {target} with a pillar of fire.")
         target.msg(f"|M{caller} strikes you with a pillar of fire.")
@@ -889,7 +928,7 @@ class CmdFlameShield(PowerCommand):
         if not caller.db.flame_shield["hits"] > 0:
             caller.cooldowns.add("flame_shield", 60)
             caller.cooldowns.add("global_cooldown", 2)
-            caller.db.flame_shield["hits"] = (
+            caller.db.flame_shield_hits = (
                 3
                 + caller.db.skills.get("inferno resilience", 1)
                 + caller.db.skills.get("pyroclastic surge", 1)

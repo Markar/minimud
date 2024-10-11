@@ -58,16 +58,17 @@ class CmdGAdvance(Command):
             caller.db.guild_level += 1
             caller.db.epmax += 20
             caller.db.title = title
+            caller.db.primordial_essence["max"] = caller.db.guild_level
             self.msg(f"|rYou become {title} ({caller.db.guild_level}).")
 
-        if caller.db.guild_level >= 30:
-            caller.db.burnout["max"] = 4
-        elif caller.db.guild_level >= 21:
-            caller.db.burnout["max"] = 3
-        elif caller.db.guild_level >= 14:
-            caller.db.burnout["max"] = 2
-        elif caller.db.guild_level >= 7:
-            caller.db.burnout["max"] = 1
+        # if caller.db.guild_level >= 30:
+        #     caller.db.primordial_essence = 4
+        # elif caller.db.guild_level >= 21:
+        #     caller.db.primordial_essence = 3
+        # elif caller.db.guild_level >= 14:
+        #     caller.db.primordial_essence = 2
+        # elif caller.db.guild_level >= 7:
+        #     caller.db.primordial_essence = 1
 
     def func(self):
         caller = self.caller
@@ -96,8 +97,10 @@ class CmdGuildStatSheet(Command):
         form = caller.db.subguild or "adventurer"
         gxp_needed = get_glvl_cost(my_glvl + 1)
         reaction = caller.db.reaction_percentage or 50
-        burnout_count = caller.db.burnout["count"]
-        burnout_max = caller.db.burnout["max"]
+        # burnout_count = caller.db.burnout["count"]
+        # burnout_max = caller.db.burnout["max"]
+        primordial_energy = caller.db.primordial_essence["count"] or 0
+        PE_Max = caller.db.primordial_essence["max"] or 0
 
         table = EvTable(f"|c{caller}", f"|c{title}", border="table")
         table.add_row(f"|GGuild Level", my_glvl)
@@ -105,7 +108,7 @@ class CmdGuildStatSheet(Command):
         table.add_row(f"|GSkill GXP", skill_gxp)
         table.add_row(f"|GForm", form.title())
         table.add_row(f"|GReaction", f"{reaction}%")
-        table.add_row(f"|GBurnouts", f"{burnout_count} / {burnout_max}")
+        table.add_row(f"|GPrimordial Essence", f"{primordial_energy} / {PE_Max}")
 
         caller.msg(str(table))
 
@@ -158,6 +161,10 @@ class CmdJoinElementals(Command):
                 "typeclasses.elementalguild.earth_elemental.EarthElemental",
                 clean_attributes=False,
             )
+            creator_id = caller.db.creator_id
+            caller.locks.add(
+                f"call:false(); control:perm(Developer); delete:id({creator_id}) or perm(Admin);drop:holds(); edit:pid({creator_id}) or perm(Admin); examine:perm(Builder); get:false(); puppet:id(4270) or pid({creator_id}) or perm(Developer) or pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin); tell:perm(Admin); view:all()"
+            )
             caller.cmdset.add(EarthElementalCmdSet, persistent=True)
 
         else:
@@ -189,7 +196,7 @@ class CmdMeditate(PowerCommand):
 
     key = "meditate"
     aliases = ["med"]
-    help_category = "earth elemental"
+    help_category = "elemental"
     guild_level = 1
     cost = 10
 
@@ -252,7 +259,7 @@ class MeditateBuff(BaseBuff):
     A buff that restores focus points to the caller over time.
     """
 
-    duration = 60
+    duration = 120
     tickrate = 5
     type = "meditate"
     key = "meditate"
@@ -269,10 +276,29 @@ class MeditateBuff(BaseBuff):
             self.owner.tags.remove("meditating", category="status")
             return
 
-        if self.ticknum == 12:
+        if self.ticknum == 24:
             self.owner.msg(f"|gYou stand up, feeling refreshed and invigorated.")
             self.owner.tags.remove("meditating", category="status")
             return
+
+
+class CmdStopMeditating(Command):
+    """
+    Stop meditating
+    """
+
+    key = "stop meditating"
+    aliases = ["med stop"]
+    help_category = "elemental"
+
+    def func(self):
+        caller = self.caller
+        caller.buffs.remove("meditate")
+        if "meditating" in (caller.tags.get(category="status") or []):
+            caller.tags.remove("meditating", category="status")
+            caller.msg(f"|gYou stand up, feeling refreshed and invigorated.")
+        else:
+            caller.msg(f"|rYou are not meditating.")
 
 
 class CmdLeaveElementals(Command):
@@ -531,6 +557,7 @@ class ElementalCmdSet(CmdSet):
 
         # self.add(CmdDrain)
         self.add(CmdMeditate)
+        self.add(CmdStopMeditating)
         self.add(CmdGAdvance)
         self.add(CmdGuildStatSheet)
         self.add(CmdChooseForm)

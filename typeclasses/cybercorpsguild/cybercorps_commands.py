@@ -228,8 +228,6 @@ class ResupplyBuff(BaseBuff):
             return
 
 
-
-
 # region Powers
 class CmdPowers(Command):
     """

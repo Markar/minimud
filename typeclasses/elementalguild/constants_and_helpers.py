@@ -26,7 +26,6 @@ SKILLS_COST = [
     10583019,  # Total: 66,605,476
     12098644,  # Total: 78,704,120
 ]
-
 WATER_TITLES = [
     "the Wave Novice",
     "the Ripple Apprentice",
@@ -67,9 +66,16 @@ WATER_TITLES = [
     "the Primordial Ocean God",
     "the God of the Abyssal Depths",
     "the Lord of the Oceanic Depths",
-    "the Abyssal Deity of the Seas",
+    "the Child of Poseidon",
+    "the Abyssal Deity of Creation",
 ]
 
+#
+#
+#
+#
+#
+#
 EARTH_TITLES = [
     "the Earth Novice",
     "the Soil Apprentice",
@@ -108,11 +114,18 @@ EARTH_TITLES = [
     "the Ground Shaper",
     "the Stonecrafter",
     "the Creator of Mountains",
-    "the Emerald Deity",
-    "the Rock God",
+    "the Emerald Entity",
+    "the Ruby Entity",
     "the Crystal Entity",
+    "the Diamond Entity",
 ]
-
+#
+#
+#
+#
+#
+#
+#
 FIRE_TITLES = [
     "Novice of the Flickering Flames",
     "Apprentice of the Smoldering Embers",
@@ -153,8 +166,16 @@ FIRE_TITLES = [
     "God of the Eternal Fire",
     "Supreme Deity of the Eternal Flame",
     "Eternal Flame Incarnate",
+    "Avatar of the Blazing Sun",
+    "Avatar of Nuclear Fusion",
 ]
-
+#
+#
+#
+#
+#
+#
+#
 AIR_TITLES = [
     "Novice of the Whispering Winds",
     "Apprentice of the Gentle Breezes",
@@ -194,4 +215,7 @@ AIR_TITLES = [
     "Master of the Celestial Air",
     "God of the Eternal Sky",
     "Supreme Deity of the Eternal Wind",
+    "Eternal Wind Incarnate",
+    "Avatar of the Airy Realms",
+    "Avatar of the Celestial Breezes",
 ]

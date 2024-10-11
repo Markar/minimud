@@ -20,7 +20,7 @@ class EarthAttack(ElementalAttack):
         str = wielder.traits.str.value
         dex = wielder.traits.dex.value
 
-        stat_bonus = str / 2 + dex / 4
+        stat_bonus = str / 2 + dex / 2
         dmg = 5 + stat_bonus + glvl * 3 / 2
 
         if glvl < 10:
@@ -37,6 +37,8 @@ class EarthAttack(ElementalAttack):
         damage = int(uniform(dmg / 2, dmg))
         if wielder.db.burnout["active"]:
             damage += wielder.db.guild_level
+        if wielder.db.elemental_fury["active"]:
+            damage += wielder.db.guild_level * 2.5
         return damage
 
     def at_attack(self, wielder, target, **kwargs):
@@ -44,21 +46,30 @@ class EarthAttack(ElementalAttack):
         speed = 3
 
         # Subtract energy and apply damage to target before their defenses
-        if wielder.db.strategy == "melee":
-            if wielder.db.burnout["active"]:
-                if randint(1, 100) <= 25:
-                    dmg = self._calculate_melee_damage(wielder)
-                    target.at_damage(wielder, dmg, "blunt", "earth_elemental_melee")
-                    wielder.msg(f"|rThe energy makes your attacks faster.|n")
-                wielder.adjust_ep(-2)
-                wielder.adjust_fp(2)
-            else:
-                wielder.db.ep -= self.energy_cost
+        if wielder.db.burnout["active"]:
+            if randint(1, 100) <= 25:
+                dmg = self._calculate_melee_damage(wielder)
+                target.at_damage(
+                    wielder, int(dmg), "blunt", "earth_elemental_melee_fury"
+                )
+                wielder.msg(f"|rThe energy makes your attacks faster.|n")
+            wielder.adjust_ep(-2)
+            wielder.adjust_fp(2)
 
-            dmg = self._calculate_melee_damage(wielder)
-            target.at_damage(wielder, dmg, "blunt", "earth_elemental_melee")
-            wielder.msg(f"[ Cooldown: {speed} seconds ]")
-            wielder.cooldowns.add("attack", speed)
+        if wielder.db.elemental_fury["active"]:
+            if randint(1, 100) <= 60:
+                dmg = self._calculate_melee_damage(wielder)
+                target.at_damage(
+                    wielder, int(dmg), "blunt", "earth_elemental_melee_fury"
+                )
+                wielder.adjust_ep(-4)
+            wielder.adjust_fp(10)
+
+        wielder.db.ep -= self.energy_cost
+        dmg = self._calculate_melee_damage(wielder)
+        target.at_damage(wielder, int(dmg), "blunt", "earth_elemental_melee")
+        wielder.msg(f"[ Cooldown: {speed} seconds ]")
+        wielder.cooldowns.add("attack", speed)
 
 
 # Guild Level: 1, Strength: 20, Dexterity: 10, Damage: 32.5

@@ -52,6 +52,7 @@ class FireElemental(Elemental):
         }
         self.db.burnout = {"active": False, "count": 0, "max": 0, "duration": 0}
         self.db.heat_wave = {"rate": 0, "duration": 0}
+        self.db.flame_shield_hits = 0
         self.db.fire_form = False
         self.db.lava_form = False
 
@@ -214,23 +215,21 @@ class FireElemental(Elemental):
     def _calculate_dodge(self):
         glvl = self.db.guild_level
 
-        blazing_speed = self.db.skills.get("blazing speed", 1)
         base_dodge = 1
         max_dodge = 40
 
-        dodge = (
-            base_dodge
-            + (blazing_speed * 2)
-            + (glvl * 0.3)
-            + (self.traits.dex.value * 0.2)
-        )
+        dodge = base_dodge + (glvl * 0.3) + (self.traits.dex.value * 0.2)
 
-        if blazing_speed <= 4:
-            dodge += 2
-        if blazing_speed <= 7:
-            dodge += 4
-        if blazing_speed <= 10:
-            dodge += 6
+        if blazing_speed := self.db.skills.get("blazing speed", 1):
+            dodge += blazing_speed * 2
+
+            if blazing_speed <= 4:
+                dodge += 2
+            if blazing_speed <= 7:
+                dodge += 4
+            if blazing_speed <= 10:
+                dodge += 6
+
         if glvl >= 10:
             dodge += 1
         if glvl >= 20:
@@ -270,13 +269,13 @@ class FireElemental(Elemental):
         # Flat damage reduction - 50 con = 5 reduction, glvl 30 = 1.5 reduction
         flat_reduction = self.traits.con.value * 0.1 + glvl * 0.05 + inferno_resilience
 
-        # Additional damage reduction from cyclone armor
-        if self.db.flame_shield["hits"] > 0:
+        # Additional damage reduction from flame shield
+        if flame_shield_hits := self.db.flame_shield_hits > 0:
             flame_shield_reduction = molten_armor * 0.03 + inferno_resilience * 0.02
             percentage_reduction += flame_shield_reduction
             flat_reduction += molten_armor + inferno_resilience
 
-            if self.db.flame_shield["hits"] == 1:
+            if flame_shield_hits == 1:
                 deactivateMsg = f"|C$Your() flame shield flickers and fades, leaving only a wisp of smoke behind."
                 self.location.msg_contents(deactivateMsg, from_obj=self)
 

@@ -10,13 +10,27 @@
 # OPEN TRAINING GROUNDS
 @tel training_grounds#1
 #
-@open north;n,south;s = (1, 1, training_grounds)
+@open enter,leave = (1, 1, training_grounds)
 #
 
 # OPEN CRUSHBONE
 @tel chaos#4
 #
 @open enter,leave = (4, 0, crushbone)
+#
+@tel (3, 2, crushbone_second_level)
+#
+@open down;d,up;u = (6, 4, crushbone)
+#
+@tel (8,2,crushbone)
+#
+@dig/teleport Trainer's Hill;crushbone#1 : typeclasses.rooms.SpecialMobRoom = up;u,down;d
+#
+@desc |YAs you climb the hill, you see a large, open area at the top. The ground is covered in patches of grass and wildflowers, and the air is filled with the sound of birdsong. At the center of the hilltop, a large, flat rock serves as a natural platform, overlooking the surrounding landscape. From this vantage point, you can see the entire training grounds, with its various obstacles and training areas.
+#
+set here/spawn_proto = [{"name": "ORC_TRAINER", "count": 1, "chance": 15, "returnEarly": True}, {"name": "ORC_CENTURION", "count": 2, "chance": 100}]
+
+
 
 # OPEN YOUTUBE
 @tel chaos#
