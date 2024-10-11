@@ -25,6 +25,8 @@ class CmdJoinCybercorps(Command):
             caller.swap_typeclass(
                 "typeclasses.cybercorps.Cybercorps",
                 clean_attributes=False,
+                no_default=True,
+                clean_cmdsets=False,
             )
             creator_id = caller.db.creator_id
             self.caller.locks.add(

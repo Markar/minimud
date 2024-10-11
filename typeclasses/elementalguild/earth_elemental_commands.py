@@ -92,7 +92,7 @@ class CmdElementalFury(PowerCommand):
     key = "elemental fury"
     aliases = ["ef", "fury"]
     help_category = "earth elemental"
-    cost = 10
+    cost = 12
     guild_level = 18
 
     def func(self):
@@ -190,11 +190,12 @@ class CmdEarthForm(PowerCommand):
     level, constitution, rock solid defense, and stone mastery.
 
     Usage:
-        earth form
+        earthform
+        earth
     """
 
-    key = "earth form"
-    aliases = ["ef"]
+    key = "earthform"
+    aliases = ["earth"]
     help_category = "earth elemental"
     cost = 50
     guild_level = 15
@@ -399,8 +400,8 @@ class CmdMudPatch(PowerCommand):
             self.msg(f"|rYou need at least {self.cost} energy to use this power.")
             return
 
-        caller.db.hp += 20 + caller.db.skills.get("elemental harmony", 1) * 2
-        caller.db.ep -= self.cost
+        caller.adjust_hp(20 + caller.db.skills.get("elemental harmony", 1) * 2)
+        caller.adjust_ep(-self.cost)
         caller.cooldowns.add("global_cooldown", 2)
         caller.cooldowns.add("mud_patch", 10)
         self.msg(f"|gYou apply a mud patch to your wounds, healing minor injuries.")
@@ -436,20 +437,19 @@ class CmdTerranRestoration(PowerCommand):
         if not caller.cooldowns.ready("global_cooldown"):
             caller.msg(f"|CNot so fast!")
             return False
-        if not caller.cooldowns.ready("rebuild"):
+        if not caller.cooldowns.ready("restoration"):
             caller.msg(f"|CNot so fast!")
             return False
 
         wis = caller.traits.wis.value
         strength = caller.traits.str.value
-        stat_bonus = strength * 0.5 + wis * 0.5
+        stat_bonus = strength * 0.25 + wis * 0.5
         hp = caller.db.hp
         hpmax = caller.db.hpmax
         fp = caller.db.fp
 
-        to_heal = math.floor(10 + glvl + stat_bonus)
-        to_heal = randint(int(to_heal / 2), to_heal)
-        to_heal = max(20, min(to_heal, 50))
+        to_heal = math.floor(30 + glvl + stat_bonus)
+        to_heal = randint(int(to_heal * 0.75), to_heal)
 
         if fp < self.cost:
             self.msg(f"|rYou can't seem to focus on restoring your form.")
@@ -463,7 +463,7 @@ class CmdTerranRestoration(PowerCommand):
             caller.db.fp -= self.cost
 
         caller.cooldowns.add("global_cooldown", 2)
-        caller.cooldowns.add("rebuild", 10)
+        caller.cooldowns.add("restoration", 10)
 
         msg = f"|M$pron(Your) rocky exterior begins to shift and mend. Cracks seal themselves as stones and minerals realign, drawn from the surrounding ground."
         caller.location.msg_contents(msg, from_obj=caller)
@@ -1050,17 +1050,18 @@ class CmdEarthquake(PowerCommand):
     guild_level = 20
     cost = 30
 
-    def _calculate_damage(self, seismic_awareness, strength, guild_level):
+    def _calculate_damage(self, seismic_awareness, guild_level):
         base_value = 50
         seismic_awareness_weight = 15
-        strength_weight = 0.75
+        wisdom_weight = 0.75
+        wisdom = self.caller.traits.wis.value
         guild_level_weight = 1.5
         # 50 + 80 + 25 + 30
 
         damage = (
             base_value
             + (seismic_awareness * seismic_awareness_weight)
-            + (strength * strength_weight)
+            + (wisdom * wisdom_weight)
             + (guild_level * guild_level_weight)
         )
 
@@ -1168,28 +1169,28 @@ class CmdPowers(Command):
     def func(self):
         caller = self.caller
 
-        table = EvTable(f"|cPower", f"|cRank", f"|cCost", border="table")
-        table.add_row(f"|GReaction", 1, 0)
-        table.add_row(f"|GMeditate", 1, 0)
-        table.add_row(f"|GMud Patch", 2, "10 Focus")
-        table.add_row(f"|GRock Throw", 4, "05 Focus")
-        table.add_row(f"|GQuicksand", 6, "10 Focus")
-        table.add_row(f"|GBurnout", 7, "1x Essence")
-        table.add_row(f"|GStone Skin", 8, "25 Energy")
-        table.add_row(f"|GEarthen Renewal", 9, "50 Energy")
-        table.add_row(f"|GTremor", 10, "25 Focus")
-        table.add_row(f"|GTerran Restoration", 11, "20 Focus")
-        table.add_row(f"|GLandslide", 12, "20 Focus")
-        table.add_row(f"|GEarth Shield", 13, "50 Energy")
-        table.add_row(f"|GHurl Boulder", 14, "35 Focus")
-        table.add_row(f"|GEarth Form", 15, "50 Energy")
-        table.add_row(f"|GEnervate", 16, "25 Focus")
-        table.add_row(f"|GLava Flow", 17, "30 Energy")
-        table.add_row(f"|GElemental Fury", 18, "2x Essence")
-        table.add_row(f"|GEarthquake", 20, "50 Focus")
-        table.add_row(f"|GMagma Form", 22, "50 Energy")
-        table.add_row(f"|GMountain Stance", 28, "75 Energy")
-        table.add_row(f"|GEarthshaker Stance", 30, "75 Energy")
+        table = EvTable(f"|cPower", f"|cRank", f"|cType", f"|cCost", border="table")
+        table.add_row(f"|GReaction", 1, "Utility", 0)
+        table.add_row(f"|GMeditate", 1, "Utility", 0)
+        table.add_row(f"|GMud Patch", 2, "Healing", "10 Focus")
+        table.add_row(f"|GRock Throw", 4, "Direct Damage", "5 Focus")
+        table.add_row(f"|GQuicksand", 6, "Direct Damage", "10 Focus")
+        table.add_row(f"|GBurnout", 7, "Essence", "7 Essence")
+        table.add_row(f"|GStone Skin", 8, "Defensive", "25 Energy")
+        table.add_row(f"|GEarthen Renewal", 9, "Healing", "50 Energy")
+        table.add_row(f"|GTremor", 10, "Area Damage", "25 Focus")
+        table.add_row(f"|GTerran Restoration", 11, "Healing", "20 Focus")
+        table.add_row(f"|GLandslide", 12, "Direct Damage", "20 Focus")
+        table.add_row(f"|GEarth Shield", 13, "Defensive", "50 Energy")
+        table.add_row(f"|GHurl Boulder", 14, "Direct Damage", "35 Focus")
+        table.add_row(f"|GEarth Form", 15, "Form", "50 Energy")
+        table.add_row(f"|GEnervate", 16, "Healing", "25 Focus")
+        table.add_row(f"|GLava Flow", 17, "Area Damage", "30 Energy")
+        table.add_row(f"|GElemental Fury", 18, "Essence", "12 Essence")
+        table.add_row(f"|GEarthquake", 20, "Area Damage", "50 Focus")
+        table.add_row(f"|GMagma Form", 22, "Form", "50 Energy")
+        table.add_row(f"|GMountain Stance", 28, "Stance", "75 Energy")
+        table.add_row(f"|GEarthshaker Stance", 30, "Stance", "75 Energy")
 
         caller.msg(str(table))
 
@@ -1345,8 +1346,8 @@ class CmdGhelp(Command):
             return
         if skill == "elemental harmony":
             caller.msg(
-                "|cElemental Harmony|n\n\n"
-                "Enhances the elemental's connection to the earth, allowing for greater control over the environment.\n\n"
+                "Enhances the elemental's connection to the earth, allowing for greater control over the environment. \n\n"
+                "Additionally, this skill allows the elemental to restore more Primordial Essence over time, increasing their ability to use powerful abilities.\n\n"
             )
             return
         if skill == "earthen regeneration":

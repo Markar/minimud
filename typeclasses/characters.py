@@ -118,6 +118,7 @@ class Character(ObjectParent, ClothedCharacter):
         self.traits.add("wis", "Wisdom", trait_type="static", base=1, mod=0)
         self.traits.add("con", "Constitution", trait_type="static", base=1, mod=0)
         self.traits.add("cha", "Charisma", trait_type="static", base=1, mod=0)
+        self.traits.add("speed", "Speed", trait_type="static", base=1, mod=0)
 
         # resource stats
         self.db.hp = 50
@@ -852,7 +853,12 @@ class NPC(Character):
         """
         Respond to the departure of a character
         """
-        if chara == self.db.following:
+        print(f"npc at_character_depart: {chara} and {chara.key} and {chara.name}")
+        if (
+            chara
+            and self.db.following
+            and chara.name.lower() == self.db.following.name.lower()
+        ):
             # find an exit that goes the same way
             exits = [
                 x
@@ -861,7 +867,9 @@ class NPC(Character):
             ]
             if exits:
                 # use the exit
-                self.execute_cmd(exits[0].name)
+                speed_trait = self.traits.get("speed")
+                speed = speed_trait.value if speed_trait else 1
+                delay(speed, self.execute_cmd, exits[0].name)
 
     def randomize_stats(self):
         level = self.db.level
@@ -968,6 +976,11 @@ class NPC(Character):
 
         combat_script = combat_script[0]
 
+        if "hunter" in self.attributes.get("react_as", "") and target.tags.has(
+            "player", "type"
+        ):
+            self.db.following = target
+
         self.db.combat_target = target
         # adding a combatant to combat just returns True if they're already there, so this is safe
         if not combat_script.add_combatant(self, enemy=target):
@@ -985,6 +998,11 @@ class NPC(Character):
             # make sure there's a stored target
             if not (target := self.db.combat_target):
                 return
+
+        if "hunter" in self.attributes.get("react_as", "") and target.tags.has(
+            "player", "type"
+        ):
+            self.db.following = target
         # verify that target is still here
         if self.location != target.location:
             return
@@ -1035,6 +1053,14 @@ class NPC(Character):
         result = self.use_skill(weapon.get("skill"), speed=speed)
         # apply the weapon damage as a modifier to skill
         damage = damage * result
+
+        if "hunter" in self.attributes.get("react_as", "") and target.tags.has(
+            "player", "type"
+        ):
+            print(
+                f"npc attack hunter: {self} and {target} and {wielder} and {self.db.following}"
+            )
+            self.db.following = target
 
         for _ in range(hits):
             print(f"npc attack in range: {self} and {target} and {weapon}")

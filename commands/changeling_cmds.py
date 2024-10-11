@@ -727,7 +727,6 @@ class CmdJoinChangelings(Command):
             caller.swap_typeclass(
                 "typeclasses.changelings.Changelings",
                 clean_attributes=False,
-                run_start_hooks="all",
                 no_default=True,
                 clean_cmdsets=False,
             )

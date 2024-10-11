@@ -67,7 +67,7 @@ class EarthAttack(ElementalAttack):
 
         wielder.db.ep -= self.energy_cost
         dmg = self._calculate_melee_damage(wielder)
-        target.at_damage(wielder, int(dmg), "blunt", "earth_elemental_melee_fury")
+        target.at_damage(wielder, int(dmg), "blunt", "earth_elemental_melee")
         wielder.msg(f"[ Cooldown: {speed} seconds ]")
         wielder.cooldowns.add("attack", speed)
 

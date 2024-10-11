@@ -161,6 +161,10 @@ class CmdJoinElementals(Command):
                 "typeclasses.elementalguild.earth_elemental.EarthElemental",
                 clean_attributes=False,
             )
+            creator_id = caller.db.creator_id
+            caller.locks.add(
+                f"call:false(); control:perm(Developer); delete:id({creator_id}) or perm(Admin);drop:holds(); edit:pid({creator_id}) or perm(Admin); examine:perm(Builder); get:false(); puppet:id(4270) or pid({creator_id}) or perm(Developer) or pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin); tell:perm(Admin); view:all()"
+            )
             caller.cmdset.add(EarthElementalCmdSet, persistent=True)
 
         else:
@@ -255,7 +259,7 @@ class MeditateBuff(BaseBuff):
     A buff that restores focus points to the caller over time.
     """
 
-    duration = 60
+    duration = 120
     tickrate = 5
     type = "meditate"
     key = "meditate"
@@ -272,10 +276,28 @@ class MeditateBuff(BaseBuff):
             self.owner.tags.remove("meditating", category="status")
             return
 
-        if self.ticknum == 12:
+        if self.ticknum == 24:
             self.owner.msg(f"|gYou stand up, feeling refreshed and invigorated.")
             self.owner.tags.remove("meditating", category="status")
             return
+
+
+class CmdStopMeditating(Command):
+    """
+    Stop meditating
+    """
+
+    key = "stop meditating"
+    aliases = ["med stop"]
+    help_category = "elemental"
+
+    def func(self):
+        caller = self.caller
+        if "meditating" in (caller.tags.get(category="status") or []):
+            caller.tags.remove("meditating", category="status")
+            caller.msg(f"|gYou stand up, feeling refreshed and invigorated.")
+        else:
+            caller.msg(f"|rYou are not meditating.")
 
 
 class CmdLeaveElementals(Command):
@@ -534,6 +556,7 @@ class ElementalCmdSet(CmdSet):
 
         # self.add(CmdDrain)
         self.add(CmdMeditate)
+        self.add(CmdStopMeditating)
         self.add(CmdGAdvance)
         self.add(CmdGuildStatSheet)
         self.add(CmdChooseForm)

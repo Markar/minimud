@@ -292,19 +292,19 @@ class JoinCharacter(Command):
 
     def func(self):
 
-        # self.caller.swap_typeclass(
-        #     "typeclasses.characters.Character",
-        #     clean_attributes=False,
-        #     run_start_hooks="all",
-        #     no_default=True,
-        #     clean_cmdsets=False,
-        # )
-
-        caller = self.caller
-        creator_id = caller.db.creator_id
-        self.caller.locks.add(
-            f"call:false(); control:perm(Developer); delete:id({creator_id}) or perm(Admin);drop:holds(); edit:pid({creator_id}) or perm(Admin); examine:perm(Builder); get:false(); puppet:id(4270) or pid({creator_id}) or perm(Developer) or pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin); tell:perm(Admin); view:all()"
+        self.caller.swap_typeclass(
+            "typeclasses.characters.Character",
+            # clean_attributes=False,
+            run_start_hooks=None,
+            # no_default=True,
+            # clean_cmdsets=False,
         )
+
+        # caller = self.caller
+        # creator_id = caller.db.creator_id
+        # self.caller.locks.add(
+        #     f"call:false(); control:perm(Developer); delete:id({creator_id}) or perm(Admin);drop:holds(); edit:pid({creator_id}) or perm(Admin); examine:perm(Builder); get:false(); puppet:id(4270) or pid({creator_id}) or perm(Developer) or pperm(Developer); teleport:perm(Admin); teleport_here:perm(Admin); tell:perm(Admin); view:all()"
+        # )
 
 
 class JoinPlayer(Command):

@@ -250,6 +250,10 @@ class CmdHeal(Command):
     def func(self):
         print(self.caller)
         caller = self.caller
+        if caller.key != "Markar":
+            caller.msg("You can't do that.")
+            return
+
         caller.use_heal()
 
 

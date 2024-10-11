@@ -53,8 +53,10 @@ class CombatScript(Script):
             obj
             for obj in self.fighters
             if not any(
-                hasattr(obj, "tags")
-                and obj.tags.has(["unconscious", "dead", "defeated"])
+                [
+                    hasattr(obj, "tags")
+                    and obj.tags.has(["unconscious", "dead", "defeated"])
+                ]
             )
         ]
 

@@ -61,12 +61,6 @@ class Elemental(PlayerCharacter):
 
     def kickstart(self):
         self.msg("Kickstarting heartbeat")
-        tickerhandler.remove(
-            interval=150,
-            callback=self.at_essence_tick,
-            idstring=f"{self}-superpower",
-            persistent=True,
-        )
 
         tickerhandler.add(
             interval=6, callback=self.at_tick, idstring=f"{self}-regen", persistent=True
@@ -90,20 +84,6 @@ class Elemental(PlayerCharacter):
         self.adjust_hp(base_regen)
         self.adjust_fp(base_ep_regen)
         self.adjust_ep(base_fp_regen)
-
-    def at_essence_tick(self):
-        """
-        Regenerate essence points.
-        """
-        glvl = self.db.guild_level
-        if glvl < 7:
-            return
-        self.msg(
-            f"|cThe earth beneath you rumbles and shifts, infusing you with a surge of energy!|n"
-        )
-        current = self.db.primordial_essence["count"]
-        max = self.db.primordial_essence["max"]
-        self.db.primordial_essence["count"] = min(current + (glvl * 0.5), max)
 
     # property to mimic weapons
     @property
